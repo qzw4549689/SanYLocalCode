@@ -43,6 +43,8 @@ NAMESPACE_MAP = {
     "SanyD365.Plugins.CofaceIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CofaceIntegration",
     "SanyD365.Plugins.CofaceIntegration": "SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration",
     "SanyD365.Plugins.BppIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditRecord",
+    "SanyD365.Plugins.Account": "SanyD365.D365Extension.Sales.Plugins.Account",
+    "SanyD365.Plugins.CustomerMasterData.Validation": "SanyD365.D365Extension.Sales.Plugins.Account",
 }
 
 # 文件映射表：本地相对路径 -> 远程相对路径
@@ -68,6 +70,12 @@ FILE_MAP = {
 
     # BPP Callback Plugin
     "BppIntegration/Plugin/BppCallbackPlugin.cs": r"Plugins\CreditRecord\CreditRecordBppCallbackPlugin.cs",
+
+    # Account 字段校验 Plugin（8 字段校验已移除，仅保留 blacklist/creditgrant）
+    "Account/AutoNumber/AccountValidationPlugin.cs": r"Plugins\Account\AccountCreditValidationPlugin.cs",
+
+    # 客户主数据字段校验 Plugin（新增）
+    "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs": r"Plugins\Account\CustomerMasterDataCreditValidationPlugin.cs",
 }
 
 # csproj 中 Compile 引用的排序分组（可选，保持 csproj 可读性）
@@ -257,6 +265,10 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
             transformed = transform_iplugin_to_pluginbase(transformed, "CofaceDataSyncPlugin", "CofaceIntegrationDataSyncPlugin")
         elif local_rel == "CofaceIntegration/Plugin/CofaceSearchCompanyPlugin.cs":
             transformed = transform_iplugin_to_pluginbase(transformed, "CofaceSearchCompanyPlugin")
+        elif local_rel == "Account/AutoNumber/AccountValidationPlugin.cs":
+            transformed = transform_iplugin_to_pluginbase(transformed, "AccountValidationPlugin", "AccountCreditValidationPlugin")
+        elif local_rel == "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs":
+            transformed = transform_iplugin_to_pluginbase(transformed, "CustomerMasterDataValidationPlugin", "CustomerMasterDataCreditValidationPlugin")
 
         if dry_run:
             print(f"[DRY-RUN] {local_rel} -> {remote_rel}")

@@ -137,6 +137,8 @@ namespace D365ToolCommon.Connection
             }
 
             var serviceUri = new Uri(url);
+            // Device Code Flow 创建的 ServiceClient 默认超时较短，上传大 Assembly 时需要延长
+            ServiceClient.MaxConnectionTimeout = TimeSpan.FromMinutes(10);
             return new ServiceClient(
                 serviceUri,
                 _ => Task.FromResult(result.AccessToken),

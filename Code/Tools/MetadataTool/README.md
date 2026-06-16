@@ -70,11 +70,17 @@ dotnet run query-plugin-steps <className>
 # Query plugin steps by namespace prefix
 dotnet run query-plugin-namespace <namespacePrefix>
 
+# Update only the plugin assembly content (large DLLs)
+dotnet run update-assembly <dllPath>
+
 # Register a plugin with update filter
 dotnet run register-plugin-update <dllPath> <className> [entity] [filteringAttributes]
 
 # Register a plugin step with full config
 dotnet run register-plugin-advanced <dllPath> <className> <entity> <message> <stage> [filter]
+
+# Register only a plugin step (no DLL upload)
+dotnet run register-step-only <className> <entity> <message> <stage> [filter]
 
 # Smoke test D365ToolCommon shared library (creates/deletes isolated test entity)
 dotnet run test-common

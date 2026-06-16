@@ -210,12 +210,68 @@ if (context.Depth > 2)  // 或 > 3，视业务而定
 大 DLL 上传时，在 MetadataTool 连接字符串中加入：
 
 ```
-MaxConnectionTimeout=00:05:00;
+MaxConnectionTimeout=00:10:00;
+```
+
+### 5.6 Device Code Flow 超时
+
+MetadataTool 默认使用 Device Code Flow 时，`ServiceClient` 会落到 SDK 默认 4 分钟超时。发布大 DLL 前，必须在 `Code/Tools/D365ToolCommon/Connection/D365ConnectionFactory.cs` 中显式设置：
+
+```csharp
+ServiceClient.MaxConnectionTimeout = TimeSpan.FromMinutes(10);
+```
+
+设置后重新编译 MetadataTool：
+
+```bash
+cd Code/Tools/MetadataTool
+dotnet build -c Release
 ```
 
 ---
 
-## 6. 清理旧 Assembly
+## 6. 大 DLL 专用发布流程
+
+当 DLL 超过 5MB 时，推荐使用 `update-assembly` + `register-step-only` 分离流程，避免反复上传大文件。
+
+### 6.1 第一步：单独更新 Assembly
+
+```bash
+cd Code/Tools/MetadataTool
+dotnet bin/Release/net10.0/D365MetadataTool.dll update-assembly <DLL路径>
+```
+
+此命令只更新 `pluginassembly.content`，不上传 Step。
+
+### 6.2 第二步：批量注册 Step
+
+- 第一个 Step 用 `register-plugin-advanced`（创建 Plugin Type）
+- 后续 Step 用 `register-step-only`（不再上传 DLL）
+
+```bash
+# 创建 Type 并注册第一个 Step
+dotnet bin/Release/net10.0/D365MetadataTool.dll register-plugin-advanced \
+  <DLL路径> <完整类名> <实体> <消息> <阶段> [筛选属性]
+
+# 注册剩余 Step
+dotnet bin/Release/net10.0/D365MetadataTool.dll register-step-only \
+  <完整类名> <实体> <消息> <阶段> [筛选属性]
+```
+
+### 6.3 失败处理
+
+| 现象 | 处理 |
+|---|---|
+| `请求通道在 00:04:00 以后尝试发送超时` | 检查 `MaxConnectionTimeout` 是否已设为 10 分钟 |
+| `An error occurred while sending the request` | 等待 1-2 分钟重试；确认无人执行 Publish All |
+| 操作卡住超过 5 分钟 | 可能 D365 正在 Publish All，等待完成后再试 |
+
+详细操作手册见：
+`Documents/DevelopmentStandards/D365-大DLL插件发布操作手册.md`
+
+---
+
+## 7. 清理旧 Assembly
 
 迁移/合并 Assembly 时，先删除旧 Assembly：
 
@@ -227,7 +283,7 @@ dotnet run unregister-assembly "旧Assembly名称"
 
 ---
 
-## 7. 完整流程清单（Checklist）
+## 8. 完整流程清单（Checklist）
 
 ```
 □ 1. 合并代码到统一项目，编译通过（0 Error）
@@ -244,7 +300,7 @@ dotnet run unregister-assembly "旧Assembly名称"
 
 ---
 
-## 8. 相关文件位置
+## 9. 相关文件位置
 
 | 文件 | 路径 |
 |---|---|
