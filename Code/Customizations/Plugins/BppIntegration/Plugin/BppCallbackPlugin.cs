@@ -163,6 +163,7 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
 
         /// <summary>
         /// 审批通过后同步客户主数据信用信息
+        /// 目标实体: mcs_customermasterdata（通过 account.mcs_customermasterdata 关联）
         /// </summary>
         private void UpdateAccountCreditInfo(IOrganizationService service, ITracingService tracer, Guid creditRecordId)
         {
@@ -187,19 +188,31 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                     return;
                 }
 
+                // 通过 account 查找关联的 mcs_customermasterdata
+                var account = service.Retrieve("account", accountId,
+                    new ColumnSet("mcs_customermasterdata"));
+
+                if (!account.Contains("mcs_customermasterdata") ||
+                    !(account["mcs_customermasterdata"] is EntityReference customerMasterDataRef))
+                {
+                    tracer.Trace($"accountId={accountId} 未关联 mcs_customermasterdata，跳过更新");
+                    return;
+                }
+
+                var customerMasterDataId = customerMasterDataRef.Id;
                 string creditGrade = CalculateCreditGrade(creditScore);
                 int? creditGradeValue = MapCreditGradeToOptionSetValue(creditGrade);
 
-                var updateAccount = new Entity("account", accountId);
-                updateAccount["mcs_creditscore"] = creditScore.Value;
+                var updateCustomerMasterData = new Entity("mcs_customermasterdata", customerMasterDataId);
+                updateCustomerMasterData["mcs_creditscore"] = creditScore.Value;
                 if (creditGradeValue.HasValue)
                 {
-                    updateAccount["mcs_creditgrade"] = new OptionSetValue(creditGradeValue.Value);
+                    updateCustomerMasterData["mcs_creditgrade"] = new OptionSetValue(creditGradeValue.Value);
                 }
-                updateAccount["mcs_creditvalid"] = true;
+                updateCustomerMasterData["mcs_creditvalid"] = true;
 
-                service.Update(updateAccount);
-                tracer.Trace($"更新客户主数据: accountId={accountId}, score={creditScore}, grade={creditGrade}({creditGradeValue})");
+                service.Update(updateCustomerMasterData);
+                tracer.Trace($"更新客户主数据: customerMasterDataId={customerMasterDataId}, score={creditScore}, grade={creditGrade}({creditGradeValue})");
             }
             catch (Exception ex)
             {

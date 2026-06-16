@@ -3007,48 +3007,15 @@ class Program
         {
             // 客户表新增字段（信用评估项目需要）
             Console.WriteLine("添加客户表字段（信用评估项目）...");
-            
-            // 1. mcs_cofaceid - 科法斯客户代码
-            manager.CreateStringField("account", "mcs_cofaceid", "科法斯客户代码", 
-                "Coface ICON平台唯一企业编码，用于对接Coface客户数据", 30);
-            
-            // 2. mcs_dealerrank - 经销商分级
-            manager.CreatePicklistField("account", "mcs_dealerrank", "经销商分级",
-                "经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）",
-                new Dictionary<string, int>
-                {
-                    { "钻石", 1 },
-                    { "铂金", 2 },
-                    { "白银", 3 },
-                    { "认证", 4 },
-                    { "意向", 5 }
-                });
-            
-            // 3. mcs_externalrate - 客户信用外部评级
-            manager.CreateStringField("account", "mcs_externalrate", "客户信用外部评级",
-                "Coface对客户信用评级，采用1-10分（10分最高）", 10);
-            
-            // 4. mcs_overduemodel - 逾期未回收率模型分
-            manager.CreateDecimalField("account", "mcs_overduemodel", "逾期未回收率模型分",
-                "逾期未回收率模型分，通过数据模型计算获得", 0, 999.99m, 2);
-            
-            // 5. mcs_creditscore - 客户信用评分
-            manager.CreateDecimalField("account", "mcs_creditscore", "客户信用评分",
-                "客户信用分计算结果", 0, 999.99m, 2);
-            
-            // 6. mcs_creditgrade - 客户等级
-            manager.CreateStringField("account", "mcs_creditgrade", "客户等级",
-                "客户等级A0-A4（A0最高），用于成交条件矩阵查询", 2);
-            
-            // 7. mcs_isdd - 重点尽调
-            manager.CreateBooleanField("account", "mcs_isdd", "重点尽调",
-                "是否需要重点尽调，用于重点尽调模块判断");
-            
-            // 8. mcs_creditvalid - 信用评估有效状态
-            manager.CreateBooleanField("account", "mcs_creditvalid", "信用评估有效状态",
-                "信用评估有效状态：1-有效 0-失效");
-            
+            AddAccountCreditFields(manager, "account");
             Console.WriteLine("客户表字段添加完成！");
+        }
+        else if (entityName == "mcs_customermasterdata")
+        {
+            // 客户主数据表新增字段（与 account 信用评估字段保持一致）
+            Console.WriteLine("添加客户主数据表字段（信用评估项目）...");
+            AddAccountCreditFields(manager, "mcs_customermasterdata");
+            Console.WriteLine("客户主数据表字段添加完成！");
         }
         else if (entityName == "mcs_customer_file")
         {
@@ -3063,6 +3030,61 @@ class Program
         {
             Console.WriteLine($"暂不支持为实体 {entityName} 批量添加字段");
         }
+    }
+
+    /// <summary>
+    /// 为指定实体添加信用评估相关的 8 个自定义字段
+    /// 用于 account 和 mcs_customermasterdata 保持字段定义一致
+    /// </summary>
+    static void AddAccountCreditFields(EntityManager manager, string entityName)
+    {
+        // 1. mcs_cofaceid - 科法斯客户代码
+        manager.CreateStringField(entityName, "mcs_cofaceid", "科法斯客户代码",
+            "Coface ICON平台唯一企业编码，用于对接Coface客户数据", 30);
+
+        // 2. mcs_dealerrank - 经销商分级
+        manager.CreatePicklistField(entityName, "mcs_dealerrank", "经销商分级",
+            "经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）",
+            new Dictionary<string, int>
+            {
+                { "钻石", 1 },
+                { "铂金", 2 },
+                { "白银", 3 },
+                { "认证", 4 },
+                { "意向", 5 }
+            });
+
+        // 3. mcs_externalrate - 客户信用外部评级
+        manager.CreateStringField(entityName, "mcs_externalrate", "客户信用外部评级",
+            "Coface对客户信用评级，采用1-10分（10分最高）", 10);
+
+        // 4. mcs_overduemodel - 逾期未回收率模型分
+        manager.CreateDecimalField(entityName, "mcs_overduemodel", "逾期未回收率模型分",
+            "逾期未回收率模型分，通过数据模型计算获得", 0, 999.99m, 2);
+
+        // 5. mcs_creditscore - 客户信用评分
+        manager.CreateDecimalField(entityName, "mcs_creditscore", "客户信用评分",
+            "客户信用分计算结果", 0, 999.99m, 2);
+
+        // 6. mcs_creditgrade - 客户等级
+        manager.CreatePicklistField(entityName, "mcs_creditgrade", "客户等级",
+            "客户等级A0-A4（A0最高），用于成交条件矩阵查询",
+            new Dictionary<string, int>
+            {
+                { "A0", 100000000 },
+                { "A1", 100000001 },
+                { "A2", 100000002 },
+                { "A3", 100000003 },
+                { "A4", 100000004 }
+            });
+
+        // 7. mcs_isdd - 重点尽调
+        manager.CreateBooleanField(entityName, "mcs_isdd", "重点尽调",
+            "是否需要重点尽调，用于重点尽调模块判断");
+
+        // 8. mcs_creditvalid - 信用评估有效状态
+        manager.CreateBooleanField(entityName, "mcs_creditvalid", "信用评估有效状态",
+            "信用评估有效状态：1-有效 0-失效");
     }
 
     static void RearrangeForm(EntityManager manager, string entityName)

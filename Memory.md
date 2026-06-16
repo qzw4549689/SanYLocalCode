@@ -522,41 +522,51 @@ account.mcs_customermasterdata = mcs_customermasterdata.new_customermasterdata_i
 
 > 当前 UAT 上 Account 和 `mcs_customermasterdata` 都没有这两个字段，`mcs_credit_profile.html` 中也未引用。若后续重启 F7.1，再按开发计划新增双表字段和同步 Plugin。
 
-**需要修改的代码清单：**
+**需要修改的代码清单（已完成）：**
 
-| # | 资产 | 修改内容 |
-|---|---|---|
-| 1 | `BppCallbackPlugin.cs` 的 `UpdateAccountCreditInfo` | 审批通过后，`mcs_creditscore`/`mcs_creditgrade`/`mcs_creditvalid` 回写目标从 `account` 改为 `mcs_customermasterdata` |
-| 2 | `CreditScorePlugin.cs` | 若使用 `mcs_dealerrank` 匹配评分卡，需改为从 `mcs_customermasterdata` 读取；`mcs_accountcategory`/`mcs_accountlevel`/`mcs_accounttype` 仍从 `account` 读取 |
-| 3 | `CofaceDataSyncPlugin.cs` | `mcs_cofaceid` 读取来源从 `account` 改为 `mcs_customermasterdata`；客户类别/级别/类型仍从 `account` 读取 |
-| 4 | `AccountValidationPlugin.cs` | `mcs_cofaceid`/`mcs_creditgrade`/`mcs_creditvalid`/`mcs_dealerrank`/`mcs_isdd` 的校验目标改为 `mcs_customermasterdata`；`mcs_blacklist`/`mcs_creditgrant` 仍保留在 Account 校验（但不在本次功能范围） |
-| 5 | `mcs_credit_record.js` | `mcs_cofaceid` 带出/校验来源改为 `mcs_customermasterdata`；其他客户基础字段仍从 `account` 带出 |
-| 6 | `mcs_credit_profile.html` / `mcs_credit_wheel.html` | 读取 `mcs_creditscore`/`mcs_creditgrade`/`mcs_creditvalid`/`mcs_externalrate`/`mcs_dealerrank`/`mcs_isdd` 时，数据源改为 `mcs_customermasterdata` |
-| 7 | `mcs_account.js` | 若包含上述 8 个字段的校验/提示逻辑，需迁移到客户主数据表单 JS |
-
-**页面/WebResource 迁移（后续按需处理）：**
-
-| # | 资产 | 当前绑定实体 | 说明 |
+| # | 资产 | 修改内容 | 状态 |
 |---|---|---|---|
-| 1 | `mcs_account.js` | `account` | 若含 8 字段相关逻辑，需迁移 |
-| 2 | `mcs_credit_profile.html` | `account` | 客户信用画像页面 |
-| 3 | `mcs_credit_wheel.html` | `account` | 客户飞轮页面 |
-| 4 | Account 表单上的信用评估页签/子网格 | `account` | 信用评估相关界面入口 |
+| 1 | `MetadataTool/Program.cs` | 新增 `mcs_customermasterdata` 8 个字段批量创建逻辑；复用 `AddAccountCreditFields` 保持 account/主数据字段定义一致；`mcs_creditgrade` 统一为 Picklist（A0-A4） | ✅ |
+| 2 | `BppCallbackPlugin.cs` 的 `UpdateAccountCreditInfo` | 审批通过后，`mcs_creditscore`/`mcs_creditgrade`/`mcs_creditvalid` 回写目标从 `account` 改为 `mcs_customermasterdata`（通过 `account.mcs_customermasterdata` 关联） | ✅ |
+| 3 | `AccountValidationPlugin.cs` | 移除 8 个字段校验，仅保留 `mcs_blacklist`/`mcs_creditgrant`（F7.1 暂缓） | ✅ |
+| 4 | `CustomerMasterDataValidationPlugin.cs`（新增） | 注册在 `mcs_customermasterdata` Create/Update PreOperation，校验 `mcs_cofaceid`/`mcs_creditgrade`/`mcs_creditvalid`/`mcs_dealerrank`/`mcs_isdd` | ✅ |
+| 5 | `mcs_credit_record.js` | `mcs_cofaceid` 带出来源改为 `account.mcs_customermasterdata.mcs_cofaceid`；其他客户基础字段仍从 `account` 带出 | ✅ |
+| 6 | `mcs_coface_company_search.html` | 绑定 Coface ID 时，更新 `mcs_customermasterdata.mcs_cofaceid` 而非 `account.mcs_cofaceid` | ✅ |
+| 7 | `mcs_credit_profile.html` | 读取 `mcs_creditscore`/`mcs_creditgrade`/`mcs_creditvalid`/`mcs_externalrate`/`mcs_dealerrank`/`mcs_isdd` 时，数据源改为 `account.mcs_customermasterdata` | ✅ |
+| 8 | `mcs_customermasterdata.js`（新增） | 客户主数据表单 JS：8 个字段只读控制、Coface ID 格式校验、信用评估状态提示 | ✅ |
+| 9 | `mcs_account.js` | 保留原逻辑（Account 上 8 字段若仍存在仍可展示/校验）；本次不删除 | ⏸️ 按需 |
+
+**无需修改的资产（已核实）：**
+
+| 资产 | 说明 |
+|---|---|
+| `CofaceDataSyncPlugin.cs` | 读取 `mcs_credit_record.mcs_cofaceid`，而评估记录的 cofaceid 已通过 `mcs_credit_record.js` 改从 `mcs_customermasterdata` 带出，Plugin 本身无需改动 |
+| `CreditScorePlugin.cs` | 评分卡匹配使用 `account.mcs_accountcategory`/`mcs_accountlevel`/`mcs_accounttype`，均不在 8 个迁移字段范围内 |
+| `mcs_credit_wheel.html` | 当前从 `mcs_credit_record.mcs_creditscore` 读取总分，无需改动 |
+
+**页面/WebResource 状态：**
+
+| # | 资产 | 绑定实体 | 说明 |
+|---|---|---|---|
+| 1 | `mcs_customermasterdata.js` | `mcs_customermasterdata` | 新增，需部署并绑定到客户主数据表单 |
+| 2 | `mcs_credit_profile.html` | `account`（数据源已切到主数据表） | 客户信用画像页面 |
+| 3 | `mcs_credit_wheel.html` | `account`（数据源已是评估记录） | 客户飞轮页面 |
+| 4 | `mcs_account.js` | `account` | 保留，若 Account 上 8 字段后续删除再移除 |
 
 **待确认问题：**
 1. 客户主数据表单上是否需要新增这 8 个字段的展示/编辑？还是只作为系统回填字段隐藏？
 2. 信用评估页面（画像/飞轮）是否立即迁移到客户主数据表单，还是等业务确认后再迁移？
-3. 历史已审批通过的记录，是否需要把 Account 上已有的这 8 个字段值同步到 `mcs_customermasterdata`？
 
 **行动计划：**
 
 | 步骤 | 任务 | 涉及资产 | 备注 |
 |---|---|---|---|
-| 1 | 在 `mcs_customermasterdata` 新建 8 个字段 | 实体定义 JSON | 字段名与 Account 一致 |
+| 1 | 在 `mcs_customermasterdata` 新建 8 个字段 | `MetadataTool`：`dotnet run add-fields mcs_customermasterdata` | 字段名与 Account 一致 |
 | 2 | 修改 BPP 审批回写逻辑 | `BppCallbackPlugin.cs` | 回写到 `mcs_customermasterdata` |
-| 3 | 修改 Coface 数据同步中的客户编码读取 | `CofaceDataSyncPlugin.cs` | `mcs_cofaceid` 来源改为主数据表 |
-| 4 | 修改评分卡匹配逻辑（如涉及 dealerrank） | `CreditScorePlugin.cs` | 从主数据表读取 |
-| 5 | 修改字段校验逻辑 | `AccountValidationPlugin.cs` | 校验目标改为主数据表 |
+| 3 | 迁移字段校验 Plugin | `AccountValidationPlugin.cs` + 新增 `CustomerMasterDataValidationPlugin.cs` | 8 字段校验注册到主数据表 |
+| 4 | 修改前端数据源 | `mcs_credit_record.js` / `mcs_coface_company_search.html` / `mcs_credit_profile.html` | 8 字段读取/写入目标改为主数据表 |
+| 5 | 新增客户主数据表单 JS | `mcs_customermasterdata.js` | 部署并绑定到主数据表单 |
+| 6 | 本地编译验证 | 3 个 Plugin 项目 + JS 语法检查 | ✅ 已完成 |
 | 6 | 修改信用评估记录表单 JS | `mcs_credit_record.js` | `mcs_cofaceid` 来源改为主数据表 |
 | 7 | 迁移信用画像/飞轮页面（后续按需） | HTML/JS WebResource | 绑定到客户主数据表单 |
 | 8 | DEV 测试 + UAT 测试 | 测试用例总集、Bug 记录 | 重点验证带出、评分、回写、审批流程 |

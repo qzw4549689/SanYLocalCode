@@ -278,16 +278,28 @@
                 }).then(handleFetchError)
             );
 
-            // 更新客户主数据
+            // 更新客户主数据（mcs_customermasterdata）
             if (accountId) {
                 var plainAccountId = toPlainGuid(accountId);
                 promises.push(
-                    fetch(baseUrl + "/api/data/v9.2/accounts(" + plainAccountId + ")", {
-                        method: "PATCH",
+                    fetch(baseUrl + "/api/data/v9.2/accounts(" + plainAccountId + ")?$select=mcs_customermasterdata", {
+                        method: "GET",
                         headers: getApiHeaders(),
-                        body: JSON.stringify({ mcs_cofaceid: cofaceId }),
                         credentials: "same-origin"
-                    }).then(handleFetchError)
+                    })
+                    .then(handleFetchError)
+                    .then(function (response) { return response.json(); })
+                    .then(function (accountData) {
+                        if (accountData.mcs_customermasterdata) {
+                            var customerMasterDataId = toPlainGuid(accountData.mcs_customermasterdata.mcs_customermasterdataid);
+                            return fetch(baseUrl + "/api/data/v9.2/mcs_customermasterdatas(" + customerMasterDataId + ")", {
+                                method: "PATCH",
+                                headers: getApiHeaders(),
+                                body: JSON.stringify({ mcs_cofaceid: cofaceId }),
+                                credentials: "same-origin"
+                            }).then(handleFetchError);
+                        }
+                    })
                 );
             }
 

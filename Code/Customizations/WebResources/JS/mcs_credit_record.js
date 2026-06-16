@@ -206,8 +206,8 @@ CreditRecordForm.onAccountChange = function (executionContext) {
     // - accountnumber: 客户编码（标准字段）
     // - mcs_englishname: 客户英文名称（新增字段）
     // - mcs_country: 注册国家/地区（Lookup），需展开取国家代码
-    // - mcs_cofaceid: 科法斯客户代码（新增字段）
-    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=accountnumber,mcs_englishname,mcs_cofaceid&$expand=mcs_country($select=mcs_countrycode)")
+    // - mcs_customermasterdata: 客户主数据（Lookup），科法斯ID等8个字段迁移到该实体
+    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=accountnumber,mcs_englishname&$expand=mcs_country($select=mcs_countrycode),mcs_customermasterdata($select=mcs_cofaceid)")
         .then(function (result) {
             // 客户编码（从accountnumber带出）
             var custNameField = formContext.getAttribute("mcs_custname");
@@ -231,10 +231,14 @@ CreditRecordForm.onAccountChange = function (executionContext) {
                 countryCodeField.setValue(countryCode);
             }
             
-            // 科法斯ID
+            // 科法斯ID（从mcs_customermasterdata Lookup展开获取）
             var cofaceField = formContext.getAttribute("mcs_cofaceid");
             if (cofaceField) {
-                cofaceField.setValue(result.mcs_cofaceid || "");
+                var cofaceId = "";
+                if (result.mcs_customermasterdata && result.mcs_customermasterdata.mcs_cofaceid) {
+                    cofaceId = result.mcs_customermasterdata.mcs_cofaceid;
+                }
+                cofaceField.setValue(cofaceId);
             }
             
             // 校验提示

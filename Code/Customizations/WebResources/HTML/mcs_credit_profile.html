@@ -530,6 +530,7 @@
 
         /**
          * 查询客户基本信息
+         * 信用评估相关8个字段从 mcs_customermasterdata 读取
          */
         function fetchAccount(accountId) {
             var xrm = getXrm();
@@ -538,7 +539,7 @@
             }
 
             return xrm.WebApi.retrieveRecord('account', accountId,
-                '?$select=accountid,name,accountnumber,mcs_creditscore,mcs_creditgrade,mcs_creditvalid,mcs_externalrate,mcs_dealerrank,mcs_isdd,mcs_accountcategory,mcs_accountlevel')
+                '?$select=accountid,name,accountnumber,mcs_accountcategory,mcs_accountlevel&$expand=mcs_customermasterdata($select=mcs_creditscore,mcs_creditgrade,mcs_creditvalid,mcs_externalrate,mcs_dealerrank,mcs_isdd)')
                 .then(function(result) {
                     return result;
                 });
@@ -633,9 +634,10 @@
         // ==================== 渲染 ====================
 
         function render(app, account, creditRecord, tags) {
-            var creditScore = getValue(account, 'mcs_creditscore');
-            var creditGrade = getValue(account, 'mcs_creditgrade');
-            var creditValid = getValue(account, 'mcs_creditvalid');
+            var customerMasterData = account.mcs_customermasterdata || {};
+            var creditScore = getValue(customerMasterData, 'mcs_creditscore');
+            var creditGrade = getValue(customerMasterData, 'mcs_creditgrade');
+            var creditValid = getValue(customerMasterData, 'mcs_creditvalid');
             var isInvalid = (creditValid !== true && creditValid !== 1);
 
             var categoryVal = getValue(account, 'mcs_accountcategory');
@@ -645,7 +647,7 @@
             // 客户分级显示
             var gradeDisplay = '';
             if (isDealer) {
-                var rank = getValue(account, 'mcs_dealerrank');
+                var rank = getValue(customerMasterData, 'mcs_dealerrank');
                 gradeDisplay = getOptionText(rank, DEALER_RANK);
             } else {
                 // 直销客户分级：S/A/B/C/I
@@ -664,9 +666,9 @@
             leftHtml += '  <div class="info-grid" style="grid-template-columns: repeat(5, 1fr);">';
             leftHtml += '    <div class="info-item"><div class="info-label">客户类别</div><div class="info-value">' + escapeHtml(getOptionText(categoryVal, ACCOUNT_CATEGORY)) + '</div></div>';
             leftHtml += '    <div class="info-item"><div class="info-label">客户等级</div><div class="info-value">' + escapeHtml(getOptionText(creditGrade, CREDIT_GRADE_MAP) || '-') + '</div></div>';
-            leftHtml += '    <div class="info-item"><div class="info-label">外部评级</div><div class="info-value">' + escapeHtml(getValue(account, 'mcs_externalrate', '-')) + '<span class="hint">科法斯 1-10 分</span></div></div>';
+            leftHtml += '    <div class="info-item"><div class="info-label">外部评级</div><div class="info-value">' + escapeHtml(getValue(customerMasterData, 'mcs_externalrate', '-')) + '<span class="hint">科法斯 1-10 分</span></div></div>';
             leftHtml += '    <div class="info-item"><div class="info-label">客户分级</div><div class="info-value">' + escapeHtml(gradeDisplay || '-') + '</div></div>';
-            leftHtml += '    <div class="info-item"><div class="info-label">是否重点尽调</div><div class="info-value">' + (getValue(account, 'mcs_isdd') ? '<span style="color:#a80000">&#10003; 是</span>' : '否') + '</div></div>';
+            leftHtml += '    <div class="info-item"><div class="info-label">是否重点尽调</div><div class="info-value">' + (getValue(customerMasterData, 'mcs_isdd') ? '<span style="color:#a80000">&#10003; 是</span>' : '否') + '</div></div>';
             leftHtml += '  </div>';
             leftHtml += '</div>';
 
@@ -715,7 +717,7 @@
             leftHtml += '</div>';
 
             // 重点尽调专家意见
-            var isDD = getValue(account, 'mcs_isdd');
+            var isDD = getValue(customerMasterData, 'mcs_isdd');
             if (isDD) {
                 leftHtml += '<div class="section-card">';
                 leftHtml += '  <div class="section-title"><span class="icon">&#128221;</span>重点尽调专家意见</div>';
