@@ -68,9 +68,10 @@ namespace DeployTool
 
         private void RegisterSearchPlugin()
         {
-            var dllPath = "/Users/peterqiu/Work/AIWorkSpace/SanYi/Code/Customizations/Plugins/CofaceIntegration/bin/Debug/net462/SanyD365.Plugins.CofaceIntegration.dll";
-            var assemblyName = "SanyD365.Plugins.CofaceIntegration";
-            var pluginTypeName = "SanyD365.Plugins.CofaceIntegration.Plugin.CofaceSearchCompanyPlugin";
+            // CofaceSearchCompanyPlugin 已归并到远程主项目 SanyD365.D365Extension.Sales
+            var dllPath = "/tmp/SanyD365.D365Extension.Sales.dll";
+            var assemblyName = "SanyD365.D365Extension.Sales";
+            var pluginTypeName = "SanyD365.D365Extension.Sales.Plugins.CofaceIntegration.CofaceSearchCompanyPlugin";
 
             var assemblyId = _pluginService.RegisterOrUpdateAssemblyFromFile(dllPath, assemblyName);
             var pluginTypeId = _pluginService.RegisterOrUpdatePluginType(assemblyId, pluginTypeName);
