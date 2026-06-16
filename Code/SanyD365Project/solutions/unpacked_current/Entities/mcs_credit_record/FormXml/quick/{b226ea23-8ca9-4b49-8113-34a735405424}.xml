@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{b226ea23-8ca9-4b49-8113-34a735405424}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{55bcd413-f349-4f32-a742-6296a3f9d0c8}" IsUserDefined="1">
+          <labels>
+            <label description="" languagecode="2052" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{042b9858-61f0-43d6-8835-344f03d7f3c8}">
+                  <labels>
+                    <label description="عام" languagecode="1025" />
+                    <label description="ALLGEMEIN" languagecode="1031" />
+                    <label description="GENERAL" languagecode="1033" />
+                    <label description="GÉNÉRAL" languagecode="1036" />
+                    <label description="GENERALE" languagecode="1040" />
+                    <label description="GERAL" languagecode="1046" />
+                    <label description="ОБЩИЕ" languagecode="1049" />
+                    <label description="ทั่วไป" languagecode="1054" />
+                    <label description="UMUM" languagecode="1057" />
+                    <label description="TỔNG QUÁT" languagecode="1066" />
+                    <label description="UMUM" languagecode="1086" />
+                    <label description="常规" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{92722d45-171c-45d1-b43a-f934fd3cc804}">
+                        <labels>
+                          <label description="信用评估编码" languagecode="1033" />
+                          <label description="信用评估编码" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_scoreid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_scoreid" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{7dc3718c-34f4-44c7-9efb-65ed71ff8f7e}">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                          <label description="负责人" languagecode="2052" />
+                          <label description="Pemilik" languagecode="1057" />
+                          <label description="Propietario" languagecode="3082" />
+                          <label description="المالك" languagecode="1025" />
+                          <label description="Proprietário" languagecode="1046" />
+                          <label description="Proprietario" languagecode="1040" />
+                          <label description="Chủ sở hữu" languagecode="1066" />
+                          <label description="Propriétaire" languagecode="1036" />
+                          <label description="Ответственный" languagecode="1049" />
+                          <label description="Pemilik" languagecode="1086" />
+                          <label description="Besitzer" languagecode="1031" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+      <LocalizedName description="Information" languagecode="2052" />
+    </LocalizedNames>
+  </systemform>
+</forms>

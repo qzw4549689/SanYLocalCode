@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{309b7075-cba5-4e3e-8bc5-995a3a928363}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_credit_record" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_customer_tagid">
+          <cell name="mcs_credit_record" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="mcs_credit_record" width="150" />
+          <cell name="mcs_accountid" width="150" />
+          <cell name="mcs_credit_item" width="150" />
+          <cell name="mcs_itemcode" width="150" />
+          <cell name="mcs_datatype" width="150" />
+          <cell name="mcs_group" width="150" />
+          <cell name="mcs_isscore" width="150" />
+          <cell name="mcs_active" width="150" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_customer_tag">
+          <attribute name="mcs_customer_tagid" />
+          <attribute name="mcs_credit_record" />
+          <attribute name="createdon" />
+          <order attribute="mcs_credit_record" descending="false" />
+          <attribute name="mcs_credit_record" />
+          <attribute name="mcs_accountid" />
+          <attribute name="mcs_credit_item" />
+          <attribute name="mcs_itemcode" />
+          <attribute name="mcs_datatype" />
+          <attribute name="mcs_group" />
+          <attribute name="mcs_isscore" />
+          <attribute name="mcs_active" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active 客户信用标签表" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

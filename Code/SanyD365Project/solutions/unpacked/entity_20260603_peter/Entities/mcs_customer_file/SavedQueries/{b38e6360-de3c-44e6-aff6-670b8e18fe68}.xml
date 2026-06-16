@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{b38e6360-de3c-44e6-aff6-670b8e18fe68}</savedqueryid>
+    <layoutxml>
+      <grid name="mcs_customer_files" jump="mcs_fileid" select="1" icon="1" preview="1">
+        <row name="mcs_customer_file" id="mcs_customer_fileid">
+          <cell name="mcs_fileid" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_customer_file">
+          <attribute name="mcs_customer_fileid" />
+          <attribute name="mcs_fileid" />
+          <attribute name="createdon" />
+          <order attribute="mcs_fileid" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="客户资信附件表 Associated View" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

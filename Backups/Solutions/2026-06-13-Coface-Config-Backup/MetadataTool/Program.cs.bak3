@@ -1,0 +1,1014 @@
+using Microsoft.PowerPlatform.Dataverse.Client;
+using D365MetadataTool;
+
+class Program
+{
+    // DEV环境连接字符串
+    static string connectionString = "AuthType=OAuth;" +
+        "Url=https://dev1.crm5.dynamics.com;" +
+        "AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;" +
+        "RedirectUri=http://localhost;" +
+        "LoginPrompt=Never;" +
+        "TokenCacheStorePath=/Users/peterqiu/.dv-token-cache;" +
+        "Username=gw_duanqy@sanyglobal.onmicrosoft.com";
+
+    static void Main(string[] args)
+    {
+        Console.WriteLine("=== D365 实体管理工具 ===");
+        Console.WriteLine("用法:");
+        Console.WriteLine("  dotnet run create <实体定义文件.json>   - 从JSON文件创建实体和字段");
+        Console.WriteLine("  dotnet run check <解决方案名>           - 检查解决方案中的实体");
+        Console.WriteLine("  dotnet run add <实体名> <解决方案名>    - 添加实体到解决方案");
+        Console.WriteLine("  dotnet run remove <实体名> <解决方案名> - 从解决方案移除实体");
+        Console.WriteLine("  dotnet run publish [实体名]             - 发布所有或指定实体");
+        Console.WriteLine("  dotnet run delete-field <实体名> <字段名> - 删除字段");
+        Console.WriteLine("  dotnet run list-fields <实体名>         - 列出实体所有字段");
+        Console.WriteLine("  dotnet run export <解决方案名> <路径>    - 导出解决方案为 ZIP");
+        Console.WriteLine("  dotnet run create-credit-items          - 创建评分项目测试数据(22条)");
+        Console.WriteLine("  dotnet run create-qualitative-enums     - 创建定性枚举值测试数据(30条)");
+        Console.WriteLine();
+
+        if (args.Length < 1)
+        {
+            ShowHelp();
+            return;
+        }
+
+        string command = args[0].ToLower();
+
+        try
+        {
+            using (ServiceClient service = new ServiceClient(connectionString))
+            {
+                if (!service.IsReady)
+                {
+                    Console.WriteLine("连接失败!");
+                    return;
+                }
+
+                Console.WriteLine($"连接成功! 用户: {service.OAuthUserId}\n");
+
+                var manager = new EntityManager(service);
+
+                switch (command)
+                {
+                    case "create":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("请指定JSON定义文件路径");
+                            return;
+                        }
+                        CreateFromJson(manager, args[1]);
+                        break;
+
+                    case "check":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("请指定解决方案名称");
+                            return;
+                        }
+                        CheckSolution(manager, args[1]);
+                        break;
+
+                    case "add":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run add <实体名> <解决方案名>");
+                            return;
+                        }
+                        manager.AddEntityToSolution(args[1], args[2]);
+                        break;
+
+                    case "remove":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run remove <实体名> <解决方案名>");
+                            return;
+                        }
+                        manager.RemoveEntityFromSolution(args[1], args[2]);
+                        break;
+
+                    case "publish":
+                        if (args.Length >= 2)
+                        {
+                            manager.PublishEntity(args[1]);
+                        }
+                        else
+                        {
+                            manager.PublishAll();
+                        }
+                        break;
+
+                    case "delete-field":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run delete-field <实体名> <字段名>");
+                            return;
+                        }
+                        manager.DeleteField(args[1], args[2]);
+                        break;
+
+                    case "remove-field-from-views":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run remove-field-from-views <实体名> <字段名>");
+                            return;
+                        }
+                        manager.RemoveFieldFromViews(args[1], args[2]);
+                        break;
+
+                    case "list-fields":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run list-fields <实体名>");
+                            return;
+                        }
+                        ListFields(manager, args[1]);
+                        break;
+
+                    case "export":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run export <解决方案名> <输出路径>");
+                            return;
+                        }
+                        manager.ExportSolution(args[1], args[2]);
+                        break;
+
+                    case "update-options":
+                        if (args.Length < 4)
+                        {
+                            Console.WriteLine("用法: dotnet run update-options <实体名> <字段名> <选项JSON>");
+                            Console.WriteLine("示例: dotnet run update-options mcs_credit_scoringcard mcs_categoryid '{\"SA级老客户\":1,\"SA级新客户\":2}'");
+                            return;
+                        }
+                        var opts = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(args[3]);
+                        manager.UpdatePicklistOptions(args[1], args[2], opts ?? new Dictionary<string, int>());
+                        break;
+
+                    case "update-form":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run update-form <实体名>");
+                            return;
+                        }
+                        UpdateForm(manager, args[1]);
+                        break;
+
+                    case "check-form":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run check-form <实体名>");
+                            return;
+                        }
+                        manager.CheckFormFields(args[1]);
+                        break;
+
+                    case "export-formxml":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run export-formxml <实体名> <输出路径>");
+                            return;
+                        }
+                        manager.ExportFormXml(args[1], args[2]);
+                        break;
+
+                    case "check-view":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run check-view <实体名>");
+                            return;
+                        }
+                        manager.CheckViews(args[1]);
+                        break;
+
+                    case "update-view":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run update-view <实体名>");
+                            return;
+                        }
+                        UpdateView(manager, args[1]);
+                        break;
+
+                    case "update-lookup-view":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run update-lookup-view <实体名>");
+                            return;
+                        }
+                        UpdateLookupView(manager, args[1]);
+                        break;
+
+                    case "export-lookup-view":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run export-lookup-view <实体名> <输出路径>");
+                            return;
+                        }
+                        manager.ExportLookupViewFetchXml(args[1], args[2]);
+                        break;
+
+                    case "deploy-js":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run deploy-js <JS文件路径>");
+                            return;
+                        }
+                        var jsPath = args[1];
+                        var jsName = System.IO.Path.GetFileName(jsPath);
+                        manager.DeployWebResource(jsName, "评分卡配置表-表单逻辑", jsPath, "entity_20260603_peter");
+                        break;
+
+                    case "bind-js":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run bind-js <JS文件名> [实体名]");
+                            return;
+                        }
+                        string bindEntity = args.Length >= 3 ? args[2] : "mcs_credit_scoringcard";
+                        manager.BindJsToForm(bindEntity, args[1], "Information");
+                        break;
+
+                    case "register-plugin":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run register-plugin <DLL路径> <类名> [实体名]");
+                            return;
+                        }
+                        string entityForPlugin = args.Length >= 4 ? args[3] : "mcs_credit_scoringcard";
+                        manager.RegisterPlugin(args[1], args[2], entityForPlugin, "Create", 20, 0);
+                        break;
+
+                    case "register-plugin-update":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run register-plugin-update <DLL路径> <类名> [实体名] [筛选属性]");
+                            return;
+                        }
+                        string entityForUpdate = args.Length >= 4 ? args[3] : "mcs_credit_record";
+                        string filteringAttr = args.Length >= 5 ? args[4] : null;
+                        manager.RegisterPluginWithFilter(args[1], args[2], entityForUpdate, "Update", 20, 0, filteringAttr);
+                        break;
+
+                    case "deploy-js-14":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run deploy-js-14 <JS文件路径>");
+                            return;
+                        }
+                        var jsPath14 = args[1];
+                        var jsName14 = System.IO.Path.GetFileName(jsPath14);
+                        manager.DeployWebResource(jsName14, "信用评估记录表-表单逻辑", jsPath14, "entity_20260603_peter");
+                        break;
+
+                    case "bind-js-14":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run bind-js-14 <JS文件名>");
+                            return;
+                        }
+                        manager.BindJsToForm("mcs_credit_record", args[1], "Information");
+                        break;
+
+                    case "bind-js-tag":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run bind-js-tag <JS文件名>");
+                            return;
+                        }
+                        manager.BindJsToForm("mcs_customer_tag", args[1], "Information");
+                        break;
+
+                    case "bind-js-enum":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run bind-js-enum <JS文件名>");
+                            return;
+                        }
+                        manager.BindJsToForm("mcs_credititem_value", args[1], "Information");
+                        break;
+
+                    case "create-credit-items":
+                        CreateCreditItems(manager);
+                        break;
+
+                    case "create-qualitative-enums":
+                        CreateQualitativeEnums(manager);
+                        break;
+
+                    case "cleanup-qualitative-enums":
+                        manager.CleanupQualitativeEnumRecords();
+                        break;
+
+                    case "create-lookup-field":
+                        if (args.Length < 6)
+                        {
+                            Console.WriteLine("用法: dotnet run create-lookup-field <实体名> <字段名> <显示名> <描述> <目标实体名> <目标实体显示名>");
+                            return;
+                        }
+                        manager.CreateLookupField(args[1], args[2], args[3], args[4], args[5], args[6]);
+                        break;
+
+                    case "check-credit-items":
+                        CheckCreditItems(manager);
+                        break;
+
+                    case "cleanup-credit-items":
+                        CleanupCreditItems(manager);
+                        break;
+
+                    case "delete-credit-item":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run delete-credit-item <编码>");
+                            return;
+                        }
+                        manager.DeleteCreditItemByCode(args[1]);
+                        break;
+
+                    case "rearrange-form":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run rearrange-form <实体名>");
+                            return;
+                        }
+                        RearrangeForm(manager, args[1]);
+                        break;
+
+                    case "add-fields":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run add-fields <实体名>");
+                            return;
+                        }
+                        AddFieldsToEntity(manager, args[1]);
+                        break;
+
+                    default:
+                        Console.WriteLine($"未知命令: {command}");
+                        ShowHelp();
+                        break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"错误: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"内部错误: {ex.InnerException.Message}");
+            }
+        }
+    }
+
+    static void ShowHelp()
+    {
+        Console.WriteLine("可用命令:");
+        Console.WriteLine("  create <json文件>    - 从JSON创建实体和字段");
+        Console.WriteLine("  check <解决方案名>    - 检查解决方案实体");
+        Console.WriteLine("  add <实体> <解决方案> - 添加实体到解决方案");
+        Console.WriteLine("  remove <实体> <解决方案> - 从解决方案移除实体");
+        Console.WriteLine("  publish [实体]        - 发布");
+        Console.WriteLine("  delete-field <实体> <字段> - 删除字段");
+        Console.WriteLine("  list-fields <实体>    - 列出字段");
+        Console.WriteLine("  export <解决方案> <路径> - 导出 ZIP");
+        Console.WriteLine("  update-options <实体> <字段> <JSON> - 更新选项集");
+        Console.WriteLine("  update-form <实体>    - 更新实体主窗体字段");
+        Console.WriteLine("  check-form <实体>     - 检查实体窗体字段");
+        Console.WriteLine("  check-view <实体>     - 检查实体视图");
+        Console.WriteLine("  update-view <实体>    - 更新实体默认视图");
+        Console.WriteLine("  add-fields <实体>     - 为实体批量添加预定义字段");
+    }
+
+    static void CreateFromJson(EntityManager manager, string jsonFile)
+    {
+        if (!File.Exists(jsonFile))
+        {
+            Console.WriteLine($"文件不存在: {jsonFile}");
+            return;
+        }
+
+        var definition = EntityDefinition.LoadFromJson(jsonFile);
+        
+        // 检查实体是否已存在
+        if (manager.EntityExists(definition.EntityName))
+        {
+            Console.WriteLine($"实体 {definition.EntityName} 已存在，跳过创建");
+        }
+        else
+        {
+            // 创建实体
+            manager.CreateEntity(
+                definition.EntityName,
+                definition.DisplayName,
+                definition.PrimaryAttribute,
+                definition.PrimaryAttributeDisplayName,
+                definition.PrimaryAttributeLength
+            );
+        }
+
+        // 创建字段
+        Console.WriteLine($"\n创建字段...");
+        int success = 0;
+        int failed = 0;
+        int skipped = 0;
+
+        var existingFields = manager.GetFields(definition.EntityName);
+        var existingFieldNames = existingFields.Select(f => f.LogicalName).ToHashSet();
+
+        foreach (var field in definition.Fields)
+        {
+            // 跳过已存在的字段
+            if (existingFieldNames.Contains(field.SchemaName.ToLower()))
+            {
+                Console.WriteLine($"  ⊘ {field.SchemaName} ({field.DisplayName}) - 已存在");
+                skipped++;
+                continue;
+            }
+
+            try
+            {
+                switch (field.Type.ToLower())
+                {
+                    case "string":
+                        manager.CreateStringField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.MaxLength ?? 100, field.Required);
+                        break;
+                    case "memo":
+                        manager.CreateMemoField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.MaxLength ?? 4000);
+                        break;
+                    case "integer":
+                        manager.CreateIntegerField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.MinValue ?? 0, field.MaxValue ?? 100);
+                        break;
+                    case "decimal":
+                        manager.CreateDecimalField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.MinDecimalValue ?? 0, field.MaxDecimalValue ?? 999999.99m, field.Precision ?? 2);
+                        break;
+                    case "money":
+                        manager.CreateMoneyField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.MinDecimalValue ?? 0, field.MaxDecimalValue ?? 1000000, field.Precision ?? 2);
+                        break;
+                    case "datetime":
+                        manager.CreateDateTimeField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.DateOnly ?? true);
+                        break;
+                    case "picklist":
+                        manager.CreatePicklistField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.Options ?? new Dictionary<string, int>());
+                        break;
+                    case "boolean":
+                        manager.CreateBooleanField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.TrueLabel ?? "是", field.FalseLabel ?? "否");
+                        break;
+                    case "lookup":
+                        manager.CreateLookupField(definition.EntityName, field.SchemaName, field.DisplayName, field.Description, field.TargetEntity, field.TargetEntityDisplayName);
+                        break;
+                    default:
+                        Console.WriteLine($"  ✗ {field.SchemaName} - 未知类型: {field.Type}");
+                        failed++;
+                        continue;
+                }
+                success++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ✗ {field.SchemaName} 失败: {ex.Message}");
+                failed++;
+            }
+        }
+
+        Console.WriteLine($"\n  完成: {success} 成功, {failed} 失败, {skipped} 跳过");
+
+        // 添加到解决方案
+        if (!string.IsNullOrEmpty(definition.SolutionName))
+        {
+            Console.WriteLine($"\n添加到解决方案 {definition.SolutionName}...");
+            try
+            {
+                manager.AddEntityToSolution(definition.EntityName, definition.SolutionName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ✗ 添加失败: {ex.Message}");
+            }
+        }
+
+        // 发布
+        if (definition.AutoPublish)
+        {
+            Console.WriteLine($"\n发布实体...");
+            manager.PublishEntity(definition.EntityName);
+        }
+    }
+
+    static void CheckSolution(EntityManager manager, string solutionName)
+    {
+        Console.WriteLine($"检查解决方案: {solutionName}\n");
+        
+        var entities = manager.GetSolutionEntities(solutionName);
+        Console.WriteLine($"实体数量: {entities.Count}\n");
+        
+        foreach (var (logicalName, entityId) in entities)
+        {
+            Console.WriteLine($"  - {logicalName} (ID: {entityId})");
+        }
+    }
+
+    static void ListFields(EntityManager manager, string entityName)
+    {
+        Console.WriteLine($"实体 {entityName} 的字段列表:\n");
+        
+        var fields = manager.GetFields(entityName);
+        foreach (var field in fields.OrderBy(f => f.LogicalName))
+        {
+            string typeName = field.AttributeType?.ToString() ?? "Unknown";
+            string displayName = field.DisplayName?.UserLocalizedLabel?.Label ?? "";
+            Console.WriteLine($"  - {field.LogicalName,-30} {typeName,-15} {displayName}");
+        }
+        
+        Console.WriteLine($"\n总计: {fields.Count} 个字段");
+    }
+
+    static void UpdateForm(EntityManager manager, string entityName)
+    {
+        var fields = new Dictionary<string, string>();
+        
+        switch (entityName)
+        {
+            case "mcs_credit_items":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credit_itemsno", "评分项目编码" },
+                    { "mcs_group", "评分项目分类" },
+                    { "mcs_itemdesc", "评分项目说明" },
+                    { "mcs_datatype", "数据类型" },
+                    { "mcs_source", "内外部" },
+                    { "mcs_validate", "人工补录" },
+                    { "mcs__3p", "外部提供" }
+                };
+                break;
+
+            case "mcs_credit_scoringcard":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credit_scoringcardno", "评分分档编码" },
+                    { "mcs_categoryid", "评分卡类型" },
+                    { "mcs_cardname", "评分卡名称" },
+                    { "mcs_typeid", "评分项目分类" },
+                    { "mcs_credititem", "评分项目" },
+                    { "mcs_itemid", "评分项目编码" },
+                    { "mcs_itemname", "评分项目名称" },
+                    { "mcs_datatype", "数据类型" },
+                    { "mcs_listvalue", "定性项目值" },
+                    { "mcs_minvalue", "定量最小值（含）" },
+                    { "mcs_maxvalue", "定量最大值（不含）" },
+                    { "mcs_weight", "赋分" }
+                };
+                break;
+
+            case "mcs_credititem_value":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credititemno", "评分项目编码" },
+                    { "mcs_listvalue", "选择项编码" }
+                };
+                break;
+
+            case "mcs_customer_file":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_fileid", "文件统一编号" },
+                    { "mcs_accountid", "客户编码" },
+                    { "mcs_filename", "文件名称" },
+                    { "mcs_filetype", "文件分类" },
+                    { "mcs_filebyte", "文件信息流" },
+                    { "mcs_filedate", "文件上传日期" },
+                    { "mcs_api_fileid", "外部附件接口ID" },
+                    { "mcs_api_status", "外部附件接口状态" },
+                    { "mcs_api_msg", "外部附件接口消息" }
+                };
+                break;
+
+            case "mcs_customer_tag":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credit_record", "信用评估" },
+                    { "mcs_accountid", "客户编码" },
+                    { "mcs_credit_item", "评分项目" },
+                    { "mcs_itemid", "指标编码" },
+                    { "mcs_datatype", "数据类型" },
+                    { "mcs_group", "评分项目分类" },
+                    { "mcs_itemdesc", "评分项目说明" },
+                    { "mcs_isscore", "是否评分" },
+                    { "mcs_active", "有效状态" }
+                };
+                break;
+
+            case "mcs_credit_record":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_accountid", "客户编码" },
+                    { "mcs_applicant", "申请人" },
+                    { "mcs_approvedate", "BPP审批完成日期" },
+                    { "mcs_bppid", "BPP审批ID" },
+                    { "mcs_bppstatus", "BPP状态" },
+                    { "mcs_bppappriver", "BPP审批人" },
+                    { "mcs_bpperrormsg", "BPP错误信息" },
+                    { "mcs_bpprejectreason", "BPP驳回原因" },
+                    { "mcs_api_name", "API名称" },
+                    { "mcs_api_status", "API状态" },
+                    { "mcs_api_msg", "API消息" },
+                    { "mcs_abidate", "数据集成日期" },
+                    { "mcs_checkdate", "复核日期" },
+                    { "mcs_cofaceid", "科法斯客户代码" },
+                    { "mcs_countrycode", "国家编码" },
+                    { "mcs_active", "有效状态" }
+                };
+                break;
+
+            default:
+                Console.WriteLine($"暂不支持实体 {entityName} 的表单更新");
+                return;
+        }
+        
+        // 先清理 footer 中的错误字段
+        manager.CleanFormFooter(entityName);
+        
+        // 然后添加字段到主 section
+        manager.UpdateMainForm(entityName, fields);
+    }
+
+    static void CreateCreditItems(EntityManager manager)
+    {
+        Console.WriteLine("创建评分项目测试数据...");
+        manager.CreateCreditItemRecords();
+    }
+
+    static void CreateQualitativeEnums(EntityManager manager)
+    {
+        Console.WriteLine("创建定性评分项目枚举值测试数据...");
+        manager.CreateQualitativeEnumRecords();
+    }
+
+    static void CheckCreditItems(EntityManager manager)
+    {
+        Console.WriteLine("检查评分项目数据...");
+        manager.CheckCreditItemRecords();
+    }
+
+    static void CleanupCreditItems(EntityManager manager)
+    {
+        Console.WriteLine("清理评分项目重复和空编码记录...");
+        manager.CleanupCreditItemRecords();
+    }
+
+    static void AddFieldsToEntity(EntityManager manager, string entityName)
+    {
+        Console.WriteLine($"为 {entityName} 添加字段...");
+
+        if (entityName == "account")
+        {
+            // 客户表新增字段（信用评估项目需要）
+            Console.WriteLine("添加客户表字段（信用评估项目）...");
+            
+            // 1. mcs_cofaceid - 科法斯客户代码
+            manager.CreateStringField("account", "mcs_cofaceid", "科法斯客户代码", 
+                "Coface ICON平台唯一企业编码，用于对接Coface客户数据", 30);
+            
+            // 2. mcs_dealerrank - 经销商分级
+            manager.CreatePicklistField("account", "mcs_dealerrank", "经销商分级",
+                "经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）",
+                new Dictionary<string, int>
+                {
+                    { "钻石", 1 },
+                    { "铂金", 2 },
+                    { "白银", 3 },
+                    { "认证", 4 },
+                    { "意向", 5 }
+                });
+            
+            // 3. mcs_externalrate - 客户信用外部评级
+            manager.CreateStringField("account", "mcs_externalrate", "客户信用外部评级",
+                "Coface对客户信用评级，采用1-10分（10分最高）", 10);
+            
+            // 4. mcs_overduemodel - 逾期未回收率模型分
+            manager.CreateDecimalField("account", "mcs_overduemodel", "逾期未回收率模型分",
+                "逾期未回收率模型分，通过数据模型计算获得", 0, 999.99m, 2);
+            
+            // 5. mcs_creditscore - 客户信用评分
+            manager.CreateDecimalField("account", "mcs_creditscore", "客户信用评分",
+                "客户信用分计算结果", 0, 999.99m, 2);
+            
+            // 6. mcs_creditgrade - 客户等级
+            manager.CreateStringField("account", "mcs_creditgrade", "客户等级",
+                "客户等级A0-A4（A0最高），用于成交条件矩阵查询", 2);
+            
+            // 7. mcs_isdd - 重点尽调
+            manager.CreateBooleanField("account", "mcs_isdd", "重点尽调",
+                "是否需要重点尽调，用于重点尽调模块判断");
+            
+            // 8. mcs_creditvalid - 信用评估有效状态
+            manager.CreateBooleanField("account", "mcs_creditvalid", "信用评估有效状态",
+                "信用评估有效状态：1-有效 0-失效");
+            
+            Console.WriteLine("客户表字段添加完成！");
+        }
+        else
+        {
+            Console.WriteLine($"暂不支持为实体 {entityName} 批量添加字段");
+        }
+    }
+
+    static void RearrangeForm(EntityManager manager, string entityName)
+    {
+        Console.WriteLine($"重新排列 {entityName} 窗体...");
+        
+        if (entityName == "mcs_credit_record")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["基本信息"] = new List<(string, string)>
+                {
+                    ("mcs_scoreid", "信用评估编码"),
+                    ("mcs_accountid", "客户编码"),
+                    ("mcs_custname", "客户名称"),
+                    ("mcs_custnameen", "客户英文名称"),
+                    ("mcs_countrycode", "国家编码"),
+                    ("mcs_cofaceid", "科法斯客户代码"),
+                },
+                ["Coface订单信息"] = new List<(string, string)>
+                {
+                    ("mcs_urba360id", "URBA订单ID"),
+                    ("mcs_urbastatus", "URBA订单状态"),
+                    ("mcs_rptorderid", "Report订单ID"),
+                    ("mcs_rptstatus", "Report订单状态"),
+                    ("mcs_publicationid", "Publication ID"),
+                },
+                ["状态与评分"] = new List<(string, string)>
+                {
+                    ("mcs_status", "评估状态"),
+                    ("mcs_creditscore", "客户信用评分"),
+                    ("mcs_active", "有效状态"),
+                    ("mcs_remark", "备注说明"),
+                },
+                ["人员与日期"] = new List<(string, string)>
+                {
+                    ("mcs_applicant", "申请人"),
+                    ("mcs_initdate", "发起评估日期"),
+                    ("mcs_abidate", "数据集成日期"),
+                    ("mcs_checkdate", "人工复核日期"),
+                    ("mcs_scoredate", "信用评分日期"),
+                    ("mcs_approvedate", "BPP审批完成日期"),
+                },
+                ["API接口信息"] = new List<(string, string)>
+                {
+                    ("mcs_api_status", "Coface接口返回状态"),
+                    ("mcs_api_name", "接口名称"),
+                    ("mcs_api_msg", "Coface接口返回信息"),
+                },
+                ["Coface原始数据"] = new List<(string, string)>
+                {
+                    ("mcs_urbajson", "Coface URBA360数据"),
+                    ("mcs_reportjson", "Coface Report数据"),
+                },
+                ["BPP审批信息"] = new List<(string, string)>
+                {
+                    ("mcs_bppstatus", "BPP审批状态"),
+                    ("mcs_bppappriver", "当前审批人"),
+                    ("mcs_bppid", "BPP工作流ID"),
+                    ("mcs_bpperrormsg", "BPP错误信息"),
+                    ("mcs_bpprejectreason", "BPP驳回原因"),
+                },
+            };
+            var lookupFields = new HashSet<string> { "mcs_accountid" };
+            manager.RearrangeForm(entityName, groups, lookupFields);
+        }
+        else if (entityName == "mcs_credit_items")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["基本信息"] = new List<(string, string)>
+                {
+                    ("mcs_credit_itemsno", "评分项目编码"),
+                    ("mcs_itemname", "评分项目名称"),
+                    ("mcs_itemdesc", "评分项目说明"),
+                },
+                ["分类与属性"] = new List<(string, string)>
+                {
+                    ("mcs_group", "评分项目分类"),
+                    ("mcs_datatype", "数据类型"),
+                    ("mcs_source", "内外部"),
+                    ("mcs_validate", "人工补录"),
+                    ("mcs__3p", "外部提供"),
+                },
+            };
+            manager.RearrangeForm(entityName, groups);
+        }
+        else if (entityName == "mcs_credit_scoringcard")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["基本信息"] = new List<(string, string)>
+                {
+                    ("mcs_credit_scoringcardno", "评分分档编码"),
+                    ("mcs_cardname", "评分卡名称"),
+                    ("mcs_categoryid", "评分卡类型"),
+                },
+                ["评分项目"] = new List<(string, string)>
+                {
+                    ("mcs_typeid", "评分项目分类"),
+                    ("mcs_credititem", "评分项目"),
+                    ("mcs_itemid", "评分项目编码"),
+                    ("mcs_itemname", "评分项目名称"),
+                    ("mcs_datatype", "数据类型"),
+                },
+                ["分值配置"] = new List<(string, string)>
+                {
+                    ("mcs_listvalue", "定性项目值"),
+                    ("mcs_minvalue", "定量最小值（含）"),
+                    ("mcs_maxvalue", "定量最大值（不含）"),
+                    ("mcs_weight", "赋分"),
+                },
+            };
+            var lookupFields = new HashSet<string> { "mcs_credititem", "mcs_listvalue" };
+            var lookupFilterMap = new Dictionary<string, (string dependentField, string dependentEntity, string filterRelationship)>
+            {
+                ["mcs_listvalue"] = ("mcs_credit_scoringcard.mcs_credititem", "mcs_credit_items", "mcs_credit_items_mcs_credititem_value_mcs_credititemno")
+            };
+            manager.RearrangeForm(entityName, groups, lookupFields, lookupFilterMap);
+        }
+        else if (entityName == "mcs_customer_file")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["基本信息"] = new List<(string, string)>
+                {
+                    ("mcs_fileid", "文件统一编号"),
+                    ("mcs_accountid", "客户编码"),
+                    ("mcs_filename", "文件名称"),
+                    ("mcs_filetype", "文件分类"),
+                },
+                ["文件内容"] = new List<(string, string)>
+                {
+                    ("mcs_filebyte", "文件信息流"),
+                    ("mcs_filedate", "文件上传日期"),
+                },
+                ["接口信息"] = new List<(string, string)>
+                {
+                    ("mcs_api_fileid", "外部附件接口ID"),
+                    ("mcs_api_status", "外部附件接口状态"),
+                    ("mcs_api_msg", "外部附件接口消息"),
+                },
+            };
+            var lookupFields = new HashSet<string> { "mcs_accountid" };
+            manager.RearrangeForm(entityName, groups, lookupFields);
+        }
+        else if (entityName == "mcs_credititem_value")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["基本信息"] = new List<(string, string)>
+                {
+                    ("mcs_credititemno", "评分项目编码"),
+                    ("mcs_listvalue", "选择项编码"),
+                    ("mcs_listname", "选择项名称"),
+                },
+            };
+            var lookupFields = new HashSet<string> { "mcs_credititemno" };
+            manager.RearrangeForm(entityName, groups, lookupFields);
+        }
+        else if (entityName == "mcs_customer_tag")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["关联信息"] = new List<(string, string)>
+                {
+                    ("mcs_scoreid", "信用评估编码"),
+                    ("mcs_credit_record", "信用评估"),
+                    ("mcs_accountid", "客户编码"),
+                },
+                ["评分项目"] = new List<(string, string)>
+                {
+                    ("mcs_credit_item", "评分项目"),
+                    ("mcs_itemid", "指标编码"),
+                    ("mcs_itemname", "评分项目名称"),
+                    ("mcs_datatype", "数据类型"),
+                    ("mcs_group", "评分项目分类"),
+                    ("mcs_itemdesc", "评分项目说明"),
+                },
+                ["指标值"] = new List<(string, string)>
+                {
+                    ("mcs_itemvalue1", "集成指标"),
+                    ("mcs_itemvalue2", "复核指标"),
+                    ("mcs_itemintvalue1", "集成定量指标"),
+                    ("mcs_itemintvalue2", "复核定量指标"),
+                    ("mcs_itemtxtvalue1", "集成定性指标"),
+                    ("mcs_itemtxtvalue2", "复核定性指标"),
+                },
+                ["评分与状态"] = new List<(string, string)>
+                {
+                    ("mcs_isscore", "是否评分"),
+                    ("mcs_scorevalue", "得分值"),
+                    ("mcs_active", "有效状态"),
+                },
+            };
+            var lookupFields = new HashSet<string> { "mcs_credit_record", "mcs_accountid", "mcs_credit_item" };
+            manager.RearrangeForm(entityName, groups, lookupFields);
+        }
+        else
+        {
+            Console.WriteLine($"暂不支持实体 {entityName} 的窗体重排");
+        }
+    }
+
+    static void UpdateLookupView(EntityManager manager, string entityName)
+    {
+        var fields = new string[] { "mcs_credit_itemsno", "mcs_itemname", "mcs_group", "mcs_datatype" };
+        manager.UpdateLookupView(entityName, fields);
+    }
+
+    static void UpdateView(EntityManager manager, string entityName)
+    {
+        var fields = new Dictionary<string, string>();
+        
+        switch (entityName)
+        {
+            case "mcs_credititem_value":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credititemno", "评分项目编码" },
+                    { "mcs_listvalue", "选择项编码" }
+                };
+                break;
+
+            case "mcs_credit_items":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credit_itemsno", "评分项目编码" },
+                    { "mcs_group", "评分项目分类" },
+                    { "mcs_datatype", "数据类型" },
+                    { "mcs_source", "内外部" },
+                    { "mcs_validate", "人工补录" },
+                    { "mcs__3p", "外部提供" }
+                };
+                break;
+
+            case "mcs_credit_scoringcard":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credit_scoringcardno", "评分分档编码" },
+                    { "mcs_categoryid", "评分卡类型" },
+                    { "mcs_typeid", "评分项目分类" },
+                    { "mcs_itemid", "评分项目编码" },
+                    { "mcs_itemname", "评分项目名称" },
+                    { "mcs_datatype", "数据类型" },
+                    { "mcs_listvalue", "定性项目值" },
+                    { "mcs_minvalue", "定量最小值" },
+                    { "mcs_maxvalue", "定量最大值" },
+                    { "mcs_weight", "赋分" }
+                };
+                break;
+
+            case "mcs_customer_file":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_fileid", "文件统一编号" },
+                    { "mcs_accountid", "客户编码" },
+                    { "mcs_filename", "文件名称" },
+                    { "mcs_filetype", "文件分类" },
+                    { "mcs_filedate", "文件上传日期" },
+                    { "mcs_api_status", "外部接口状态" }
+                };
+                break;
+
+            case "mcs_customer_tag":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_credit_record", "信用评估" },
+                    { "mcs_accountid", "客户编码" },
+                    { "mcs_credit_item", "评分项目" },
+                    { "mcs_itemid", "指标编码" },
+                    { "mcs_datatype", "数据类型" },
+                    { "mcs_group", "评分项目分类" },
+                    { "mcs_isscore", "是否评分" },
+                    { "mcs_active", "有效状态" }
+                };
+                break;
+
+            case "mcs_credit_record":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_accountid", "客户编码" },
+                    { "mcs_applicant", "申请人" },
+                    { "mcs_approvedate", "BPP审批完成日期" },
+                    { "mcs_bppstatus", "BPP状态" },
+                    { "mcs_api_status", "API状态" },
+                    { "mcs_abidate", "数据集成日期" },
+                    { "mcs_checkdate", "复核日期" },
+                    { "mcs_active", "有效状态" }
+                };
+                break;
+
+            default:
+                Console.WriteLine($"暂不支持实体 {entityName} 的视图更新");
+                return;
+        }
+        
+        manager.UpdateDefaultView(entityName, fields);
+    }
+}

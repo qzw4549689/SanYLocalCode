@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>0</isdefault>
+    <savedqueryid>{4bc81e13-2043-47a0-b284-005397f63bea}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_listname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credititem_valueid">
+          <cell name="mcs_listname" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credititem_value">
+          <attribute name="mcs_credititem_valueid" />
+          <attribute name="mcs_listname" />
+          <attribute name="createdon" />
+          <order attribute="mcs_listname" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="1" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="غير نشط  定性评分项目枚举值" languagecode="1025" />
+      <LocalizedName description="Inaktive 定性评分项目枚举值" languagecode="1031" />
+      <LocalizedName description="Inactive 定性评分项目枚举值" languagecode="1033" />
+      <LocalizedName description="定性评分项目枚举值 inactifs" languagecode="1036" />
+      <LocalizedName description="定性评分项目枚举值 inattivi/e" languagecode="1040" />
+      <LocalizedName description="定性评分项目枚举值 Inativos(as)" languagecode="1046" />
+      <LocalizedName description="Неактивные 定性评分项目枚举值" languagecode="1049" />
+      <LocalizedName description="定性评分项目枚举值 tidak aktif" languagecode="1057" />
+      <LocalizedName description="定性评分项目枚举值 Không hoạt động" languagecode="1066" />
+      <LocalizedName description="Tidak aktif 定性评分项目枚举值" languagecode="1086" />
+      <LocalizedName description="停用定性评分项目枚举值" languagecode="2052" />
+      <LocalizedName description="定性评分项目枚举值 inactivo" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{0b335277-19d5-40ab-a983-81582d855d03}</formid>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{69b1a432-b963-4112-879d-a8f89e0c78e4}" name="StageStep3" locklevel="0" expanded="true" visible="false" labelid="{3d23f813-2ecc-414d-bbcc-4abdcdac0a00}">
+          <labels>
+            <label description="发起信用评估" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{52019dbd-0919-6cb5-ab60-e640694397fc}" name="StageStep3_section1" labelid="{04052930-98fe-4c21-b806-f3bfa7995389}">
+                  <labels>
+                    <label description="发起信用评估" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{fb44aa57-a44e-40a2-a498-7a59a28a7dde}" showlabel="true" visible="true" labelid="{2e97eaa0-d0ae-469d-8cdc-41a851b69892}">
+                        <labels>
+                          <label description="评分日期" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{391ff60e-7aa4-4aa8-beea-ee679a2d5f11}" name="StageStep7" locklevel="0" expanded="true" visible="false" labelid="{1b48d701-ef61-4e3c-b3c5-c3b43dcca962}">
+          <labels>
+            <label description="关联客户代码" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{6732ae1c-f863-780a-7cd9-98ea05f7903e}" name="StageStep7_section1" labelid="{633240b2-f323-4a87-8593-42808f5731c5}">
+                  <labels>
+                    <label description="关联客户代码" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{e2b96948-d6ad-4e90-b5c4-e56bdc0121c7}" showlabel="true" visible="true" labelid="{a37e67c9-c4a2-4721-a8e5-2db76a817ff6}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{a98cb93e-72ad-4ac0-be65-8fee8d525b04}" name="StageStep11" locklevel="0" expanded="true" visible="false" labelid="{5a850f9d-cbc2-431d-826a-f815f1f8cf0c}">
+          <labels>
+            <label description="内外部数据集成" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{986cd884-687a-2f66-a21f-bf23c36f6a1a}" name="StageStep11_section1" labelid="{9fb761bf-6a1f-4cc7-a64d-e71d9072574b}">
+                  <labels>
+                    <label description="内外部数据集成" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{d7b99e22-90f6-4a6c-95c4-edf6f0dbe3eb}" showlabel="true" visible="true" labelid="{9400321f-a156-4041-9c64-cf48cd0670fe}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{abf076d1-f3c1-4144-9c15-ca3dda62ed39}" name="StageStep15" locklevel="0" expanded="true" visible="false" labelid="{5f619b59-c2d3-42c1-8c97-4ee480deb0b8}">
+          <labels>
+            <label description="人工复核" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{30165b9d-eb65-6f15-2ec1-39c532ad1dbb}" name="StageStep15_section1" labelid="{a46704df-9104-4847-aa85-7956a02f760e}">
+                  <labels>
+                    <label description="人工复核" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{31366aeb-3928-43a5-9f4f-bfdef21e1e7d}" showlabel="true" visible="true" labelid="{2f4e8ae3-0844-4e01-8738-984808e746de}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{f1de9ef1-2f9f-44ff-bc34-f6732eb330ab}" name="StageStep19" locklevel="0" expanded="true" visible="false" labelid="{a285beb3-ce90-400d-beb0-a8d5b3f713a3}">
+          <labels>
+            <label description="信用分计算" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{2ff17f33-85cd-bfc9-2e46-aa8e0fd77fe0}" name="StageStep19_section1" labelid="{9146128b-41a5-43ef-b3d6-6af6f2ea0779}">
+                  <labels>
+                    <label description="信用分计算" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{4823f0c7-145b-4ccd-a57c-fa0c8c32ba24}" showlabel="true" visible="true" labelid="{e9b66a58-93e2-4bce-81d2-4bbf0f00c9d1}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{64382bb7-2e3f-4b56-a4be-922924141250}" name="StageStep23" locklevel="0" expanded="true" visible="false" labelid="{4e7e3fff-a475-490f-8960-8024b776452a}">
+          <labels>
+            <label description="审核申请" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{dbe07355-739d-5786-c066-fdaf07e41b7d}" name="StageStep23_section1" labelid="{40f1bd7c-4640-46e8-8ffa-7c2a3d32b290}">
+                  <labels>
+                    <label description="审核申请" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{c1f85977-ab17-4070-8572-79b30fea422c}" showlabel="true" visible="true" labelid="{825243d0-f83b-4e2f-aa55-31d6d9b905aa}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{1158618a-a0c3-4030-8bef-4b3af5740062}" name="StageStep27" locklevel="0" expanded="true" visible="false" labelid="{5a7ab7d4-8f24-43c6-b7aa-dc600778c0b2}">
+          <labels>
+            <label description="审批通过" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{c49f70d4-37e9-95c4-7682-07e181c752b7}" name="StageStep27_section1" labelid="{78813ac6-45cc-4169-b935-b9a28c0ea6da}">
+                  <labels>
+                    <label description="审批通过" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{f2808bf1-eee4-467b-8557-4d8d53c7b427}" showlabel="true" visible="true" labelid="{77a91a23-e8c4-45b9-9187-cdbdd8b8e526}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+        <tab verticallayout="true" id="{00fe3244-c92a-4108-b733-6a824fac0dae}" name="StageStep31" locklevel="0" expanded="true" visible="false" labelid="{5a54306d-6a70-4531-beb8-4dbd3e1c54c1}">
+          <labels>
+            <label description="审批未通过" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showbar="false" columns="1" id="{3da7c4ce-5896-a6c2-53e9-1ec55837fa67}" name="StageStep31_section1" labelid="{230f7392-1c17-4242-8747-3f88bc2316ec}">
+                  <labels>
+                    <label description="审批未通过" languagecode="1033" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{91dda07c-0842-4edc-8cbe-91500e190857}" showlabel="true" visible="true" labelid="{83f03d1c-c5f3-4573-9e78-d67a5ea40e54}">
+                        <labels>
+                          <label description="评估状态" languagecode="1033" />
+                        </labels>
+                        <control id="bpf_mcs_credit_record_mcs_credit:mcs_status" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="mcs_status" relationship="bpf_mcs_credit_record_mcs_credit" isrequired="false" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

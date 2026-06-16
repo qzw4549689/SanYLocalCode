@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RibbonDiffXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <CustomActions>
+    <!-- 【下一步】按钮 - 放在Form命令栏 -->
+    <CustomAction Id="mcs.creditrecord.Form.NextStep.Button" Location="Mscrm.Form.mcs_credit_record.MainTab.Save.Controls._children" Sequence="10">
+      <CommandUIDefinition>
+        <Button Id="mcs.creditrecord.Form.NextStep.Button" Command="mcs.creditrecord.NextStep.Command" LabelText="$LocLabels:mcs.creditrecord.NextStep.Label" ToolTipTitle="$LocLabels:mcs.creditrecord.NextStep.ToolTipTitle" ToolTipDescription="$LocLabels:mcs.creditrecord.NextStep.ToolTipDescription" TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <!-- 【数据集成刷新】按钮 -->
+    <CustomAction Id="mcs.creditrecord.Form.RefreshData.Button" Location="Mscrm.Form.mcs_credit_record.MainTab.Save.Controls._children" Sequence="11">
+      <CommandUIDefinition>
+        <Button Id="mcs.creditrecord.Form.RefreshData.Button" Command="mcs.creditrecord.RefreshData.Command" LabelText="$LocLabels:mcs.creditrecord.RefreshData.Label" ToolTipTitle="$LocLabels:mcs.creditrecord.RefreshData.ToolTipTitle" ToolTipDescription="$LocLabels:mcs.creditrecord.RefreshData.ToolTipDescription" TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <!-- 【重新发起】按钮 -->
+    <CustomAction Id="mcs.creditrecord.Form.Restart.Button" Location="Mscrm.Form.mcs_credit_record.MainTab.Save.Controls._children" Sequence="12">
+      <CommandUIDefinition>
+        <Button Id="mcs.creditrecord.Form.Restart.Button" Command="mcs.creditrecord.Restart.Command" LabelText="$LocLabels:mcs.creditrecord.Restart.Label" ToolTipTitle="$LocLabels:mcs.creditrecord.Restart.ToolTipTitle" ToolTipDescription="$LocLabels:mcs.creditrecord.Restart.ToolTipDescription" TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+  </CustomActions>
+  <Templates>
+    <RibbonTemplates Id="Mscrm.Templates"></RibbonTemplates>
+  </Templates>
+  <CommandDefinitions>
+    <!-- 【下一步】命令定义 -->
+    <CommandDefinition Id="mcs.creditrecord.NextStep.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.creditrecord.NextStep.EnableRule" />
+      </EnableRules>
+      <DisplayRules>
+        <DisplayRule Id="mcs.creditrecord.Form.DisplayRule" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction Library="$webresource:mcs_credit_record.js" FunctionName="CreditRecordForm.nextStep">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <!-- 【数据集成刷新】命令定义 -->
+    <CommandDefinition Id="mcs.creditrecord.RefreshData.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.creditrecord.RefreshData.EnableRule" />
+      </EnableRules>
+      <DisplayRules>
+        <DisplayRule Id="mcs.creditrecord.Form.DisplayRule" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction Library="$webresource:mcs_credit_record.js" FunctionName="CreditRecordForm.refreshDataIntegration">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <!-- 【重新发起】命令定义 -->
+    <CommandDefinition Id="mcs.creditrecord.Restart.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.creditrecord.Restart.EnableRule" />
+      </EnableRules>
+      <DisplayRules>
+        <DisplayRule Id="mcs.creditrecord.Form.DisplayRule" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction Library="$webresource:mcs_credit_record.js" FunctionName="CreditRecordForm.restartEvaluation">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+  </CommandDefinitions>
+  <RuleDefinitions>
+    <TabDisplayRules />
+    <DisplayRules>
+      <!-- 仅在表单上显示 -->
+      <DisplayRule Id="mcs.creditrecord.Form.DisplayRule">
+        <FormStateRule State="Existing" />
+        <FormStateRule State="Create" />
+      </DisplayRule>
+    </DisplayRules>
+    <EnableRules>
+      <!-- 【下一步】可用规则：状态9-13 -->
+      <EnableRule Id="mcs.creditrecord.NextStep.EnableRule">
+        <CustomRule FunctionName="CreditRecordForm.canNextStep" Library="$webresource:mcs_credit_record.js" Default="false" />
+      </EnableRule>
+      <!-- 【数据集成刷新】可用规则：状态12 -->
+      <EnableRule Id="mcs.creditrecord.RefreshData.EnableRule">
+        <CustomRule FunctionName="CreditRecordForm.canRefreshData" Library="$webresource:mcs_credit_record.js" Default="false" />
+      </EnableRule>
+      <!-- 【重新发起】可用规则：状态16 -->
+      <EnableRule Id="mcs.creditrecord.Restart.EnableRule">
+        <CustomRule FunctionName="CreditRecordForm.canRestart" Library="$webresource:mcs_credit_record.js" Default="false" />
+      </EnableRule>
+    </EnableRules>
+  </RuleDefinitions>
+  <LocLabels>
+    <!-- 【下一步】标签 -->
+    <LocLabel Id="mcs.creditrecord.NextStep.Label">
+      <Titles>
+        <Title languagecode="1033" description="Next Step" />
+        <Title languagecode="2052" description="下一步" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.NextStep.ToolTipTitle">
+      <Titles>
+        <Title languagecode="1033" description="Next Step" />
+        <Title languagecode="2052" description="下一步" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.NextStep.ToolTipDescription">
+      <Titles>
+        <Title languagecode="1033" description="Proceed to the next stage of credit evaluation" />
+        <Title languagecode="2052" description="进入信用评估的下一阶段" />
+      </Titles>
+    </LocLabel>
+    <!-- 【数据集成刷新】标签 -->
+    <LocLabel Id="mcs.creditrecord.RefreshData.Label">
+      <Titles>
+        <Title languagecode="1033" description="Refresh Data" />
+        <Title languagecode="2052" description="数据集成刷新" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.RefreshData.ToolTipTitle">
+      <Titles>
+        <Title languagecode="1033" description="Refresh Data Integration" />
+        <Title languagecode="2052" description="数据集成刷新" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.RefreshData.ToolTipDescription">
+      <Titles>
+        <Title languagecode="1033" description="Re-execute data integration to refresh indicator data" />
+        <Title languagecode="2052" description="重新执行数据集成，刷新指标数据" />
+      </Titles>
+    </LocLabel>
+    <!-- 【重新发起】标签 -->
+    <LocLabel Id="mcs.creditrecord.Restart.Label">
+      <Titles>
+        <Title languagecode="1033" description="Restart" />
+        <Title languagecode="2052" description="重新发起" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.Restart.ToolTipTitle">
+      <Titles>
+        <Title languagecode="1033" description="Restart Evaluation" />
+        <Title languagecode="2052" description="重新发起评估" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.Restart.ToolTipDescription">
+      <Titles>
+        <Title languagecode="1033" description="Return to data integration stage and re-evaluate" />
+        <Title languagecode="2052" description="回到数据集成阶段，重新进行评估" />
+      </Titles>
+    </LocLabel>
+  </LocLabels>
+</RibbonDiffXml>

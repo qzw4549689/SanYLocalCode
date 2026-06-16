@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{8e580ba7-22f4-4051-9286-22bf57c494e6}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_listname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credititem_valueid">
+          <cell name="mcs_listname" width="300" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credititem_value">
+          <attribute name="mcs_credititem_valueid" />
+          <attribute name="mcs_listname" />
+          <attribute name="createdon" />
+          <order attribute="mcs_listname" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="定性评分项目枚举值 النشط" languagecode="1025" />
+      <LocalizedName description="Aktive 定性评分项目枚举值" languagecode="1031" />
+      <LocalizedName description="Active 定性评分项目枚举值" languagecode="1033" />
+      <LocalizedName description="定性评分项目枚举值 actifs" languagecode="1036" />
+      <LocalizedName description="定性评分项目枚举值 attivi/e" languagecode="1040" />
+      <LocalizedName description="定性评分项目枚举值 Ativos(as)" languagecode="1046" />
+      <LocalizedName description="Активные 定性评分项目枚举值" languagecode="1049" />
+      <LocalizedName description="定性评分项目枚举值 aktif" languagecode="1057" />
+      <LocalizedName description="定性评分项目枚举值 Hiện hoạt" languagecode="1066" />
+      <LocalizedName description="Aktif 定性评分项目枚举值" languagecode="1086" />
+      <LocalizedName description="可用的定性评分项目枚举值" languagecode="2052" />
+      <LocalizedName description="定性评分项目枚举值 activo" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

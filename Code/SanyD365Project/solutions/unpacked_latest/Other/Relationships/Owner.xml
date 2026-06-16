@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="owner_mcs_credit_items">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_items</ReferencingEntityName>
+    <ReferencedEntityName>Owner</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwnerId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Owner Id" languagecode="1033" />
+        <Description description="负责人 ID" languagecode="2052" />
+        <Description description="ID Pengguna" languagecode="1057" />
+        <Description description="Id. del propietario" languagecode="3082" />
+        <Description description="معرف المالك" languagecode="1025" />
+        <Description description="ID do Proprietário" languagecode="1046" />
+        <Description description="ID proprietario" languagecode="1040" />
+        <Description description="Id Chủ sở hữu" languagecode="1066" />
+        <Description description="ID du propriétaire" languagecode="1036" />
+        <Description description="Идентификатор ответственного" languagecode="1049" />
+        <Description description="Id Pemilik" languagecode="1086" />
+        <Description description="Besitzer-ID" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="owner_mcs_credit_record">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_record</ReferencingEntityName>
+    <ReferencedEntityName>Owner</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwnerId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Owner Id" languagecode="1033" />
+        <Description description="负责人 ID" languagecode="2052" />
+        <Description description="ID Pengguna" languagecode="1057" />
+        <Description description="Id. del propietario" languagecode="3082" />
+        <Description description="معرف المالك" languagecode="1025" />
+        <Description description="ID do Proprietário" languagecode="1046" />
+        <Description description="ID proprietario" languagecode="1040" />
+        <Description description="Id Chủ sở hữu" languagecode="1066" />
+        <Description description="ID du propriétaire" languagecode="1036" />
+        <Description description="Идентификатор ответственного" languagecode="1049" />
+        <Description description="Id Pemilik" languagecode="1086" />
+        <Description description="Besitzer-ID" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="owner_mcs_credit_scoringcard">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_scoringcard</ReferencingEntityName>
+    <ReferencedEntityName>Owner</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwnerId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Owner Id" languagecode="1033" />
+        <Description description="负责人 ID" languagecode="2052" />
+        <Description description="ID Pengguna" languagecode="1057" />
+        <Description description="Id. del propietario" languagecode="3082" />
+        <Description description="معرف المالك" languagecode="1025" />
+        <Description description="ID do Proprietário" languagecode="1046" />
+        <Description description="ID proprietario" languagecode="1040" />
+        <Description description="Id Chủ sở hữu" languagecode="1066" />
+        <Description description="ID du propriétaire" languagecode="1036" />
+        <Description description="Идентификатор ответственного" languagecode="1049" />
+        <Description description="Id Pemilik" languagecode="1086" />
+        <Description description="Besitzer-ID" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="owner_mcs_credititem_value">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credititem_value</ReferencingEntityName>
+    <ReferencedEntityName>Owner</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwnerId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Owner Id" languagecode="1033" />
+        <Description description="负责人 ID" languagecode="2052" />
+        <Description description="ID Pengguna" languagecode="1057" />
+        <Description description="Id. del propietario" languagecode="3082" />
+        <Description description="معرف المالك" languagecode="1025" />
+        <Description description="ID do Proprietário" languagecode="1046" />
+        <Description description="ID proprietario" languagecode="1040" />
+        <Description description="Id Chủ sở hữu" languagecode="1066" />
+        <Description description="ID du propriétaire" languagecode="1036" />
+        <Description description="Идентификатор ответственного" languagecode="1049" />
+        <Description description="Id Pemilik" languagecode="1086" />
+        <Description description="Besitzer-ID" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="owner_mcs_customer_file">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_file</ReferencingEntityName>
+    <ReferencedEntityName>Owner</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwnerId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Owner Id" languagecode="1033" />
+        <Description description="负责人 ID" languagecode="2052" />
+        <Description description="ID Pengguna" languagecode="1057" />
+        <Description description="Id. del propietario" languagecode="3082" />
+        <Description description="معرف المالك" languagecode="1025" />
+        <Description description="ID do Proprietário" languagecode="1046" />
+        <Description description="ID proprietario" languagecode="1040" />
+        <Description description="Id Chủ sở hữu" languagecode="1066" />
+        <Description description="ID du propriétaire" languagecode="1036" />
+        <Description description="Идентификатор ответственного" languagecode="1049" />
+        <Description description="Id Pemilik" languagecode="1086" />
+        <Description description="Besitzer-ID" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="owner_mcs_customer_tag">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_tag</ReferencingEntityName>
+    <ReferencedEntityName>Owner</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwnerId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Owner Id" languagecode="1033" />
+        <Description description="负责人 ID" languagecode="2052" />
+        <Description description="ID Pengguna" languagecode="1057" />
+        <Description description="Id. del propietario" languagecode="3082" />
+        <Description description="معرف المالك" languagecode="1025" />
+        <Description description="ID do Proprietário" languagecode="1046" />
+        <Description description="ID proprietario" languagecode="1040" />
+        <Description description="Id Chủ sở hữu" languagecode="1066" />
+        <Description description="ID du propriétaire" languagecode="1036" />
+        <Description description="Идентификатор ответственного" languagecode="1049" />
+        <Description description="Id Pemilik" languagecode="1086" />
+        <Description description="Besitzer-ID" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+</EntityRelationships>

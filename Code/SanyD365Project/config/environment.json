@@ -1,0 +1,33 @@
+{
+  "environments": [
+    {
+      "name": "SanyDev",
+      "url": "https://sanyglobal.crm.dynamics.com",
+      "type": "development",
+      "description": "开发环境"
+    },
+    {
+      "name": "SanyTest",
+      "url": "https://sanyglobal-test.crm.dynamics.com",
+      "type": "test",
+      "description": "测试环境"
+    },
+    {
+      "name": "SanyProd",
+      "url": "https://sanyglobal-prod.crm.dynamics.com",
+      "type": "production",
+      "description": "生产环境"
+    }
+  ],
+  "solution": {
+    "name": "SanyProjectManagement",
+    "displayName": "Sany Project Management",
+    "version": "1.0.0.0",
+    "publisher": {
+      "name": "sany",
+      "displayName": "Sany Global",
+      "prefix": "sany"
+    },
+    "description": "三一重工项目管理解决方案"
+  }
+}

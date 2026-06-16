@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>1</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{f438ba57-547a-4899-a322-8471c0c86627}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_listname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credititem_valueid">
+          <cell name="mcs_listname" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>4</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credititem_value">
+          <attribute name="mcs_credititem_valueid" />
+          <attribute name="mcs_listname" />
+          <attribute name="createdon" />
+          <order attribute="mcs_listname" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <filter type="or" isquickfindfields="1">
+            <condition attribute="mcs_listname" operator="like" value="{0}" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="البحث السريع عن 定性评分项目枚举值 النشط" languagecode="1025" />
+      <LocalizedName description="Schnellsuche für aktive 定性评分项目枚举值" languagecode="1031" />
+      <LocalizedName description="Quick Find Active 定性评分项目枚举值" languagecode="1033" />
+      <LocalizedName description="Éléments 定性评分项目枚举值 actifs Quick Find" languagecode="1036" />
+      <LocalizedName description="Ricerca rapida 定性评分项目枚举值 attivi/e" languagecode="1040" />
+      <LocalizedName description="Localização Rápida de 定性评分项目枚举值 Ativo(a)" languagecode="1046" />
+      <LocalizedName description="Быстрый поиск активных 定性评分项目枚举值" languagecode="1049" />
+      <LocalizedName description="Cari Cepat 定性评分项目枚举值 Aktif" languagecode="1057" />
+      <LocalizedName description="Tìm Nhanh 定性评分项目枚举值 Hiện hoạt" languagecode="1066" />
+      <LocalizedName description="Carian Cepat Aktif 定性评分项目枚举值" languagecode="1086" />
+      <LocalizedName description="快速查找可用定性评分项目枚举值" languagecode="2052" />
+      <LocalizedName description="Búsqueda rápida de 定性评分项目枚举值 activos" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

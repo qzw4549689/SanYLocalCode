@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{eb4d66fd-5cc0-4fce-a4c4-61835607651f}</savedqueryid>
+    <querytype>8192</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical" output-format="xml-platform">
+        <entity name="mcs_credit_items">
+          <attribute name="mcs_credit_itemsid" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+            <condition attribute="ownerid" operator="eq-userid" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="客户信用评分项目表 الخاص بي" languagecode="1025" />
+      <LocalizedName description="Meine 客户信用评分项目表" languagecode="1031" />
+      <LocalizedName description="My 客户信用评分项目表" languagecode="1033" />
+      <LocalizedName description="Mes 客户信用评分项目表" languagecode="1036" />
+      <LocalizedName description="Entità 客户信用评分项目表 personali" languagecode="1040" />
+      <LocalizedName description="Meu 客户信用评分项目表" languagecode="1046" />
+      <LocalizedName description="Мои 客户信用评分项目表" languagecode="1049" />
+      <LocalizedName description="客户信用评分项目表 Saya" languagecode="1057" />
+      <LocalizedName description="客户信用评分项目表 của Tôi" languagecode="1066" />
+      <LocalizedName description="Saya 客户信用评分项目表" languagecode="1086" />
+      <LocalizedName description="我的客户信用评分项目表" languagecode="2052" />
+      <LocalizedName description="Mis 客户信用评分项目表" languagecode="3082" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="客户信用评分项目表 النشط المملوك لي" languagecode="1025" />
+      <Description description="Aktive 客户信用评分项目表 in meinem Besitz" languagecode="1031" />
+      <Description description="Active 客户信用评分项目表 owned by me" languagecode="1033" />
+      <Description description="客户信用评分项目表 actifs que je possède" languagecode="1036" />
+      <Description description="Entità 客户信用评分项目表 attive di proprietà dell'utente corrente" languagecode="1040" />
+      <Description description="客户信用评分项目表 ativo de minha propriedade" languagecode="1046" />
+      <Description description="Активные 客户信用评分项目表, принадлежащие мне" languagecode="1049" />
+      <Description description="客户信用评分项目表 aktif milik saya" languagecode="1057" />
+      <Description description="客户信用评分项目表 hiện hoạt do tôi sở hữu" languagecode="1066" />
+      <Description description="Aktif 客户信用评分项目表 milik saya" languagecode="1086" />
+      <Description description="我所负责的可用客户信用评分项目表" languagecode="2052" />
+      <Description description="Entidades 客户信用评分项目表 activas de mi propiedad" languagecode="3082" />
+    </Descriptions>
+  </savedquery>
+</savedqueries>

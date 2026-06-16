@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workflow WorkflowId="{824edb28-b460-f111-a826-000d3aa333b3}" Name="信用评估" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <XamlFileName>/Workflows/-824EDB28-B460-F111-A826-000D3AA333B3.xaml</XamlFileName>
+  <Type>1</Type>
+  <Subprocess>0</Subprocess>
+  <Category>4</Category>
+  <Mode>0</Mode>
+  <Scope>4</Scope>
+  <OnDemand>0</OnDemand>
+  <TriggerOnCreate>1</TriggerOnCreate>
+  <TriggerOnDelete>0</TriggerOnDelete>
+  <AsyncAutodelete>0</AsyncAutodelete>
+  <SyncWorkflowLogOnFailure>0</SyncWorkflowLogOnFailure>
+  <StateCode>1</StateCode>
+  <StatusCode>2</StatusCode>
+  <processorder>100</processorder>
+  <RunAs>1</RunAs>
+  <UniqueName>mcs_credit</UniqueName>
+  <IsTransacted>1</IsTransacted>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <BusinessProcessType>0</BusinessProcessType>
+  <IsCustomProcessingStepAllowedForOtherPublishers>1</IsCustomProcessingStepAllowedForOtherPublishers>
+  <ProcessTriggerScope>1</ProcessTriggerScope>
+  <ModernFlowType>0</ModernFlowType>
+  <PrimaryEntity>mcs_credit_record</PrimaryEntity>
+  <LocalizedNames>
+    <LocalizedName languagecode="1033" description="信用评估" />
+  </LocalizedNames>
+  <labels>
+    <steplabels id="{69b1a432-b963-4112-879d-a8f89e0c78e4}">
+      <label languagecode="1033" description="发起信用评估" />
+    </steplabels>
+    <steplabels id="{fb44aa57-a44e-40a2-a498-7a59a28a7dde}">
+      <label languagecode="1033" description="评分日期" />
+    </steplabels>
+    <steplabels id="{391ff60e-7aa4-4aa8-beea-ee679a2d5f11}">
+      <label languagecode="1033" description="关联客户代码" />
+    </steplabels>
+    <steplabels id="{e2b96948-d6ad-4e90-b5c4-e56bdc0121c7}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+    <steplabels id="{a98cb93e-72ad-4ac0-be65-8fee8d525b04}">
+      <label languagecode="1033" description="内外部数据集成" />
+    </steplabels>
+    <steplabels id="{d7b99e22-90f6-4a6c-95c4-edf6f0dbe3eb}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+    <steplabels id="{abf076d1-f3c1-4144-9c15-ca3dda62ed39}">
+      <label languagecode="1033" description="人工复核" />
+    </steplabels>
+    <steplabels id="{31366aeb-3928-43a5-9f4f-bfdef21e1e7d}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+    <steplabels id="{f1de9ef1-2f9f-44ff-bc34-f6732eb330ab}">
+      <label languagecode="1033" description="信用分计算" />
+    </steplabels>
+    <steplabels id="{4823f0c7-145b-4ccd-a57c-fa0c8c32ba24}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+    <steplabels id="{64382bb7-2e3f-4b56-a4be-922924141250}">
+      <label languagecode="1033" description="审核申请" />
+    </steplabels>
+    <steplabels id="{c1f85977-ab17-4070-8572-79b30fea422c}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+    <steplabels id="{1158618a-a0c3-4030-8bef-4b3af5740062}">
+      <label languagecode="1033" description="审批通过" />
+    </steplabels>
+    <steplabels id="{f2808bf1-eee4-467b-8557-4d8d53c7b427}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+    <steplabels id="{00fe3244-c92a-4108-b733-6a824fac0dae}">
+      <label languagecode="1033" description="审批未通过" />
+    </steplabels>
+    <steplabels id="{91dda07c-0842-4edc-8cbe-91500e190857}">
+      <label languagecode="1033" description="评估状态" />
+    </steplabels>
+  </labels>
+</Workflow>

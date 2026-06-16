@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{2b01eb7b-6345-4488-9a66-a58369acbe73}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{337d9e4b-6a6c-4471-950c-be0e78728b98}" IsUserDefined="1">
+          <labels>
+            <label description="عام" languagecode="1025" />
+            <label description="Allgemein" languagecode="1031" />
+            <label description="General" languagecode="1033" />
+            <label description="Général" languagecode="1036" />
+            <label description="Generale" languagecode="1040" />
+            <label description="Geral" languagecode="1046" />
+            <label description="Общие сведения" languagecode="1049" />
+            <label description="Umum" languagecode="1057" />
+            <label description="Tổng quát" languagecode="1066" />
+            <label description="Umum" languagecode="1086" />
+            <label description="常规" languagecode="2052" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{57fef372-943c-4737-9740-70f5b302fd1f}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="关联信息" languagecode="1033" />
+                    <label description="关联信息" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{e29cc7cb-2794-42a5-92e6-18ead8c92b7c}" colspan="1">
+                        <labels>
+                          <label description="信用评估" languagecode="1033" />
+                          <label description="信用评估" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_credit_record" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_credit_record" />
+                      </cell>
+                      <cell id="{f9305476-e4ad-47c6-be66-d5ddccee4696}" colspan="1">
+                        <labels>
+                          <label description="客户编码" languagecode="1033" />
+                          <label description="客户编码" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_accountid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_accountid" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{6c0a8c61-ab68-4b58-b2ab-1f5d1ce2be9a}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="评分项目" languagecode="1033" />
+                    <label description="评分项目" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{b0ba9288-ced9-4efd-9d6a-46ca0b637038}" colspan="1">
+                        <labels>
+                          <label description="评分项目" languagecode="1033" />
+                          <label description="评分项目" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_credit_item" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="mcs_credit_item">
+                          <parameters>
+                            <DefaultViewId>{b6cc0238-4496-48d0-ab45-7ef8b59e8d95}</DefaultViewId>
+                            <AvailableViewIds>{b6cc0238-4496-48d0-ab45-7ef8b59e8d95}</AvailableViewIds>
+                          </parameters>
+                        </control>
+                      </cell>
+                      <cell id="{d50e7650-6082-4980-8974-10b023ea1aab}" colspan="1">
+                        <labels>
+                          <label description="指标编码" languagecode="1033" />
+                        </labels>
+                        <control id="mcs_itemcode" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemcode" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{0b2abcd5-de5a-4a34-a6d8-7ed6b4e6766c}" colspan="1">
+                        <labels>
+                          <label description="评分项目名称" languagecode="1033" />
+                          <label description="评分项目名称" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemname" />
+                      </cell>
+                      <cell id="{bba1d998-58ca-4c93-af8f-abd250fb9151}" colspan="1">
+                        <labels>
+                          <label description="数据类型" languagecode="1033" />
+                          <label description="数据类型" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_datatype" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_datatype" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{4360e07f-dded-4b61-a208-b892db0f7a02}" colspan="1">
+                        <labels>
+                          <label description="评分项目分类" languagecode="1033" />
+                          <label description="评分项目分类" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_group" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_group" />
+                      </cell>
+                      <cell id="{f6249c41-842c-407e-8412-4a08061a892a}" colspan="1">
+                        <labels>
+                          <label description="评分项目说明" languagecode="1033" />
+                          <label description="评分项目说明" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemdesc" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemdesc" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{984f4776-c1df-4065-b213-9f2383ce0e87}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="指标值" languagecode="1033" />
+                    <label description="指标值" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{25bec636-65ac-45ed-81d9-c58b78e18e8e}" colspan="1">
+                        <labels>
+                          <label description="集成指标" languagecode="1033" />
+                          <label description="集成指标" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemvalue1" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemvalue1" />
+                      </cell>
+                      <cell id="{516db336-a649-43ea-9b83-9e29082614ee}" colspan="1">
+                        <labels>
+                          <label description="复核指标" languagecode="1033" />
+                          <label description="复核指标" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemvalue2" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemvalue2" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{eb5a7e2b-e004-482c-bfaa-2d8efc95b6cb}" colspan="1">
+                        <labels>
+                          <label description="集成定量指标" languagecode="1033" />
+                          <label description="集成定量指标" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemintvalue1" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemintvalue1" />
+                      </cell>
+                      <cell id="{b2e102b3-5635-4324-a356-ca5e8412dcd0}" colspan="1">
+                        <labels>
+                          <label description="复核定量指标" languagecode="1033" />
+                          <label description="复核定量指标" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemintvalue2" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemintvalue2" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{103db061-8bbd-4288-9793-0b80fb17f167}" colspan="1">
+                        <labels>
+                          <label description="集成定性指标" languagecode="1033" />
+                          <label description="集成定性指标" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemtxtvalue1" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemtxtvalue1" />
+                      </cell>
+                      <cell id="{ef22fb76-cdd5-48cb-ae99-1f20c562630a}" colspan="1">
+                        <labels>
+                          <label description="复核定性指标" languagecode="1033" />
+                          <label description="复核定性指标" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_itemtxtvalue2" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemtxtvalue2" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{49765bc5-67ce-4214-812b-bb0b41b69ab0}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="评分与状态" languagecode="1033" />
+                    <label description="评分与状态" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{950484cb-dbd1-4317-b033-16203db65bc6}" colspan="1">
+                        <labels>
+                          <label description="是否评分" languagecode="1033" />
+                          <label description="是否评分" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_isscore" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_isscore" />
+                      </cell>
+                      <cell id="{5c5fa03d-efc6-4dc1-a1fe-35cb1319e02d}" colspan="1">
+                        <labels>
+                          <label description="得分值" languagecode="1033" />
+                          <label description="得分值" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_scorevalue" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_scorevalue" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{76a36d6e-3c40-4b9a-8d67-bed99851111d}" colspan="1">
+                        <labels>
+                          <label description="有效状态" languagecode="1033" />
+                          <label description="有效状态" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_active" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_active" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+      <formLibraries>
+        <Library name="mcs_customer_tag.js" libraryUniqueId="{3280ead9-ff4d-4034-a4c3-85e60ae3c6fd}" />
+      </formLibraries>
+      <events>
+        <event name="onload" application="false" active="true">
+          <Handlers>
+            <Handler handlerUniqueId="{912efdd3-ca22-42af-8559-81a0bdf69be2}" libraryName="mcs_customer_tag.js" functionName="CustomerTagForm.onLoad" enabled="true" parameters="" passExecutionContext="true" />
+          </Handlers>
+        </event>
+        <event name="onsave" application="false" active="true">
+          <Handlers>
+            <Handler handlerUniqueId="{9c39e636-edad-48f3-a1c9-570d3b9d5c66}" libraryName="mcs_customer_tag.js" functionName="CustomerTagForm.onSave" enabled="true" parameters="" passExecutionContext="true" />
+          </Handlers>
+        </event>
+      </events>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+      <LocalizedName description="Information" languagecode="2052" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+      <Description description="A form for this entity." languagecode="2052" />
+    </Descriptions>
+  </systemform>
+</forms>

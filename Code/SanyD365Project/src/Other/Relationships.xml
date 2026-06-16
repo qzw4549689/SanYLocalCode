@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="business_unit_mcs_credit_items" />
+  <EntityRelationship Name="business_unit_mcs_credititem_value" />
+  <EntityRelationship Name="lk_mcs_credit_items_createdby" />
+  <EntityRelationship Name="lk_mcs_credit_items_modifiedby" />
+  <EntityRelationship Name="lk_mcs_credititem_value_createdby" />
+  <EntityRelationship Name="lk_mcs_credititem_value_modifiedby" />
+  <EntityRelationship Name="owner_mcs_credit_items" />
+  <EntityRelationship Name="owner_mcs_credititem_value" />
+  <EntityRelationship Name="team_mcs_credit_items" />
+  <EntityRelationship Name="team_mcs_credititem_value" />
+  <EntityRelationship Name="user_mcs_credit_items" />
+  <EntityRelationship Name="user_mcs_credititem_value" />
+</EntityRelationships>

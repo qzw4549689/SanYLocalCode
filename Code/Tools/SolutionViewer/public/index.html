@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution Viewer - D365 实体浏览器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #0078d4;
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .header .subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+        
+        .breadcrumb a {
+            color: #0078d4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb .separator {
+            margin: 0 8px;
+            color: #999;
+        }
+        
+        .breadcrumb .current {
+            color: #666;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .card-header .count {
+            background: #e6f2ff;
+            color: #0078d4;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .search-box {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .search-box input:focus {
+            border-color: #0078d4;
+        }
+        
+        .list {
+            list-style: none;
+        }
+        
+        .list-item {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .fields-container {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .fields-column {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .fields-column h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            padding: 12px 16px;
+            background: #e6f2ff;
+            border-radius: 6px 6px 0 0;
+            margin: 0;
+        }
+        
+        .fields-column .list {
+            border: 1px solid #eee;
+            border-radius: 0 0 6px 6px;
+            border-top: none;
+        }
+        
+        .field-group {
+            margin-bottom: 12px;
+        }
+        
+        .field-group h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-left: 3px solid #0078d4;
+            margin: 0;
+        }
+        
+        .field-group .list {
+            border: 1px solid #eee;
+            border-top: none;
+        }
+        
+        .list-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .item-meta {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .item-meta code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+        }
+        
+        .item-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .badge-picklist {
+            background: #e6f7e6;
+            color: #52c41a;
+        }
+        
+        .badge-boolean {
+            background: #fff7e6;
+            color: #faad14;
+        }
+        
+        .badge-string {
+            background: #e6f2ff;
+            color: #1890ff;
+        }
+        
+        .badge-memo {
+            background: #f0f0ff;
+            color: #722ed1;
+        }
+        
+        .badge-datetime {
+            background: #f6ffed;
+            color: #389e0d;
+        }
+        
+        .badge-decimal {
+            background: #fff0f6;
+            color: #eb2f96;
+        }
+        
+        .badge-integer {
+            background: #e6fffb;
+            color: #13c2c2;
+        }
+        
+        .badge-default {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .arrow {
+            color: #ccc;
+            font-size: 18px;
+            margin-left: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+        
+        .options-panel {
+            background: #fafafa;
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .options-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+        }
+        
+        .option-value {
+            background: #0078d4;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 10px;
+            min-width: 28px;
+            text-align: center;
+        }
+        
+        .option-label {
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Solution Viewer</h1>
+        <div class="subtitle">D365 实体与字段浏览器</div>
+    </div>
+    
+    <div class="container">
+        <div class="breadcrumb" id="breadcrumb">
+            <a onclick="showEntityList()">实体列表</a>
+        </div>
+        
+        <div id="content">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <script>
+        let currentEntity = null;
+        let currentEntityDisplayName = null;
+        let currentField = null;
+        let allEntities = [];
+        
+        // 页面加载时显示实体列表
+        document.addEventListener('DOMContentLoaded', () => {
+            showEntityList();
+        });
+        
+        // 显示实体列表
+        async function showEntityList() {
+            currentEntity = null;
+            currentEntityDisplayName = null;
+            currentField = null;
+            updateBreadcrumb();
+            
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">加载实体列表...</div>';
+            
+            try {
+                const res = await fetch('/api/entities');
+                const data = await res.json();
+                allEntities = data.entities || [];
+                renderEntityList(data.entities);
+            } catch (err) {
+                content.innerHTML = `<div class="empty">加载失败: ${err.message}</div>`;
+            }
+        }
+        
+        // 渲染实体列表
+        function renderEntityList(entities) {
+            const content = document.getElementById('content');
+            
+            if (!entities || entities.length === 0) {
+                content.innerHTML = '<div class="empty">暂无实体</div>';
+                return;
+            }
+            
+            const html = `
+                <div class="card">
+                    <div class="card-header">
+                        <h2>实体列表</h2>
+                        <span class="count">${entities.length} 个实体</span>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="搜索实体..." oninput="filterEntities(this.value, ${JSON.stringify(entities).replace(/"/g, '&quot;')})">
+                    </div>
+                    <ul class="list" id="entityList">
+                        ${entities.map(e => `
+                            <li class="list-item" onclick="showFieldList('${e.logicalName}')">
+                                <div class="item-info">
+                                    <div class="item-title">${e.displayName || e.logicalName}</div>
+                                    <div class="item-meta">
+                                        <span style="color:#999;font-size:11px;margin-right:4px;">逻辑名</span><code>${e.logicalName}</code>
+                                        ${e.schemaName ? `<span style="color:#999;font-size:11px;margin:0 4px 0 8px;">架构名</span><code>${e.schemaName}</code>` : ''}
+                                    </div>
+                                </div>
+                                <span class="arrow">›</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+        
+        // 过滤实体
+        function filterEntities(keyword, entities) {
+            const list = document.getElementById('entityList');
+            if (!list) return;
+            
+            const lower = keyword.toLowerCase();
+            const items = list.querySelectorAll('.list-item');
+            
+            items.forEach((item, index) => {
+                const entity = entities[index];
+                const match = (entity.displayName && entity.displayName.toLowerCase().includes(lower)) ||
+                              entity.logicalName.toLowerCase().includes(lower) ||
+                              (entity.schemaName && entity.schemaName.toLowerCase().includes(lower));
+                item.style.display = match ? 'flex' : 'none';
+            });
+        }
+        
+        // 显示字段列表
+        async function showFieldList(entityName) {
+            currentEntity = entityName;
+            const entity = allEntities.find(e => e.logicalName === entityName);
+            currentEntityDisplayName = entity ? (entity.displayName || entityName) : entityName;
+            currentField = null;
+            updateBreadcrumb();
+            
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">加载字段列表...</div>';
+            
+            try {
+                const res = await fetch(`/api/entities/${entityName}/fields`);
+                const data = await res.json();
+                renderFieldList(data.fields);
+            } catch (err) {
+                content.innerHTML = `<div class="empty">加载失败: ${err.message}</div>`;
+            }
+        }
+        
+        // 渲染字段列表
+        function renderFieldList(fields) {
+            const content = document.getElementById('content');
+            
+            if (!fields || fields.length === 0) {
+                content.innerHTML = '<div class="empty">暂无字段</div>';
+                return;
+            }
+            
+            const typeBadges = {
+                'string': 'badge-string',
+                'nvarchar': 'badge-string',
+                'memo': 'badge-memo',
+                'ntext': 'badge-memo',
+                'int': 'badge-integer',
+                'integer': 'badge-integer',
+                'decimal': 'badge-decimal',
+                'float': 'badge-decimal',
+                'money': 'badge-decimal',
+                'datetime': 'badge-datetime',
+                'date': 'badge-datetime',
+                'picklist': 'badge-picklist',
+                'boolean': 'badge-boolean',
+                'bit': 'badge-boolean',
+                'lookup': 'badge-default',
+                'primarykey': 'badge-default'
+            };
+            
+            // 分离自定义字段和原生字段
+            const customFields = fields.filter(f => f.logicalName.startsWith('mcs_'));
+            const systemFields = fields.filter(f => !f.logicalName.startsWith('mcs_'));
+            
+            // 再按是否有选项值分组
+            const sortByOptions = (list) => {
+                const withOptions = list.filter(f => f.hasOptions).sort((a, b) => (a.schemaName || a.logicalName).localeCompare(b.schemaName || b.logicalName));
+                const withoutOptions = list.filter(f => !f.hasOptions).sort((a, b) => (a.schemaName || a.logicalName).localeCompare(b.schemaName || b.logicalName));
+                return { withOptions, withoutOptions };
+            };
+            
+            const customGroups = sortByOptions(customFields);
+            const systemGroups = sortByOptions(systemFields);
+            
+            const renderFieldItem = (f) => {
+                const badgeClass = typeBadges[f.type?.toLowerCase()] || 'badge-default';
+                const lookupInfo = f.type?.toLowerCase() === 'lookup' && f.lookupTarget 
+                    ? `<span style="color:#0078d4;font-size:11px;margin-left:6px;">→ ${f.lookupTarget}</span>` 
+                    : '';
+                return `
+                    <li class="list-item" data-field="${f.logicalName}" data-has-options="${f.hasOptions}">
+                        ${f.hasOptions ? `<span class="arrow" onclick="event.stopPropagation(); toggleOptions('${f.logicalName}')" style="margin-right:10px;">▼</span>` : '<span style="width:28px;margin-right:10px;"></span>'}
+                        <div class="item-info">
+                            <div class="item-title">
+                                ${f.displayName || f.logicalName}
+                                <span class="item-badge ${badgeClass}" style="margin-left:8px;vertical-align:middle;">${f.type}</span>
+                                ${lookupInfo}
+                                ${f.required ? '<span style="color:#ff4d4f;margin-left:6px;font-size:11px;">必填</span>' : ''}
+                            </div>
+                            <div class="item-meta">
+                                <span style="color:#999;font-size:11px;margin-right:4px;">逻辑名</span><code>${f.logicalName}</code>
+                                <span style="color:#999;font-size:11px;margin:0 4px 0 8px;">架构名</span><code>${f.schemaName || f.logicalName}</code>
+                            </div>
+                        </div>
+                    </li>
+                    <div id="options-${f.logicalName}" style="display:none"></div>
+                `;
+            };
+            
+            const renderGroup = (title, fields, groupId) => {
+                if (fields.length === 0) return '';
+                return `
+                    <div class="field-group">
+                        <h4>${title} (${fields.length})</h4>
+                        <ul class="list" id="${groupId}">
+                            ${fields.map(renderFieldItem).join('')}
+                        </ul>
+                    </div>
+                `;
+            };
+            
+            const html = `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2>${currentEntityDisplayName || currentEntity}</h2>
+                            <div style="font-size:12px;color:#888;margin-top:4px;">
+                                <code>${currentEntity}</code> · ${fields.length} 个字段
+                            </div>
+                        </div>
+                        <span class="count">自定义 ${customFields.length} / 系统 ${systemFields.length}</span>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="搜索字段..." oninput="filterFields(this.value)">
+                    </div>
+                    <div class="fields-container">
+                        <div class="fields-column">
+                            <h3>自定义字段 (${customFields.length})</h3>
+                            ${renderGroup('有选项值', customGroups.withOptions, 'customWithOptions')}
+                            ${renderGroup('无选项值', customGroups.withoutOptions, 'customWithoutOptions')}
+                        </div>
+                        <div class="fields-column">
+                            <h3>系统字段 (${systemFields.length})</h3>
+                            ${renderGroup('有选项值', systemGroups.withOptions, 'systemWithOptions')}
+                            ${renderGroup('无选项值', systemGroups.withoutOptions, 'systemWithoutOptions')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+        
+        // 过滤字段
+        function filterFields(keyword) {
+            const lower = keyword.toLowerCase();
+            
+            ['customWithOptions', 'customWithoutOptions', 'systemWithOptions', 'systemWithoutOptions'].forEach(listId => {
+                const list = document.getElementById(listId);
+                if (!list) return;
+                
+                const items = list.querySelectorAll('.list-item');
+                items.forEach(item => {
+                    const title = item.querySelector('.item-title')?.textContent || '';
+                    const meta = item.querySelector('.item-meta')?.textContent || '';
+                    const match = title.toLowerCase().includes(lower) || meta.toLowerCase().includes(lower);
+                    item.style.display = match ? 'flex' : 'none';
+                    
+                    // 同时隐藏/显示对应的选项面板
+                    const fieldName = item.getAttribute('data-field');
+                    const optionsPanel = document.getElementById(`options-${fieldName}`);
+                    if (optionsPanel) {
+                        optionsPanel.style.display = match && optionsPanel.style.display !== 'none' ? 'block' : 'none';
+                    }
+                });
+            });
+        }
+        
+        // 切换选项显示
+        async function toggleOptions(fieldName) {
+            const panel = document.getElementById(`options-${fieldName}`);
+            if (!panel) return;
+            
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                // 加载并显示
+                if (!panel.dataset.loaded) {
+                    panel.innerHTML = '<div style="padding:20px;text-align:center;color:#999">加载中...</div>';
+                    panel.style.display = 'block';
+                    
+                    try {
+                        const res = await fetch(`/api/entities/${currentEntity}/fields/${fieldName}/options`);
+                        const data = await res.json();
+                        renderOptions(panel, data.options);
+                        panel.dataset.loaded = 'true';
+                    } catch (err) {
+                        panel.innerHTML = `<div style="padding:20px;color:#ff4d4f">加载失败: ${err.message}</div>`;
+                    }
+                } else {
+                    panel.style.display = 'block';
+                }
+                
+                // 更新箭头
+                const arrow = document.querySelector(`[data-field="${fieldName}"] .arrow`);
+                if (arrow) arrow.textContent = '▲';
+            } else {
+                panel.style.display = 'none';
+                const arrow = document.querySelector(`[data-field="${fieldName}"] .arrow`);
+                if (arrow) arrow.textContent = '▼';
+            }
+        }
+        
+        // 渲染选项值
+        function renderOptions(container, options) {
+            if (!options || options.length === 0) {
+                container.innerHTML = '<div style="padding:16px 20px;color:#999">暂无选项值</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="options-panel">
+                    <div class="options-title">选项值 (${options.length})</div>
+                    <div class="options-grid">
+                        ${options.map(o => `
+                            <div class="option-item">
+                                <span class="option-value">${o.value}</span>
+                                <span class="option-label">${o.label}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 更新面包屑
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            let html = '<a onclick="showEntityList()">实体列表</a>';
+            
+            if (currentEntity) {
+                html += `<span class="separator">›</span>`;
+                if (currentField) {
+                    html += `<a onclick="showFieldList('${currentEntity}')">${currentEntityDisplayName || currentEntity}</a>`;
+                    html += `<span class="separator">›</span>`;
+                    html += `<span class="current">选项值</span>`;
+                } else {
+                    html += `<span class="current">${currentEntityDisplayName || currentEntity}</span>`;
+                }
+            }
+            
+            breadcrumb.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

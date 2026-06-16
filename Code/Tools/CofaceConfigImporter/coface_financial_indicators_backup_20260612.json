@@ -1,0 +1,1569 @@
+[
+  {
+    "countryCode": "AE",
+    "countryName": "UNITED ARAB EMIRATES",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "37560",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - (non current liabilities + current liabilities) OR Shareholders funds"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "37616",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - (non current liabilities + current liabilities) OR Shareholders funds"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "37573",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "(non current liabilities + current liabilities)/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "37561",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current Assets/Current Liabilities"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "37597",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Profit (Loss) after Taxation/Operating Revenue / Turnover"
+      }
+    ]
+  },
+  {
+    "countryCode": "BE",
+    "countryName": "BELGIUM",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "BH",
+    "countryName": "BAHRAIN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "CN",
+    "countryName": "CHINA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "33964",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": ""
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "34112",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Liabilities to assets ratio"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "34126",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Liabilities to assets ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "34113",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "34127",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Current ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "34106",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Net profit margin"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "34120",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Net profit margin"
+      }
+    ]
+  },
+  {
+    "countryCode": "CY",
+    "countryName": "CYPRUS",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "DE",
+    "countryName": "GERMANY",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "36574",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Adjusted balance sheet total (Assets) - Total borrowed capital OR Adjusted shareholders' funds"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "36862",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Adjusted balance sheet total (Assets) - Total borrowed capital OR Adjusted shareholders' funds"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "36599",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total borrowed capital/Adjusted balance sheet total (Assets)"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "36956",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current ratio (%)"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "37014",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Current ratio (%)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "36945",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Return on sales (%)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "37003",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Return on sales (%)"
+      }
+    ]
+  },
+  {
+    "countryCode": "DK",
+    "countryName": "DENMARK",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "35996",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Totals assets- Total liabilities OR Equity Net worth"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "36124",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Totals assets- Total liabilities OR Equity Net worth"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "36021",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total liabilities/Totals assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "35988",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current assets/Total Short-tem debt"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "36132",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Profit ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "36165",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Profit ratio"
+      }
+    ]
+  },
+  {
+    "countryCode": "DZ",
+    "countryName": "ALGERIA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "EG",
+    "countryName": "EGYPT",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "37560",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - (non current liabilities + current liabilities) OR Shareholders funds"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "37616",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - (non current liabilities + current liabilities) OR Shareholders funds"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "37573",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "(non current liabilities + current liabilities)/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "37561",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current Assets/Current Liabilities"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "37597",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Profit (Loss) after Taxation/Operating Revenue / Turnover"
+      }
+    ]
+  },
+  {
+    "countryCode": "ES",
+    "countryName": "SPAIN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "44640",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - (total current libilities+total long term liabilities) OR total shareholders equity"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "44641",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - (total current libilities+total long term liabilities) OR total shareholders equity"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "44800",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": ""
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "44750",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": ""
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "44190",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Profit After Tax /Revenue"
+      }
+    ]
+  },
+  {
+    "countryCode": "FI",
+    "countryName": "FINLAND",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "GB",
+    "countryName": "UNITED KINGDOM",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "IE",
+    "countryName": "IRELAND",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "IQ",
+    "countryName": "IRAQ",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "IR",
+    "countryName": "IRAN (ISLAMIC REPUBLIC)",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "IT",
+    "countryName": "ITALY",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "JO",
+    "countryName": "JORDAN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "KW",
+    "countryName": "KUWAIT",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "LU",
+    "countryName": "LUXEMBOURG",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "LY",
+    "countryName": "LIBYAN ARAB JAMAHIRYA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "MA",
+    "countryName": "MOROCCO",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "MT",
+    "countryName": "MALTA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "NO",
+    "countryName": "NORWAY",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      }
+    ]
+  },
+  {
+    "countryCode": "OM",
+    "countryName": "OMAN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "PT",
+    "countryName": "PORTUGAL",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "QA",
+    "countryName": "QATAR",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "SA",
+    "countryName": "SAUDI ARABIA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "37560",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - (non current liabilities + current liabilities) OR Shareholders funds"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "37616",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - (non current liabilities + current liabilities) OR Shareholders funds"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "37573",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "(non current liabilities + current liabilities)/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "37561",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current Assets/Current Liabilities"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "37597",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Profit (Loss) after Taxation/Operating Revenue / Turnover"
+      }
+    ]
+  },
+  {
+    "countryCode": "SD",
+    "countryName": "SUDAN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "SE",
+    "countryName": "SWEDEN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Balance sheet total-total liabilities OR Equity capital"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "3313",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "3308",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "N/A"
+      }
+    ]
+  },
+  {
+    "countryCode": "SY",
+    "countryName": "SYRIAN ARAB REPUBLIC",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "TN",
+    "countryName": "TUNISIA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "YE",
+    "countryName": "YEMEN",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "16081",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "NetAssets",
+        "typeValue": "16262",
+        "indicatorType": 1,
+        "priority": 2,
+        "formulaFallback": "Total assets - [Total long-term liabilities+Total current liabilities] OR Total liabilities in equities"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "16102",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "[Total long-term liabilities+Total current liabilities]/Total assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16370",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "16387",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16379",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "16396",
+        "indicatorType": 2,
+        "priority": 2,
+        "formulaFallback": "Percentage of net profit to sales ratio (Consolidated data)"
+      }
+    ]
+  },
+  {
+    "countryCode": "FR",
+    "countryName": "FRANCE",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "21",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "total assets - total liabilities OR Equity"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "33629",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total liabilities/Totals assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "33701",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current ratio OR \nCurrent assets/Short-term liabilities"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "33713",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Net profit margin (%)"
+      }
+    ]
+  },
+  {
+    "countryCode": "ID",
+    "countryName": "INDONESIA",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "35368",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "total assets - total liabilities OR Total Equity"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "35365",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total liabilities/Totals assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "35751",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total Current Asset/Total Current Liabilities (x)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "35762",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Return On Sales (%)"
+      }
+    ]
+  },
+  {
+    "countryCode": "PH",
+    "countryName": "PHILIPPINES",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "35522",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "total assets - total liabilities OR Total Equity"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "35523",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total liabilities/Totals assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "35828",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Current ratio"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "35834",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Return On Sales (%)"
+      }
+    ]
+  },
+  {
+    "countryCode": "SG",
+    "countryName": "SINGAPORE",
+    "indicators": [
+      {
+        "name": "NetAssets",
+        "typeValue": "35368",
+        "indicatorType": 1,
+        "priority": 1,
+        "formulaFallback": "total assets - total liabilities OR Total Equity"
+      },
+      {
+        "name": "DebtRatio",
+        "typeValue": "35365",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total liabilities/Totals assets"
+      },
+      {
+        "name": "CurrentRatio",
+        "typeValue": "35751",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Total Current Asset/Total Current Liabilities (x)"
+      },
+      {
+        "name": "NetProfitMargin",
+        "typeValue": "35762",
+        "indicatorType": 2,
+        "priority": 1,
+        "formulaFallback": "Return On Sales (%)"
+      }
+    ]
+  }
+]

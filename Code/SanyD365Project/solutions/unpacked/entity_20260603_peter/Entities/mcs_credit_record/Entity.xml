@@ -1,0 +1,2960 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="客户信用评估记录表" OriginalName="客户信用评估记录表">mcs_credit_record</Name>
+  <EntityInfo>
+    <entity Name="mcs_credit_record">
+      <LocalizedNames>
+        <LocalizedName description="客户信用评估记录表" languagecode="2052" />
+        <LocalizedName description="客户信用评估记录表" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="客户信用评估记录表" languagecode="2052" />
+        <LocalizedCollectionName description="客户信用评估记录表" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="客户信用评估记录表" languagecode="2052" />
+        <Description description="客户信用评估记录表" languagecode="1033" />
+      </Descriptions>
+      <attributes>
+        <attribute PhysicalName="CreatedBy">
+          <Type>lookup</Type>
+          <Name>createdby</Name>
+          <LogicalName>createdby</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Created By" languagecode="1033" />
+            <displayname description="创建者" languagecode="2052" />
+            <displayname description="Dibuat Oleh" languagecode="1057" />
+            <displayname description="Autor" languagecode="3082" />
+            <displayname description="منشأ بواسطة" languagecode="1025" />
+            <displayname description="Criada Por" languagecode="1046" />
+            <displayname description="Autore" languagecode="1040" />
+            <displayname description="Người tạo" languagecode="1066" />
+            <displayname description="Créé par" languagecode="1036" />
+            <displayname description="Создано" languagecode="1049" />
+            <displayname description="Dicipta Oleh" languagecode="1086" />
+            <displayname description="Erstellt von" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+            <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+            <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+            <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+            <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+            <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+            <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+            <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+            <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+            <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+            <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="CreatedOn">
+          <Type>datetime</Type>
+          <Name>createdon</Name>
+          <LogicalName>createdon</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>inactive</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>1</IsFilterable>
+          <IsRetrievable>1</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>datetime</Format>
+          <CanChangeDateTimeBehavior>0</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="Created On" languagecode="1033" />
+            <displayname description="创建时间" languagecode="2052" />
+            <displayname description="Dibuat Pada" languagecode="1057" />
+            <displayname description="Fecha de creación" languagecode="3082" />
+            <displayname description="تاريخ الإنشاء" languagecode="1025" />
+            <displayname description="Data de Criação" languagecode="1046" />
+            <displayname description="Data creazione" languagecode="1040" />
+            <displayname description="Ngày tạo" languagecode="1066" />
+            <displayname description="Créé le" languagecode="1036" />
+            <displayname description="Дата создания" languagecode="1049" />
+            <displayname description="Dicipta Pada" languagecode="1086" />
+            <displayname description="Erstellt am" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Date and time when the record was created." languagecode="1033" />
+            <Description description="创建记录的日期和时间。" languagecode="2052" />
+            <Description description="Tanggal dan waktu rekaman dibuat." languagecode="1057" />
+            <Description description="Fecha y hora de creación del registro." languagecode="3082" />
+            <Description description="تاريخ إنشاء السجل ووقته." languagecode="1025" />
+            <Description description="Data e hora de criação do registro." languagecode="1046" />
+            <Description description="Data e ora di creazione del record." languagecode="1040" />
+            <Description description="Ngày và giờ tạo bản ghi." languagecode="1066" />
+            <Description description="Date et heure de création de l'enregistrement." languagecode="1036" />
+            <Description description="Дата и время создания записи." languagecode="1049" />
+            <Description description="Tarikh dan masa rekod dicipta." languagecode="1086" />
+            <Description description="Datum und Uhrzeit der Datensatzerstellung." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="CreatedOnBehalfBy">
+          <Type>lookup</Type>
+          <Name>createdonbehalfby</Name>
+          <LogicalName>createdonbehalfby</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Created By (Delegate)" languagecode="1033" />
+            <displayname description="创建者(代理)" languagecode="2052" />
+            <displayname description="Dibuat Oleh (Delegasi)" languagecode="1057" />
+            <displayname description="Autor (delegado)" languagecode="3082" />
+            <displayname description="قام بإنشائه (المفوّض)" languagecode="1025" />
+            <displayname description="Criado por (Delegado)" languagecode="1046" />
+            <displayname description="Autore (delegato)" languagecode="1040" />
+            <displayname description="Người tạo (Đại diện)" languagecode="1066" />
+            <displayname description="Créé par (délégué)" languagecode="1036" />
+            <displayname description="Кем создано (делегат)" languagecode="1049" />
+            <displayname description="Dicipta Oleh (Wakil)" languagecode="1086" />
+            <displayname description="Erstellt von (Stellvertreter)" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier of the delegate user who created the record." languagecode="1033" />
+            <Description description="创建记录的代理用户的唯一标识符。" languagecode="2052" />
+            <Description description="Pengidentifikasi unik pengguna delegasi yang membuat rekaman." languagecode="1057" />
+            <Description description="Identificador único del usuario delegado que creó el registro." languagecode="3082" />
+            <Description description="المعرف الفريد للمستخدم المفوّض الذي أنشأ السجل." languagecode="1025" />
+            <Description description="Identificador exclusivo do usuário delegado que criou o registro." languagecode="1046" />
+            <Description description="Identificatore univoco dell'utente delegato che ha creato il record." languagecode="1040" />
+            <Description description="Mã định danh duy nhất của người dùng đại diện đã tạo bản ghi." languagecode="1066" />
+            <Description description="Identificateur unique de l'utilisateur délégué ayant créé l'enregistrement." languagecode="1036" />
+            <Description description="Уникальный идентификатор пользователя-представителя, создавшего запись." languagecode="1049" />
+            <Description description="Pengecam unik wakil pengguna yang mencipta rekod." languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner des stellvertretenden Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="ImportSequenceNumber">
+          <Type>int</Type>
+          <Name>importsequencenumber</Name>
+          <LogicalName>importsequencenumber</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format></Format>
+          <MinValue>-2147483648</MinValue>
+          <MaxValue>2147483647</MaxValue>
+          <displaynames>
+            <displayname description="Import Sequence Number" languagecode="1033" />
+            <displayname description="导入序列号" languagecode="2052" />
+            <displayname description="Nomor Urut Impor" languagecode="1057" />
+            <displayname description="Número de secuencia de importación" languagecode="3082" />
+            <displayname description="الرقم التسلسلي للاستيراد" languagecode="1025" />
+            <displayname description="Número de Sequência de Importação" languagecode="1046" />
+            <displayname description="Numero sequenza importazione" languagecode="1040" />
+            <displayname description="Số Thứ tự Nhập" languagecode="1066" />
+            <displayname description="Numéro séquentiel d’importation" languagecode="1036" />
+            <displayname description="Порядковый номер импорта" languagecode="1049" />
+            <displayname description="Import Nombor Jujukan" languagecode="1086" />
+            <displayname description="Importsequenznummer" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Sequence number of the import that created this record." languagecode="1033" />
+            <Description description="创建此记录的导入内容的序列号。" languagecode="2052" />
+            <Description description="Nomor urutan impor yang membuat rekaman ini." languagecode="1057" />
+            <Description description="Número de secuencia de la importación que creó este registro." languagecode="3082" />
+            <Description description="الرقم التسلسلي للاستيراد الذي أنشأ هذا السجل." languagecode="1025" />
+            <Description description="Número de sequência da importação que criou este registro." languagecode="1046" />
+            <Description description="Numero di sequenza dell'importazione che ha creato il record." languagecode="1040" />
+            <Description description="Số thứ tự của quá trình nhập đã tạo bản ghi này." languagecode="1066" />
+            <Description description="Numéro séquentiel de l'importation ayant créé cet enregistrement." languagecode="1036" />
+            <Description description="Порядковый номер импорта, в результате которого была создана эта запись." languagecode="1049" />
+            <Description description="Nombor jujukan import yang mencipta rekod ini." languagecode="1086" />
+            <Description description="Sequenznummer des Imports, mit dem dieser Datensatz erstellt wurde." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_abidate">
+          <Type>datetime</Type>
+          <Name>mcs_abidate</Name>
+          <LogicalName>mcs_abidate</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>date</Format>
+          <CanChangeDateTimeBehavior>1</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="数据集成日期" languagecode="2052" />
+            <displayname description="数据集成日期" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="数据集成日期" languagecode="2052" />
+            <Description description="数据集成日期" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_accountid">
+          <Type>lookup</Type>
+          <Name>mcs_accountid</Name>
+          <LogicalName>mcs_accountid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <ExternalName>mcs_accountid</ExternalName>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="客户" languagecode="2052" />
+            <displayname description="客户" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="" languagecode="2052" />
+            <Description description="" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_active">
+          <Type>bit</Type>
+          <Name>mcs_active</Name>
+          <LogicalName>mcs_active</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="new_mcs_credit_record_mcs_active">
+            <OptionSetType>bit</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="有效状态" languagecode="2052" />
+              <displayname description="有效状态" languagecode="1033" />
+            </displaynames>
+            <Descriptions>
+              <Description description="有效状态" languagecode="2052" />
+              <Description description="有效状态" languagecode="1033" />
+            </Descriptions>
+            <options>
+              <option value="1" IsHidden="0">
+                <labels>
+                  <label description="是" languagecode="2052" />
+                  <label description="是" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="0" IsHidden="0">
+                <labels>
+                  <label description="否" languagecode="2052" />
+                  <label description="否" languagecode="1033" />
+                </labels>
+              </option>
+            </options>
+          </optionset>
+          <displaynames>
+            <displayname description="有效状态" languagecode="2052" />
+            <displayname description="有效状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="有效状态" languagecode="2052" />
+            <Description description="有效状态" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_api_msg">
+          <Type>nvarchar</Type>
+          <Name>mcs_api_msg</Name>
+          <LogicalName>mcs_api_msg</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>2000</MaxLength>
+          <Length>4000</Length>
+          <displaynames>
+            <displayname description="API消息" languagecode="2052" />
+            <displayname description="API消息" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="外部接口返回消息" languagecode="2052" />
+            <Description description="外部接口返回消息" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_api_name">
+          <Type>nvarchar</Type>
+          <Name>mcs_api_name</Name>
+          <LogicalName>mcs_api_name</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>100</MaxLength>
+          <Length>200</Length>
+          <displaynames>
+            <displayname description="API名称" languagecode="2052" />
+            <displayname description="API名称" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="调用的API名称" languagecode="2052" />
+            <Description description="调用的API名称" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_api_status">
+          <Type>nvarchar</Type>
+          <Name>mcs_api_status</Name>
+          <LogicalName>mcs_api_status</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>20</MaxLength>
+          <Length>40</Length>
+          <displaynames>
+            <displayname description="API状态" languagecode="2052" />
+            <displayname description="API状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="外部接口返回状态" languagecode="2052" />
+            <Description description="外部接口返回状态" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_applicant">
+          <Type>nvarchar</Type>
+          <Name>mcs_applicant</Name>
+          <LogicalName>mcs_applicant</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>45</MaxLength>
+          <Length>90</Length>
+          <displaynames>
+            <displayname description="申请人" languagecode="2052" />
+            <displayname description="申请人" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="系统登录用户姓名" languagecode="2052" />
+            <Description description="系统登录用户姓名" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_approvedate">
+          <Type>datetime</Type>
+          <Name>mcs_approvedate</Name>
+          <LogicalName>mcs_approvedate</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>datetime</Format>
+          <CanChangeDateTimeBehavior>1</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="BPP审批完成日期" languagecode="2052" />
+            <displayname description="BPP审批完成日期" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="" languagecode="2052" />
+            <Description description="" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_bppappriver">
+          <Type>nvarchar</Type>
+          <Name>mcs_bppappriver</Name>
+          <LogicalName>mcs_bppappriver</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>45</MaxLength>
+          <Length>90</Length>
+          <displaynames>
+            <displayname description="BPP审批人" languagecode="2052" />
+            <displayname description="BPP审批人" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="BPP审批人" languagecode="2052" />
+            <Description description="BPP审批人" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_bpperrormsg">
+          <Type>ntext</Type>
+          <Name>mcs_bpperrormsg</Name>
+          <LogicalName>mcs_bpperrormsg</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>textarea</Format>
+          <MaxLength>1000</MaxLength>
+          <displaynames>
+            <displayname description="BPP错误信息" languagecode="2052" />
+            <displayname description="BPP错误信息" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="" languagecode="2052" />
+            <Description description="" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_bppid">
+          <Type>nvarchar</Type>
+          <Name>mcs_bppid</Name>
+          <LogicalName>mcs_bppid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>50</MaxLength>
+          <Length>100</Length>
+          <displaynames>
+            <displayname description="BPP审批ID" languagecode="2052" />
+            <displayname description="BPP审批ID" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="BPP审批ID" languagecode="2052" />
+            <Description description="BPP审批ID" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_bpprejectreason">
+          <Type>ntext</Type>
+          <Name>mcs_bpprejectreason</Name>
+          <LogicalName>mcs_bpprejectreason</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>textarea</Format>
+          <MaxLength>1000</MaxLength>
+          <displaynames>
+            <displayname description="BPP驳回原因" languagecode="2052" />
+            <displayname description="BPP驳回原因" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="" languagecode="2052" />
+            <Description description="" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_bppstatus">
+          <Type>nvarchar</Type>
+          <Name>mcs_bppstatus</Name>
+          <LogicalName>mcs_bppstatus</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>20</MaxLength>
+          <Length>40</Length>
+          <displaynames>
+            <displayname description="BPP状态" languagecode="2052" />
+            <displayname description="BPP状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="BPP审批状态" languagecode="2052" />
+            <Description description="BPP审批状态" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_checkdate">
+          <Type>datetime</Type>
+          <Name>mcs_checkdate</Name>
+          <LogicalName>mcs_checkdate</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>date</Format>
+          <CanChangeDateTimeBehavior>1</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="复核日期" languagecode="2052" />
+            <displayname description="复核日期" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="复核日期" languagecode="2052" />
+            <Description description="复核日期" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_cofaceid">
+          <Type>nvarchar</Type>
+          <Name>mcs_cofaceid</Name>
+          <LogicalName>mcs_cofaceid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>30</MaxLength>
+          <Length>60</Length>
+          <displaynames>
+            <displayname description="科法斯客户代码" languagecode="2052" />
+            <displayname description="科法斯客户代码" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Coface唯一企业编码" languagecode="2052" />
+            <Description description="Coface唯一企业编码" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_countrycode">
+          <Type>nvarchar</Type>
+          <Name>mcs_countrycode</Name>
+          <LogicalName>mcs_countrycode</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>2</MaxLength>
+          <Length>4</Length>
+          <displaynames>
+            <displayname description="国家编码" languagecode="2052" />
+            <displayname description="国家编码" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="通过客户注册国家取代码" languagecode="2052" />
+            <Description description="通过客户注册国家取代码" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_credit_recordId">
+          <Type>primarykey</Type>
+          <Name>mcs_credit_recordid</Name>
+          <LogicalName>mcs_credit_recordid</LogicalName>
+          <RequiredLevel>systemrequired</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|RequiredForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>0</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>1</IsFilterable>
+          <IsRetrievable>1</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <displaynames>
+            <displayname description="客户信用评估记录表" languagecode="2052" />
+            <displayname description="客户信用评估记录表" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier for entity instances" languagecode="1033" />
+            <Description description="实体实例的唯一标识符" languagecode="2052" />
+            <Description description="Pengidentifikasi unik untuk instans entitas" languagecode="1057" />
+            <Description description="Identificador único de instancias de entidad" languagecode="3082" />
+            <Description description="المعرف الفريد لمثيلات الكيان" languagecode="1025" />
+            <Description description="Identificador exclusivo de instâncias de entidade" languagecode="1046" />
+            <Description description="Identificatore univoco delle istanze di entità" languagecode="1040" />
+            <Description description="Mã định danh duy nhất của phiên bản thực thể" languagecode="1066" />
+            <Description description="Identificateur unique des instances d'entité" languagecode="1036" />
+            <Description description="Уникальный идентификатор для экземпляров сущности." languagecode="1049" />
+            <Description description="Pengecam unik bagi tika entiti" languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner der Entitätsinstanzen" languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_creditscore">
+          <Type>decimal</Type>
+          <Name>mcs_creditscore</Name>
+          <LogicalName>mcs_creditscore</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <MinValue>0</MinValue>
+          <MaxValue>999999.99</MaxValue>
+          <Accuracy>2</Accuracy>
+          <displaynames>
+            <displayname description="客户信用评分" languagecode="2052" />
+            <displayname description="客户信用评分" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="客户信用评分" languagecode="2052" />
+            <Description description="客户信用评分" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_custname">
+          <Type>nvarchar</Type>
+          <Name>mcs_custname</Name>
+          <LogicalName>mcs_custname</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>500</MaxLength>
+          <Length>1000</Length>
+          <displaynames>
+            <displayname description="客户编码" languagecode="2052" />
+            <displayname description="客户编码" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="从客户管理模块带入" languagecode="2052" />
+            <Description description="从客户管理模块带入" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_custnameen">
+          <Type>nvarchar</Type>
+          <Name>mcs_custnameen</Name>
+          <LogicalName>mcs_custnameen</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>500</MaxLength>
+          <Length>1000</Length>
+          <displaynames>
+            <displayname description="客户英文名称" languagecode="2052" />
+            <displayname description="客户英文名称" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="从客户管理模块带入" languagecode="2052" />
+            <Description description="从客户管理模块带入" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_initdate">
+          <Type>datetime</Type>
+          <Name>mcs_initdate</Name>
+          <LogicalName>mcs_initdate</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>date</Format>
+          <CanChangeDateTimeBehavior>1</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="发起评估日期" languagecode="2052" />
+            <displayname description="发起评估日期" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="发起评估日期" languagecode="2052" />
+            <Description description="发起评估日期" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_publicationid">
+          <Type>nvarchar</Type>
+          <Name>mcs_publicationid</Name>
+          <LogicalName>mcs_publicationid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>60</MaxLength>
+          <Length>120</Length>
+          <displaynames>
+            <displayname description="Publication ID" languagecode="2052" />
+            <displayname description="Publication ID" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Publication ID" languagecode="2052" />
+            <Description description="Publication ID" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_remark">
+          <Type>ntext</Type>
+          <Name>mcs_remark</Name>
+          <LogicalName>mcs_remark</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>textarea</Format>
+          <MaxLength>4000</MaxLength>
+          <displaynames>
+            <displayname description="备注说明" languagecode="2052" />
+            <displayname description="备注说明" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="人工填写" languagecode="2052" />
+            <Description description="人工填写" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_reportjson">
+          <Type>ntext</Type>
+          <Name>mcs_reportjson</Name>
+          <LogicalName>mcs_reportjson</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>textarea</Format>
+          <MaxLength>4000</MaxLength>
+          <displaynames>
+            <displayname description="Report JSON" languagecode="2052" />
+            <displayname description="Report JSON" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Report接口返回JSON" languagecode="2052" />
+            <Description description="Report接口返回JSON" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_rptorderid">
+          <Type>nvarchar</Type>
+          <Name>mcs_rptorderid</Name>
+          <LogicalName>mcs_rptorderid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>60</MaxLength>
+          <Length>120</Length>
+          <displaynames>
+            <displayname description="Report订单ID" languagecode="2052" />
+            <displayname description="Report订单ID" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="科法斯Publication产品订单ID" languagecode="2052" />
+            <Description description="科法斯Publication产品订单ID" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_rptstatus">
+          <Type>nvarchar</Type>
+          <Name>mcs_rptstatus</Name>
+          <LogicalName>mcs_rptstatus</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>20</MaxLength>
+          <Length>40</Length>
+          <displaynames>
+            <displayname description="Report订单状态" languagecode="2052" />
+            <displayname description="Report订单状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Report订单状态" languagecode="2052" />
+            <Description description="Report订单状态" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_scoredate">
+          <Type>datetime</Type>
+          <Name>mcs_scoredate</Name>
+          <LogicalName>mcs_scoredate</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>date</Format>
+          <CanChangeDateTimeBehavior>1</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="评分日期" languagecode="2052" />
+            <displayname description="评分日期" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="评分日期" languagecode="2052" />
+            <Description description="评分日期" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_scoreid">
+          <Type>nvarchar</Type>
+          <Name>mcs_scoreid</Name>
+          <LogicalName>mcs_scoreid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>PrimaryName|ValidForAdvancedFind|ValidForForm|ValidForGrid|RequiredForForm</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>1</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>1</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>50</MaxLength>
+          <Length>100</Length>
+          <displaynames>
+            <displayname description="信用评估编码" languagecode="2052" />
+            <displayname description="信用评估编码" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="信用评估编码" languagecode="2052" />
+            <Description description="信用评估编码" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_status">
+          <Type>picklist</Type>
+          <Name>mcs_status</Name>
+          <LogicalName>mcs_status</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="new_mcs_credit_record_mcs_status">
+            <OptionSetType>picklist</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="评估状态" languagecode="2052" />
+              <displayname description="评估状态" languagecode="1033" />
+            </displaynames>
+            <Descriptions>
+              <Description description="评估状态" languagecode="2052" />
+              <Description description="评估状态" languagecode="1033" />
+            </Descriptions>
+            <options>
+              <option value="9" IsHidden="0">
+                <labels>
+                  <label description="发起信用评估" languagecode="2052" />
+                  <label description="发起信用评估" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="10" IsHidden="0">
+                <labels>
+                  <label description="关联客户代码" languagecode="2052" />
+                  <label description="关联客户代码" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="11" IsHidden="0">
+                <labels>
+                  <label description="内外部数据集成" languagecode="2052" />
+                  <label description="内外部数据集成" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="12" IsHidden="0">
+                <labels>
+                  <label description="人工复核" languagecode="2052" />
+                  <label description="人工复核" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="13" IsHidden="0">
+                <labels>
+                  <label description="信用分计算" languagecode="2052" />
+                  <label description="信用分计算" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="14" IsHidden="0">
+                <labels>
+                  <label description="审核申请" languagecode="2052" />
+                  <label description="审核申请" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="15" IsHidden="0">
+                <labels>
+                  <label description="审批通过" languagecode="2052" />
+                  <label description="审批通过" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="16" IsHidden="0">
+                <labels>
+                  <label description="审批未通过" languagecode="2052" />
+                  <label description="审批未通过" languagecode="1033" />
+                </labels>
+              </option>
+            </options>
+          </optionset>
+          <displaynames>
+            <displayname description="评估状态" languagecode="2052" />
+            <displayname description="评估状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="评估状态" languagecode="2052" />
+            <Description description="评估状态" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_urba360id">
+          <Type>nvarchar</Type>
+          <Name>mcs_urba360id</Name>
+          <LogicalName>mcs_urba360id</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>60</MaxLength>
+          <Length>120</Length>
+          <displaynames>
+            <displayname description="URBA订单ID" languagecode="2052" />
+            <displayname description="URBA订单ID" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="科法斯URBA360产品订单ID" languagecode="2052" />
+            <Description description="科法斯URBA360产品订单ID" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_urbajson">
+          <Type>ntext</Type>
+          <Name>mcs_urbajson</Name>
+          <LogicalName>mcs_urbajson</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>textarea</Format>
+          <MaxLength>4000</MaxLength>
+          <displaynames>
+            <displayname description="URBA JSON" languagecode="2052" />
+            <displayname description="URBA JSON" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="URBA接口返回JSON" languagecode="2052" />
+            <Description description="URBA接口返回JSON" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_urbastatus">
+          <Type>nvarchar</Type>
+          <Name>mcs_urbastatus</Name>
+          <LogicalName>mcs_urbastatus</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>20</MaxLength>
+          <Length>40</Length>
+          <displaynames>
+            <displayname description="URBA订单状态" languagecode="2052" />
+            <displayname description="URBA订单状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="URBA订单状态" languagecode="2052" />
+            <Description description="URBA订单状态" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="ModifiedBy">
+          <Type>lookup</Type>
+          <Name>modifiedby</Name>
+          <LogicalName>modifiedby</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Modified By" languagecode="1033" />
+            <displayname description="修改者" languagecode="2052" />
+            <displayname description="Dimodifikasi Oleh" languagecode="1057" />
+            <displayname description="Modificado por" languagecode="3082" />
+            <displayname description="تعديل بواسطة" languagecode="1025" />
+            <displayname description="Modificado Por" languagecode="1046" />
+            <displayname description="Autore modifica" languagecode="1040" />
+            <displayname description="Người Sửa đổi" languagecode="1066" />
+            <displayname description="Modifié par" languagecode="1036" />
+            <displayname description="Изменено" languagecode="1049" />
+            <displayname description="Diubah Suai Oleh" languagecode="1086" />
+            <displayname description="Geändert von" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+            <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+            <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+            <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+            <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+            <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+            <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+            <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+            <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+            <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+            <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="ModifiedOn">
+          <Type>datetime</Type>
+          <Name>modifiedon</Name>
+          <LogicalName>modifiedon</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>inactive</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>1</IsFilterable>
+          <IsRetrievable>1</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>datetime</Format>
+          <CanChangeDateTimeBehavior>0</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="Modified On" languagecode="1033" />
+            <displayname description="修改时间" languagecode="2052" />
+            <displayname description="Dimodifikasi Pada" languagecode="1057" />
+            <displayname description="Fecha de modificación" languagecode="3082" />
+            <displayname description="تاريخ التعديل" languagecode="1025" />
+            <displayname description="Data de Modificação" languagecode="1046" />
+            <displayname description="Data modifica" languagecode="1040" />
+            <displayname description="Sửa đổi Vào" languagecode="1066" />
+            <displayname description="Modifié le" languagecode="1036" />
+            <displayname description="Дата изменения" languagecode="1049" />
+            <displayname description="Diubah Suai Pada" languagecode="1086" />
+            <displayname description="Geändert am" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Date and time when the record was modified." languagecode="1033" />
+            <Description description="修改记录的日期和时间。" languagecode="2052" />
+            <Description description="Tanggal dan waktu rekaman diubah." languagecode="1057" />
+            <Description description="Fecha y hora en que se modificó el registro." languagecode="3082" />
+            <Description description="‏‏‏‏تاريخ ووقت تعديل السجل.‬" languagecode="1025" />
+            <Description description="Data e hora de modificação do registro." languagecode="1046" />
+            <Description description="Data e ora di modifica del record." languagecode="1040" />
+            <Description description="Ngày và giờ sửa đổi bản ghi." languagecode="1066" />
+            <Description description="Date et heure de modification de l'enregistrement." languagecode="1036" />
+            <Description description="Дата и время изменения записи." languagecode="1049" />
+            <Description description="Tarikh dan masa rekod diubah suai." languagecode="1086" />
+            <Description description="Datum und Uhrzeit der Datensatzänderung." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="ModifiedOnBehalfBy">
+          <Type>lookup</Type>
+          <Name>modifiedonbehalfby</Name>
+          <LogicalName>modifiedonbehalfby</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Modified By (Delegate)" languagecode="1033" />
+            <displayname description="修改者(代理)" languagecode="2052" />
+            <displayname description="Dimodifikasi Oleh (Delegasi)" languagecode="1057" />
+            <displayname description="Modificado por (delegado)" languagecode="3082" />
+            <displayname description="قام بالتعديل (المفوّض)" languagecode="1025" />
+            <displayname description="Modificado por (Delegado)" languagecode="1046" />
+            <displayname description="Autore modifica (delegato)" languagecode="1040" />
+            <displayname description="Người Sửa đổi (Đại diện)" languagecode="1066" />
+            <displayname description="Modifié par (délégué)" languagecode="1036" />
+            <displayname description="Кем изменено (делегат)" languagecode="1049" />
+            <displayname description="Diubah Suai Oleh (Wakil)" languagecode="1086" />
+            <displayname description="Geändert von (Stellvertreter)" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier of the delegate user who modified the record." languagecode="1033" />
+            <Description description="修改记录的代理用户的唯一标识符。" languagecode="2052" />
+            <Description description="Pengidentifikasi unik pengguna delegasi yang mengubah rekaman." languagecode="1057" />
+            <Description description="Identificador único del usuario delegado que modificó el registro." languagecode="3082" />
+            <Description description="المعرف الفريد للمستخدم المفوّض الذي عدّل السجل." languagecode="1025" />
+            <Description description="Identificador exclusivo do usuário delegado que modificou o registro." languagecode="1046" />
+            <Description description="Identificatore univoco dell'utente delegato che ha modificato il record." languagecode="1040" />
+            <Description description="Mã định danh duy nhất của người dùng đại diện đã sửa đổi bản ghi." languagecode="1066" />
+            <Description description="Identificateur unique de l'utilisateur délégué ayant modifié l'enregistrement." languagecode="1036" />
+            <Description description="Уникальный идентификатор пользователя-представителя, изменившего запись." languagecode="1049" />
+            <Description description="Pengecam unik wakil pengguna yang mengubah suai rekod." languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner des stellvertretenden Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="OverriddenCreatedOn">
+          <Type>datetime</Type>
+          <Name>overriddencreatedon</Name>
+          <LogicalName>overriddencreatedon</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForGrid</DisplayMask>
+          <ImeMode>inactive</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>date</Format>
+          <CanChangeDateTimeBehavior>0</CanChangeDateTimeBehavior>
+          <Behavior>1</Behavior>
+          <displaynames>
+            <displayname description="Record Created On" languagecode="1033" />
+            <displayname description="创建记录的时间" languagecode="2052" />
+            <displayname description="Rekaman Dibuat Pada" languagecode="1057" />
+            <displayname description="Fecha de creación del registro" languagecode="3082" />
+            <displayname description="تم إنشاء السجل في" languagecode="1025" />
+            <displayname description="Registro Criado em" languagecode="1046" />
+            <displayname description="Data creazione record" languagecode="1040" />
+            <displayname description="Ngày tạo Bản ghi" languagecode="1066" />
+            <displayname description="Enregistrement créé le" languagecode="1036" />
+            <displayname description="Дата создания записи" languagecode="1049" />
+            <displayname description="Rekod Dicipta Pada" languagecode="1086" />
+            <displayname description="Datensatz erstellt am" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Date and time that the record was migrated." languagecode="1033" />
+            <Description description="迁移记录的日期和时间。" languagecode="2052" />
+            <Description description="Tanggal dan waktu rekaman dimigrasikan." languagecode="1057" />
+            <Description description="Fecha y hora en que se migró el registro." languagecode="3082" />
+            <Description description="تاريخ ووقت ترحيل السجل." languagecode="1025" />
+            <Description description="Data e hora da migração do registro." languagecode="1046" />
+            <Description description="Data e ora di migrazione del record." languagecode="1040" />
+            <Description description="Ngày và giờ di chuyển bản ghi." languagecode="1066" />
+            <Description description="Date et heure de migration de l'enregistrement." languagecode="1036" />
+            <Description description="Дата и время переноса записи." languagecode="1049" />
+            <Description description="Tarikh dan masa rekod dipindahkan." languagecode="1086" />
+            <Description description="Datum und Uhrzeit der Datensatzmigration." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="OwnerId">
+          <Type>owner</Type>
+          <Name>ownerid</Name>
+          <LogicalName>ownerid</LogicalName>
+          <RequiredLevel>systemrequired</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid|RequiredForForm</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>1</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes>
+            <LookupType id="00000000-0000-0000-0000-000000000000">8</LookupType>
+            <LookupType id="00000000-0000-0000-0000-000000000000">9</LookupType>
+          </LookupTypes>
+          <displaynames>
+            <displayname description="Owner" languagecode="1033" />
+            <displayname description="负责人" languagecode="2052" />
+            <displayname description="Pemilik" languagecode="1057" />
+            <displayname description="Propietario" languagecode="3082" />
+            <displayname description="المالك" languagecode="1025" />
+            <displayname description="Proprietário" languagecode="1046" />
+            <displayname description="Proprietario" languagecode="1040" />
+            <displayname description="Chủ sở hữu" languagecode="1066" />
+            <displayname description="Propriétaire" languagecode="1036" />
+            <displayname description="Ответственный" languagecode="1049" />
+            <displayname description="Pemilik" languagecode="1086" />
+            <displayname description="Besitzer" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Owner Id" languagecode="1033" />
+            <Description description="负责人 ID" languagecode="2052" />
+            <Description description="ID Pengguna" languagecode="1057" />
+            <Description description="Id. del propietario" languagecode="3082" />
+            <Description description="معرف المالك" languagecode="1025" />
+            <Description description="ID do Proprietário" languagecode="1046" />
+            <Description description="ID proprietario" languagecode="1040" />
+            <Description description="Id Chủ sở hữu" languagecode="1066" />
+            <Description description="ID du propriétaire" languagecode="1036" />
+            <Description description="Идентификатор ответственного" languagecode="1049" />
+            <Description description="Id Pemilik" languagecode="1086" />
+            <Description description="Besitzer-ID" languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="OwningBusinessUnit">
+          <Type>lookup</Type>
+          <Name>owningbusinessunit</Name>
+          <LogicalName>owningbusinessunit</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>1</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Owning Business Unit" languagecode="1033" />
+            <displayname description="负责的业务部门" languagecode="2052" />
+            <displayname description="Kepemilikan Unit Bisnis" languagecode="1057" />
+            <displayname description="Unidad de negocio propietaria" languagecode="3082" />
+            <displayname description="وحدة الأعمال المالكة" languagecode="1025" />
+            <displayname description="Unidade de Negócios Proprietária" languagecode="1046" />
+            <displayname description="Business Unit proprietaria" languagecode="1040" />
+            <displayname description="Đơn vị Kinh doanh Sở hữu" languagecode="1066" />
+            <displayname description="Division propriétaire" languagecode="1036" />
+            <displayname description="Ответственная бизнес-единица" languagecode="1049" />
+            <displayname description="Unit Perniagaan Pemilikan" languagecode="1086" />
+            <displayname description="Besitzer (Unternehmenseinheit)" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier for the business unit that owns the record" languagecode="1033" />
+            <Description description="负责记录的业务部门的唯一标识符" languagecode="2052" />
+            <Description description="Pengidentifikasi unik untuk unit bisnis yang memiliki rekaman" languagecode="1057" />
+            <Description description="Identificador único de la unidad de negocio propietaria del registro" languagecode="3082" />
+            <Description description="‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد لوحدة الأعمال التي تملك السجل‬" languagecode="1025" />
+            <Description description="Identificador exclusivo da unidade de negócios proprietária do registro" languagecode="1046" />
+            <Description description="Identificatore univoco della Business Unit a cui appartiene il record" languagecode="1040" />
+            <Description description="Mã định danh duy nhất của đơn vị kinh doanh sở hữu bản ghi" languagecode="1066" />
+            <Description description="Identificateur unique de la division propriétaire de l'enregistrement" languagecode="1036" />
+            <Description description="Уникальный идентификатор бизнес-единицы, ответственной за запись." languagecode="1049" />
+            <Description description="Pengecam unik bagi unit perniagaan yang memiliki rekod" languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner der für den Datensatz zuständigen Unternehmenseinheit." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="OwningTeam">
+          <Type>lookup</Type>
+          <Name>owningteam</Name>
+          <LogicalName>owningteam</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsLogical>1</IsLogical>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Owning Team" languagecode="1033" />
+            <displayname description="负责团队" languagecode="2052" />
+            <displayname description="Kepemilikan Tim" languagecode="1057" />
+            <displayname description="Equipo propietario" languagecode="3082" />
+            <displayname description="الفريق المالك" languagecode="1025" />
+            <displayname description="Equipe Proprietária" languagecode="1046" />
+            <displayname description="Team proprietario" languagecode="1040" />
+            <displayname description="Nhóm Sở hữu" languagecode="1066" />
+            <displayname description="Équipe propriétaire" languagecode="1036" />
+            <displayname description="Ответственная рабочая группа" languagecode="1049" />
+            <displayname description="Pasukan Pemilikan" languagecode="1086" />
+            <displayname description="Besitzer (Team)" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+            <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+            <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+            <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+            <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+            <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+            <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+            <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+            <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+            <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+            <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="OwningUser">
+          <Type>lookup</Type>
+          <Name>owninguser</Name>
+          <LogicalName>owninguser</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>0</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsLogical>1</IsLogical>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <LookupStyle>single</LookupStyle>
+          <LookupTypes />
+          <displaynames>
+            <displayname description="Owning User" languagecode="1033" />
+            <displayname description="负责人用户" languagecode="2052" />
+            <displayname description="Kepemilikan Pengguna" languagecode="1057" />
+            <displayname description="Usuario propietario" languagecode="3082" />
+            <displayname description="المستخدم المالك" languagecode="1025" />
+            <displayname description="Usuário Proprietário" languagecode="1046" />
+            <displayname description="Utente proprietario" languagecode="1040" />
+            <displayname description="Người dùng Sở hữu" languagecode="1066" />
+            <displayname description="Utilisateur propriétaire" languagecode="1036" />
+            <displayname description="Ответственный пользователь" languagecode="1049" />
+            <displayname description="Pengguna Pemilikan" languagecode="1086" />
+            <displayname description="Besitzer (Benutzer)" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+            <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+            <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+            <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+            <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+            <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+            <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+            <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+            <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+            <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+            <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+            <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="processid">
+          <Type>uniqueidentifier</Type>
+          <Name>processid</Name>
+          <LogicalName>processid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>0</IsCustomizable>
+          <IsRenameable>0</IsRenameable>
+          <CanModifySearchSettings>0</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>0</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>0</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <displaynames>
+            <displayname description="Process Id" languagecode="1033" />
+            <displayname description="流程 ID" languagecode="2052" />
+            <displayname description="ID Proses" languagecode="1057" />
+            <displayname description="รหัสกระบวนการ" languagecode="1054" />
+            <displayname description="Id. de proceso" languagecode="3082" />
+            <displayname description="مُعرِّف العملية" languagecode="1025" />
+            <displayname description="Id do Processo" languagecode="1046" />
+            <displayname description="ID processo" languagecode="1040" />
+            <displayname description="ID quy trình" languagecode="1066" />
+            <displayname description="ID de processus" languagecode="1036" />
+            <displayname description="Идентификатор процесса" languagecode="1049" />
+            <displayname description="Id Proses" languagecode="1086" />
+            <displayname description="Prozess-ID" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Contains the id of the process associated with the entity." languagecode="1033" />
+            <Description description="包含与实体关联的流程的 ID。" languagecode="2052" />
+            <Description description="Berisi ID proses yang terkait dengan entitas." languagecode="1057" />
+            <Description description="มีรหัสของกระบวนการที่สัมพันธ์กับเอนทิตี" languagecode="1054" />
+            <Description description="Contiene el id. del proceso asociado con la entidad." languagecode="3082" />
+            <Description description="يحتوي على معرف العملية المقترنة بالكيان." languagecode="1025" />
+            <Description description="Contém a ID do processo associado à entidade." languagecode="1046" />
+            <Description description="Contiene l'ID del processo associato all'entità." languagecode="1040" />
+            <Description description="Chứa id của quy trình liên kết với thực thể." languagecode="1066" />
+            <Description description="Contient l'ID du processus associé à l'entité." languagecode="1036" />
+            <Description description="Содержит идентификатор процесса, связанного с сущностью." languagecode="1049" />
+            <Description description="Mengandungi id proses yang dikaitkan dengan entiti." languagecode="1086" />
+            <Description description="Enthält die ID des Prozesses, der der Entität zugeordnet ist." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="stageid">
+          <Type>uniqueidentifier</Type>
+          <Name>stageid</Name>
+          <LogicalName>stageid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>0</IsCustomizable>
+          <IsRenameable>0</IsRenameable>
+          <CanModifySearchSettings>0</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>0</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>0</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <displaynames>
+            <displayname description="(Deprecated) Stage Id" languagecode="1033" />
+            <displayname description="(已弃用)阶段 ID" languagecode="2052" />
+            <displayname description="ID Tahapan (Ditolak)" languagecode="1057" />
+            <displayname description="(ไม่สนับสนุน) รหัสลำดับขั้น" languagecode="1054" />
+            <displayname description="(Obsoleto) Id. de fase" languagecode="3082" />
+            <displayname description="معرف المرحلة (مهمل)" languagecode="1025" />
+            <displayname description="(Preterido) ID do estágio" languagecode="1046" />
+            <displayname description="(Deprecata) ID fase" languagecode="1040" />
+            <displayname description="(Không còn dùng) ID Trạng thái" languagecode="1066" />
+            <displayname description="(Déconseillé) ID de phase" languagecode="1036" />
+            <displayname description="(Устарело) Идентификатор стадии" languagecode="1049" />
+            <displayname description="(Ditamatkan) Id Peringkat" languagecode="1086" />
+            <displayname description="(Veraltet) Phasen-ID" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Contains the id of the stage where the entity is located." languagecode="1033" />
+            <Description description="包含实体所处阶段的 ID。" languagecode="2052" />
+            <Description description="Berisi ID tahapan lokasi entitas." languagecode="1057" />
+            <Description description="มีรหัสของลำดับขั้นที่มีเอนทิตีอยู่" languagecode="1054" />
+            <Description description="Contiene el id. de la fase donde se encuentra la entidad." languagecode="3082" />
+            <Description description="يحتوي على معرف المرحلة الموجود بها الكيان." languagecode="1025" />
+            <Description description="Contém a id do estágio onde a entidade está localizada." languagecode="1046" />
+            <Description description="Contiene l'ID della fase in cui si trova l'entità." languagecode="1040" />
+            <Description description="Chứa id của giai đoạn có thực thể được đặt." languagecode="1066" />
+            <Description description="Contient l'ID de la phase dans laquelle se trouve l'entité." languagecode="1036" />
+            <Description description="Содержит идентификатор стадии, на которой находится сущность." languagecode="1049" />
+            <Description description="Mengandungi id peringkat letaknya entiti." languagecode="1086" />
+            <Description description="Enthält die ID der Phase, in der sich die Entität befindet." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="statecode">
+          <Type>state</Type>
+          <Name>statecode</Name>
+          <LogicalName>statecode</LogicalName>
+          <RequiredLevel>systemrequired</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>0</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>1</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="mcs_credit_record_statecode">
+            <OptionSetType>state</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="Status" languagecode="1033" />
+              <displayname description="状态" languagecode="2052" />
+              <displayname description="Estado" languagecode="3082" />
+              <displayname description="الحالة" languagecode="1025" />
+              <displayname description="Stato" languagecode="1040" />
+              <displayname description="Trạng thái" languagecode="1066" />
+              <displayname description="Statut" languagecode="1036" />
+              <displayname description="Статус" languagecode="1049" />
+            </displaynames>
+            <Descriptions>
+              <Description description="Status of the 客户信用评估记录表" languagecode="1033" />
+              <Description description="客户信用评估记录表的状态" languagecode="2052" />
+              <Description description="Status 客户信用评估记录表" languagecode="1057" />
+              <Description description="Estado del 客户信用评估记录表" languagecode="3082" />
+              <Description description="حالة 客户信用评估记录表" languagecode="1025" />
+              <Description description="Status de 客户信用评估记录表" languagecode="1046" />
+              <Description description="Stato di 客户信用评估记录表" languagecode="1040" />
+              <Description description="Trạng thái của 客户信用评估记录表" languagecode="1066" />
+              <Description description="Statut de l'élément 客户信用评估记录表" languagecode="1036" />
+              <Description description="Статус 客户信用评估记录表" languagecode="1049" />
+              <Description description="Status 客户信用评估记录表" languagecode="1086" />
+              <Description description="Status von 客户信用评估记录表" languagecode="1031" />
+            </Descriptions>
+            <states>
+              <state value="0" defaultstatus="1" invariantname="Active" IsHidden="0">
+                <labels>
+                  <label description="Active" languagecode="1033" />
+                  <label description="可用" languagecode="2052" />
+                  <label description="Aktif" languagecode="1057" />
+                  <label description="Activo" languagecode="3082" />
+                  <label description="نشط" languagecode="1025" />
+                  <label description="Ativo(a)" languagecode="1046" />
+                  <label description="Attivo" languagecode="1040" />
+                  <label description="Hiện hoạt" languagecode="1066" />
+                  <label description="Actif" languagecode="1036" />
+                  <label description="Активный" languagecode="1049" />
+                  <label description="Aktif" languagecode="1086" />
+                  <label description="Aktiv" languagecode="1031" />
+                </labels>
+              </state>
+              <state value="1" defaultstatus="2" invariantname="Inactive" IsHidden="0">
+                <labels>
+                  <label description="Inactive" languagecode="1033" />
+                  <label description="停用" languagecode="2052" />
+                  <label description="Tidak aktif" languagecode="1057" />
+                  <label description="Inactivo" languagecode="3082" />
+                  <label description="غير نشط" languagecode="1025" />
+                  <label description="Inativo(a)" languagecode="1046" />
+                  <label description="Inattivo" languagecode="1040" />
+                  <label description="Không hoạt động" languagecode="1066" />
+                  <label description="Inactif" languagecode="1036" />
+                  <label description="Неактивные" languagecode="1049" />
+                  <label description="Tidak Aktif" languagecode="1086" />
+                  <label description="Inaktiv" languagecode="1031" />
+                </labels>
+              </state>
+            </states>
+          </optionset>
+          <displaynames>
+            <displayname description="Status" languagecode="1033" />
+            <displayname description="状态" languagecode="2052" />
+            <displayname description="Estado" languagecode="3082" />
+            <displayname description="الحالة" languagecode="1025" />
+            <displayname description="Stato" languagecode="1040" />
+            <displayname description="Trạng thái" languagecode="1066" />
+            <displayname description="Statut" languagecode="1036" />
+            <displayname description="Статус" languagecode="1049" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Status of the 客户信用评估记录表" languagecode="1033" />
+            <Description description="客户信用评估记录表的状态" languagecode="2052" />
+            <Description description="Status 客户信用评估记录表" languagecode="1057" />
+            <Description description="Estado del 客户信用评估记录表" languagecode="3082" />
+            <Description description="حالة 客户信用评估记录表" languagecode="1025" />
+            <Description description="Status de 客户信用评估记录表" languagecode="1046" />
+            <Description description="Stato di 客户信用评估记录表" languagecode="1040" />
+            <Description description="Trạng thái của 客户信用评估记录表" languagecode="1066" />
+            <Description description="Statut de l'élément 客户信用评估记录表" languagecode="1036" />
+            <Description description="Статус 客户信用评估记录表" languagecode="1049" />
+            <Description description="Status 客户信用评估记录表" languagecode="1086" />
+            <Description description="Status von 客户信用评估记录表" languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="statuscode">
+          <Type>status</Type>
+          <Name>statuscode</Name>
+          <LogicalName>statuscode</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="mcs_credit_record_statuscode">
+            <OptionSetType>status</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="Status Reason" languagecode="1033" />
+              <displayname description="状态描述" languagecode="2052" />
+              <displayname description="Alasan Status" languagecode="1057" />
+              <displayname description="Razón para el estado" languagecode="3082" />
+              <displayname description="سبب الحالة" languagecode="1025" />
+              <displayname description="Razão do Status" languagecode="1046" />
+              <displayname description="Motivo stato" languagecode="1040" />
+              <displayname description="Lý do dẫn đến Trạng thái" languagecode="1066" />
+              <displayname description="Raison du statut" languagecode="1036" />
+              <displayname description="Причина состояния" languagecode="1049" />
+              <displayname description="Sebab Status" languagecode="1086" />
+              <displayname description="Statusgrund" languagecode="1031" />
+            </displaynames>
+            <Descriptions>
+              <Description description="Reason for the status of the 客户信用评估记录表" languagecode="1033" />
+              <Description description="客户信用评估记录表的状态描述" languagecode="2052" />
+              <Description description="Alasan untuk status 客户信用评估记录表" languagecode="1057" />
+              <Description description="Razón para el estado del 客户信用评估记录表" languagecode="3082" />
+              <Description description="سبب حالة 客户信用评估记录表" languagecode="1025" />
+              <Description description="Razão do status de 客户信用评估记录表" languagecode="1046" />
+              <Description description="Motivo dello stato di 客户信用评估记录表" languagecode="1040" />
+              <Description description="Lý do cho trạng thái của 客户信用评估记录表" languagecode="1066" />
+              <Description description="Raison du statut de l'élément 客户信用评估记录表" languagecode="1036" />
+              <Description description="Причина состояния 客户信用评估记录表" languagecode="1049" />
+              <Description description="Sebab untuk status 客户信用评估记录表" languagecode="1086" />
+              <Description description="Grund für den Status von 客户信用评估记录表" languagecode="1031" />
+            </Descriptions>
+            <statuses>
+              <status value="1" state="0" IsHidden="0">
+                <labels>
+                  <label description="Active" languagecode="1033" />
+                  <label description="可用" languagecode="2052" />
+                  <label description="Aktif" languagecode="1057" />
+                  <label description="Activo" languagecode="3082" />
+                  <label description="نشط" languagecode="1025" />
+                  <label description="Ativo(a)" languagecode="1046" />
+                  <label description="Attivo" languagecode="1040" />
+                  <label description="Hiện hoạt" languagecode="1066" />
+                  <label description="Actif" languagecode="1036" />
+                  <label description="Активный" languagecode="1049" />
+                  <label description="Aktif" languagecode="1086" />
+                  <label description="Aktiv" languagecode="1031" />
+                </labels>
+              </status>
+              <status value="2" state="1" IsHidden="0">
+                <labels>
+                  <label description="Inactive" languagecode="1033" />
+                  <label description="停用" languagecode="2052" />
+                  <label description="Tidak aktif" languagecode="1057" />
+                  <label description="Inactivo" languagecode="3082" />
+                  <label description="غير نشط" languagecode="1025" />
+                  <label description="Inativo(a)" languagecode="1046" />
+                  <label description="Inattivo" languagecode="1040" />
+                  <label description="Không hoạt động" languagecode="1066" />
+                  <label description="Inactif" languagecode="1036" />
+                  <label description="Неактивные" languagecode="1049" />
+                  <label description="Tidak Aktif" languagecode="1086" />
+                  <label description="Inaktiv" languagecode="1031" />
+                </labels>
+              </status>
+            </statuses>
+          </optionset>
+          <displaynames>
+            <displayname description="Status Reason" languagecode="1033" />
+            <displayname description="状态描述" languagecode="2052" />
+            <displayname description="Alasan Status" languagecode="1057" />
+            <displayname description="Razón para el estado" languagecode="3082" />
+            <displayname description="سبب الحالة" languagecode="1025" />
+            <displayname description="Razão do Status" languagecode="1046" />
+            <displayname description="Motivo stato" languagecode="1040" />
+            <displayname description="Lý do dẫn đến Trạng thái" languagecode="1066" />
+            <displayname description="Raison du statut" languagecode="1036" />
+            <displayname description="Причина состояния" languagecode="1049" />
+            <displayname description="Sebab Status" languagecode="1086" />
+            <displayname description="Statusgrund" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Reason for the status of the 客户信用评估记录表" languagecode="1033" />
+            <Description description="客户信用评估记录表的状态描述" languagecode="2052" />
+            <Description description="Alasan untuk status 客户信用评估记录表" languagecode="1057" />
+            <Description description="Razón para el estado del 客户信用评估记录表" languagecode="3082" />
+            <Description description="سبب حالة 客户信用评估记录表" languagecode="1025" />
+            <Description description="Razão do status de 客户信用评估记录表" languagecode="1046" />
+            <Description description="Motivo dello stato di 客户信用评估记录表" languagecode="1040" />
+            <Description description="Lý do cho trạng thái của 客户信用评估记录表" languagecode="1066" />
+            <Description description="Raison du statut de l'élément 客户信用评估记录表" languagecode="1036" />
+            <Description description="Причина состояния 客户信用评估记录表" languagecode="1049" />
+            <Description description="Sebab untuk status 客户信用评估记录表" languagecode="1086" />
+            <Description description="Grund für den Status von 客户信用评估记录表" languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="TimeZoneRuleVersionNumber">
+          <Type>int</Type>
+          <Name>timezoneruleversionnumber</Name>
+          <LogicalName>timezoneruleversionnumber</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format></Format>
+          <MinValue>-1</MinValue>
+          <MaxValue>2147483647</MaxValue>
+          <displaynames>
+            <displayname description="Time Zone Rule Version Number" languagecode="1033" />
+            <displayname description="时区规则版本号" languagecode="2052" />
+            <displayname description="Nomor Versi Aturan Zona Waktu" languagecode="1057" />
+            <displayname description="Número de versión de regla de zona horaria" languagecode="3082" />
+            <displayname description="رقم إصدار قاعدة المنطقة الزمنية‬" languagecode="1025" />
+            <displayname description="Número de Versão da Regra de Fuso Horário" languagecode="1046" />
+            <displayname description="Numero di versione regola fuso orario" languagecode="1040" />
+            <displayname description="Số phiên bản của quy tắc múi giờ" languagecode="1066" />
+            <displayname description="Numéro de version de la règle du fuseau horaire" languagecode="1036" />
+            <displayname description="Номер версии правила часового пояса" languagecode="1049" />
+            <displayname description="Nombor Versi Peraturan Zon Waktu" languagecode="1086" />
+            <displayname description="Versionsnummer der Zeitzonenregel" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="For internal use only." languagecode="1033" />
+            <Description description="仅供内部使用。" languagecode="2052" />
+            <Description description="Hanya untuk penggunaan internal." languagecode="1057" />
+            <Description description="Solo para uso interno." languagecode="3082" />
+            <Description description="للاستخدام الداخلي فقط." languagecode="1025" />
+            <Description description="Somente para uso interno." languagecode="1046" />
+            <Description description="Solo per uso interno." languagecode="1040" />
+            <Description description="Chỉ sử dụng nội bộ." languagecode="1066" />
+            <Description description="Utilisation interne uniquement." languagecode="1036" />
+            <Description description="Только для внутреннего использования." languagecode="1049" />
+            <Description description="Untuk kegunaan dalaman sahaja." languagecode="1086" />
+            <Description description="Nur zur internen Verwendung." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="traversedpath">
+          <Type>nvarchar</Type>
+          <Name>traversedpath</Name>
+          <LogicalName>traversedpath</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>0</IsCustomizable>
+          <IsRenameable>0</IsRenameable>
+          <CanModifySearchSettings>0</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>0</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>0</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>1250</MaxLength>
+          <Length>2500</Length>
+          <displaynames>
+            <displayname description="(Deprecated) Traversed Path" languagecode="1033" />
+            <displayname description="(已弃用)遍历的路径" languagecode="2052" />
+            <displayname description="Jalur yang Dilewati (Ditolak)" languagecode="1057" />
+            <displayname description="(ไม่สนับสนุน) พาธที่ตรวจสอบ" languagecode="1054" />
+            <displayname description="(Obsoleto) Ruta recorrida" languagecode="3082" />
+            <displayname description="المسار الانتقالي (مهمل)" languagecode="1025" />
+            <displayname description="(Preterido) Caminho Percorrido" languagecode="1046" />
+            <displayname description="(Deprecata) Percorso incrociato" languagecode="1040" />
+            <displayname description="(Không còn dùng) Đường ngang" languagecode="1066" />
+            <displayname description="(Déconseillé) Chemin d’accès traversé" languagecode="1036" />
+            <displayname description="(Устарело) Пройденный путь" languagecode="1049" />
+            <displayname description="(Ditamatkan) Laluan Direntasi" languagecode="1086" />
+            <displayname description="(Veraltet) Durchlaufener Pfad" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="A comma separated list of string values representing the unique identifiers of stages in a Business Process Flow Instance in the order that they occur." languagecode="1033" />
+            <Description description="以逗号分隔的字符串值的列表，这些字符串值按照业务流程实例中阶段的发生顺序表示这些阶段的唯一标识符。" languagecode="2052" />
+            <Description description="Daftar nilai string yang dipisahkan koma menunjukkan pengidentifikasi unik tahapan di Instans Alur Proses Bisnis dalam urutan kejadiannya." languagecode="1057" />
+            <Description description="รายการที่คั่นเครื่องหมายจุลภาค (,) ของค่าสตริงที่แสดงรหัสเฉพาะของลำดับขั้นในอินสแตนซ์โฟลว์กระบวนการธุรกิจตามลำดับการปรากฏ" languagecode="1054" />
+            <Description description="Lista de valores de cadena separados por coma que representan los identificadores únicos de las fases de una instancia de flujo de proceso de negocio en el orden en que ocurren." languagecode="3082" />
+            <Description description="قائمة مفصولة بفاصلة لقيم السلسلة التي تمثل المعرفات الفريدة للمراحل في مثيل سير إجراءات العمل بترتيب ظهورها." languagecode="1025" />
+            <Description description="Uma lista separada por vírgula de valores de cadeia de caracteres representando os identificadores exclusivos dos estágios em uma Instância do Fluxo do Processo Empresarial na ordem em que ocorrem." languagecode="1046" />
+            <Description description="Elenco separato da virgole di valori stringa che rappresentano gli identificatori univoci delle fasi di un'istanza del processo aziendale nell'ordine in cui si verificano." languagecode="1040" />
+            <Description description="Một danh sách các giá trị chuỗi phân tách bằng dấu phẩy cho biết mã định danh duy nhất của các giai đoạn trong Phiên bản Dòng Quy trình Công việc theo thứ tự xuất hiện." languagecode="1066" />
+            <Description description="Liste séparée par des virgules dans laquelle figurent des valeurs de chaîne représentant les identificateurs uniques des phases dans une instance de flux des processus d'entreprise dans l'ordre de leur apparition." languagecode="1036" />
+            <Description description="Разделенный запятыми список строковых значений, представляющих уникальные идентификаторы стадий в экземпляре потока бизнес-процесса в порядке, в котором они возникают." languagecode="1049" />
+            <Description description="Senarai dipisahkan koma dengan nilai rentetan yang mewakili pengecam unik bagi peringkat dalam Tika Aliran Proses Perniagaan mengikut urutan kejadian itu berlaku." languagecode="1086" />
+            <Description description="Eine durch Kommas getrennte Liste von Zeichenfolgenwerten, die für die eindeutigen Bezeichner der Phasen in einer Geschäftsprozessflow-Instanz stehen, in der Reihenfolge, in der sie auftreten." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="UTCConversionTimeZoneCode">
+          <Type>int</Type>
+          <Name>utcconversiontimezonecode</Name>
+          <LogicalName>utcconversiontimezonecode</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>0</IsCustomField>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format></Format>
+          <MinValue>-1</MinValue>
+          <MaxValue>2147483647</MaxValue>
+          <displaynames>
+            <displayname description="UTC Conversion Time Zone Code" languagecode="1033" />
+            <displayname description="UTC 转换时区代码" languagecode="2052" />
+            <displayname description="Kode Zona Waktu Konversi UTC" languagecode="1057" />
+            <displayname description="Código de zona horaria de conversión UTC" languagecode="3082" />
+            <displayname description="رمز المنطقة الزمنية للتحويل بتنسيق التوقيت العالمي المتفق عليه (UTC)" languagecode="1025" />
+            <displayname description="Código de Fuso Horário de Conversão de UTC" languagecode="1046" />
+            <displayname description="Codice fuso orario conversione UTC" languagecode="1040" />
+            <displayname description="Mã múi giờ chuyển đổi UTC" languagecode="1066" />
+            <displayname description="Code de fuseau horaire pour la conversion UTC" languagecode="1036" />
+            <displayname description="Код часового пояса для преобразования в UTC" languagecode="1049" />
+            <displayname description="Kod Zon Waktu Penukaran UTC" languagecode="1086" />
+            <displayname description="Zeitzonencode für UTC-Konvertierung" languagecode="1031" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Time zone code that was in use when the record was created." languagecode="1033" />
+            <Description description="创建记录时所用的时区代码。" languagecode="2052" />
+            <Description description="Kode zona waktu yang digunakan saat rekaman dibuat." languagecode="1057" />
+            <Description description="Código de la zona horaria que estaba en uso cuando se creó el registro." languagecode="3082" />
+            <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏رمز المنطقة الزمنية الذي كان قيد الاستخدام عند إنشاء السجل.‬" languagecode="1025" />
+            <Description description="Código de fuso horário em uso quando o registro foi criado." languagecode="1046" />
+            <Description description="Codice del fuso orario utilizzato al momento della creazione del record." languagecode="1040" />
+            <Description description="Mã múi giờ đã dùng khi tạo bản ghi." languagecode="1066" />
+            <Description description="Code du fuseau horaire utilisé à la création de l'enregistrement." languagecode="1036" />
+            <Description description="Код часового пояса, который использовался при создании записи." languagecode="1049" />
+            <Description description="Kod zon waktu yang telah digunakan semasa rekod dicipta." languagecode="1086" />
+            <Description description="Zeitzonencode, der bei der Datensatzerstellung verwendet wurde." languagecode="1031" />
+          </Descriptions>
+        </attribute>
+      </attributes>
+      <EntitySetName>mcs_credit_records</EntitySetName>
+      <IsDuplicateCheckSupported>0</IsDuplicateCheckSupported>
+      <IsBusinessProcessEnabled>1</IsBusinessProcessEnabled>
+      <IsRequiredOffline>0</IsRequiredOffline>
+      <IsInteractionCentricEnabled>0</IsInteractionCentricEnabled>
+      <IsCollaboration>0</IsCollaboration>
+      <AutoRouteToOwnerQueue>0</AutoRouteToOwnerQueue>
+      <IsConnectionsEnabled>0</IsConnectionsEnabled>
+      <IsDocumentManagementEnabled>0</IsDocumentManagementEnabled>
+      <AutoCreateAccessTeams>0</AutoCreateAccessTeams>
+      <IsOneNoteIntegrationEnabled>0</IsOneNoteIntegrationEnabled>
+      <IsKnowledgeManagementEnabled>0</IsKnowledgeManagementEnabled>
+      <IsSLAEnabled>0</IsSLAEnabled>
+      <IsDocumentRecommendationsEnabled>0</IsDocumentRecommendationsEnabled>
+      <IsBPFEntity>0</IsBPFEntity>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>0</IsAuditEnabled>
+      <IsRetrieveAuditEnabled>0</IsRetrieveAuditEnabled>
+      <IsRetrieveMultipleAuditEnabled>0</IsRetrieveMultipleAuditEnabled>
+      <IsActivity>0</IsActivity>
+      <ActivityTypeMask></ActivityTypeMask>
+      <IsActivityParty>0</IsActivityParty>
+      <IsReplicated>0</IsReplicated>
+      <IsReplicationUserFiltered>0</IsReplicationUserFiltered>
+      <IsMailMergeEnabled>0</IsMailMergeEnabled>
+      <IsVisibleInMobile>0</IsVisibleInMobile>
+      <IsVisibleInMobileClient>0</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+      <DaysSinceRecordLastModified>0</DaysSinceRecordLastModified>
+      <MobileOfflineFilters></MobileOfflineFilters>
+      <IsMapiGridEnabled>1</IsMapiGridEnabled>
+      <IsReadingPaneEnabled>1</IsReadingPaneEnabled>
+      <IsQuickCreateEnabled>0</IsQuickCreateEnabled>
+      <SyncToExternalSearchIndex>0</SyncToExternalSearchIndex>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsMappable>1</IsMappable>
+      <CanModifyAuditSettings>1</CanModifyAuditSettings>
+      <CanModifyMobileVisibility>1</CanModifyMobileVisibility>
+      <CanModifyMobileClientVisibility>1</CanModifyMobileClientVisibility>
+      <CanModifyMobileClientReadOnly>1</CanModifyMobileClientReadOnly>
+      <CanModifyMobileClientOffline>1</CanModifyMobileClientOffline>
+      <CanModifyConnectionSettings>1</CanModifyConnectionSettings>
+      <CanModifyDuplicateDetectionSettings>1</CanModifyDuplicateDetectionSettings>
+      <CanModifyMailMergeSettings>1</CanModifyMailMergeSettings>
+      <CanModifyQueueSettings>1</CanModifyQueueSettings>
+      <CanCreateAttributes>1</CanCreateAttributes>
+      <CanCreateForms>1</CanCreateForms>
+      <CanCreateCharts>1</CanCreateCharts>
+      <CanCreateViews>1</CanCreateViews>
+      <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+      <CanEnableSyncToExternalSearchIndex>1</CanEnableSyncToExternalSearchIndex>
+      <EnforceStateTransitions>0</EnforceStateTransitions>
+      <CanChangeHierarchicalRelationship>1</CanChangeHierarchicalRelationship>
+      <EntityHelpUrlEnabled>0</EntityHelpUrlEnabled>
+      <ChangeTrackingEnabled>0</ChangeTrackingEnabled>
+      <CanChangeTrackingBeEnabled>1</CanChangeTrackingBeEnabled>
+      <IsEnabledForExternalChannels>0</IsEnabledForExternalChannels>
+      <IsMSTeamsIntegrationEnabled>0</IsMSTeamsIntegrationEnabled>
+      <IsSolutionAware>0</IsSolutionAware>
+    </entity>
+  </EntityInfo>
+
+<RibbonDiffXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <CustomActions>
+    <!-- 【下一步】按钮 - 放在Form命令栏 -->
+    <CustomAction Id="mcs.creditrecord.Form.NextStep.Button" Location="Mscrm.Form.mcs_credit_record.MainTab.Save.Controls._children" Sequence="10">
+      <CommandUIDefinition>
+        <Button Id="mcs.creditrecord.Form.NextStep.Button" Command="mcs.creditrecord.NextStep.Command" LabelText="$LocLabels:mcs.creditrecord.NextStep.Label" ToolTipTitle="$LocLabels:mcs.creditrecord.NextStep.ToolTipTitle" ToolTipDescription="$LocLabels:mcs.creditrecord.NextStep.ToolTipDescription" TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <!-- 【数据集成刷新】按钮 -->
+    <CustomAction Id="mcs.creditrecord.Form.RefreshData.Button" Location="Mscrm.Form.mcs_credit_record.MainTab.Save.Controls._children" Sequence="11">
+      <CommandUIDefinition>
+        <Button Id="mcs.creditrecord.Form.RefreshData.Button" Command="mcs.creditrecord.RefreshData.Command" LabelText="$LocLabels:mcs.creditrecord.RefreshData.Label" ToolTipTitle="$LocLabels:mcs.creditrecord.RefreshData.ToolTipTitle" ToolTipDescription="$LocLabels:mcs.creditrecord.RefreshData.ToolTipDescription" TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <!-- 【重新发起】按钮 -->
+    <CustomAction Id="mcs.creditrecord.Form.Restart.Button" Location="Mscrm.Form.mcs_credit_record.MainTab.Save.Controls._children" Sequence="12">
+      <CommandUIDefinition>
+        <Button Id="mcs.creditrecord.Form.Restart.Button" Command="mcs.creditrecord.Restart.Command" LabelText="$LocLabels:mcs.creditrecord.Restart.Label" ToolTipTitle="$LocLabels:mcs.creditrecord.Restart.ToolTipTitle" ToolTipDescription="$LocLabels:mcs.creditrecord.Restart.ToolTipDescription" TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+  </CustomActions>
+  <Templates>
+    <RibbonTemplates Id="Mscrm.Templates"></RibbonTemplates>
+  </Templates>
+  <CommandDefinitions>
+    <!-- 【下一步】命令定义 -->
+    <CommandDefinition Id="mcs.creditrecord.NextStep.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.creditrecord.NextStep.EnableRule" />
+      </EnableRules>
+      <DisplayRules>
+        <DisplayRule Id="mcs.creditrecord.Form.DisplayRule" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction Library="$webresource:mcs_credit_record.js" FunctionName="CreditRecordForm.nextStep">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <!-- 【数据集成刷新】命令定义 -->
+    <CommandDefinition Id="mcs.creditrecord.RefreshData.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.creditrecord.RefreshData.EnableRule" />
+      </EnableRules>
+      <DisplayRules>
+        <DisplayRule Id="mcs.creditrecord.Form.DisplayRule" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction Library="$webresource:mcs_credit_record.js" FunctionName="CreditRecordForm.refreshDataIntegration">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <!-- 【重新发起】命令定义 -->
+    <CommandDefinition Id="mcs.creditrecord.Restart.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.creditrecord.Restart.EnableRule" />
+      </EnableRules>
+      <DisplayRules>
+        <DisplayRule Id="mcs.creditrecord.Form.DisplayRule" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction Library="$webresource:mcs_credit_record.js" FunctionName="CreditRecordForm.restartEvaluation">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+  </CommandDefinitions>
+  <RuleDefinitions>
+    <TabDisplayRules />
+    <DisplayRules>
+      <!-- 仅在表单上显示 -->
+      <DisplayRule Id="mcs.creditrecord.Form.DisplayRule">
+        <FormStateRule State="Existing" />
+        <FormStateRule State="Create" />
+      </DisplayRule>
+    </DisplayRules>
+    <EnableRules>
+      <!-- 【下一步】可用规则：状态9-13 -->
+      <EnableRule Id="mcs.creditrecord.NextStep.EnableRule">
+        <CustomRule FunctionName="CreditRecordForm.canNextStep" Library="$webresource:mcs_credit_record.js" Default="false" />
+      </EnableRule>
+      <!-- 【数据集成刷新】可用规则：状态12 -->
+      <EnableRule Id="mcs.creditrecord.RefreshData.EnableRule">
+        <CustomRule FunctionName="CreditRecordForm.canRefreshData" Library="$webresource:mcs_credit_record.js" Default="false" />
+      </EnableRule>
+      <!-- 【重新发起】可用规则：状态16 -->
+      <EnableRule Id="mcs.creditrecord.Restart.EnableRule">
+        <CustomRule FunctionName="CreditRecordForm.canRestart" Library="$webresource:mcs_credit_record.js" Default="false" />
+      </EnableRule>
+    </EnableRules>
+  </RuleDefinitions>
+  <LocLabels>
+    <!-- 【下一步】标签 -->
+    <LocLabel Id="mcs.creditrecord.NextStep.Label">
+      <Titles>
+        <Title languagecode="1033" description="Next Step" />
+        <Title languagecode="2052" description="下一步" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.NextStep.ToolTipTitle">
+      <Titles>
+        <Title languagecode="1033" description="Next Step" />
+        <Title languagecode="2052" description="下一步" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.NextStep.ToolTipDescription">
+      <Titles>
+        <Title languagecode="1033" description="Proceed to the next stage of credit evaluation" />
+        <Title languagecode="2052" description="进入信用评估的下一阶段" />
+      </Titles>
+    </LocLabel>
+    <!-- 【数据集成刷新】标签 -->
+    <LocLabel Id="mcs.creditrecord.RefreshData.Label">
+      <Titles>
+        <Title languagecode="1033" description="Refresh Data" />
+        <Title languagecode="2052" description="数据集成刷新" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.RefreshData.ToolTipTitle">
+      <Titles>
+        <Title languagecode="1033" description="Refresh Data Integration" />
+        <Title languagecode="2052" description="数据集成刷新" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.RefreshData.ToolTipDescription">
+      <Titles>
+        <Title languagecode="1033" description="Re-execute data integration to refresh indicator data" />
+        <Title languagecode="2052" description="重新执行数据集成，刷新指标数据" />
+      </Titles>
+    </LocLabel>
+    <!-- 【重新发起】标签 -->
+    <LocLabel Id="mcs.creditrecord.Restart.Label">
+      <Titles>
+        <Title languagecode="1033" description="Restart" />
+        <Title languagecode="2052" description="重新发起" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.Restart.ToolTipTitle">
+      <Titles>
+        <Title languagecode="1033" description="Restart Evaluation" />
+        <Title languagecode="2052" description="重新发起评估" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.creditrecord.Restart.ToolTipDescription">
+      <Titles>
+        <Title languagecode="1033" description="Return to data integration stage and re-evaluate" />
+        <Title languagecode="2052" description="回到数据集成阶段，重新进行评估" />
+      </Titles>
+    </LocLabel>
+  </LocLabels>
+</RibbonDiffXml>
+  <FormXml />
+  <SavedQueries />
+  
+</Entity>

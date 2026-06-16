@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{3a27a16e-fad0-4260-8e16-62da964268af}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab name="general" verticallayout="true" id="{1C1CA57F-EC99-49C8-8F3D-FD5FB8B2CC76}" IsUserDefined="0">
+          <labels>
+            <label description="" languagecode="2052" />
+          </labels>
+          <columns>
+            <column width="25%">
+              <sections>
+                <section name="ColorStrip" showlabel="false" showbar="false" columns="1" IsUserDefined="0" id="{1F369560-7D17-40DA-BB04-F5CDBBB78479}">
+                  <labels>
+                    <label description="ColorStrip" languagecode="1033" />
+                  </labels>
+                </section>
+              </sections>
+            </column>
+            <column width="75%">
+              <sections>
+                <section name="CardHeader" showlabel="false" showbar="false" columns="111" id="{651A787B-935C-443A-9ECB-4DC4BC1DD4CE}" IsUserDefined="0">
+                  <labels>
+                    <label description="الرأس" languagecode="1025" />
+                    <label description="Kopfzeile" languagecode="1031" />
+                    <label description="Header" languagecode="1033" />
+                    <label description="En-tête" languagecode="1036" />
+                    <label description="Intestazione" languagecode="1040" />
+                    <label description="Cabeçalho" languagecode="1046" />
+                    <label description="Заголовок" languagecode="1049" />
+                    <label description="ส่วนหัว" languagecode="1054" />
+                    <label description="Đầu trang" languagecode="1066" />
+                    <label description="Pengepala" languagecode="1086" />
+                    <label description="标题" languagecode="2052" />
+                    <label description="Encabezado" languagecode="3082" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{98AC78F0-6711-4FCA-A1D2-ECB7D2455E10}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="Status Reason" languagecode="1033" />
+                          <label description="状态描述" languagecode="2052" />
+                          <label description="Alasan Status" languagecode="1057" />
+                          <label description="Razón para el estado" languagecode="3082" />
+                          <label description="سبب الحالة" languagecode="1025" />
+                          <label description="Razão do Status" languagecode="1046" />
+                          <label description="Motivo stato" languagecode="1040" />
+                          <label description="Lý do dẫn đến Trạng thái" languagecode="1066" />
+                          <label description="Raison du statut" languagecode="1036" />
+                          <label description="Причина состояния" languagecode="1049" />
+                          <label description="Sebab Status" languagecode="1086" />
+                          <label description="Statusgrund" languagecode="1031" />
+                        </labels>
+                        <control id="statuscode" classid="{5D68B988-0661-4db2-BC3E-17598AD3BE6C}" datafieldname="statuscode" disabled="false" />
+                      </cell>
+                      <cell id="{52EDF0AC-2E3C-4BC6-88C4-10029E3539E3}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="" languagecode="2052" />
+                        </labels>
+                      </cell>
+                      <cell id="{6A52F2AB-49BF-4792-AB4E-E81CA0F0970B}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="" languagecode="2052" />
+                        </labels>
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section name="CardDetails" showlabel="false" showbar="false" columns="1" id="{1A2DD9A9-07C6-4154-8E10-09EE79D384AC}" IsUserDefined="0">
+                  <labels>
+                    <label description="التفاصيل" languagecode="1025" />
+                    <label description="Details" languagecode="1033" />
+                    <label description="Détails" languagecode="1036" />
+                    <label description="Dettagli" languagecode="1040" />
+                    <label description="Detalhes" languagecode="1046" />
+                    <label description="Подробности" languagecode="1049" />
+                    <label description="รายละเอียด" languagecode="1054" />
+                    <label description="Rincian" languagecode="1057" />
+                    <label description="Các chi tiết" languagecode="1066" />
+                    <label description="Butiran" languagecode="1086" />
+                    <label description="详细信息" languagecode="2052" />
+                    <label description="Detalles" languagecode="3082" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{0B36E428-6A69-4A16-82BB-AAA56BCC2084}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="选择项名称" languagecode="1033" />
+                          <label description="mcs_listname" languagecode="2052" />
+                          <label description="mcs_listname" languagecode="1057" />
+                          <label description="mcs_listname" languagecode="1054" />
+                          <label description="mcs_listname" languagecode="3082" />
+                          <label description="mcs_listname" languagecode="1025" />
+                          <label description="mcs_listname" languagecode="1046" />
+                          <label description="mcs_listname" languagecode="1040" />
+                          <label description="mcs_listname" languagecode="1066" />
+                          <label description="mcs_listname" languagecode="1036" />
+                          <label description="mcs_listname" languagecode="1049" />
+                          <label description="mcs_listname" languagecode="1086" />
+                          <label description="mcs_listname" languagecode="1031" />
+                        </labels>
+                        <control id="mcs_listname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_listname" disabled="false" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section name="CardFooter" showlabel="false" columns="1111" showbar="false" id="{E27D599B-3483-4CFB-A5EC-9627C52CFC3F}" IsUserDefined="0">
+                  <labels>
+                    <label description="تذييل الصفحة" languagecode="1025" />
+                    <label description="Fußzeile" languagecode="1031" />
+                    <label description="Footer" languagecode="1033" />
+                    <label description="Pied de page" languagecode="1036" />
+                    <label description="Piè di pagina" languagecode="1040" />
+                    <label description="Rodapé" languagecode="1046" />
+                    <label description="Нижний колонтитул" languagecode="1049" />
+                    <label description="ส่วนท้าย" languagecode="1054" />
+                    <label description="Catatan Kaki" languagecode="1057" />
+                    <label description="Chân trang" languagecode="1066" />
+                    <label description="Pengaki" languagecode="1086" />
+                    <label description="页脚" languagecode="2052" />
+                    <label description="Pie de página" languagecode="3082" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{5F2DA67D-768C-47D3-8E98-F8693D1EAD20}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="Owner" languagecode="1033" />
+                          <label description="负责人" languagecode="2052" />
+                          <label description="Pemilik" languagecode="1057" />
+                          <label description="Propietario" languagecode="3082" />
+                          <label description="المالك" languagecode="1025" />
+                          <label description="Proprietário" languagecode="1046" />
+                          <label description="Proprietario" languagecode="1040" />
+                          <label description="Chủ sở hữu" languagecode="1066" />
+                          <label description="Propriétaire" languagecode="1036" />
+                          <label description="Ответственный" languagecode="1049" />
+                          <label description="Pemilik" languagecode="1086" />
+                          <label description="Besitzer" languagecode="1031" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" disabled="false" />
+                      </cell>
+                      <cell id="{96C9C6EC-8ADF-400C-981B-CE19DDB830C2}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="Created On" languagecode="1033" />
+                          <label description="创建时间" languagecode="2052" />
+                          <label description="Dibuat Pada" languagecode="1057" />
+                          <label description="Fecha de creación" languagecode="3082" />
+                          <label description="تاريخ الإنشاء" languagecode="1025" />
+                          <label description="Data de Criação" languagecode="1046" />
+                          <label description="Data creazione" languagecode="1040" />
+                          <label description="Ngày tạo" languagecode="1066" />
+                          <label description="Créé le" languagecode="1036" />
+                          <label description="Дата создания" languagecode="1049" />
+                          <label description="Dicipta Pada" languagecode="1086" />
+                          <label description="Erstellt am" languagecode="1031" />
+                        </labels>
+                        <control id="createdon" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="createdon" disabled="false" />
+                      </cell>
+                      <cell id="{411EE51C-66AF-4E5D-A685-6057556B6FBA}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="" languagecode="2052" />
+                        </labels>
+                      </cell>
+                      <cell id="{86E8E535-7739-4575-8B69-C7CDAA06D529}" showlabel="true" locklevel="0">
+                        <labels>
+                          <label description="" languagecode="2052" />
+                        </labels>
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="معلومات" languagecode="1025" />
+      <LocalizedName description="Informationen" languagecode="1031" />
+      <LocalizedName description="Information" languagecode="1033" />
+      <LocalizedName description="Informations" languagecode="1036" />
+      <LocalizedName description="Informazioni" languagecode="1040" />
+      <LocalizedName description="Informações" languagecode="1046" />
+      <LocalizedName description="Сведения" languagecode="1049" />
+      <LocalizedName description="Informasi" languagecode="1057" />
+      <LocalizedName description="Thông tin" languagecode="1066" />
+      <LocalizedName description="Maklumat" languagecode="1086" />
+      <LocalizedName description="信息" languagecode="2052" />
+      <LocalizedName description="Información" languagecode="3082" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="نموذج بطاقة لهذا الكيان." languagecode="1025" />
+      <Description description="Ein Kartenformular für diese Entität." languagecode="1031" />
+      <Description description="A card form for this entity." languagecode="1033" />
+      <Description description="Formulaire de carte pour cette entité." languagecode="1036" />
+      <Description description="Modulo scheda per questa entità." languagecode="1040" />
+      <Description description="Um formulário de cartão para esta entidade." languagecode="1046" />
+      <Description description="Форма карточки для этой сущности." languagecode="1049" />
+      <Description description="ฟอร์มการ์ดสำหรับเอนทิตีนี้" languagecode="1054" />
+      <Description description="Formulir kartu untuk entitas ini." languagecode="1057" />
+      <Description description="Biểu mẫu thẻ cho thực thể này." languagecode="1066" />
+      <Description description="Borang kad untuk entiti ini." languagecode="1086" />
+      <Description description="此实体的卡窗体。" languagecode="2052" />
+      <Description description="Formulario de tarjeta para esta entidad." languagecode="3082" />
+    </Descriptions>
+  </systemform>
+</forms>

@@ -1,0 +1,65 @@
+{
+  "entityName": "mcs_coface_nace_mapping",
+  "displayName": "Coface NACE行业映射表",
+  "primaryAttribute": "mcs_sanyindustry",
+  "primaryAttributeDisplayName": "三一行业",
+  "primaryAttributeLength": 100,
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_nacedivisionfrom",
+      "displayName": "NACE Division 起始编码",
+      "description": "NACE Rev.2.1 Division 编码（前两位），范围匹配的起始值",
+      "type": "integer",
+      "minValue": 1,
+      "maxValue": 99,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_nacedivisionto",
+      "displayName": "NACE Division 结束编码",
+      "description": "NACE Rev.2.1 Division 编码（前两位），范围匹配的结束值；与起始值相同表示单个 Division",
+      "type": "integer",
+      "minValue": 1,
+      "maxValue": 99,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_nacedivisionname",
+      "displayName": "NACE Division 名称",
+      "description": "NACE Division 的中文或英文名称，如 Manufacturing",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_sanyindustry",
+      "displayName": "三一行业",
+      "description": "映射后的三一行业名称，将写入客户信用标签表",
+      "type": "string",
+      "maxLength": 100,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_effectivedate",
+      "displayName": "生效日期",
+      "description": "该映射记录的生效日期，用于支持多套映射规则切换",
+      "type": "datetime",
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_isactive",
+      "displayName": "是否启用",
+      "description": "仅启用的记录参与 NACE 映射",
+      "type": "boolean",
+      "trueLabel": "是",
+      "falseLabel": "否"
+    },
+    {
+      "schemaName": "mcs_remark",
+      "displayName": "备注",
+      "description": "映射规则说明或来源",
+      "type": "memo",
+      "maxLength": 4000
+    }
+  ]
+}

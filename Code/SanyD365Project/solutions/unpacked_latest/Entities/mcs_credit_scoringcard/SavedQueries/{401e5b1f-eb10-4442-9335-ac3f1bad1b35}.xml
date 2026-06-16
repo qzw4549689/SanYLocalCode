@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>1</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{401e5b1f-eb10-4442-9335-ac3f1bad1b35}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_cardname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credit_scoringcardid">
+          <cell name="mcs_credit_scoringcardid" width="100" />
+          <cell name="mcs_cardname" width="100" />
+          <cell name="mcs_categoryid" width="100" />
+          <cell name="mcs_itemid" width="100" />
+          <cell name="mcs_typeid" width="100" />
+          <cell name="mcs_itemname" width="100" />
+          <cell name="mcs_datatype" width="100" />
+          <cell name="mcs_minvalue" width="100" />
+          <cell name="mcs_maxvalue" width="100" />
+          <cell name="mcs_weight" width="100" />
+          <cell name="ownerid" width="100" />
+          <cell name="statecode" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>4</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_scoringcard">
+          <attribute name="mcs_credit_scoringcardid" />
+          <attribute name="mcs_cardname" />
+          <attribute name="mcs_categoryid" />
+          <attribute name="mcs_itemid" />
+          <attribute name="mcs_typeid" />
+          <attribute name="mcs_itemname" />
+          <attribute name="mcs_datatype" />
+          <attribute name="mcs_minvalue" />
+          <attribute name="mcs_maxvalue" />
+          <attribute name="mcs_weight" />
+          <attribute name="ownerid" />
+          <attribute name="statecode" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="البحث السريع عن 客户信用评分项目表 النشط" languagecode="1025" />
+      <LocalizedName description="Schnellsuche für aktive 客户信用评分项目表" languagecode="1031" />
+      <LocalizedName description="Quick Find Active 客户信用评分项目表" languagecode="1033" />
+      <LocalizedName description="Éléments 客户信用评分项目表 actifs Quick Find" languagecode="1036" />
+      <LocalizedName description="Ricerca rapida 客户信用评分项目表 attivi/e" languagecode="1040" />
+      <LocalizedName description="Localização Rápida de 客户信用评分项目表 Ativo(a)" languagecode="1046" />
+      <LocalizedName description="Быстрый поиск активных 客户信用评分项目表" languagecode="1049" />
+      <LocalizedName description="Cari Cepat 客户信用评分项目表 Aktif" languagecode="1057" />
+      <LocalizedName description="Tìm Nhanh 客户信用评分项目表 Hiện hoạt" languagecode="1066" />
+      <LocalizedName description="Carian Cepat Aktif 客户信用评分项目表" languagecode="1086" />
+      <LocalizedName description="快速查找可用客户信用评分项目表" languagecode="2052" />
+      <LocalizedName description="Búsqueda rápida de 客户信用评分项目表 activos" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

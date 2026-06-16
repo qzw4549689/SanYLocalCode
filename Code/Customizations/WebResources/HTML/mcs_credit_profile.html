@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户信用画像</title>
+    <script src="/WebResources/mcs_credit_wheel_echarts.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            font-size: 13px;
+            color: #333;
+            background: #fff;
+            line-height: 1.4;
+        }
+        .profile-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 12px 16px;
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+        .left-panel {
+            min-width: 0;
+        }
+        .right-panel {
+            min-width: 0;
+            position: sticky;
+            top: 12px;
+        }
+
+        /* 右侧信用飞轮卡片 */
+        .wheel-card {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+            padding: 12px 16px;
+        }
+        .wheel-card .wheel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .wheel-card .wheel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .wheel-card .wheel-score {
+            text-align: right;
+        }
+        .wheel-card .wheel-score-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0078d4;
+            line-height: 1;
+        }
+        .wheel-card .wheel-score-label {
+            font-size: 11px;
+            color: #666;
+        }
+        .wheel-chart {
+            width: 100%;
+            height: 320px;
+        }
+        .wheel-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 12px;
+        }
+        .wheel-legend {
+            margin-top: 10px;
+        }
+        .wheel-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 4px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .wheel-legend-item:last-child {
+            border-bottom: none;
+        }
+        .wheel-legend-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #333;
+        }
+        .wheel-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .wheel-legend-score {
+            font-weight: 600;
+            color: #0078d4;
+        }
+
+        @media (max-width: 1100px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .right-panel { position: static; }
+        }
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-box {
+            background: #fde7e9;
+            border: 1px solid #f3b1b7;
+            border-radius: 4px;
+            padding: 16px;
+            color: #a80000;
+            margin: 20px 0;
+        }
+
+        /* 头部 */
+        .profile-header {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: #0078d4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .header-title h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+        .header-title .subtitle {
+            font-size: 12px;
+            color: #666;
+        }
+        .header-right {
+            text-align: right;
+        }
+        .score-display {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .score-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0078d4;
+            line-height: 1;
+        }
+        .score-value.invalid {
+            color: #a80000;
+        }
+        .score-label {
+            font-size: 13px;
+            color: #666;
+        }
+        .score-hint {
+            font-size: 12px;
+            color: #a80000;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .grade-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+            background: #e8f0fe;
+            color: #0078d4;
+        }
+        .grade-badge.A0 { background: #e6f4ea; color: #137333; }
+        .grade-badge.A1 { background: #e8f0fe; color: #1967d2; }
+        .grade-badge.A2 { background: #fef7e0; color: #b06000; }
+        .grade-badge.A3 { background: #fce8e6; color: #c5221f; }
+        .grade-badge.A4 { background: #f3e8fd; color: #9334e6; }
+
+        /* 区域卡片 */
+        .section-card {
+            background: #fff;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border: 1px solid #e8e8e8;
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .section-title .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 信息网格 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px 16px;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .info-label {
+            font-size: 11px;
+            color: #666;
+        }
+        .info-value {
+            font-size: 12px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+        .info-value.empty {
+            color: #999;
+            font-style: italic;
+        }
+        .info-value .hint {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
+            margin-left: 4px;
+        }
+
+
+        /* 表格 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .data-table th {
+            background: #f8f9fa;
+            padding: 6px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #444;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .data-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+        .data-table tr:hover td {
+            background: #fafbfc;
+        }
+        .data-table .score-cell {
+            font-weight: 600;
+            color: #0078d4;
+        }
+        .data-table .group-label {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .group-1 { background: #e6f4ea; color: #137333; } /* 客户实力 */
+        .group-2 { background: #e8f0fe; color: #1967d2; } /* 客户财务 */
+        .group-3 { background: #fef7e0; color: #b06000; } /* 宏观市场 */
+        .group-4 { background: #fce8e6; color: #c5221f; } /* 历史交易 */
+        .group-5 { background: #f3e8fd; color: #9334e6; } /* 综合指标 */
+
+        /* 分类标签栏 */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .category-tab {
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .category-tab:hover {
+            border-color: #0078d4;
+            color: #0078d4;
+        }
+        .category-tab.active {
+            background: #0078d4;
+            color: #fff;
+            border-color: #0078d4;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 32px;
+            color: #999;
+        }
+
+        /* 尽调区域 */
+        .dd-content {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 16px;
+        }
+        .dd-score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0078d4;
+            margin-bottom: 8px;
+        }
+        .dd-opinion {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 采购要求 */
+        .purchase-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .purchase-item {
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .purchase-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+        .purchase-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .score-highlight {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0078d4;
+        }
+        .score-highlight.invalid {
+            color: #a80000;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: repeat(2, 1fr); }
+            .purchase-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="profile-container">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>正在加载客户信用画像...</div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ==================== 常量 ====================
+        var STATUS_NAMES = {
+            1: '客户实力',
+            2: '客户财务',
+            3: '宏观市场',
+            4: '历史交易',
+            5: '综合指标'
+        };
+
+        var DEALER_RANK = {
+            1: '钻石', 2: '铂金', 3: '白银', 4: '认证', 5: '意向'
+        };
+
+        var ACCOUNT_CATEGORY = {
+            10: '正式经销商',
+            90: '意向经销商',
+            20: '三一终端客户'
+        };
+
+        var CREDIT_GRADE_MAP = {
+            100000000: 'A0',
+            100000001: 'A1',
+            100000002: 'A2',
+            100000003: 'A3',
+            100000004: 'A4'
+        };
+
+        // ==================== 工具函数 ====================
+
+        /**
+         * 获取 URL 参数
+         */
+        function getUrlParam(name) {
+            var params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        /**
+         * 获取 Xrm 上下文（支持嵌入和独立模式）
+         */
+        function getXrm() {
+            try {
+                if (typeof Xrm !== 'undefined' && Xrm.WebApi) return Xrm;
+                if (window.parent && window.parent.Xrm && window.parent.Xrm.WebApi) return window.parent.Xrm;
+                if (window.opener && window.opener.Xrm && window.opener.Xrm.WebApi) return window.opener.Xrm;
+            } catch (e) {}
+            return null;
+        }
+
+        /**
+         * 获取当前 accountid
+         */
+        function getAccountId() {
+            // 1. URL 参数
+            var aid = getUrlParam('accountid') || getUrlParam('data');
+            if (aid) {
+                aid = aid.replace(/[{}]/g, '').toLowerCase();
+                if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(aid)) {
+                    return aid;
+                }
+            }
+
+            // 2. Xrm 上下文
+            var xrm = getXrm();
+            if (xrm && xrm.Page && xrm.Page.data && xrm.Page.data.entity) {
+                try {
+                    var entity = xrm.Page.data.entity;
+                    if (entity.getEntityName() === 'account') {
+                        return entity.getId().replace(/[{}]/g, '').toLowerCase();
+                    }
+                } catch (e) {}
+            }
+
+            return null;
+        }
+
+        /**
+         * 格式化数字
+         */
+        function formatNumber(num, decimals) {
+            if (num === null || num === undefined || num === '') return '';
+            var n = parseFloat(num);
+            if (isNaN(n)) return num;
+            if (decimals !== undefined) {
+                return n.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+            }
+            return n.toLocaleString('zh-CN');
+        }
+
+        /**
+         * 安全获取字段值
+         */
+        function getValue(entity, fieldName, defaultValue) {
+            if (entity && entity[fieldName] !== undefined && entity[fieldName] !== null) {
+                return entity[fieldName];
+            }
+            return defaultValue !== undefined ? defaultValue : '';
+        }
+
+        /**
+         * 获取选项集显示文本（同时支持数字/字符串键）
+         */
+        function getOptionText(value, map) {
+            if (value === null || value === undefined) return '';
+            if (map[value] !== undefined) return map[value];
+            return map[String(value)] || String(value);
+        }
+
+        // ==================== 数据获取 ====================
+
+        /**
+         * 查询客户基本信息
+         */
+        function fetchAccount(accountId) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi) {
+                return Promise.reject('Xrm.WebApi 不可用');
+            }
+
+            return xrm.WebApi.retrieveRecord('account', accountId,
+                '?$select=accountid,name,accountnumber,mcs_creditscore,mcs_creditgrade,mcs_creditvalid,mcs_externalrate,mcs_dealerrank,mcs_isdd,mcs_accountcategory,mcs_accountlevel')
+                .then(function(result) {
+                    return result;
+                });
+        }
+
+        /**
+         * 查询最新有效评估记录
+         */
+        function fetchLatestCreditRecord(accountId) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi) {
+                return Promise.resolve(null);
+            }
+
+            var fetchXml = [
+                '<fetch top="1">',
+                '  <entity name="mcs_credit_record">',
+                '    <attribute name="mcs_credit_recordid" />',
+                '    <attribute name="mcs_scoreid" />',
+                '    <attribute name="mcs_creditscore" />',
+                '    <attribute name="mcs_status" />',
+                '    <attribute name="mcs_active" />',
+                '    <attribute name="mcs_approvedate" />',
+                '    <attribute name="modifiedon" />',
+                '    <filter>',
+                '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
+                '      <condition attribute="mcs_active" operator="eq" value="1" />',
+                '    </filter>',
+                '    <order attribute="modifiedon" descending="true" />',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_credit_record', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    return result.entities.length > 0 ? result.entities[0] : null;
+                })
+                .catch(function() {
+                    return null;
+                });
+        }
+
+        /**
+         * 查询客户信用标签（最新有效评估的）
+         */
+        function fetchCustomerTags(accountId) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi) {
+                return Promise.resolve([]);
+            }
+
+            var fetchXml = [
+                '<fetch>',
+                '  <entity name="mcs_customer_tag">',
+                '    <attribute name="mcs_group" />',
+                '    <attribute name="mcs_itemname" />',
+                '    <attribute name="mcs_itemdesc" />',
+                '    <attribute name="mcs_itemtxtvalue1" />',
+                '    <attribute name="mcs_itemtxtvalue2" />',
+                '    <attribute name="mcs_itemvalue1" />',
+                '    <attribute name="mcs_itemvalue2" />',
+                '    <attribute name="mcs_scorevalue" />',
+                '    <attribute name="mcs_isscore" />',
+                '    <attribute name="modifiedon" />',
+                '    <filter>',
+                '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
+                '    </filter>',
+                '    <order attribute="modifiedon" descending="true" />',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_customer_tag', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    // 去重：同一指标取最新
+                    var seen = {};
+                    var unique = [];
+                    result.entities.forEach(function(item) {
+                        var key = item.mcs_itemname || '';
+                        if (!seen[key]) {
+                            seen[key] = true;
+                            unique.push(item);
+                        }
+                    });
+                    return unique;
+                })
+                .catch(function() {
+                    return [];
+                });
+        }
+
+        // ==================== 渲染 ====================
+
+        function render(app, account, creditRecord, tags) {
+            var creditScore = getValue(account, 'mcs_creditscore');
+            var creditGrade = getValue(account, 'mcs_creditgrade');
+            var creditValid = getValue(account, 'mcs_creditvalid');
+            var isInvalid = (creditValid !== true && creditValid !== 1);
+
+            var categoryVal = getValue(account, 'mcs_accountcategory');
+            var levelVal = getValue(account, 'mcs_accountlevel');
+            var isDealer = (categoryVal === 10 || categoryVal === 90);
+
+            // 客户分级显示
+            var gradeDisplay = '';
+            if (isDealer) {
+                var rank = getValue(account, 'mcs_dealerrank');
+                gradeDisplay = getOptionText(rank, DEALER_RANK);
+            } else {
+                // 直销客户分级：S/A/B/C/I
+                var levelMap = { 4: 'S级', 3: 'A级', 2: 'B级', 1: 'C级' };
+                gradeDisplay = getOptionText(levelVal, levelMap);
+                if (!gradeDisplay && categoryVal === 20) {
+                    gradeDisplay = '普通客户';
+                }
+            }
+
+            var leftHtml = '';
+
+            // 客户基本信息
+            leftHtml += '<div class="section-card">';
+            leftHtml += '  <div class="section-title"><span class="icon">&#128196;</span>客户基本信息</div>';
+            leftHtml += '  <div class="info-grid" style="grid-template-columns: repeat(5, 1fr);">';
+            leftHtml += '    <div class="info-item"><div class="info-label">客户类别</div><div class="info-value">' + escapeHtml(getOptionText(categoryVal, ACCOUNT_CATEGORY)) + '</div></div>';
+            leftHtml += '    <div class="info-item"><div class="info-label">客户等级</div><div class="info-value">' + escapeHtml(getOptionText(creditGrade, CREDIT_GRADE_MAP) || '-') + '</div></div>';
+            leftHtml += '    <div class="info-item"><div class="info-label">外部评级</div><div class="info-value">' + escapeHtml(getValue(account, 'mcs_externalrate', '-')) + '<span class="hint">科法斯 1-10 分</span></div></div>';
+            leftHtml += '    <div class="info-item"><div class="info-label">客户分级</div><div class="info-value">' + escapeHtml(gradeDisplay || '-') + '</div></div>';
+            leftHtml += '    <div class="info-item"><div class="info-label">是否重点尽调</div><div class="info-value">' + (getValue(account, 'mcs_isdd') ? '<span style="color:#a80000">&#10003; 是</span>' : '否') + '</div></div>';
+            leftHtml += '  </div>';
+            leftHtml += '</div>';
+
+            // 信用基础标签和评分
+            leftHtml += '<div class="section-card">';
+            leftHtml += '  <div class="section-title"><span class="icon">&#128202;</span>信用基础标签和评分</div>';
+
+            if (tags.length === 0) {
+                leftHtml += '  <div class="empty-state">暂无信用标签数据</div>';
+            } else {
+                leftHtml += '  <table class="data-table">';
+                leftHtml += '    <thead><tr><th>信用分类</th><th>指标名称</th><th>指标说明</th><th>指标值</th><th>评分值</th></tr></thead>';
+                leftHtml += '    <tbody>';
+                tags.forEach(function(tag) {
+                    var group = getValue(tag, 'mcs_group');
+                    var groupClass = 'group-' + group;
+                    var groupName = getOptionText(group, STATUS_NAMES);
+                    leftHtml += '      <tr>';
+                    leftHtml += '        <td><span class="group-label ' + groupClass + '">' + escapeHtml(groupName) + '</span></td>';
+                    leftHtml += '        <td>' + escapeHtml(getValue(tag, 'mcs_itemname', '-')) + '</td>';
+                    leftHtml += '        <td>' + escapeHtml(getValue(tag, 'mcs_itemdesc', '-')) + '</td>';
+                    var itemValue = getValue(tag, 'mcs_itemtxtvalue2')
+                        || getValue(tag, 'mcs_itemtxtvalue1')
+                        || getValue(tag, 'mcs_itemvalue2')
+                        || getValue(tag, 'mcs_itemvalue1');
+                    leftHtml += '        <td>' + escapeHtml(itemValue || '-') + '</td>';
+                    var scoreVal = getValue(tag, 'mcs_scorevalue');
+                    leftHtml += '        <td class="score-cell">' + (scoreVal !== '' ? formatNumber(scoreVal, 1) : '<span class="empty">-</span>') + '</td>';
+                    leftHtml += '      </tr>';
+                });
+                leftHtml += '    </tbody>';
+                leftHtml += '  </table>';
+            }
+            leftHtml += '</div>';
+
+            // 当前采购要求
+            leftHtml += '<div class="section-card">';
+            leftHtml += '  <div class="section-title"><span class="icon">&#128176;</span>当前采购要求</div>';
+            leftHtml += '  <div class="purchase-grid">';
+            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">在手订单金额 (USD)</div></div>';
+            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">首付款比例</div></div>';
+            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">账期 (天)</div></div>';
+            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">授信额度 (USD)</div></div>';
+            leftHtml += '  </div>';
+            leftHtml += '  <div style="margin-top:12px;font-size:11px;color:#999;text-align:center;">依赖 LTC 合同模块数据，待接入</div>';
+            leftHtml += '</div>';
+
+            // 重点尽调专家意见
+            var isDD = getValue(account, 'mcs_isdd');
+            if (isDD) {
+                leftHtml += '<div class="section-card">';
+                leftHtml += '  <div class="section-title"><span class="icon">&#128221;</span>重点尽调专家意见</div>';
+                leftHtml += '  <div class="dd-content">';
+                leftHtml += '    <div class="dd-score">-</div>';
+                leftHtml += '    <div class="dd-opinion">重点尽调模块数据待接入</div>';
+                leftHtml += '  </div>';
+                leftHtml += '</div>';
+            }
+
+            // 右侧信用飞轮
+            var rightHtml = '';
+            rightHtml += '<div class="wheel-card">';
+            rightHtml += '  <div class="wheel-header">';
+            rightHtml += '    <div class="wheel-title">&#127744; 客户信用飞轮</div>';
+            rightHtml += '    <div class="wheel-score">';
+            rightHtml += '      <div class="wheel-score-value">' + (creditScore !== '' ? formatNumber(creditScore, 1) : '-') + '</div>';
+            rightHtml += '      <div class="wheel-score-label">信用总分</div>';
+            rightHtml += '    </div>';
+            rightHtml += '  </div>';
+            rightHtml += '  <div id="wheel-chart" class="wheel-chart"></div>';
+            rightHtml += '  <div id="wheel-legend" class="wheel-legend"></div>';
+            rightHtml += '</div>';
+
+            app.innerHTML = '<div class="main-layout"><div class="left-panel">' + leftHtml + '</div><div class="right-panel">' + rightHtml + '</div></div>';
+
+            // 渲染飞轮图表
+            renderWheel(tags, creditScore);
+        }
+
+        /**
+         * 渲染右侧信用飞轮（ECharts 旭日图）
+         */
+        function renderWheel(tags, totalScore) {
+            var chartDom = document.getElementById('wheel-chart');
+            var legendDom = document.getElementById('wheel-legend');
+            if (!chartDom || typeof echarts === 'undefined') return;
+
+            var GROUP_MAP = {
+                1: { name: '客户实力', color: '#137333' },
+                2: { name: '客户财务', color: '#1967d2' },
+                3: { name: '宏观市场', color: '#b06000' },
+                4: { name: '历史交易', color: '#c5221f' },
+                5: { name: '综合指标', color: '#9334e6' }
+            };
+            var SUB_COLORS = {
+                1: ['#34a853', '#81c995', '#137333', '#0d652d'],
+                2: ['#4285f4', '#8ab4f8', '#1967d2', '#174ea6'],
+                3: ['#f9ab00', '#fde293', '#b06000', '#e37400'],
+                4: ['#ea4335', '#f6aea9', '#c5221f', '#9e1a16'],
+                5: ['#a142f4', '#d7aefb', '#9334e6', '#681da8']
+            };
+
+            if (!tags || tags.length === 0) {
+                chartDom.innerHTML = '<div class="wheel-empty">暂无信用标签数据</div>';
+                if (legendDom) legendDom.innerHTML = '';
+                return;
+            }
+
+            // 按分组聚合（无评分值时用占位值，保证图表有形状）
+            var hasAnyScore = tags.some(function(t) { return (t.mcs_scorevalue || 0) > 0; });
+            var groupData = {};
+            tags.forEach(function(tag) {
+                var group = tag.mcs_group || 5;
+                if (!groupData[group]) {
+                    groupData[group] = { items: [], total: 0 };
+                }
+                var score = hasAnyScore ? (tag.mcs_scorevalue || 0) : 1;
+                groupData[group].items.push({
+                    name: tag.mcs_itemname || '-',
+                    score: score
+                });
+                groupData[group].total += score;
+            });
+
+            var sunburstData = [];
+            var legendHtml = '';
+            var allGroups = Object.keys(groupData).sort();
+            var total = parseFloat(totalScore) || 0;
+
+            allGroups.forEach(function(groupId) {
+                var gInfo = GROUP_MAP[groupId] || { name: '其他', color: '#666' };
+                var items = groupData[groupId].items;
+                var colors = SUB_COLORS[groupId] || ['#666'];
+
+                var children = items.map(function(item, i) {
+                    return {
+                        name: item.name,
+                        value: item.score,
+                        itemStyle: { color: colors[i % colors.length] }
+                    };
+                });
+
+                sunburstData.push({
+                    name: gInfo.name,
+                    value: groupData[groupId].total,
+                    itemStyle: { color: gInfo.color },
+                    children: children
+                });
+
+                var percent = total > 0 ? Math.round((groupData[groupId].total / total) * 100) : 0;
+                legendHtml += '<div class="wheel-legend-item">';
+                legendHtml += '  <div class="wheel-legend-name"><span class="wheel-legend-dot" style="background:' + gInfo.color + '"></span>' + escapeHtml(gInfo.name) + '</div>';
+                legendHtml += '  <div class="wheel-legend-score">' + groupData[groupId].total + ' (' + percent + '%)</div>';
+                legendHtml += '</div>';
+            });
+
+            if (legendDom) legendDom.innerHTML = legendHtml;
+
+            var chartInstance = echarts.init(chartDom);
+            chartInstance.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        return '<b>' + escapeHtml(params.name) + '</b><br/>得分: ' + params.value + '<br/>占比: ' + params.percent + '%';
+                    }
+                },
+                series: {
+                    type: 'sunburst',
+                    data: sunburstData,
+                    radius: [0, '90%'],
+                    label: { rotate: 'radial', fontSize: 10 },
+                    itemStyle: {
+                        borderRadius: 3,
+                        borderWidth: 1,
+                        borderColor: '#fff'
+                    },
+                    emphasis: { focus: 'ancestor' },
+                    levels: [
+                        {},
+                        { r0: '0%', r: '45%', label: { rotate: 0, fontSize: 11, fontWeight: 'bold' } },
+                        { r0: '45%', r: '80%', label: { align: 'right', fontSize: 9 } }
+                    ]
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                chartInstance && chartInstance.resize();
+            });
+        }
+
+        function renderError(app, message) {
+            app.innerHTML = '<div class="error-box">&#9888; ' + escapeHtml(message) + '</div>';
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            var div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        // ==================== 初始化 ====================
+
+        function init() {
+            var app = document.getElementById('app');
+            var xrm = getXrm();
+
+            if (!xrm) {
+                app.innerHTML = [
+                    '<div style="padding:40px 20px;text-align:center;">',
+                    '  <div style="font-size:48px;margin-bottom:16px;">&#128270;</div>',
+                    '  <div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">需要在 D365 环境中打开</div>',
+                    '  <div style="font-size:13px;color:#666;max-width:400px;margin:0 auto;line-height:1.6;">',
+                    '    <p>客户信用画像页面需要在 D365 客户管理模块的<strong>"信用画像"页签</strong>中打开，</p>',
+                    '    <p>或通过带有 Xrm 上下文的 iframe 嵌入方式访问。</p>',
+                    '    <p style="margin-top:12px;color:#999;font-size:12px;">直接通过 URL 打开无法获取 D365 数据上下文。</p>',
+                    '  </div>',
+                    '</div>'
+                ].join('');
+                return;
+            }
+
+            var accountId = getAccountId();
+
+            if (!accountId) {
+                renderError(app, '无法获取客户标识。请通过 Account 表单页签打开，或通过 URL 传入 accountid 参数。');
+                return;
+            }
+
+            // 并行查询数据
+            Promise.all([
+                fetchAccount(accountId),
+                fetchLatestCreditRecord(accountId),
+                fetchCustomerTags(accountId)
+            ])
+            .then(function(results) {
+                var account = results[0];
+                var creditRecord = results[1];
+                var tags = results[2];
+                render(app, account, creditRecord, tags);
+            })
+            .catch(function(error) {
+                console.error('加载画像失败:', error);
+                renderError(app, '加载客户信用画像失败: ' + (error.message || error));
+            });
+        }
+
+        // DOM 加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>

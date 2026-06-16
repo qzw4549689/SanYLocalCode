@@ -1,0 +1,539 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Account" OriginalName="">Account</Name>
+  <EntityInfo>
+    <entity Name="Account">
+      <LocalizedNames>
+        <LocalizedName description="Account" languagecode="1033" />
+        <LocalizedName description="العملاء" languagecode="1025" />
+        <LocalizedName description="Firma" languagecode="1031" />
+        <LocalizedName description="Le client" languagecode="1036" />
+        <LocalizedName description="cliente" languagecode="1040" />
+        <LocalizedName description="Conta" languagecode="1046" />
+        <LocalizedName description="Клиенты" languagecode="1049" />
+        <LocalizedName description="ลูกค้า" languagecode="1054" />
+        <LocalizedName description="Akun" languagecode="1057" />
+        <LocalizedName description="Khách hàng" languagecode="1066" />
+        <LocalizedName description="客户" languagecode="2052" />
+        <LocalizedName description="Cliente" languagecode="3082" />
+        <LocalizedName description="Pelanggan" languagecode="1086" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Account" languagecode="1033" />
+        <LocalizedCollectionName description="العملاء" languagecode="1025" />
+        <LocalizedCollectionName description="Firmen" languagecode="1031" />
+        <LocalizedCollectionName description="Le client" languagecode="1036" />
+        <LocalizedCollectionName description="cliente" languagecode="1040" />
+        <LocalizedCollectionName description="Contas" languagecode="1046" />
+        <LocalizedCollectionName description="Клиенты" languagecode="1049" />
+        <LocalizedCollectionName description="ลูกค้า" languagecode="1054" />
+        <LocalizedCollectionName description="Akun" languagecode="1057" />
+        <LocalizedCollectionName description="Khách hàng" languagecode="1066" />
+        <LocalizedCollectionName description="客户" languagecode="2052" />
+        <LocalizedCollectionName description="Cliente" languagecode="3082" />
+        <LocalizedCollectionName description="Pelanggan" languagecode="1086" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Business that represents a customer or potential customer. The company that is billed in business transactions." languagecode="1033" />
+        <Description description="الشركات التي تمثل العملاء أو العملاء المحتملين هي أيضا الشركات التي تقدم الفواتير لهم في المعاملات التجارية ." languagecode="1025" />
+        <Description description="Ein Geschäft, das einen Kunden oder einen potenziellen Kunden darstellt. Das Unternehmen, mit dem Geschäftstransaktionen abgerechnet werden." languagecode="1031" />
+        <Description description="Une entreprise qui représente un client ou un client potentiel est également une entreprise qui lui facture dans le cadre d'une transaction commerciale." languagecode="1036" />
+        <Description description="Un'azienda che rappresenta clienti o potenziali clienti è anche quella che emette loro fatture nelle transazioni commerciali." languagecode="1040" />
+        <Description description="Um negócio que representa um cliente ou cliente potencial. A empresa que é cobrada em transações comerciais." languagecode="1046" />
+        <Description description="Компании, представляющие клиентов или потенциальных клиентов, также выставляют счета в ходе коммерческих сделок." languagecode="1049" />
+        <Description description="ธุรกิจที่เป็นตัวแทนของลูกค้าหรือลูกค้าที่มีศักยภาพก็เป็น บริษัท ที่ออกใบแจ้งหนี้ให้พวกเขาในการทำธุรกรรมทางธุรกิจ" languagecode="1054" />
+        <Description description="Bisnis yang menunjukkan pelanggan atau calon pelanggan. Perusahaan yang menerima tagihan dalam transaksi bisnis." languagecode="1057" />
+        <Description description="Một doanh nghiệp đại diện cho một khách hàng hoặc khách hàng tiềm năng và là công ty nhận hóa đơn trong các giao dịch kinh doanh." languagecode="1066" />
+        <Description description="代表客户或潜在客户的企业，也是在商业交易中向其出具帐单的公司。" languagecode="2052" />
+        <Description description="Las empresas que representan a clientes o clientes potenciales también son empresas que les facturan en transacciones comerciales." languagecode="3082" />
+        <Description description="Syarikat yang mewakili pelanggan atau bakal pelanggan, dan juga syarikat yang mengeluarkan invois kepada mereka dalam urus niaga komersial." languagecode="1086" />
+      </Descriptions>
+      <attributes>
+        <attribute PhysicalName="mcs_cofaceid">
+          <Type>nvarchar</Type>
+          <Name>mcs_cofaceid</Name>
+          <LogicalName>mcs_cofaceid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>30</MaxLength>
+          <Length>60</Length>
+          <displaynames>
+            <displayname description="科法斯客户代码" languagecode="2052" />
+            <displayname description="科法斯客户代码" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Coface ICON平台唯一企业编码，用于对接Coface客户数据" languagecode="2052" />
+            <Description description="Coface ICON平台唯一企业编码，用于对接Coface客户数据" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_creditgrade">
+          <Type>nvarchar</Type>
+          <Name>mcs_creditgrade</Name>
+          <LogicalName>mcs_creditgrade</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>2</MaxLength>
+          <Length>4</Length>
+          <displaynames>
+            <displayname description="客户等级" languagecode="2052" />
+            <displayname description="客户等级" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="客户等级A0-A4（A0最高），用于成交条件矩阵查询" languagecode="2052" />
+            <Description description="客户等级A0-A4（A0最高），用于成交条件矩阵查询" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_creditscore">
+          <Type>decimal</Type>
+          <Name>mcs_creditscore</Name>
+          <LogicalName>mcs_creditscore</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <MinValue>0</MinValue>
+          <MaxValue>999.99</MaxValue>
+          <Accuracy>2</Accuracy>
+          <displaynames>
+            <displayname description="客户信用评分" languagecode="2052" />
+            <displayname description="客户信用评分" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="客户信用分计算结果" languagecode="2052" />
+            <Description description="客户信用分计算结果" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_creditvalid">
+          <Type>bit</Type>
+          <Name>mcs_creditvalid</Name>
+          <LogicalName>mcs_creditvalid</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="new_account_mcs_creditvalid">
+            <OptionSetType>bit</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="信用评估有效状态" languagecode="2052" />
+              <displayname description="信用评估有效状态" languagecode="1033" />
+            </displaynames>
+            <Descriptions>
+              <Description description="信用评估有效状态：1-有效 0-失效" languagecode="2052" />
+              <Description description="信用评估有效状态：1-有效 0-失效" languagecode="1033" />
+            </Descriptions>
+            <options>
+              <option value="1" IsHidden="0">
+                <labels>
+                  <label description="是" languagecode="2052" />
+                  <label description="是" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="0" IsHidden="0">
+                <labels>
+                  <label description="否" languagecode="2052" />
+                  <label description="否" languagecode="1033" />
+                </labels>
+              </option>
+            </options>
+          </optionset>
+          <displaynames>
+            <displayname description="信用评估有效状态" languagecode="2052" />
+            <displayname description="信用评估有效状态" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="信用评估有效状态：1-有效 0-失效" languagecode="2052" />
+            <Description description="信用评估有效状态：1-有效 0-失效" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_dealerrank">
+          <Type>picklist</Type>
+          <Name>mcs_dealerrank</Name>
+          <LogicalName>mcs_dealerrank</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="new_account_mcs_dealerrank">
+            <OptionSetType>picklist</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="经销商分级" languagecode="2052" />
+              <displayname description="经销商分级" languagecode="1033" />
+            </displaynames>
+            <Descriptions>
+              <Description description="经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）" languagecode="2052" />
+              <Description description="经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）" languagecode="1033" />
+            </Descriptions>
+            <options>
+              <option value="1" IsHidden="0">
+                <labels>
+                  <label description="钻石" languagecode="2052" />
+                  <label description="钻石" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="2" IsHidden="0">
+                <labels>
+                  <label description="铂金" languagecode="2052" />
+                  <label description="铂金" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="3" IsHidden="0">
+                <labels>
+                  <label description="白银" languagecode="2052" />
+                  <label description="白银" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="4" IsHidden="0">
+                <labels>
+                  <label description="认证" languagecode="2052" />
+                  <label description="认证" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="5" IsHidden="0">
+                <labels>
+                  <label description="意向" languagecode="2052" />
+                  <label description="意向" languagecode="1033" />
+                </labels>
+              </option>
+            </options>
+          </optionset>
+          <displaynames>
+            <displayname description="经销商分级" languagecode="2052" />
+            <displayname description="经销商分级" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）" languagecode="2052" />
+            <Description description="经销商分级（1-钻石、2-铂金、3-白银、4-认证、5-意向）" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_externalrate">
+          <Type>nvarchar</Type>
+          <Name>mcs_externalrate</Name>
+          <LogicalName>mcs_externalrate</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <Format>text</Format>
+          <MaxLength>10</MaxLength>
+          <Length>20</Length>
+          <displaynames>
+            <displayname description="客户信用外部评级" languagecode="2052" />
+            <displayname description="客户信用外部评级" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="Coface对客户信用评级，采用1-10分（10分最高）" languagecode="2052" />
+            <Description description="Coface对客户信用评级，采用1-10分（10分最高）" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_isdd">
+          <Type>bit</Type>
+          <Name>mcs_isdd</Name>
+          <LogicalName>mcs_isdd</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>auto</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <optionset Name="new_account_mcs_isdd">
+            <OptionSetType>bit</OptionSetType>
+            <IntroducedVersion>1.0</IntroducedVersion>
+            <IsCustomizable>1</IsCustomizable>
+            <displaynames>
+              <displayname description="重点尽调" languagecode="2052" />
+              <displayname description="重点尽调" languagecode="1033" />
+            </displaynames>
+            <Descriptions>
+              <Description description="是否需要重点尽调，用于重点尽调模块判断" languagecode="2052" />
+              <Description description="是否需要重点尽调，用于重点尽调模块判断" languagecode="1033" />
+            </Descriptions>
+            <options>
+              <option value="1" IsHidden="0">
+                <labels>
+                  <label description="是" languagecode="2052" />
+                  <label description="是" languagecode="1033" />
+                </labels>
+              </option>
+              <option value="0" IsHidden="0">
+                <labels>
+                  <label description="否" languagecode="2052" />
+                  <label description="否" languagecode="1033" />
+                </labels>
+              </option>
+            </options>
+          </optionset>
+          <displaynames>
+            <displayname description="重点尽调" languagecode="2052" />
+            <displayname description="重点尽调" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="是否需要重点尽调，用于重点尽调模块判断" languagecode="2052" />
+            <Description description="是否需要重点尽调，用于重点尽调模块判断" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+        <attribute PhysicalName="mcs_overduemodel">
+          <Type>decimal</Type>
+          <Name>mcs_overduemodel</Name>
+          <LogicalName>mcs_overduemodel</LogicalName>
+          <RequiredLevel>none</RequiredLevel>
+          <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+          <ImeMode>disabled</ImeMode>
+          <ValidForUpdateApi>1</ValidForUpdateApi>
+          <ValidForReadApi>1</ValidForReadApi>
+          <ValidForCreateApi>1</ValidForCreateApi>
+          <IsCustomField>1</IsCustomField>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsSecured>0</IsSecured>
+          <IntroducedVersion>1.0</IntroducedVersion>
+          <IsCustomizable>1</IsCustomizable>
+          <IsRenameable>1</IsRenameable>
+          <CanModifySearchSettings>1</CanModifySearchSettings>
+          <CanModifyRequirementLevelSettings>1</CanModifyRequirementLevelSettings>
+          <CanModifyAdditionalSettings>1</CanModifyAdditionalSettings>
+          <SourceType>0</SourceType>
+          <IsGlobalFilterEnabled>0</IsGlobalFilterEnabled>
+          <IsSortableEnabled>0</IsSortableEnabled>
+          <CanModifyGlobalFilterSettings>1</CanModifyGlobalFilterSettings>
+          <CanModifyIsSortableSettings>1</CanModifyIsSortableSettings>
+          <IsDataSourceSecret>0</IsDataSourceSecret>
+          <AutoNumberFormat></AutoNumberFormat>
+          <IsSearchable>0</IsSearchable>
+          <IsFilterable>0</IsFilterable>
+          <IsRetrievable>0</IsRetrievable>
+          <IsLocalizable>0</IsLocalizable>
+          <MinValue>0</MinValue>
+          <MaxValue>999.99</MaxValue>
+          <Accuracy>2</Accuracy>
+          <displaynames>
+            <displayname description="逾期未回收率模型分" languagecode="2052" />
+            <displayname description="逾期未回收率模型分" languagecode="1033" />
+          </displaynames>
+          <Descriptions>
+            <Description description="逾期未回收率模型分，通过数据模型计算获得" languagecode="2052" />
+            <Description description="逾期未回收率模型分，通过数据模型计算获得" languagecode="1033" />
+          </Descriptions>
+        </attribute>
+      </attributes>
+      <EntitySetName>accounts</EntitySetName>
+      <IsDuplicateCheckSupported>1</IsDuplicateCheckSupported>
+      <IsBusinessProcessEnabled>1</IsBusinessProcessEnabled>
+      <IsRequiredOffline>0</IsRequiredOffline>
+      <IsInteractionCentricEnabled>1</IsInteractionCentricEnabled>
+      <IsCollaboration>0</IsCollaboration>
+      <AutoRouteToOwnerQueue>0</AutoRouteToOwnerQueue>
+      <IsConnectionsEnabled>1</IsConnectionsEnabled>
+      <EntityColor>#794300</EntityColor>
+      <IsDocumentManagementEnabled>1</IsDocumentManagementEnabled>
+      <AutoCreateAccessTeams>1</AutoCreateAccessTeams>
+      <IsOneNoteIntegrationEnabled>1</IsOneNoteIntegrationEnabled>
+      <IsKnowledgeManagementEnabled>0</IsKnowledgeManagementEnabled>
+      <IsSLAEnabled>0</IsSLAEnabled>
+      <IsDocumentRecommendationsEnabled>0</IsDocumentRecommendationsEnabled>
+      <IsBPFEntity>0</IsBPFEntity>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <EntityMask>ActivityPointer</EntityMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsRetrieveAuditEnabled>0</IsRetrieveAuditEnabled>
+      <IsRetrieveMultipleAuditEnabled>0</IsRetrieveMultipleAuditEnabled>
+      <IsActivity>0</IsActivity>
+      <ActivityTypeMask></ActivityTypeMask>
+      <IsActivityParty>1</IsActivityParty>
+      <IsReplicated>1</IsReplicated>
+      <IsReplicationUserFiltered>1</IsReplicationUserFiltered>
+      <IsMailMergeEnabled>1</IsMailMergeEnabled>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>1</IsOfflineInMobileClient>
+      <DaysSinceRecordLastModified>0</DaysSinceRecordLastModified>
+      <MobileOfflineFilters>
+		&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false"&gt;
+			&lt;entity name="account"&gt;
+				&lt;filter type="and"&gt;
+					&lt;condition attribute="modifiedon" operator="last-x-days" value="10"/&gt;
+				&lt;/filter&gt;
+			&lt;/entity&gt;
+		&lt;/fetch&gt;
+	</MobileOfflineFilters>
+      <IsMapiGridEnabled>1</IsMapiGridEnabled>
+      <IsReadingPaneEnabled>1</IsReadingPaneEnabled>
+      <IsQuickCreateEnabled>0</IsQuickCreateEnabled>
+      <SyncToExternalSearchIndex>1</SyncToExternalSearchIndex>
+      <IntroducedVersion>5.0.0.0</IntroducedVersion>
+      <IconVectorName></IconVectorName>
+      <EnforceStateTransitions>0</EnforceStateTransitions>
+      <EntityHelpUrlEnabled>1</EntityHelpUrlEnabled>
+      <EntityHelpUrl>https://outerstorageprod.z23.web.core.windows.net/help/en/docs/Sales/Customer/</EntityHelpUrl>
+      <ChangeTrackingEnabled>1</ChangeTrackingEnabled>
+      <IsEnabledForExternalChannels>1</IsEnabledForExternalChannels>
+      <IsMSTeamsIntegrationEnabled>0</IsMSTeamsIntegrationEnabled>
+      <IsSolutionAware>0</IsSolutionAware>
+      <HasRelatedNotes>True</HasRelatedNotes>
+      <HasRelatedActivities>True</HasRelatedActivities>
+    </entity>
+  </EntityInfo>
+  <FormXml />
+  <RibbonDiffXml />
+</Entity>

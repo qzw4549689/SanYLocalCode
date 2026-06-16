@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{2f69f1ee-2861-4c59-ad3d-937cbd7c2382}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form><tabs><tab verticallayout="true" id="{99FA482A-AE8D-4507-8659-6B3B778A9864}" IsUserDefined="1">
+      <labels><label description="General" languagecode="1033" /><label description="常规" languagecode="2052" /></labels>
+      <columns><column width="100%"><sections>
+        <section showlabel="false" showbar="false" IsUserDefined="0" id="{08CC2F96-CB6A-4ABA-8B95-7D7F5C4CC8AC}">
+          <labels><label description="General" languagecode="1033" /><label description="常规" languagecode="2052" /></labels>
+          <rows><row>
+            <cell id="{5F13830C-BB77-43DF-9F5B-A3FB86107356}">
+              <labels><label description="信用评估编码" languagecode="1033" /><label description="信用评估编码" languagecode="2052" /></labels>
+              <control id="mcs_scoreid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_scoreid" />
+            </cell>
+          </row></rows>
+        </section>
+      </sections></column></columns>
+    </tab></tabs></form>
+    <IsCustomizable>1</IsCustomizable><CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames><LocalizedName description="Quick View" languagecode="1033" /><LocalizedName description="快速查看" languagecode="2052" /></LocalizedNames>
+  </systemform>
+</forms>

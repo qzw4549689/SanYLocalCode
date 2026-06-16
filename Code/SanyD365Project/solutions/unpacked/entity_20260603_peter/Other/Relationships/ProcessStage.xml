@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="lk_mcs_credit_activestageid">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit</ReferencingEntityName>
+    <ReferencedEntityName>ProcessStage</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ActiveStageId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the active stage for the Business Process Flow instance." languagecode="1033" />
+        <Description description="业务流程实例的活动阶段的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik tahapan aktif untuk instans Alur Proses Bisnis." languagecode="1057" />
+        <Description description="รหัสเฉพาะของลำดับขั้นที่ใช้งานสำหรับอินสแตนซ์ของโฟลว์กระบวนการธุรกิจ" languagecode="1054" />
+        <Description description="Identificador único de la fase activa de la instancia del flujo de proceso de negocio." languagecode="3082" />
+        <Description description="المُعرِّف الفريد للمرحلة النشطة لمثيل سير إجراءات العمل." languagecode="1025" />
+        <Description description="Identificador exclusivo do estágio ativo na instância do Fluxo do Processo Empresarial." languagecode="1046" />
+        <Description description="Identificatore univoco della fase attiva per l'istanza del processo aziendale." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của giai đoạn hiện hoạt trong phiên bản Dòng Quy trình Công việc." languagecode="1066" />
+        <Description description="Identificateur unique de la phase active pour l'instance du flux des processus d'entreprise." languagecode="1036" />
+        <Description description="Уникальный идентификатор активной стадии экземпляра последовательности операций бизнес-процесса." languagecode="1049" />
+        <Description description="Pengecam unik peringkat aktif bagi tika Aliran Proses Perniagaan." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner der aktiven Phase für die Geschäftsprozessflow-Instanz." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+</EntityRelationships>

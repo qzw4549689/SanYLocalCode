@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{10fb9d39-7364-4f5e-906a-052d4bd5e6ce}</savedqueryid>
+    <layoutxml>
+      <grid name="mcs_credititem_values" jump="mcs_listname" select="1" icon="1" preview="1">
+        <row name="mcs_credititem_value" id="mcs_credititem_valueid">
+          <cell name="mcs_listname" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credititem_value">
+          <attribute name="mcs_credititem_valueid" />
+          <attribute name="mcs_listname" />
+          <attribute name="createdon" />
+          <order attribute="mcs_listname" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="طريقة العرض المقترنة لـ 定性评分项目枚举值" languagecode="1025" />
+      <LocalizedName description="定性评分项目枚举值 Zugeordnete Ansicht" languagecode="1031" />
+      <LocalizedName description="定性评分项目枚举值 Associated View" languagecode="1033" />
+      <LocalizedName description="Vue associée : 定性评分项目枚举值" languagecode="1036" />
+      <LocalizedName description="Visualizzazione associata 定性评分项目枚举值" languagecode="1040" />
+      <LocalizedName description="Exibição Associada de 定性评分项目枚举值" languagecode="1046" />
+      <LocalizedName description="定性评分项目枚举值 связанное представление" languagecode="1049" />
+      <LocalizedName description="Tampilan Terkait 定性评分项目枚举值" languagecode="1057" />
+      <LocalizedName description="Dạng xem Liên kết 定性评分项目枚举值" languagecode="1066" />
+      <LocalizedName description="定性评分项目枚举值 Pandangan Berkaitan" languagecode="1086" />
+      <LocalizedName description="定性评分项目枚举值关联视图" languagecode="2052" />
+      <LocalizedName description="Vista asociada de 定性评分项目枚举值" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

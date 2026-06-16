@@ -1,0 +1,80 @@
+{
+  "entityName": "mcs_coface_financial_indicator",
+  "displayName": "Coface财务指标对照",
+  "primaryAttribute": "mcs_name",
+  "primaryAttributeDisplayName": "名称",
+  "primaryAttributeLength": 200,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": true,
+  "fields": [
+    {
+      "schemaName": "mcs_countrycode",
+      "displayName": "国家代码",
+      "description": "国家代码，如 AR / IN / MY",
+      "type": "string",
+      "required": true,
+      "maxLength": 10
+    },
+    {
+      "schemaName": "mcs_countryname",
+      "displayName": "国家名称",
+      "description": "国家名称，如 ARGENTINA",
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_indicatorname",
+      "displayName": "指标名称",
+      "description": "指标名称：NetAssets / DebtRatio / CurrentRatio / NetProfitMargin",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_typevalue",
+      "displayName": "Coface类型编码",
+      "description": "Coface indicator.type.value 编码，如 21 / 1000 / 4105",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_indicatortype",
+      "displayName": "取数位置",
+      "description": "指标在 Coface JSON 中的取数位置",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "资产负债表": 1,
+        "比率": 2
+      }
+    },
+    {
+      "schemaName": "mcs_priority",
+      "displayName": "匹配优先级",
+      "description": "同一国家同一指标多个候选编码时的匹配顺序，数字越小越优先",
+      "type": "integer",
+      "required": true,
+      "minValue": 0,
+      "maxValue": 100
+    },
+    {
+      "schemaName": "mcs_formulafallback",
+      "displayName": "兜底计算公式",
+      "description": "当直接取数失败时，用于计算该指标的公式说明",
+      "type": "memo",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_isactive",
+      "displayName": "是否有效",
+      "description": "该配置是否有效",
+      "type": "boolean",
+      "required": false,
+      "trueLabel": "是",
+      "falseLabel": "否"
+    }
+  ]
+}

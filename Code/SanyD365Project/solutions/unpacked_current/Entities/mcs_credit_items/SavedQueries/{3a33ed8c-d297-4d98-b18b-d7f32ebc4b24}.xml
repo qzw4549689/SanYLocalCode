@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{3a33ed8c-d297-4d98-b18b-d7f32ebc4b24}</savedqueryid>
+    <layoutxml>
+      <grid name="mcs_credit_itemses" jump="mcs_itemname" select="1" icon="1" preview="1">
+        <row name="mcs_credit_items" id="mcs_credit_itemsid">
+          <cell name="mcs_itemname" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_items">
+          <attribute name="mcs_credit_itemsid" />
+          <attribute name="mcs_itemname" />
+          <attribute name="createdon" />
+          <order attribute="mcs_itemname" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="طريقة العرض المقترنة لـ 客户信用评分项目表" languagecode="1025" />
+      <LocalizedName description="客户信用评分项目表 Zugeordnete Ansicht" languagecode="1031" />
+      <LocalizedName description="客户信用评分项目表 Associated View" languagecode="1033" />
+      <LocalizedName description="Vue associée : 客户信用评分项目表" languagecode="1036" />
+      <LocalizedName description="Visualizzazione associata 客户信用评分项目表" languagecode="1040" />
+      <LocalizedName description="Exibição Associada de 客户信用评分项目表" languagecode="1046" />
+      <LocalizedName description="客户信用评分项目表 связанное представление" languagecode="1049" />
+      <LocalizedName description="Tampilan Terkait 客户信用评分项目表" languagecode="1057" />
+      <LocalizedName description="Dạng xem Liên kết 客户信用评分项目表" languagecode="1066" />
+      <LocalizedName description="客户信用评分项目表 Pandangan Berkaitan" languagecode="1086" />
+      <LocalizedName description="客户信用评分项目表关联视图" languagecode="2052" />
+      <LocalizedName description="Vista asociada de 客户信用评分项目表" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

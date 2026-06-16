@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>搜索 Coface 企业</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            font-size: 13px;
+        }
+        .search-panel {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+        .search-panel input {
+            padding: 5px;
+            margin-right: 10px;
+            width: 200px;
+        }
+        .search-panel button {
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .btn-bind {
+            padding: 3px 10px;
+            cursor: pointer;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+        }
+        .btn-bind:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .message.error {
+            background-color: #fde7e9;
+            color: #a80000;
+            border: 1px solid #a80000;
+        }
+        .message.info {
+            background-color: #e5f1fb;
+            color: #0078d4;
+            border: 1px solid #0078d4;
+        }
+        .loading {
+            color: #0078d4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h3>搜索 Coface 企业</h3>
+
+    <div class="search-panel">
+        <label>英文名称: <input type="text" id="companyName" /></label>
+        <label>国家编码: <input type="text" id="countryCode" maxlength="2" style="width:80px;" /></label>
+        <button id="btnSearch" onclick="searchCompanies()">搜索</button>
+        <button id="btnClose" onclick="closeDialog()">关闭</button>
+    </div>
+
+    <div id="messageArea"></div>
+    <div id="resultArea"></div>
+
+    <script>
+        var pageData = null;
+        var recordId = null;
+        var accountId = null;
+        var accountName = null;
+        var baseUrl = window.location.origin;
+
+        // 从 URL 中解析 data 参数
+        function getPageData() {
+            try {
+                var url = window.location.href;
+                var match = url.match(/[?&]data=([^&#]+)/);
+                if (match && match[1]) {
+                    return JSON.parse(decodeURIComponent(match[1].replace(/\+/g, " ")));
+                }
+            } catch (e) {
+                console.error("解析 data 参数失败:", e);
+            }
+            return null;
+        }
+
+        // 页面加载时初始化
+        window.onload = function () {
+            try {
+                pageData = getPageData();
+                if (!pageData || !pageData.creditRecordId) {
+                    showMessage("初始化失败: 未获取到记录上下文", "error");
+                    return;
+                }
+
+                recordId = pageData.creditRecordId;
+                accountId = pageData.accountId;
+                accountName = pageData.accountName;
+
+                // 自动带入英文名称和国家编码
+                document.getElementById("companyName").value = pageData.companyName || "";
+                document.getElementById("countryCode").value = pageData.countryCode || "";
+            } catch (e) {
+                showMessage("初始化失败: " + e.message, "error");
+            }
+        };
+
+        function showMessage(text, type) {
+            var area = document.getElementById("messageArea");
+            area.innerHTML = '<div class="message ' + type + '">' + escapeHtml(text) + '</div>';
+        }
+
+        function clearMessage() {
+            document.getElementById("messageArea").innerHTML = "";
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function toPlainGuid(guid) {
+            if (!guid) return guid;
+            return guid.replace(/[{}]/g, "").toLowerCase();
+        }
+
+        function getApiHeaders() {
+            return {
+                "Accept": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
+                "OData-MaxVersion": "4.0",
+                "OData-Version": "4.0"
+            };
+        }
+
+        function handleFetchError(response) {
+            if (!response.ok) {
+                return response.text().then(function (text) {
+                    throw new Error("HTTP " + response.status + ": " + (text || response.statusText));
+                });
+            }
+            return response;
+        }
+
+        function searchCompanies() {
+            clearMessage();
+            var companyName = document.getElementById("companyName").value.trim();
+            var countryCode = document.getElementById("countryCode").value.trim().toUpperCase();
+
+            if (!companyName) {
+                showMessage("请输入客户英文名称", "error");
+                return;
+            }
+            if (!countryCode) {
+                showMessage("请输入国家编码", "error");
+                return;
+            }
+
+            document.getElementById("resultArea").innerHTML = '<div class="loading">搜索中...</div>';
+            document.getElementById("btnSearch").disabled = true;
+
+            var url = baseUrl + "/api/data/v9.2/mcs_CofaceSearchCompany";
+            var body = JSON.stringify({
+                CompanyName: companyName,
+                CountryCode: countryCode
+            });
+
+            fetch(url, {
+                method: "POST",
+                headers: getApiHeaders(),
+                body: body,
+                credentials: "same-origin"
+            })
+            .then(handleFetchError)
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                document.getElementById("btnSearch").disabled = false;
+                if (data && data.ResultJson) {
+                    var companies = JSON.parse(data.ResultJson);
+                    renderResults(companies);
+                } else {
+                    showMessage("搜索返回数据异常", "error");
+                    document.getElementById("resultArea").innerHTML = "";
+                }
+            })
+            .catch(function (error) {
+                document.getElementById("btnSearch").disabled = false;
+                showMessage("搜索失败: " + (error.message || JSON.stringify(error)), "error");
+                document.getElementById("resultArea").innerHTML = "";
+            });
+        }
+
+        function renderResults(companies) {
+            if (!companies || companies.length === 0) {
+                document.getElementById("resultArea").innerHTML = "<div>未找到匹配企业</div>";
+                return;
+            }
+
+            var html = '<table><thead><tr>' +
+                '<th>Coface ID</th>' +
+                '<th>名称</th>' +
+                '<th>地址</th>' +
+                '<th>城市</th>' +
+                '<th>注册号</th>' +
+                '<th>税号</th>' +
+                '<th>操作</th>' +
+                '</tr></thead><tbody>';
+
+            companies.forEach(function (company) {
+                html += '<tr>' +
+                    '<td>' + escapeHtml(company.CofaceId) + '</td>' +
+                    '<td>' + escapeHtml(company.Name) + '</td>' +
+                    '<td>' + escapeHtml(company.Address) + '</td>' +
+                    '<td>' + escapeHtml(company.City) + '</td>' +
+                    '<td>' + escapeHtml(company.RegistrationNumber) + '</td>' +
+                    '<td>' + escapeHtml(company.TaxNumber) + '</td>' +
+                    '<td><button class="btn-bind" onclick="bindCofaceId(\'' + escapeHtml(company.CofaceId) + '\')">绑定</button></td>' +
+                    '</tr>';
+            });
+
+            html += '</tbody></table>';
+            document.getElementById("resultArea").innerHTML = html;
+            showMessage("找到 " + companies.length + " 个候选企业，请选择匹配项绑定", "info");
+        }
+
+        function bindCofaceId(cofaceId) {
+            if (!cofaceId) {
+                showMessage("Coface ID 为空，无法绑定", "error");
+                return;
+            }
+
+            if (!recordId) {
+                showMessage("未获取到当前评估记录 ID", "error");
+                return;
+            }
+
+            clearMessage();
+            showMessage("正在绑定...", "info");
+
+            var promises = [];
+            var plainRecordId = toPlainGuid(recordId);
+
+            // 更新评估记录
+            promises.push(
+                fetch(baseUrl + "/api/data/v9.2/mcs_credit_records(" + plainRecordId + ")", {
+                    method: "PATCH",
+                    headers: getApiHeaders(),
+                    body: JSON.stringify({ mcs_cofaceid: cofaceId }),
+                    credentials: "same-origin"
+                }).then(handleFetchError)
+            );
+
+            // 更新客户主数据
+            if (accountId) {
+                var plainAccountId = toPlainGuid(accountId);
+                promises.push(
+                    fetch(baseUrl + "/api/data/v9.2/accounts(" + plainAccountId + ")", {
+                        method: "PATCH",
+                        headers: getApiHeaders(),
+                        body: JSON.stringify({ mcs_cofaceid: cofaceId }),
+                        credentials: "same-origin"
+                    }).then(handleFetchError)
+                );
+            }
+
+            Promise.all(promises)
+                .then(function () {
+                    showMessage("绑定成功: " + cofaceId, "info");
+                    setTimeout(function () {
+                        closeDialog();
+                    }, 1000);
+                })
+                .catch(function (error) {
+                    showMessage("绑定失败: " + (error.message || JSON.stringify(error)), "error");
+                });
+        }
+
+        function closeDialog() {
+            try {
+                window.close();
+            } catch (e) {
+                // ignore
+            }
+        }
+    </script>
+</body>
+</html>

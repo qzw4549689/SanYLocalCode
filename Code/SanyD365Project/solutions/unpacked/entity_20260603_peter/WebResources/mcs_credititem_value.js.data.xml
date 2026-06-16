@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebResource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <WebResourceId>{05346b6d-2662-f111-a826-000d3aa33d1b}</WebResourceId>
+  <Name>mcs_credititem_value.js</Name>
+  <DisplayName>评分卡配置表-表单逻辑</DisplayName>
+  <WebResourceType>3</WebResourceType>
+  <IntroducedVersion>1.0</IntroducedVersion>
+  <IsEnabledForMobileClient>0</IsEnabledForMobileClient>
+  <IsAvailableForMobileOffline>0</IsAvailableForMobileOffline>
+  <IsCustomizable>1</IsCustomizable>
+  <CanBeDeleted>1</CanBeDeleted>
+  <IsHidden>0</IsHidden>
+  <FileName>/WebResources/mcs_credititem_valuejs05346B6D-2662-F111-A826-000D3AA33D1B</FileName>
+</WebResource>

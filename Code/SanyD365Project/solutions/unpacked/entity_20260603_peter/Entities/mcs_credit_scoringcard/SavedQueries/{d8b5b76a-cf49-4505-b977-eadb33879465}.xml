@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>0</isdefault>
+    <savedqueryid>{d8b5b76a-cf49-4505-b977-eadb33879465}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_cardname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credit_scoringcardid">
+          <cell name="mcs_cardname" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_scoringcard">
+          <attribute name="mcs_credit_scoringcardid" />
+          <attribute name="mcs_cardname" />
+          <attribute name="createdon" />
+          <order attribute="mcs_cardname" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="1" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Inactive 客户评分卡配置表" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

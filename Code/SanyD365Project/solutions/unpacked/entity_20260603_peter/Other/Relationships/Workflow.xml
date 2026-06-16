@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="lk_mcs_credit_processid">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit</ReferencingEntityName>
+    <ReferencedEntityName>Workflow</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ProcessId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the workflow associated to the Business Process Flow instance." languagecode="1033" />
+        <Description description="与业务流程实例关联的工作流的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik alur kerja yang terkait dengan instans Alur Proses Bisnis." languagecode="1057" />
+        <Description description="รหัสเฉพาะของเวิร์กโฟลว์ที่เกี่ยวข้องกับอินสแตนซ์ของโฟลว์กระบวนการธุรกิจ" languagecode="1054" />
+        <Description description="Identificador único del flujo de trabajo asociado a la instancia del flujo de proceso de negocio." languagecode="3082" />
+        <Description description="المُعرِّف الفريد لسير العمل المقترن بمثيل سير إجراءات العمل." languagecode="1025" />
+        <Description description="Identificador exclusivo do fluxo de trabalho associado à instância do Fluxo do Processo Empresarial." languagecode="1046" />
+        <Description description="Identificatore univoco del flusso di lavoro associato all'istanza del processo aziendale." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của quy trình làm việc liên kết với phiên bản Dòng Quy trình Công việc." languagecode="1066" />
+        <Description description="Identificateur unique du workflow associé à l'instance du flux des processus d'entreprise." languagecode="1036" />
+        <Description description="Уникальный идентификатор бизнес-процесса, связанного с экземпляром последовательности операций бизнес-процесса." languagecode="1049" />
+        <Description description="Pengecam unik aliran kerja yang berkaitan dengan tika Aliran Proses Perniagaan." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Workflows, der der Geschäftsprozessflow-Instanz zugeordnet ist." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+</EntityRelationships>

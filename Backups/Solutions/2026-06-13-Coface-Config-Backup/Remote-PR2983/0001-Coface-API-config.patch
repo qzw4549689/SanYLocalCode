@@ -1,0 +1,336 @@
+From 1668a8596f8a3db1278ab8c5ff252d69eac2ed37 Mon Sep 17 00:00:00 2001
+From: peterqiu <peterqiu@example.com>
+Date: Sat, 13 Jun 2026 07:50:18 +0800
+Subject: [PATCH] =?UTF-8?q?Coface=20API=20=E9=85=8D=E7=BD=AE=E5=8C=96?=
+ =?UTF-8?q?=EF=BC=9A=E4=BB=8E=20ms=5Fsystemconfiguration=20=E8=AF=BB?=
+ =?UTF-8?q?=E5=8F=96=20CofaceApiConfig=EF=BC=8C=E7=A7=BB=E9=99=A4=E7=A1=AC?=
+ =?UTF-8?q?=E7=BC=96=E7=A0=81?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../CofaceIntegration/CofaceApiConfig.cs      | 25 ++++++++
+ .../CofaceIntegration/CofaceApiService.cs     | 40 +++++++------
+ .../CofaceIntegration/CofaceConfigHelper.cs   | 58 +++++++++++++++++++
+ .../CofaceIntegration/CofaceTokenManager.cs   | 19 +++---
+ .../SanyD365.D365Extension.Sales.csproj       |  4 +-
+ 5 files changed, 116 insertions(+), 30 deletions(-)
+ create mode 100644 D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiConfig.cs
+ create mode 100644 D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceConfigHelper.cs
+
+diff --git a/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiConfig.cs b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiConfig.cs
+new file mode 100644
+index 0000000000..d15fce6390
+--- /dev/null
++++ b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiConfig.cs
+@@ -0,0 +1,25 @@
++using System.Text.Json.Serialization;
++
++namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
++{
++    /// <summary>
++    /// Coface API configuration, loaded from ms_systemconfiguration (name = CofaceApiConfig)
++    /// </summary>
++    public class CofaceApiConfig
++    {
++        [JsonPropertyName("baseUrl")]
++        public string BaseUrl { get; set; } = string.Empty;
++
++        [JsonPropertyName("authUrl")]
++        public string AuthUrl { get; set; } = string.Empty;
++
++        [JsonPropertyName("apiKey")]
++        public string ApiKey { get; set; } = string.Empty;
++
++        [JsonPropertyName("username")]
++        public string Username { get; set; } = string.Empty;
++
++        [JsonPropertyName("password")]
++        public string Password { get; set; } = string.Empty;
++    }
++}
+diff --git a/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiService.cs b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiService.cs
+index 4ccba57a2c..0420eae0e2 100644
+--- a/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiService.cs
++++ b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiService.cs
+@@ -1,4 +1,6 @@
+ using Microsoft.Xrm.Sdk;
++
++using SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration;
+ using System;
+ using System.IO;
+ using System.Net;
+@@ -16,37 +18,35 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+         private readonly IOrganizationService _service;
+         private readonly ITracingService _tracer;
+         private readonly CofaceTokenManager _tokenManager;
+-
+-        // 测试环境URL
+-        private const string BASE_URL = "https://icon-api-test.coface.com/dataapi-v1";
+-        private const string API_KEY = "0vneRg8vLjzPQlIfSkzO8kIDg04kfaKafTzg5sX1";
++        private readonly CofaceApiConfig _config;
+ 
+         public CofaceApiService(IOrganizationService service, ITracingService tracer)
+         {
+             _service = service;
+             _tracer = tracer;
++            _config = CofaceConfigHelper.GetConfig(service);
+             _tokenManager = new CofaceTokenManager(service, tracer);
+         }
+ 
+         #region 公司搜索
+ 
+         /// <summary>
+-        /// 搜索公司（通过英文名称+国家编码）
++        /// 搜索公司（通过英文名称+国家编码�?
+         /// </summary>
+         public JsonDocument SearchCompany(string companyName, string countryCode)
+         {
+             _tracer.Trace($"SearchCompany: name={companyName}, country={countryCode}");
+-            string url = $"{BASE_URL}/companies?companyName={Uri.EscapeDataString(companyName)}&countryCode={countryCode}";
++            string url = $"{_config.BaseUrl}/companies?companyName={Uri.EscapeDataString(companyName)}&countryCode={countryCode}";
+             return ExecuteGet(url);
+         }
+ 
+         /// <summary>
+-        /// 搜索公司（通过externalId+国家编码）
++        /// 搜索公司（通过externalId+国家编码�?
+         /// </summary>
+         public JsonDocument SearchCompanyByExternalId(string externalId, string countryCode)
+         {
+             _tracer.Trace($"SearchCompanyByExternalId: externalId={externalId}, country={countryCode}");
+-            string url = $"{BASE_URL}/companies?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
++            string url = $"{_config.BaseUrl}/companies?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
+             return ExecuteGet(url);
+         }
+ 
+@@ -60,17 +60,17 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+         public JsonDocument GetUrbaMonitoringOrders(string externalId, string countryCode)
+         {
+             _tracer.Trace($"GetUrbaMonitoringOrders: externalId={externalId}, country={countryCode}");
+-            string url = $"{BASE_URL}/urba360/monitorings/orders?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
++            string url = $"{_config.BaseUrl}/urba360/monitorings/orders?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
+             return ExecuteGet(url);
+         }
+ 
+         /// <summary>
+-        /// 获取URBA360监控订单状态
++        /// 获取URBA360监控订单状�?
+         /// </summary>
+         public JsonDocument GetUrbaMonitoringOrderStatus(string orderId)
+         {
+             _tracer.Trace($"GetUrbaMonitoringOrderStatus: orderId={orderId}");
+-            string url = $"{BASE_URL}/urba360/monitorings/orders/{orderId}";
++            string url = $"{_config.BaseUrl}/urba360/monitorings/orders/{orderId}";
+             return ExecuteGet(url);
+         }
+ 
+@@ -80,7 +80,7 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+         public JsonDocument GetUrbaContent(string orderId)
+         {
+             _tracer.Trace($"GetUrbaContent: orderId={orderId}");
+-            string url = $"{BASE_URL}/urba360/content?id={orderId}";
++            string url = $"{_config.BaseUrl}/urba360/content?id={orderId}";
+             return ExecuteGet(url);
+         }
+ 
+@@ -94,17 +94,19 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+         public JsonDocument GetReportOrders(string externalId, string countryCode)
+         {
+             _tracer.Trace($"GetReportOrders: externalId={externalId}, country={countryCode}");
+-            string url = $"{BASE_URL}/publications/orders?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
++            string url = $"{_config.BaseUrl}/publications/orders?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
+             return ExecuteGet(url);
+         }
+ 
+         /// <summary>
+-        /// 获取Report内容（通过publicationId）
++        /// 获取Report内容（通过publicationId�?
+         /// </summary>
+         public JsonDocument GetReportContent(string publicationId)
+         {
+             _tracer.Trace($"GetReportContent: publicationId={publicationId}");
+-            string url = $"{BASE_URL}/publications?id={publicationId}&format=json";
++            // 去掉 format=json 参数：某�?publication（如波兰�?6国）不支�?JSON 格式�?
++            // 不指�?format �?Coface 会返回默认支持的格式
++            string url = $"{_config.BaseUrl}/publications?id={publicationId}";
+             return ExecuteGet(url);
+         }
+ 
+@@ -123,8 +125,8 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+             request.Method = "GET";
+             request.ContentType = "application/json";
+             request.Headers.Add("Authorization", $"Bearer {token}");
+-            request.Headers.Add("x-api-key", API_KEY);
+-            request.Timeout = 30000; // 30秒超时
++            request.Headers.Add("x-api-key", _config.ApiKey);
++            request.Timeout = 30000; // 30秒超�?
+ 
+             _tracer.Trace($"HTTP GET: {url}");
+ 
+@@ -171,7 +173,7 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+ 
+             _tracer.Trace(errorMsg);
+ 
+-            // 401/403时尝试刷新Token重试一次
++            // 401/403时尝试刷新Token重试一�?
+             if (statusCode == 401 || statusCode == 403)
+             {
+                 _tracer.Trace("Token可能过期，尝试刷新后重试");
+@@ -199,7 +201,7 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+             request.Method = "GET";
+             request.ContentType = "application/json";
+             request.Headers.Add("Authorization", $"Bearer {token}");
+-            request.Headers.Add("x-api-key", API_KEY);
++            request.Headers.Add("x-api-key", _config.ApiKey);
+             request.Timeout = 30000;
+ 
+             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+diff --git a/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceConfigHelper.cs b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceConfigHelper.cs
+new file mode 100644
+index 0000000000..69c1af0200
+--- /dev/null
++++ b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceConfigHelper.cs
+@@ -0,0 +1,58 @@
++using Microsoft.Xrm.Sdk;
++using Microsoft.Xrm.Sdk.Query;
++using System;
++using System.Linq;
++using System.Text.Json;
++
++namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
++{
++    /// <summary>
++    /// Helper to load Coface API configuration from ms_systemconfiguration
++    /// </summary>
++    public static class CofaceConfigHelper
++    {
++        public const string ConfigName = "CofaceApiConfig";
++        public const string ConfigEntityName = "ms_systemconfiguration";
++        public const string ConfigNameField = "ms_name";
++        public const string ConfigContentField = "ms_content";
++
++        public static CofaceApiConfig GetConfig(IOrganizationService service)
++        {
++            if (service == null)
++                throw new ArgumentNullException(nameof(service));
++
++            var query = new QueryExpression(ConfigEntityName)
++            {
++                ColumnSet = new ColumnSet(ConfigContentField)
++            };
++            query.Criteria.AddCondition(ConfigNameField, ConditionOperator.Equal, ConfigName);
++
++            var results = service.RetrieveMultiple(query);
++            var entity = results.Entities.FirstOrDefault();
++            if (entity == null)
++            {
++                throw new InvalidPluginExecutionException($"System configuration not found: {ConfigName}. Please create it in {ConfigEntityName}.");
++            }
++
++            var json = entity.GetAttributeValue<string>(ConfigContentField);
++            if (string.IsNullOrWhiteSpace(json))
++            {
++                throw new InvalidPluginExecutionException($"System configuration {ConfigName} content is empty.");
++            }
++
++            try
++            {
++                var config = JsonSerializer.Deserialize<CofaceApiConfig>(json);
++                if (config == null)
++                {
++                    throw new InvalidPluginExecutionException($"Failed to deserialize system configuration {ConfigName}.");
++                }
++                return config;
++            }
++            catch (JsonException ex)
++            {
++                throw new InvalidPluginExecutionException($"Invalid JSON in system configuration {ConfigName}: {ex.Message}");
++            }
++        }
++    }
++}
+diff --git a/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceTokenManager.cs b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceTokenManager.cs
+index a26ede3aab..740f54e943 100644
+--- a/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceTokenManager.cs
++++ b/D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceTokenManager.cs
+@@ -17,17 +17,13 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+     {
+         private readonly IOrganizationService _service;
+         private readonly ITracingService _tracer;
++        private readonly CofaceApiConfig _config;
+ 
+-        // Coface配置
+-        private const string AUTH_URL = "https://api.coface.com/authentication/v1/token";
+-        private const string API_KEY = "0vneRg8vLjzPQlIfSkzO8kIDg04kfaKafTzg5sX1";
+-        private const string USERNAME = "tangys12@sany.com.cn";
+-        private const string PASSWORD = "1qaz!QAZ";
+         private const int TOKEN_EXPIRY_SECONDS = 3600;
+         private const int REFRESH_BUFFER_SECONDS = 300; // 提前5分钟刷新
+ 
+         // D365配置实体信息
+-        private const string CONFIG_ENTITY = "mcs_system_config"; // 系统配置实体
++        private const string CONFIG_ENTITY = "ms_systemconfiguration"; // 系统配置实体
+         private const string CONFIG_TOKEN = "coface_idtoken";
+         private const string CONFIG_EXPIRY = "coface_token_expiry";
+ 
+@@ -35,6 +31,7 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+         {
+             _service = service;
+             _tracer = tracer;
++            _config = CofaceConfigHelper.GetConfig(service);
+         }
+ 
+         /// <summary>
+@@ -56,15 +53,15 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+ 
+             try
+             {
+-                var request = (HttpWebRequest)WebRequest.Create(AUTH_URL);
++                var request = (HttpWebRequest)WebRequest.Create(_config.AuthUrl);
+                 request.Method = "POST";
+                 request.ContentType = "application/json";
+-                request.Headers.Add("x-api-key", API_KEY);
++                request.Headers.Add("x-api-key", _config.ApiKey);
+ 
+                 var body = new
+                 {
+-                    username = USERNAME,
+-                    password = PASSWORD,
++                    username = _config.Username,
++                    password = _config.Password,
+                     grant_type = "password"
+                 };
+ 
+@@ -109,5 +106,7 @@ namespace SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration
+                 throw new InvalidPluginExecutionException(errorMsg);
+             }
+         }
++
++
+     }
+ }
+diff --git a/D365/SanyD365.D365Extension.Sales/SanyD365.D365Extension.Sales.csproj b/D365/SanyD365.D365Extension.Sales/SanyD365.D365Extension.Sales.csproj
+index 30aa7beeaa..5a803c6519 100644
+--- a/D365/SanyD365.D365Extension.Sales/SanyD365.D365Extension.Sales.csproj
++++ b/D365/SanyD365.D365Extension.Sales/SanyD365.D365Extension.Sales.csproj
+@@ -559,6 +559,8 @@
+     <Compile Include="Plugins\TrialMachine\TrialMachinePlugin.cs" />
+     <Compile Include="Plugins\RestrictionManagements\RestrictionManagementPlugins.cs" />
+     <Compile Include="Application\Sales\RestrictionManagements\RestrictionManagementService.cs" />
++    <Compile Include="Application\Sales\CofaceIntegration\CofaceApiConfig.cs" />
++    <Compile Include="Application\Sales\CofaceIntegration\CofaceConfigHelper.cs" />
+     <Compile Include="Application\Sales\CofaceIntegration\CofaceApiService.cs" />
+     <Compile Include="Application\Sales\CofaceIntegration\CofaceTokenManager.cs" />
+     <Compile Include="Application\Sales\CofaceIntegration\FullReportParser.cs" />
+@@ -587,4 +589,4 @@
+   <Import Project="..\..\Common\MSLibrary.D365.Common\MSLibrary.D365.Common.projitems" Label="Shared" />
+   <Import Project="..\SanyD365.D365ExtensionMain\SanyD365.D365ExtensionMain.projitems" Label="Shared" />
+   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+-</Project>
+\ No newline at end of file
++</Project>
+-- 
+2.49.0.windows.1
+

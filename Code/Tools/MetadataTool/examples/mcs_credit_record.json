@@ -1,0 +1,212 @@
+{
+  "entityName": "mcs_credit_record",
+  "displayName": "客户信用评估记录表",
+  "primaryAttribute": "mcs_scoreid",
+  "primaryAttributeDisplayName": "信用评估编码",
+  "primaryAttributeLength": 50,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_accountid",
+      "displayName": "客户编码",
+      "description": "从客户管理模块带入",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_custname",
+      "displayName": "客户名称",
+      "description": "从客户管理模块带入",
+      "type": "string",
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_custnameen",
+      "displayName": "客户英文名称",
+      "description": "从客户管理模块带入",
+      "type": "string",
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_countrycode",
+      "displayName": "国家编码",
+      "description": "通过客户注册国家取代码",
+      "type": "string",
+      "maxLength": 2
+    },
+    {
+      "schemaName": "mcs_cofaceid",
+      "displayName": "科法斯客户代码",
+      "description": "Coface唯一企业编码",
+      "type": "string",
+      "maxLength": 30
+    },
+    {
+      "schemaName": "mcs_urba360id",
+      "displayName": "URBA订单ID",
+      "description": "科法斯URBA360产品订单ID",
+      "type": "string",
+      "maxLength": 60
+    },
+    {
+      "schemaName": "mcs_urbastatus",
+      "displayName": "URBA订单状态",
+      "description": "URBA订单状态",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_rptorderid",
+      "displayName": "Report订单ID",
+      "description": "科法斯Publication产品订单ID",
+      "type": "string",
+      "maxLength": 60
+    },
+    {
+      "schemaName": "mcs_rptstatus",
+      "displayName": "Report订单状态",
+      "description": "Report订单状态",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_publicationid",
+      "displayName": "Publication ID",
+      "description": "Publication ID",
+      "type": "string",
+      "maxLength": 60
+    },
+    {
+      "schemaName": "mcs_applicant",
+      "displayName": "申请人",
+      "description": "系统登录用户姓名",
+      "type": "string",
+      "maxLength": 45
+    },
+    {
+      "schemaName": "mcs_api_status",
+      "displayName": "API状态",
+      "description": "外部接口返回状态",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_api_name",
+      "displayName": "API名称",
+      "description": "调用的API名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_api_msg",
+      "displayName": "API消息",
+      "description": "外部接口返回消息",
+      "type": "string",
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_bppstatus",
+      "displayName": "BPP状态",
+      "description": "BPP审批状态",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_bppappriver",
+      "displayName": "BPP审批人",
+      "description": "BPP审批人",
+      "type": "string",
+      "maxLength": 45
+    },
+    {
+      "schemaName": "mcs_bppid",
+      "displayName": "BPP审批ID",
+      "description": "BPP审批ID",
+      "type": "string",
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_remark",
+      "displayName": "备注说明",
+      "description": "人工填写",
+      "type": "memo",
+      "maxLength": 4000
+    },
+    {
+      "schemaName": "mcs_urbajson",
+      "displayName": "URBA JSON",
+      "description": "URBA接口返回JSON",
+      "type": "memo",
+      "maxLength": 4000
+    },
+    {
+      "schemaName": "mcs_reportjson",
+      "displayName": "Report JSON",
+      "description": "Report接口返回JSON",
+      "type": "memo",
+      "maxLength": 4000
+    },
+    {
+      "schemaName": "mcs_creditscore",
+      "displayName": "客户信用评分",
+      "description": "客户信用评分",
+      "type": "decimal",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_status",
+      "displayName": "评估状态",
+      "description": "评估状态",
+      "type": "picklist",
+      "options": {
+        "发起信用评估": 9,
+        "关联客户代码": 10,
+        "内外部数据集成": 11,
+        "人工复核": 12,
+        "信用分计算": 13,
+        "审核申请": 14,
+        "审批通过": 15,
+        "审批未通过": 16
+      }
+    },
+    {
+      "schemaName": "mcs_active",
+      "displayName": "有效状态",
+      "description": "有效状态",
+      "type": "boolean",
+      "trueLabel": "是",
+      "falseLabel": "否"
+    },
+    {
+      "schemaName": "mcs_initdate",
+      "displayName": "发起评估日期",
+      "description": "发起评估日期",
+      "type": "datetime",
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_abidate",
+      "displayName": "数据集成日期",
+      "description": "数据集成日期",
+      "type": "datetime",
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_checkdate",
+      "displayName": "复核日期",
+      "description": "复核日期",
+      "type": "datetime",
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_scoredate",
+      "displayName": "评分日期",
+      "description": "评分日期",
+      "type": "datetime",
+      "dateOnly": true
+    }
+  ]
+}

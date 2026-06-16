@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>0</isdefault>
+    <savedqueryid>{b7ddd8e4-eb5c-4735-9a4d-656bb882de60}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_scoreid" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credit_recordid">
+          <cell name="mcs_scoreid" width="300" />
+          <cell name="createdon" width="125" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_record">
+          <attribute name="mcs_credit_recordid" />
+          <attribute name="mcs_scoreid" />
+          <attribute name="createdon" />
+          <order attribute="mcs_scoreid" descending="false" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="1" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Inactive 客户信用评估记录表" languagecode="1033" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

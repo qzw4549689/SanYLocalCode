@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{1ed57397-232c-4dbb-9c01-f899fdd6bc47}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{0894DE60-1F76-4789-8ABF-C803FA213013}" IsUserDefined="1">
+          <labels>
+            <label description="评分卡名称" languagecode="1033" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="false" showbar="false" IsUserDefined="0" id="{7732DBDC-91A5-4A08-9FF8-93BE83AC8BFC}">
+                  <labels>
+                    <label description="عام" languagecode="1025" />
+                    <label description="ALLGEMEIN" languagecode="1031" />
+                    <label description="评分卡名称" languagecode="1033" />
+                    <label description="GÉNÉRAL" languagecode="1036" />
+                    <label description="GENERALE" languagecode="1040" />
+                    <label description="GERAL" languagecode="1046" />
+                    <label description="ОБЩИЕ" languagecode="1049" />
+                    <label description="ทั่วไป" languagecode="1054" />
+                    <label description="UMUM" languagecode="1057" />
+                    <label description="TỔNG QUÁT" languagecode="1066" />
+                    <label description="UMUM" languagecode="1086" />
+                    <label description="评分卡名称" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{DF5E7B93-B561-4521-9A3F-C4B2D95954C1}">
+                        <labels>
+                          <label description="评分卡名称" languagecode="1033" />
+                          <label description="评分卡名称" languagecode="2052" />
+                          <label description="mcs_itemname" languagecode="1057" />
+                          <label description="mcs_itemname" languagecode="1054" />
+                          <label description="mcs_itemname" languagecode="3082" />
+                          <label description="mcs_itemname" languagecode="1025" />
+                          <label description="mcs_itemname" languagecode="1046" />
+                          <label description="mcs_itemname" languagecode="1040" />
+                          <label description="mcs_itemname" languagecode="1066" />
+                          <label description="mcs_itemname" languagecode="1036" />
+                          <label description="mcs_itemname" languagecode="1049" />
+                          <label description="mcs_itemname" languagecode="1086" />
+                          <label description="mcs_itemname" languagecode="1031" />
+                        </labels>
+                        <control id="mcs_cardname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_cardname" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{685E2B01-03FD-4AD4-AA97-D8AFFB3672B7}">
+                        <labels>
+                          <label description="评分卡名称" languagecode="1033" />
+                          <label description="评分卡名称" languagecode="2052" />
+                          <label description="Pemilik" languagecode="1057" />
+                          <label description="Propietario" languagecode="3082" />
+                          <label description="المالك" languagecode="1025" />
+                          <label description="Proprietário" languagecode="1046" />
+                          <label description="Proprietario" languagecode="1040" />
+                          <label description="Chủ sở hữu" languagecode="1066" />
+                          <label description="Propriétaire" languagecode="1036" />
+                          <label description="Ответственный" languagecode="1049" />
+                          <label description="Pemilik" languagecode="1086" />
+                          <label description="Besitzer" languagecode="1031" />
+                        </labels>
+                        <control id="ownerid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ownerid" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="معلومات" languagecode="1025" />
+      <LocalizedName description="Informationen" languagecode="1031" />
+      <LocalizedName description="Information" languagecode="1033" />
+      <LocalizedName description="Informations" languagecode="1036" />
+      <LocalizedName description="Informazioni" languagecode="1040" />
+      <LocalizedName description="Informações" languagecode="1046" />
+      <LocalizedName description="Сведения" languagecode="1049" />
+      <LocalizedName description="Informasi" languagecode="1057" />
+      <LocalizedName description="Thông tin" languagecode="1066" />
+      <LocalizedName description="Maklumat" languagecode="1086" />
+      <LocalizedName description="信息" languagecode="2052" />
+      <LocalizedName description="Información" languagecode="3082" />
+    </LocalizedNames>
+  </systemform>
+</forms>

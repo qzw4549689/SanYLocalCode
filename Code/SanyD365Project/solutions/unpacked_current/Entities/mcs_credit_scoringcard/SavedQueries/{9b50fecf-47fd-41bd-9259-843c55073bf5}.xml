@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{9b50fecf-47fd-41bd-9259-843c55073bf5}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_cardname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credit_scoringcardid">
+          <cell name="mcs_credit_scoringcardid" width="100" />
+          <cell name="mcs_cardname" width="100" />
+          <cell name="mcs_categoryid" width="100" />
+          <cell name="mcs_itemid" width="100" />
+          <cell name="mcs_typeid" width="100" />
+          <cell name="mcs_itemname" width="100" />
+          <cell name="mcs_datatype" width="100" />
+          <cell name="mcs_minvalue" width="100" />
+          <cell name="mcs_maxvalue" width="100" />
+          <cell name="mcs_weight" width="100" />
+          <cell name="ownerid" width="100" />
+          <cell name="statecode" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_scoringcard">
+          <attribute name="mcs_credit_scoringcardid" />
+          <attribute name="mcs_cardname" />
+          <attribute name="mcs_categoryid" />
+          <attribute name="mcs_itemid" />
+          <attribute name="mcs_typeid" />
+          <attribute name="mcs_itemname" />
+          <attribute name="mcs_datatype" />
+          <attribute name="mcs_minvalue" />
+          <attribute name="mcs_maxvalue" />
+          <attribute name="mcs_weight" />
+          <attribute name="ownerid" />
+          <attribute name="statecode" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="طريقة العرض المقترنة لـ 客户信用评分项目表" languagecode="1025" />
+      <LocalizedName description="客户信用评分项目表 Zugeordnete Ansicht" languagecode="1031" />
+      <LocalizedName description="客户信用评分项目表 Associated View" languagecode="1033" />
+      <LocalizedName description="Vue associée : 客户信用评分项目表" languagecode="1036" />
+      <LocalizedName description="Visualizzazione associata 客户信用评分项目表" languagecode="1040" />
+      <LocalizedName description="Exibição Associada de 客户信用评分项目表" languagecode="1046" />
+      <LocalizedName description="客户信用评分项目表 связанное представление" languagecode="1049" />
+      <LocalizedName description="Tampilan Terkait 客户信用评分项目表" languagecode="1057" />
+      <LocalizedName description="Dạng xem Liên kết 客户信用评分项目表" languagecode="1066" />
+      <LocalizedName description="客户信用评分项目表 Pandangan Berkaitan" languagecode="1086" />
+      <LocalizedName description="客户信用评分项目表关联视图" languagecode="2052" />
+      <LocalizedName description="Vista asociada de 客户信用评分项目表" languagecode="3082" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

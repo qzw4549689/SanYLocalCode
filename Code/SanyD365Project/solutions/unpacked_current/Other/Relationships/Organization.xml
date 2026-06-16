@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="organization_mcs_credit">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit</ReferencingEntityName>
+    <ReferencedEntityName>Organization</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OrganizationId</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the organization" languagecode="1033" />
+        <Description description="组织的唯一标识符" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk organisasi" languagecode="1057" />
+        <Description description="Identificador único de la organización." languagecode="3082" />
+        <Description description="المعرف الفريد للمؤسسة" languagecode="1025" />
+        <Description description="Identificador exclusivo da organização" languagecode="1046" />
+        <Description description="Identificatore univoco dell'organizzazione" languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho tổ chức" languagecode="1066" />
+        <Description description="Identificateur unique de l'organisation" languagecode="1036" />
+        <Description description="Уникальный идентификатор организации." languagecode="1049" />
+        <Description description="Pengecam unik bagi organisasi" languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner der Organisation" languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+</EntityRelationships>

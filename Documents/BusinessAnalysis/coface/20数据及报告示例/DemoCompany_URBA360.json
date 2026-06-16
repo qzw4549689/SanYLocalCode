@@ -1,0 +1,270 @@
+{
+    "companyGeneralInformation": {
+        "id": "33f5fbe4-84c2-3984-b6e0-e5983af2f788",
+        "name": "NEW NAME TEST TEST Firma Testowa ABC-TEST Sp. z o.o.",
+        "countryCode": "PL",
+        "naceCodes": [
+            {
+                "code": "4711",
+                "label": "Retail sale in non-specialised stores with food, beverages or tobacco predominating"
+            },
+            {
+                "code": "4640",
+                "label": "Wholesale of household goods"
+            },
+            {
+                "code": "4710",
+                "label": "Retail sale in non-specialised stores"
+            }
+        ],
+        "legalForm": {
+            "code": "300",
+            "label": "Limited Liability Company"
+        },
+        "address": {
+            "address1": "NEW ADDRESS TEST ul. Nowa Testowa 12",
+            "postalCode": "31-358",
+            "city": "Kraków",
+            "countryCode": "PL"
+        },
+        "phoneNumbers": [
+            {
+                "internationalPrefix": "22",
+                "value": "0000001",
+                "countryCode": "PL",
+                "main": true
+            }
+        ],
+        "websites": [
+            {
+                "url": "www.ftabc-t.com.pl",
+                "main": true
+            }
+        ],
+        "externalIds": [
+            {
+                "id": "1111111111",
+                "repositorySlug": "national-id"
+            },
+            {
+                "id": "00006641235282",
+                "repositorySlug": "easy"
+            },
+            {
+                "id": "KRS 0000022345",
+                "repositorySlug": "registration-number"
+            },
+            {
+                "id": "83784290",
+                "repositorySlug": "icon"
+            },
+            {
+                "id": "1111111111",
+                "repositorySlug": "vat-number"
+            },
+            {
+                "id": "1111111111",
+                "repositorySlug": "tax-number"
+            },
+            {
+                "id": "000000000",
+                "repositorySlug": "statistic-number"
+            }
+        ],
+        "registrationDate": "20030101"
+    },
+    "productStatus": {
+        "score": {
+            "value": 3,
+            "label": "KEEP_TRACK",
+            "description": "The status of URBA360"
+        },
+        "creditOpinion": {
+            "value": 4,
+            "label": "GOOD",
+            "description": "The status of URBA360"
+        },
+        "sectorRiskAssessment": {
+            "value": 3,
+            "label": "KEEP_TRACK",
+            "description": "The status of URBA360"
+        },
+        "countryRiskAssessment": {
+            "value": 4,
+            "label": "GOOD",
+            "description": "The status of URBA360"
+        },
+        "latePaymentIndex": {
+            "value": 4,
+            "label": "GOOD",
+            "description": "The status of URBA360"
+        },
+        "financials": {
+            "value": 3,
+            "label": "KEEP_TRACK",
+            "description": "The status of URBA360"
+        }
+    },
+    "expectedDeliveryDates": {
+        "score": "",
+        "creditOpinion": "",
+        "sectorRiskAssessment": "",
+        "countryRiskAssessment": "",
+        "latePaymentIndex": "",
+        "financials": ""
+    },
+    "productDetails": {
+        "score": [
+            {
+                "descriptions": [
+                    {
+                        "label": "Debtor Risk Assessment (DRA)",
+                        "full": "6/10: Acceptable risk and average financial stability.  The sensitivity to external adverse factors should not be overlooked.  Risk of default is average.",
+                        "language": "en",
+                        "short": "DRA"
+                    }
+                ],
+                "releaseDate": "20240917",
+                "assessmentSlug": "debtor-risk-assessment-package",
+                "companyId": "33f5fbe4-84c2-3984-b6e0-e5983af2f788",
+                "debtorRiskValue": "6",
+                "probabilityOfDefault": 0.7,
+                "newUpdate": false,
+                "updatedDate": 20240917,
+                "customerReference": "GF getting Demo sample  Urba360 for  PL",
+                "isCurrent": true
+            }
+        ],
+        "creditOpinion": [
+            {
+                "releaseDate": "20240917",
+                "assessmentSlug": "advanced-opinion",
+                "companyId": "33f5fbe4-84c2-3984-b6e0-e5983af2f788",
+                "maxCreditAmount": {
+                    "currency": "EUR",
+                    "value": 200000.0
+                },
+                "requestedAmount": {},
+                "decisionDetails": [
+                    {
+                        "code": "BA03",
+                        "descriptions": [
+                            {
+                                "label": "Refusal Motivation",
+                                "full": "Payment overdues reported on the company or the group",
+                                "language": "en"
+                            }
+                        ]
+                    }
+                ],
+                "newUpdate": false,
+                "updatedDate": 20240917,
+                "customerReference": "GF getting Demo sample  Urba360 for  PL"
+            }
+        ],
+        "sectorRiskAssessment": [
+            {
+                "assessmentSlug": "sector-risk-assessment",
+                "countryCode": "PL",
+                "inHouseRegionCode": "CER",
+                "inHouseRegionLabel": "Central and Eastern Europe",
+                "sector": {
+                    "code": "RETAIL",
+                    "label": "Non specialised trade"
+                },
+                "naceCode": {
+                    "code": "4711",
+                    "label": "Retail sale in non-specialised stores with food, beverages or tobacco predominating"
+                },
+                "countryRiskValue": "2",
+                "inHouseRegionRiskValue": "2",
+                "year": "2023",
+                "yearPeriod": "Q4",
+                "descriptions": [
+                    {
+                        "label": "Sector Risk Assessment",
+                        "full": "Medium risk",
+                        "language": "en",
+                        "short": "SRA"
+                    }
+                ],
+                "newUpdate": false,
+                "updatedDate": 20240917,
+                "customerReference": "GF getting Demo sample  Urba360 for  PL",
+                "isCurrent": true
+            }
+        ],
+        "countryRiskAssessment": [
+            {
+                "year": "2023",
+                "yearPeriod": "Q4",
+                "assessmentSlug": "country-risk-assessment",
+                "countryCode": "PL",
+                "countryRiskValue": "A4",
+                "descriptions": [
+                    {
+                        "label": "Country Risk Assessment",
+                        "full": "A4: Economic and financial outlook could be struck by some weaknesses...",
+                        "language": "en",
+                        "short": "CRA"
+                    }
+                ],
+                "newUpdate": false,
+                "updatedDate": 20240917,
+                "customerReference": "GF getting Demo sample  Urba360 for  PL",
+                "isCurrent": true
+            }
+        ],
+        "latePaymentIndex": [
+            {
+                "value": 4,
+                "description": "No negative experience",
+                "updatedDate": 20240917,
+                "newUpdate": false,
+                "customerReference": "GF getting Demo sample  Urba360 for  PL"
+            }
+        ],
+        "financials": {
+            "balanceSheet": {
+                "balanceSheetItems": [
+                    {
+                        "type": "900",
+                        "name": "BALANCE SHEET"
+                    },
+                    {
+                        "type": "906",
+                        "name": "ASSETS",
+                        "indicators": [
+                            {
+                                "type": {
+                                    "value": "2300",
+                                    "name": "Fixed assets"
+                                },
+                                "date": "20230331",
+                                "fromDate": "20230101",
+                                "toDate": "20230331",
+                                "fromAmount": 40262199.765,
+                                "currency": {
+                                    "value": "EUR",
+                                    "name": "Euro"
+                                },
+                                "dimension": {
+                                    "value": "",
+                                    "name": ""
+                                },
+                                "measure": {
+                                    "value": "",
+                                    "name": ""
+                                },
+                                "labelType": {
+                                    "outlineNumber": "A.",
+                                    "name": "4"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

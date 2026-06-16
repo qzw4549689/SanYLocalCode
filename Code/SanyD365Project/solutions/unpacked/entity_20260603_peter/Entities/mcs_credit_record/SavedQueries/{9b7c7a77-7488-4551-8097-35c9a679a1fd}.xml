@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{9b7c7a77-7488-4551-8097-35c9a679a1fd}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_scoreid" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credit_recordid">
+          <cell name="mcs_scoreid" width="300" />
+          <cell name="createdon" width="125" />
+          <cell name="mcs_accountid" width="150" />
+          <cell name="mcs_applicant" width="150" />
+          <cell name="mcs_approvedate" width="150" />
+          <cell name="mcs_bppstatus" width="150" />
+          <cell name="mcs_api_status" width="150" />
+          <cell name="mcs_abidate" width="150" />
+          <cell name="mcs_checkdate" width="150" />
+          <cell name="mcs_active" width="150" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_record">
+          <attribute name="mcs_credit_recordid" />
+          <attribute name="mcs_scoreid" />
+          <attribute name="createdon" />
+          <order attribute="mcs_scoreid" descending="false" />
+          <attribute name="mcs_accountid" />
+          <attribute name="mcs_applicant" />
+          <attribute name="mcs_approvedate" />
+          <attribute name="mcs_bppstatus" />
+          <attribute name="mcs_api_status" />
+          <attribute name="mcs_abidate" />
+          <attribute name="mcs_checkdate" />
+          <attribute name="mcs_active" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active 客户信用评估记录表" languagecode="1033" />
+      <LocalizedName description="客户信用评估记录" languagecode="2052" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

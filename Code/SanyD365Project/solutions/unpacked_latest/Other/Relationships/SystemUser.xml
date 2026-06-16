@@ -1,0 +1,623 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="lk_mcs_credit_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_items_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_items</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_items_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_items</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_record_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_record</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_record_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_record</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_scoringcard_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_scoringcard</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credit_scoringcard_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_scoringcard</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credititem_value_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credititem_value</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_credititem_value_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credititem_value</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_customer_file_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_file</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_customer_file_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_file</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_customer_tag_createdby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_tag</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>CreatedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who created the record." languagecode="1033" />
+        <Description description="创建记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang membuat rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que creó el registro." languagecode="3082" />
+        <Description description="‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏المعرف الفريد للمستخدم الذي أنشأ السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que criou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha creato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã tạo bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant créé l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, создавшего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mencipta rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz erstellt hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="lk_mcs_customer_tag_modifiedby">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_tag</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>ModifiedBy</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier of the user who modified the record." languagecode="1033" />
+        <Description description="修改记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik pengguna yang mengubah rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario que modificó el registro." languagecode="3082" />
+        <Description description="‏‏المعرف الفريد للمستخدم الذي عدّل السجل.‬" languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário que modificou o registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente che ha modificato il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất của người dùng đã sửa đổi bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur ayant modifié l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, изменившего запись." languagecode="1049" />
+        <Description description="Pengecam unik pengguna yang mengubah suai rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des Benutzers, der den Datensatz geändert hat." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="user_mcs_credit_items">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_items</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningUser</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+        <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="user_mcs_credit_record">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_record</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningUser</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+        <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="user_mcs_credit_scoringcard">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_scoringcard</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningUser</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+        <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="user_mcs_credititem_value">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credititem_value</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningUser</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+        <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="user_mcs_customer_file">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_file</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningUser</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+        <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="user_mcs_customer_tag">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_tag</ReferencingEntityName>
+    <ReferencedEntityName>SystemUser</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningUser</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the user that owns the record." languagecode="1033" />
+        <Description description="负责记录的用户的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk pengguna yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del usuario propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للمستخدم الذي يملك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo do usuário proprietário do registro." languagecode="1046" />
+        <Description description="Identificatore univoco dell'utente a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho người dùng sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'utilisateur propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор пользователя, ответственного за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pengguna yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Benutzers." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+</EntityRelationships>

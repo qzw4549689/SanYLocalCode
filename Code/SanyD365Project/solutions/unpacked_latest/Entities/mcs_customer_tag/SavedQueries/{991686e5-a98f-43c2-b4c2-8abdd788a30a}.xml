@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{991686e5-a98f-43c2-b4c2-8abdd788a30a}</savedqueryid>
+    <layoutxml>
+      <grid name="mcs_customer_tags" jump="mcs_credit_record" select="1" icon="1" preview="1">
+        <row name="mcs_customer_tag" id="mcs_customer_tagid">
+          <cell name="mcs_accountid" width="100" />
+          <cell name="mcs_credit_item" width="100" />
+          <cell name="mcs_group" width="124" />
+          <cell name="mcs_datatype" width="100" />
+          <cell name="mcs_itemvalue1" width="100" />
+          <cell name="mcs_itemvalue2" width="100" />
+          <cell name="mcs_scorevalue" width="100" />
+          <cell name="mcs_isscore" width="100" />
+          <cell name="mcs_itemcode" width="100" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>2</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_customer_tag">
+          <attribute name="mcs_customer_tagid" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+          <attribute name="mcs_credit_item" />
+          <attribute name="mcs_group" />
+          <attribute name="mcs_scorevalue" />
+          <attribute name="mcs_itemvalue2" />
+          <attribute name="mcs_itemvalue1" />
+          <attribute name="mcs_isscore" />
+          <attribute name="mcs_datatype" />
+          <attribute name="mcs_itemcode" />
+          <attribute name="mcs_accountid" />
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="客户信用标签表 Associated View" languagecode="1033" />
+      <LocalizedName description="客户信用标签表 Associated View" languagecode="2052" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

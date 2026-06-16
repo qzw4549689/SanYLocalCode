@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<savedqueries xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <savedquery>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>0</CanBeDeleted>
+    <isquickfindquery>0</isquickfindquery>
+    <isprivate>0</isprivate>
+    <isdefault>1</isdefault>
+    <savedqueryid>{db0cde09-5d77-4e06-a970-ecaed190db4d}</savedqueryid>
+    <layoutxml>
+      <grid name="resultset" jump="mcs_cardname" select="1" icon="1" preview="1">
+        <row name="result" id="mcs_credit_scoringcardid">
+          <cell name="mcs_categoryid" width="150" />
+          <cell name="mcs_credit_scoringcardno" width="150" />
+          <cell name="mcs_itemid" width="150" />
+          <cell name="mcs_typeid" width="150" />
+          <cell name="mcs_itemname" width="150" />
+          <cell name="mcs_datatype" width="150" />
+          <cell name="mcs_minvalue" width="150" />
+          <cell name="mcs_maxvalue" width="150" />
+          <cell name="mcs_weight" width="150" />
+          <cell name="mcs_listvalue" width="150" />
+        </row>
+      </grid>
+    </layoutxml>
+    <querytype>0</querytype>
+    <fetchxml>
+      <fetch version="1.0" mapping="logical">
+        <entity name="mcs_credit_scoringcard">
+          <attribute name="mcs_credit_scoringcardid" />
+          <attribute name="mcs_listvalue" />
+          <attribute name="mcs_credit_scoringcardno" />
+          <attribute name="mcs_categoryid" />
+          <attribute name="mcs_typeid" />
+          <attribute name="mcs_itemid" />
+          <attribute name="mcs_itemname" />
+          <attribute name="mcs_datatype" />
+          <attribute name="mcs_minvalue" />
+          <attribute name="mcs_maxvalue" />
+          <attribute name="mcs_weight" />
+          <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </entity>
+      </fetch>
+    </fetchxml>
+    <IntroducedVersion>1.0.0.0</IntroducedVersion>
+    <LocalizedNames>
+      <LocalizedName description="Active 客户评分卡配置表" languagecode="1033" />
+      <LocalizedName description="Active 客户评分卡配置表" languagecode="2052" />
+    </LocalizedNames>
+  </savedquery>
+</savedqueries>

@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="team_mcs_credit_items">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_items</ReferencingEntityName>
+    <ReferencedEntityName>Team</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningTeam</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+        <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+        <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="team_mcs_credit_record">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_record</ReferencingEntityName>
+    <ReferencedEntityName>Team</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningTeam</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+        <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+        <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="team_mcs_credit_scoringcard">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credit_scoringcard</ReferencingEntityName>
+    <ReferencedEntityName>Team</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningTeam</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+        <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+        <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="team_mcs_credititem_value">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_credititem_value</ReferencingEntityName>
+    <ReferencedEntityName>Team</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningTeam</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+        <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+        <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="team_mcs_customer_file">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_file</ReferencingEntityName>
+    <ReferencedEntityName>Team</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningTeam</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+        <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+        <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+  <EntityRelationship Name="team_mcs_customer_tag">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingEntityName>mcs_customer_tag</ReferencingEntityName>
+    <ReferencedEntityName>Team</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>NoCascade</CascadeDelete>
+    <CascadeArchive>NoCascade</CascadeArchive>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <ReferencingAttributeName>OwningTeam</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions>
+        <Description description="Unique identifier for the team that owns the record." languagecode="1033" />
+        <Description description="负责记录的团队的唯一标识符。" languagecode="2052" />
+        <Description description="Pengidentifikasi unik untuk tim yang memiliki rekaman." languagecode="1057" />
+        <Description description="Identificador único del equipo propietario del registro." languagecode="3082" />
+        <Description description="المعرف الفريد للفريق الذي يمتلك السجل." languagecode="1025" />
+        <Description description="Identificador exclusivo da equipe proprietária do registro." languagecode="1046" />
+        <Description description="Identificatore univoco del team a cui appartiene il record." languagecode="1040" />
+        <Description description="Mã định danh duy nhất cho nhóm sở hữu bản ghi." languagecode="1066" />
+        <Description description="Identificateur unique de l'équipe propriétaire de l'enregistrement." languagecode="1036" />
+        <Description description="Уникальный идентификатор рабочей группы, ответственной за запись." languagecode="1049" />
+        <Description description="Pengecam unik bagi pasukan yang memiliki rekod." languagecode="1086" />
+        <Description description="Eindeutiger Bezeichner des für den Datensatz zuständigen Teams." languagecode="1031" />
+      </Descriptions>
+    </RelationshipDescription>
+  </EntityRelationship>
+</EntityRelationships>

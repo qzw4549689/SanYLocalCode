@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemform>
+    <formid>{6d5b08ba-a4de-4ef7-b517-02fc30742eca}</formid>
+    <IntroducedVersion>1.0</IntroducedVersion>
+    <FormPresentation>1</FormPresentation>
+    <FormActivationState>1</FormActivationState>
+    <form>
+      <tabs>
+        <tab verticallayout="true" id="{77addde4-1cc3-41ec-b9a9-31825459d65d}" IsUserDefined="1">
+          <labels>
+            <label description="عام" languagecode="1025" />
+            <label description="Allgemein" languagecode="1031" />
+            <label description="General" languagecode="1033" />
+            <label description="Général" languagecode="1036" />
+            <label description="Generale" languagecode="1040" />
+            <label description="Geral" languagecode="1046" />
+            <label description="Общие сведения" languagecode="1049" />
+            <label description="Umum" languagecode="1057" />
+            <label description="Tổng quát" languagecode="1066" />
+            <label description="Umum" languagecode="1086" />
+            <label description="常规" languagecode="2052" />
+          </labels>
+          <columns>
+            <column width="100%">
+              <sections>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{b46bf5c0-2d94-4809-95c4-ce94f6e4abf2}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="基本信息" languagecode="1033" />
+                    <label description="基本信息" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{9e1b6289-55f7-4ebb-8906-74d115154441}" colspan="1">
+                        <labels>
+                          <label description="文件统一编号" languagecode="1033" />
+                          <label description="文件统一编号" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_fileid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_fileid" />
+                      </cell>
+                      <cell id="{8e372248-f155-43f1-ab3b-62e6e899cf0d}" colspan="1">
+                        <labels>
+                          <label description="客户编码" languagecode="1033" />
+                          <label description="客户编码" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_accountid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="mcs_accountid">
+                          <parameters>
+                            <DefaultViewId>{a9af0ab8-861d-4cfa-92a5-c6281fed7fab}</DefaultViewId>
+                            <AvailableViewIds>{a9af0ab8-861d-4cfa-92a5-c6281fed7fab}</AvailableViewIds>
+                          </parameters>
+                        </control>
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{261a5eff-7120-4d59-97a0-d7ee8f44da7b}" colspan="1">
+                        <labels>
+                          <label description="文件名称" languagecode="1033" />
+                          <label description="文件名称" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_filename" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_filename" />
+                      </cell>
+                      <cell id="{8aa13bb5-66d8-4ebd-8e9e-4067b0478309}" colspan="1">
+                        <labels>
+                          <label description="文件分类" languagecode="1033" />
+                          <label description="文件分类" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_filetype" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_filetype" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{d9f896c2-1a68-4e2c-ad7a-e1029fa7f984}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="文件内容" languagecode="1033" />
+                    <label description="文件内容" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{e64c8ea2-7b68-4ede-891f-72574e1e4153}" colspan="1">
+                        <labels>
+                          <label description="文件信息流" languagecode="1033" />
+                          <label description="文件信息流" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_filebyte" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_filebyte" />
+                      </cell>
+                      <cell id="{e6600bce-3b37-41b5-bdbb-27150920dd10}" colspan="1">
+                        <labels>
+                          <label description="文件上传日期" languagecode="1033" />
+                          <label description="文件上传日期" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_filedate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_filedate" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+                <section showlabel="true" showbar="true" IsUserDefined="1" id="{af4262b7-c69a-43c9-903d-3668a1dc1f97}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+                  <labels>
+                    <label description="接口信息" languagecode="1033" />
+                    <label description="接口信息" languagecode="2052" />
+                  </labels>
+                  <rows>
+                    <row>
+                      <cell id="{976808af-9da1-4b63-b211-f4d1b8726c39}" colspan="1">
+                        <labels>
+                          <label description="外部附件接口ID" languagecode="1033" />
+                          <label description="外部附件接口ID" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_api_fileid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_api_fileid" />
+                      </cell>
+                      <cell id="{0657cbfc-df0b-42ca-b4b1-120dbd4a0a42}" colspan="1">
+                        <labels>
+                          <label description="外部附件接口状态" languagecode="1033" />
+                          <label description="外部附件接口状态" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_api_status" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_api_status" />
+                      </cell>
+                    </row>
+                    <row>
+                      <cell id="{47527c22-32b8-4397-85f4-2c8fa8e3f047}" colspan="1">
+                        <labels>
+                          <label description="外部附件接口消息" languagecode="1033" />
+                          <label description="外部附件接口消息" languagecode="2052" />
+                        </labels>
+                        <control id="mcs_api_msg" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_api_msg" />
+                      </cell>
+                    </row>
+                  </rows>
+                </section>
+              </sections>
+            </column>
+          </columns>
+        </tab>
+      </tabs>
+    </form>
+    <IsCustomizable>1</IsCustomizable>
+    <CanBeDeleted>1</CanBeDeleted>
+    <LocalizedNames>
+      <LocalizedName description="Information" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="A form for this entity." languagecode="1033" />
+    </Descriptions>
+  </systemform>
+</forms>

@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{614F2334-833B-4161-BCDE-F3A7A16AD509}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SanyD365.D365Extension.Sales</RootNamespace>
+    <AssemblyName>SanyD365.D365Extension.Sales</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CAS;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_EMIT;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CAS;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_CONCURRENT_COLLECTIONS;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DB_NULL_TYPE_CODE;HAVE_DYNAMIC;HAVE_EMPTY_TYPES;HAVE_ENTITY_FRAMEWORK;HAVE_EXPRESSIONS;HAVE_FAST_REVERSE;HAVE_FSHARP_TYPES;HAVE_FULL_REFLECTION;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_MEMORY_BARRIER;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_EMIT;HAVE_SECURITY_SAFE_CRITICAL_ATTRIBUTE;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;HAVE_CONCURRENT_DICTIONARY;$(AdditionalConstants)</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.56\lib\net462\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Sdk, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.56\lib\net462\Microsoft.Xrm.Sdk.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Sdk.Workflow, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.CrmSdk.Workflow.9.0.2.56\lib\net462\Microsoft.Xrm.Sdk.Workflow.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.Activities.Presentation" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Http, Version=4.10.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ServiceModel.Http.4.10.3\lib\net461\System.ServiceModel.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceModel.Primitives, Version=4.10.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ServiceModel.Primitives.4.10.3\lib\net461\System.ServiceModel.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Text.Encodings.Web, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Text.Encodings.Web.8.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Json, Version=8.0.0.4, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Text.Json.8.0.4\lib\net462\System.Text.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Workflow.Activities" />
+    <Reference Include="System.Workflow.ComponentModel" />
+    <Reference Include="System.Workflow.Runtime" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Application\Sales\Account\AppProjectManagementService.cs" />
+    <Compile Include="Application\Sales\BonusReport\AppBonusReportService.cs" />
+    <Compile Include="Application\Sales\CompanyInspection\AppCompanyInspectionMeetingService.cs" />
+    <Compile Include="Application\Sales\CompanyInspection\AppCompanyInspectionService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerMasterDataService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerBankAccountService.cs" />
+    <Compile Include="Application\Sales\Account\AppContactService.cs" />
+    <Compile Include="Application\Sales\Account\AppAccountService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerCreditLimitService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerChangeApproveService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerResponsiblePersonApproveService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerUnFreezeApproveService.cs" />
+    <Compile Include="Application\Sales\Account\AppCustomerFreezeApproveService.cs" />
+    <Compile Include="Application\Sales\Account\AppAddressService.cs" />
+    <Compile Include="Application\Sales\Approval\ApprovalService.cs" />
+    <Compile Include="Application\Sales\Base\AppBaseService.cs" />
+    <Compile Include="Application\Sales\ContractReviewElement\AppContractReviewElement.cs" />
+    <Compile Include="Application\Sales\ContractSigning\AppContractSigning.cs" />
+    <Compile Include="Application\Sales\Contract\ContractPartsDetailChangeZNService.cs" />
+    <Compile Include="Application\Sales\Contract\AppContractService.cs" />
+    <Compile Include="Application\Sales\Contract\AppLTCContractService.cs" />
+    <Compile Include="Application\Sales\Contract\AppLTCContractDetailRollupService.cs" />
+    <Compile Include="Application\Sales\Contract\AppPartnerFunctionService.cs" />
+    <Compile Include="Application\Sales\Contract\AppLTCGiftAccessoryService.cs" />
+    <Compile Include="Application\Sales\Contract\AppWarrantService.cs" />
+    <Compile Include="Application\Sales\CostTemplate\AppCostTemplate.cs" />
+    <Compile Include="Application\Sales\CountryManager\CountryManagerService.cs" />
+    <Compile Include="Application\Sales\CreditLimitApplication\AppCreditLimitApplication.cs" />
+    <Compile Include="Application\Sales\CreditLimitApplication\IAppCreditLimitApplication.cs" />
+    <Compile Include="Application\Sales\CustomerVoices\CustomerVoiceService.cs" />
+    <Compile Include="Application\Sales\Dealer\AppDealer.cs" />
+    <Compile Include="Application\Sales\Dealer\AppNetworkService.cs" />
+    <Compile Include="Application\Sales\Dealer\ChurnedCustomerService.cs" />
+    <Compile Include="Application\Sales\Dealer\DMSDearler.cs" />
+    <Compile Include="Application\Sales\DuplicateDetect\DuplicateDetectPlugins.cs" />
+    <Compile Include="Application\Sales\DuplicateDetect\MemoryCacheHelper.cs" />
+    <Compile Include="Application\Sales\DutyPlan\AppDutyPlan.cs" />
+    <Compile Include="Application\Sales\Expertpool\AppExpertpoolService.cs" />
+    <Compile Include="Application\Sales\ExtendCountry\AppExtendCountryDetailService.cs" />
+    <Compile Include="Application\Sales\FinancialPayment\AppFinancialPayment.cs" />
+    <Compile Include="Application\Sales\Forecast\AppForecastService.cs" />
+    <Compile Include="Application\Sales\IndiaRelated\AppIndiaRelated.cs" />
+    <Compile Include="Application\Sales\Judgementrule\AppJudgementruleLineNumberService.cs" />
+    <Compile Include="Application\Sales\KeyAccount\AppKeyAccount.cs" />
+    <Compile Include="Application\Sales\LeadMain\AppLeadDetail.cs" />
+    <Compile Include="Application\Sales\LeadMain\AppLeadMain.cs" />
+    <Compile Include="Application\Sales\LeadMain\IAppLeadDetail.cs" />
+    <Compile Include="Application\Sales\LeadMain\IAppLeadMain.cs" />
+    <Compile Include="Application\Sales\Lead\AppLeads.cs" />
+    <Compile Include="Application\Sales\Lead\AppLeadAssignmentMatrix.cs" />
+    <Compile Include="Application\Sales\O2O\AppImsFollowUprecords.cs" />
+    <Compile Include="Application\Sales\Order\AppBulkRepaymentPlanChanges.cs" />
+    <Compile Include="Application\Sales\Order\AppHostTransferRequestOrder.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderReturnBatchRequest.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderShipCancel.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderShipCancelDetail.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderUpdateNumber.cs" />
+    <Compile Include="Application\Sales\Order\AppPermissionSharing.cs" />
+    <Compile Include="Application\Sales\Order\IAppOrderShippingChangeRequest.cs" />
+    <Compile Include="Application\Sales\OtherExpensePayment\OtherExpensePaymentService.cs" />
+    <Compile Include="Application\Sales\Position\AppPositionService.cs" />
+    <Compile Include="Application\Sales\Productinfomation\AppProductinfomation.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\APPPerformanceincentive.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\APPProductInfo.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjbidcriteria.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjclauseresponse.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjcompetitoranalysis.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjdecisionchain.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjectApplication.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjectManagement.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjectMilestone.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppProjectoperationreview.cs" />
+    <Compile Include="Application\Sales\ProjectManagement\AppSubProjectApplication.cs" />
+    <Compile Include="Application\Sales\RegionAdjustment\AppRegionAdjustment.cs" />
+    <Compile Include="Application\Sales\Risk\CataLogItemService.cs" />
+    <Compile Include="Application\Sales\Risk\RiskCheckItemService.cs" />
+    <Compile Include="Application\Sales\RussiaDataBackup\RussiaDataBackupService.cs" />
+    <Compile Include="DTO\RussiaOE\RussiaOERequestDTO.cs" />
+    <Compile Include="Plugins\Account\AccountExportPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerBankAccountPreUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\ProjectManagementBreakthroughplanPlugin.cs" />
+    <Compile Include="Plugins\Account\ProjectManagementSchedulesPlugin.cs" />
+    <Compile Include="Plugins\Account\ProjectMemeberManagementPlugin.cs" />
+    <Compile Include="Plugins\Account\ProjectManagementPlugin.cs" />
+    <Compile Include="Plugins\BonusReport\BonusReportUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\BulkRepaymentPlan\BulkRepaymentPlanChangesExtensionPeriodUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailCostCreatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailCostUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailCreatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailCreatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailDeletePrePlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailRatePlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeDetailUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractPartsDetailChangeZNPlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangeNetPriceCalculationPlugin.cs" />
+    <Compile Include="Plugins\ContractChangeDetail\ContractChangePriceCalculationPlugin.cs" />
+    <Compile Include="Plugins\ContractChange\ContractChangeCreatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractChange\ContractChangeCurrencyUpdatePlugin.cs" />
+    <Compile Include="Plugins\ContractChange\ContractChangeOrderStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractChange\ContractChangeUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailCreatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailCreatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailDeletePostPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailDeletePrePlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailRatePlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailStockCheckPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailUpdatePostAsyncPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractDetailUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractIsFreeUpdatePlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractNetPriceCalculationPlugin.cs" />
+    <Compile Include="Plugins\ContractDetail\ContractPriceCalculationPlugin.cs" />
+    <Compile Include="Plugins\ContractPartDetail\ContractPartDetailCreatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractPartDetail\ContractPartDetailDeletePrePlugin.cs" />
+    <Compile Include="Plugins\ContractPartDetail\ContractPartDetailUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractPerformance\PerformanceAttributionApprovalStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\ContractPerformance\PerformanceShareReverseUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractPerformance\PerformanceShareStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\ContractReviewElement\ContractReviewElementConditionPostPlugin.cs" />
+    <Compile Include="Plugins\ContractSigning\ContractSigningStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractStock\ContractStockChangeUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ContractStock\ContractStockCreatePrePlugin.cs" />
+    <Compile Include="Plugins\ContractStock\ContractStockNumberChangePrePlugin.cs" />
+    <Compile Include="Plugins\ContractStock\contractStockPartsDetailZNNumberChangePrePlugin.cs" />
+    <Compile Include="Plugins\ContractStock\ContractStockSharePostPlugin.cs" />
+    <Compile Include="Plugins\ContractStock\ContractStockStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractShippingOrderDetailZNUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractUpdatePostWithPostImagePlugin.cs" />
+    <Compile Include="Plugins\Contract\LTCHostdetailsPostCreate.cs" />
+    <Compile Include="Plugins\ContractDetail\LtcContractDetailRollupPostPlugin.cs" />
+    <Compile Include="Plugins\Contract\LTCGiftAccessoryPostPlugin.cs" />
+    <Compile Include="Plugins\CountryManager\CountryManagerCreateOrUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\CreditLimitApplication\CreditLimitApplicationProcessCreateOrUpdatePlugin.cs" />
+    <Compile Include="Plugins\CreditLimitApplication\CreditLimitApplicationUpdatePlugin.cs" />
+    <Compile Include="Plugins\CustomerVoice\CustomerVoiceCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Dealer\ChurnedCustomerDetailPlugin.cs" />
+    <Compile Include="Plugins\Dealer\NetworkCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Dealer\NetworkDeletePostPlugin.cs" />
+    <Compile Include="Plugins\Dealer\NetworkUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\DuplicateDetect\DuplicateDetectPlugins.cs" />
+    <Compile Include="Plugins\DutyPlan\DutyPlanCreatePostAsyncPlugin.cs" />
+    <Compile Include="Plugins\ExtendCountry\ExtendCountryDetailCreatePrePlugin.cs" />
+    <Compile Include="Plugins\Expertpool\ExpertpoolCreatePrePlugin.cs" />
+    <Compile Include="Plugins\ExtendCountry\ExtendCountryDetailUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\FinancialPayment\FinancialPaymentPlugins.cs" />
+    <Compile Include="Plugins\Contract\ContractUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\IndiaRelated\CalculateOrderTaxStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Judgementrule\JudgementruleLineNumberPlugin.cs" />
+    <Compile Include="Plugins\LeadDetail\LeadDetailPostCreated.cs" />
+    <Compile Include="Plugins\LeadDetail\PreventLeadProductByStatus.cs" />
+    <Compile Include="Plugins\LeadMain\AutoNumberOnLeadMain.cs" />
+    <Compile Include="Plugins\LeadMain\LeadMainPreCreatedCheckDuplicate.cs" />
+    <Compile Include="Plugins\LeadMain\LeadMainUpdateToAutoAssign.cs" />
+    <Compile Include="Plugins\LeadMain\SetLeadStatusByBPFStage.cs" />
+    <Compile Include="Plugins\Lead\LeadCreatePostAsyncPlugin.cs" />
+    <Compile Include="Plugins\Lead\RequestedproductsPlugins.cs" />
+    <Compile Include="Application\Sales\Opportunity\AppOpportunity.cs" />
+    <Compile Include="Application\Sales\Opportunity\AppOpportunityItem.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderPerformanceShare.cs" />
+    <Compile Include="Application\Sales\Order\AppCreditNote.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderPerformanceChange.cs" />
+    <Compile Include="Application\Sales\Order\AppPaymentPlan.cs" />
+    <Compile Include="Application\Sales\Order\AppSalesOrderFee.cs" />
+    <Compile Include="Application\Sales\Order\AppPaymentDeduction.cs" />
+    <Compile Include="Application\Sales\Order\AppChangeCurrencyRequest.cs" />
+    <Compile Include="Application\Sales\Order\AppAdjustAccountRequest.cs" />
+    <Compile Include="Application\Sales\Order\AppBadDebt.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderProductChange.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderGoodsReceipt.cs" />
+    <Compile Include="Application\Sales\Order\AppOrderShipmentRequest.cs" />
+    <Compile Include="Application\Sales\Order\AppTaskUnexecute.cs" />
+    <Compile Include="Application\Sales\Order\AppPaymentLoss.cs" />
+    <Compile Include="Application\Sales\Order\AppRepaymentPlanChangeRecord.cs" />
+    <Compile Include="Application\Sales\Order\AppShipConfirm.cs" />
+    <Compile Include="Application\Sales\Order\AppSaleOrder.cs" />
+    <Compile Include="Application\Sales\paymentmanagement\AppBankStatement.cs" />
+    <Compile Include="Application\Sales\paymentmanagement\AppFundClaim.cs" />
+    <Compile Include="Application\Sales\paymentmanagement\AppOverDueTask.cs" />
+    <Compile Include="Application\Sales\paymentmanagement\AppFundClaimDetail.cs" />
+    <Compile Include="Application\Sales\Performance\AppPerformanceSharingDetail.cs" />
+    <Compile Include="Application\Sales\plan\ConsolidationStatusChange.cs" />
+    <Compile Include="Application\Sales\plan\SalesGoalUpload.cs" />
+    <Compile Include="Application\Sales\SalesPlan\AppBreakdownService.cs" />
+    <Compile Include="Application\Sales\SalesPlan\AppSalesGoal.cs" />
+    <Compile Include="Application\Sales\ScoreQuestionnaire\AppScoreQuestionnaireService.cs" />
+    <Compile Include="Application\Sales\SealApplication\SealApplicationService.cs" />
+    <Compile Include="Application\Sales\SealApplication\SealInformationService.cs" />
+    <Compile Include="Application\Sales\SpecialBooking\AppSpecialBookingService.cs" />
+    <Compile Include="Application\Sales\Visit\CustomerVisitService.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionBudgetUpdateAndDeletePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountBroadcastPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountSubgridCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountDataCenterSyncStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\AccountPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerExpandApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerTaxPlugin.cs" />
+    <Compile Include="Plugins\Account\BankAccountPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerMasterDataPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerBankAccountPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\Account\AccountRelationPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountCreatePrePlugin.cs" />
+    <Compile Include="Plugins\Account\AccountSinosureCodeUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\AccountUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\ContactPlugin.cs" />
+    <Compile Include="Plugins\Account\AddressPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerChangeApprovalCreatePrePlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerChangeApprovalUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerExpandSyncStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerExpandSapNumberCountUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerResponsiblePersonAccountNumberUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerResponsiblePersonApproveCreatePrePlugin.cs" />
+    <Compile Include="Plugins\Account\ContactUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\ContactCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountStageStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CollectionChangeStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerCreditStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerResponsiblePersonApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerUnFreezeApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AccountApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerUnFreezeStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerVisitCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\LimitAntiDatedApplyStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\LimitApplyStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\MoneyCollectionStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\OverdueCustomerStrategyCollectionCreatePlugin.cs" />
+    <Compile Include="Plugins\Account\OverDueStandardOperationBuCodePlugin.cs" />
+    <Compile Include="Plugins\Account\OverDueTaskCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\ShipmentDeclarationChangeCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\ShipmentDeclarationChangeStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\ShipmentDeclarationCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\ShipmentDeclarationStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Account\TradingObjectSalesOrgPlugin.cs" />
+    <Compile Include="Plugins\Account\WhiteListExitStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\WhitelistReviewSpecialPlugins.cs" />
+    <Compile Include="Plugins\Account\WhiteListStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\AgentManagement\DevelopmentPlugins.cs" />
+    <Compile Include="Plugins\Approval\ApprovalActivityCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Approval\SanytodoCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Approval\ApprovalActivityStatusChangePostPlugin.cs" />
+    <Compile Include="Plugins\Base\CityRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\LocalityDistrictRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\ProductGroupJobMappingRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\SeaFreightCoefficientRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\SparePartTaxRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\StateRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\TaxNumberRedundancyPlugin.cs" />
+    <Compile Include="Plugins\Base\TaxRedundancyPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\ApplicationStatusUpdatePostPlugins.cs" />
+    <Compile Include="Plugins\CompanyInspection\CateringInformationDeletePrePlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionBPPApproveUpdatePost.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionMeetingSetTemplateCreatePostPlugins.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompleteSummarySendFeishuMainReceptionLeaderUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VehicleInformationDeletePrePlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitorsCreatePostPlugins.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionBudgetedCostStatisticsCreatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionBudgetedCostStatisticsDeletePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionBudgetedCostStatisticsUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionSetTemplateCreatePrePlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionVisitorsNameCreatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionVisitorsNameDeletePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\CompanyInspectionVisitorsNameUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingNameTOCompanyInspectionMainGuestCreatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingNameTOCompanyInspectionMainGuestDeletePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingNameTOCompanyInspectionMainGuestUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsAndVisitorsDeletePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsReceptionlevelToCompanyInspectionReceptionlevelCreatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsToCompanyInspectionTopicCreatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsReceptionlevelToCompanyInspectionReceptionlevelDeletePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsToCompanyInspectionTopicDeletePrePlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsReceptionlevelToCompanyInspectionReceptionlevelUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitingUnitsToCompanyInspectionTopicUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\CompanyInspection\VisitorsUpdatePostPlugins.cs" />
+    <Compile Include="Plugins\CompanyInspection\ContactWriteCompanyInspectionVisitorUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractCreatePreOperation.cs" />
+    <Compile Include="Plugins\Contract\ContractDeletePreOperationPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractDeletePrePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractSinosureRealtimeCreditlimitPlugin.cs" />
+    <Compile Include="Plugins\Contract\SpecialBookingCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractDocTypeUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractWarrantPlugin.cs" />
+    <Compile Include="Plugins\Contract\InterestedPartiesCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractBranchSetPostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractCostSwitchUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractOtherFeeUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractUpdatePreValidationPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractCurrencyUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractCountryUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractWorkflowIdUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractPerformanceSharePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractRepaymentlanUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ProductCostCreateOrUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ProductGroupBuUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\SalesCostCreateOrUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\TemplateStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\UserRoleCreatePostPlugin.cs" />
+    <Compile Include="Plugins\CostTemplate\CostTemplateCreatePostPlugins.cs" />
+    <Compile Include="Plugins\CustomerVoice\PostCommentCreatePrePlugin.cs" />
+    <Compile Include="Plugins\CustomerVoice\CustomerVoiceUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\Dealer\DealerPlugins.cs" />
+    <Compile Include="Plugins\Dealer\DevelopmentPlugins.cs" />
+    <Compile Include="Plugins\Dealer\RebateAccountTransactionsPlugins.cs" />
+    <Compile Include="Plugins\Dealer\RebatePlugins.cs" />
+    <Compile Include="Plugins\Dealer\SalesItemPlugins.cs" />
+    <Compile Include="Plugins\Dealer\SalesPlugins.cs" />
+    <Compile Include="Plugins\Dealer\EvaluationPlugins.cs" />
+    <Compile Include="Plugins\Dealer\TerminationPlugins.cs" />
+    <Compile Include="Plugins\Dealer\RenewalPlugins.cs" />
+    <Compile Include="Plugins\Forecast\MiddlePlanPlugins.cs" />
+    <Compile Include="Plugins\Forecast\MonthPlanPlugins.cs" />
+    <Compile Include="Plugins\Forecast\ProductSalesPlanPlugins.cs" />
+    <Compile Include="Plugins\Forecast\RegionYearPlanPlugins.cs" />
+    <Compile Include="Plugins\Forecast\YearPlanSumPlugins.cs" />
+    <Compile Include="Plugins\KeyAccount\ContactPlugins.cs" />
+    <Compile Include="Plugins\Account\CustomerCreditLimitStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerCreditLimitCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerChangeApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerFreezeApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerChangeStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\CustomerFreezeStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AddressUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Account\AddressCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractApprovalStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractCreatePrePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractProcessUpdatePlugin.cs" />
+    <Compile Include="Plugins\Contract\ContractStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Contract\SalesTargetPlugin.cs" />
+    <Compile Include="Plugins\KeyAccount\CustomerAuthorizationPlugins.cs" />
+    <Compile Include="Plugins\KeyAccount\CustomerVisitCreatePostPlugin.cs" />
+    <Compile Include="Plugins\KeyAccount\CustomerVisitUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\KeyAccount\CustomerVoiceAddCommentCreatePostPlugin.cs" />
+    <Compile Include="Plugins\KeyAccount\DevelopmentPlugins.cs" />
+    <Compile Include="Plugins\KeyAccount\SalesPlanPlugins.cs" />
+    <Compile Include="Plugins\KeyAccount\VisitPlugins.cs" />
+    <Compile Include="Plugins\Lead\LeadAssignmentMatrixPlugins.cs" />
+    <Compile Include="Plugins\Lead\RequestedproductsCreatePrePlugin.cs" />
+    <Compile Include="Plugins\O2O\ImsFollowUprecordsPlugins.cs" />
+    <Compile Include="Plugins\Opportunity\OpportunityItemPlugins.cs" />
+    <Compile Include="Plugins\Opportunity\OpportunityOperationMapPlugin.cs" />
+    <Compile Include="Plugins\Opportunity\OpportunityPluginsSaytotalPostRefresh.cs" />
+    <Compile Include="Plugins\Opportunity\OpportunityPluginsShippingTermsDescPostUpdate.cs" />
+    <Compile Include="Plugins\Opportunity\OpportunityPluginsPaymentInstructionsPostUpdate.cs" />
+    <Compile Include="Plugins\Opportunity\ProductlineitemPlugins.cs" />
+    <Compile Include="Plugins\Order\HostRetainApplicationFormPlugin.cs" />
+    <Compile Include="Plugins\Order\HostTransferRequestDetailsPlugin.cs" />
+    <Compile Include="Plugins\Order\HostTransferRequestOrderPlugin.cs" />
+    <Compile Include="Plugins\Order\OrderGoodsReceiptCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceShareDetailCreatePrePlugins.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceShareReverseUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceShareApprovalStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceChangePlugins.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceChangeDetailPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceShareDetailDeletePostPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderReturnBatchRequestPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderShipCancelDetailPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderShipCancelPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderShippingChangeRequestPlugin.cs" />
+    <Compile Include="Plugins\Order\OrderUpdateNumber.cs" />
+    <Compile Include="Plugins\Order\OrderWarrantUpdatePlugin.cs" />
+    <Compile Include="Plugins\Order\CreditNotePlugins.cs" />
+    <Compile Include="Plugins\Order\OrderGoodsReceiptDetailPlugins.cs" />
+    <Compile Include="Plugins\Order\PermissionSharingPlugins.cs" />
+    <Compile Include="Plugins\Order\RepaymentPlanPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderPerformanceShareDetailCreatePostPlugins.cs" />
+    <Compile Include="Plugins\Order\SalesOrderCancelPlugins.cs" />
+    <Compile Include="Plugins\Order\SalesOrderFeePlugins.cs" />
+    <Compile Include="Plugins\Order\PaymentDeductionPlugins.cs" />
+    <Compile Include="Plugins\Order\ChangeCurrencyStatusChangePostPlugins.cs" />
+    <Compile Include="Plugins\Order\AdjustAccountStatusChangePostPlugins.cs" />
+    <Compile Include="Plugins\Order\BadDebtPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderProductChangePlugins.cs" />
+    <Compile Include="Plugins\Order\OrderGoodsReceiptPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderShipmentRequestPlugins.cs" />
+    <Compile Include="Plugins\Order\OrderUpdateSyncOutstandingPlugin.cs" />
+    <Compile Include="Plugins\Order\TaskUnexcutePlugins.cs" />
+    <Compile Include="Plugins\Order\PaymentLossPlugins.cs" />
+    <Compile Include="Plugins\Order\RepaymentPlanChangeRecordPlugins.cs" />
+    <Compile Include="Plugins\Order\SalesOrderReturnRequestPlugins.cs" />
+    <Compile Include="Plugins\Order\ShipConfirmPlugins.cs" />
+    <Compile Include="Plugins\Order\SaleOrderPlugins.cs" />
+    <Compile Include="Plugins\OtherExpensePayment\OtherExpensePaymentDetailPlugins.cs" />
+    <Compile Include="Plugins\Outstanding\OverduetransPlugins.cs" />
+    <Compile Include="Plugins\PartnerFunctions\PartnerFunctionsCreatePostPlugin.cs" />
+    <Compile Include="Plugins\PaymentManagement\CurrencyConversionDetailPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\OverDueTaskPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\BadDebtDetailPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\PaymentInAdvanceOrderPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\BankStatementPlugins.cs" />
+    <Compile Include="Plugins\Lead\LeadPlugins.cs" />
+    <Compile Include="Plugins\Opportunity\OpportunityPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\DownPaymentsAssociatedOrdersPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\FundClaimDetailPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\FundClaimReversalDetailPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\FundClaimStatusUpdatePlugin.cs" />
+    <Compile Include="Plugins\PaymentManagement\OpenItemPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\RefundOrderPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\FundClaimReversalPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\FundClaimPlugins.cs" />
+    <Compile Include="Plugins\Order\SaleOrderDetailPlugins.cs" />
+    <Compile Include="Plugins\PaymentManagement\RepaymentPlanToOutstandingPlugin.cs" />
+    <Compile Include="Plugins\Performance\PerformanceSharingDetailPlugins.cs" />
+    <Compile Include="Plugins\plan\ConsolidationStatusChangePlugins.cs" />
+    <Compile Include="Plugins\plan\GenerateSaleGoalUploadRecordPlugins.cs" />
+    <Compile Include="Plugins\Position\PositionDeletePostPlugin.cs" />
+    <Compile Include="Plugins\Position\PositionUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\Position\PositionCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Productinfomation\ProductinfomationUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ParentProjectManagementMemeberPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ParentProjectManagementPostUpdatePlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\PerformanceincentivePlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProductInfoPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjbidcriteriaPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjclauseresponsePlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjcompetitoranalysisPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjdecisionchainPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjectApplicationPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjectManagementStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjectManagementStatusUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjectMilestonePlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\ProjectoperationreviewPlugin.cs" />
+    <Compile Include="Plugins\ProjectManagement\SubProjectApplicationPlugin.cs" />
+    <Compile Include="Plugins\RegionAdjustment\RegionAdjustmentResultStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\RegionAdjustment\RegionAdjustmentStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\RepaymentPlan\RepaymentPlanPlugins.cs" />
+    <Compile Include="Plugins\Risk\CheckCreatePostPlugin.cs" />
+    <Compile Include="Plugins\Risk\CataLogItemCreateOrUpdatePrePlugin.cs" />
+    <Compile Include="Plugins\RussiaDataBackup\RussiaDataBackupPlugins.cs" />
+    <Compile Include="Plugins\SalesFollowup\ContractDetailFollowupUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\SalesFollowup\ContractDetailFollowupCreatePostPlugin.cs" />
+    <Compile Include="Plugins\SalesFollowup\SalesFollowUpOrderStageUpdatePostPlugings.cs" />
+    <Compile Include="Plugins\SalesFollowup\SalesFollowupUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\SalesFollowup\SalesFollowupCreatePostPlugin.cs" />
+    <Compile Include="Plugins\SalesPlan\BreakdownCreatePostPlugin.cs" />
+    <Compile Include="Plugins\SalesPlan\BreakdownDeletePostPlugin.cs" />
+    <Compile Include="Plugins\SalesPlan\BreakdownUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\SalesPlan\GoalPublishPlugins.cs" />
+    <Compile Include="Plugins\SalesPlan\SalesGoalPlugins.cs" />
+    <Compile Include="Plugins\ScoreQuestionnaire\ScoreQuestionnairePlugin.cs" />
+    <Compile Include="Plugins\SealApplication\SealApplicationCreatePostPlugin.cs" />
+    <Compile Include="Plugins\SealApplication\SealApplicationDetailCreatePostPlugin.cs" />
+    <Compile Include="Plugins\SealApplication\SealApplicationDetelePrePlugin.cs" />
+    <Compile Include="Plugins\SealApplication\SealApplicationStatusUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\SealApplication\SealInformationCreatePostPlugin.cs" />
+    <Compile Include="Plugins\SealApplication\SealInformationUpdatePostPlugin.cs" />
+    <Compile Include="Plugins\SupplyPathConfiguration\SupplyPathConfigurationPlugin.cs" />
+    <Compile Include="Plugins\TrialMachine\TrialMachinePlugin.cs" />
+    <Compile Include="Plugins\RestrictionManagements\RestrictionManagementPlugins.cs" />
+    <Compile Include="Application\Sales\RestrictionManagements\RestrictionManagementService.cs" />
+    <Compile Include="Application\Sales\CofaceIntegration\CofaceApiConfig.cs" />
+    <Compile Include="Application\Sales\CofaceIntegration\CofaceConfigHelper.cs" />
+    <Compile Include="Application\Sales\CofaceIntegration\CofaceApiService.cs" />
+    <Compile Include="Application\Sales\CofaceIntegration\CofaceTokenManager.cs" />
+    <Compile Include="Application\Sales\CofaceIntegration\FullReportParser.cs" />
+    <Compile Include="Application\Sales\CofaceIntegration\Urba360Parser.cs" />
+    <Compile Include="Application\Sales\CreditScore\ScoreCalculator.cs" />
+    <Compile Include="Plugins\Account\AccountCreditValidationPlugin.cs" />
+    <Compile Include="Plugins\CofaceIntegration\CofaceIntegrationDataSyncPlugin.cs" />
+    <Compile Include="Plugins\CreditItemValue\CreditItemValueValidationPlugin.cs" />
+    <Compile Include="Plugins\CreditItems\CreditItemsValidationPlugin.cs" />
+    <Compile Include="Plugins\CreditRecord\CreditRecordAutoNumberPlugin.cs" />
+    <Compile Include="Plugins\CreditRecord\CreditRecordBppCallbackPlugin.cs" />
+    <Compile Include="Plugins\CreditRecord\CreditRecordBppIntegrationPlugin.cs" />
+    <Compile Include="Plugins\CreditScore\CreditScoreBpfStageSyncPlugin.cs" />
+    <Compile Include="Plugins\CreditScore\CreditScoreBpfSyncHelper.cs" />
+    <Compile Include="Plugins\CreditScore\CreditScoreCalculationPlugin.cs" />
+    <Compile Include="Plugins\CustomerTag\CustomerTagInitPlugin.cs" />
+    <Compile Include="Plugins\CustomerTag\CustomerTagValidationPlugin.cs" />
+    <Compile Include="Plugins\ScoringCard\ScoringCardAutoNumberPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Key.snk" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="..\..\Common\MSLibrary.D365.Common\MSLibrary.D365.Common.projitems" Label="Shared" />
+  <Import Project="..\SanyD365.D365ExtensionMain\SanyD365.D365ExtensionMain.projitems" Label="Shared" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

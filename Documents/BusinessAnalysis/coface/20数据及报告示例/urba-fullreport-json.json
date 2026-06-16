@@ -1,0 +1,169 @@
+{
+    "icon": {
+        "version": "1.0.0",
+        "orderStatus": {
+            "intercreditOrderNumber": "5931265",
+            "provider": {
+                "providerId": "9",
+                "name": "Coface Romania Services SRL",
+                "senderId": "IC09",
+                "city": "BUCURESTI, SECTOR 2",
+                "country": {
+                    "value": "RO",
+                    "name": "Romania"
+                },
+                "street": "SOSEAUA PIPERA",
+                "houseNumber": "NR.42",
+                "zipcode": "020309"
+            },
+            "customer": {
+                "customerId": "128846659",
+                "name": "TestBDC",
+                "recipientId": "",
+                "city": "Wien",
+                "country": {
+                    "value": "AT",
+                    "name": "Austria"
+                },
+                "street": "Sigmundsgasse",
+                "houseNumber": "11/2A",
+                "zipcode": "1072"
+            },
+            "customersReference": "",
+            "purchaseOrderNumber": "",
+            "language": {
+                "value": "2",
+                "name": "English"
+            },
+            "product": {
+                "value": "301",
+                "name": "Full Report URBA"
+            },
+            "reportMimeType": "APPLICATION/JSON",
+            "balanceSheetLayout": {
+                "value": "7",
+                "name": "Joint stock company"
+            },
+            "timestamp": "20250818100955",
+            "status": {
+                "value": "10",
+                "name": "Finished"
+            },
+            "requiredBy": "20250818110900",
+            "givenCompanyName": "",
+            "requestedCompanyInformation": {
+                "companyName": "",
+                "registrationCountry": {
+                    "value": "",
+                    "name": ""
+                },
+                "zipcode": "",
+                "city": "",
+                "street": "",
+                "houseNumber": "",
+                "additionalAddressLine": "",
+                "country": {
+                    "value": "",
+                    "name": ""
+                },
+                "telephonAreacode": "",
+                "telephoneNumber": "",
+                "nationalNumber": ""
+            },
+            "question": "",
+            "answer": ""
+        },
+        "creditReport": {
+            "company": {
+                "copyright": "Coface Romania Services SRL",
+                "intercreditNumber": "85826040",
+                "nationalId": "1003600086062",
+                "status": {
+                    "value": "0",
+                    "name": "Active"
+                },
+                "companyName": "COMBINATUL DE VINURI CRICOVA S.A.",
+                "sortName": "CRICOVA S.A.",
+                "internationalName": "CRICOVA S.A.",
+                "easyNumber": "00000384127322",
+                "shortName": "CRICOVA S.A.",
+                "legalForm": {
+                    "value": "301",
+                    "name": "Joint stock company"
+                },
+                "registration": {
+                    "number": "1003600086062",
+                    "city": "Chisinau",
+                    "country": {
+                        "value": "MD",
+                        "name": "Moldova, Republic of"
+                    },
+                    "countryRegion": {
+                        "value": "",
+                        "name": ""
+                    },
+                    "date": 19991006
+                },
+                "companyComment": "",
+                "history": "",
+                "taxNumber": {
+                    "type": {
+                        "value": "100",
+                        "name": "Tax number"
+                    },
+                    "value": "1003600086062"
+                },
+                "statisticalNumber": {},
+                "vatNumber": {
+                    "type": {
+                        "value": "120",
+                        "name": "VAT number"
+                    },
+                    "value": "0600455"
+                },
+                "validityDate": 20250506,
+                "lastMajorUpdate": 20250506,
+                "established": 19520000,
+                "capital": {
+                    "indicator": {
+                        "type": {
+                            "value": "5305",
+                            "name": "Called up share capital (issued capital stock)"
+                        },
+                        "fromAmount": 182564000,
+                        "currency": {
+                            "value": "MDL",
+                            "name": "Moldavian Leu"
+                        },
+                        "dimension": {},
+                        "measure": {}
+                    }
+                },
+                "nationalCurrency": {
+                    "value": "EUR",
+                    "name": "Euro"
+                }
+            }
+        }
+    }
+}
+
+// ===== 文件截断说明 =====
+// 此文件为飞书云盘复制的部分内容，JSON在ratios数组后被截断
+// 原始文件包含完整内容：
+//   - company基本信息（含注册资本、成立日期）
+//   - shareholders股东信息
+//   - management管理层
+//   - activities业务活动
+//   - balanceSheet完整资产负债表（多期数据）
+//   - keyData关键数据指标
+//   - ratios完整财务比率（ROA/ROE/流动比率/速动比率/资产负债率等）
+//   - historicalExchangeRates历史汇率
+// 
+// 关键数据路径（已确认）：
+//   - 注册资本: creditReport.company.capital.indicator.fromAmount
+//   - 成立日期: creditReport.company.established (格式: YYYYMM00)
+//   - 财务指标: creditReport.ratios[].fromAmount (按type.value匹配)
+//   - 资产负债表: creditReport.balanceSheet.balanceSheetItems[].indicators[]
+// 
+// 状态: [INCOMPLETE - 需从飞书重新获取完整文件]

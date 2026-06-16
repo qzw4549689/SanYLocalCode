@@ -1,0 +1,508 @@
+<form headerdensity="HighWithControls">
+  <tabs>
+    <tab verticallayout="true" id="{43b8ba0b-5d84-4816-8f34-87d25e3212b5}" IsUserDefined="1" name="General">
+      <labels>
+        <label description="General" languagecode="1033" />
+      </labels>
+      <columns>
+        <column width="100%">
+          <sections>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{79892300-8b72-4700-bd10-609e8f7f8845}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="基本信息" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{08f29c3d-b080-42df-9c10-9c19dd3316aa}" colspan="1">
+                    <labels>
+                      <label description="信用评估编码" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_scoreid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_scoreid" />
+                  </cell>
+                  <cell id="{45453dec-59c2-4e9f-85ab-0abadc7daf96}" colspan="1">
+                    <labels>
+                      <label description="客户" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_accountid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="mcs_accountid">
+                      <parameters>
+                        <DefaultViewId>{a9af0ab8-861d-4cfa-92a5-c6281fed7fab}</DefaultViewId>
+                        <AvailableViewIds>{a9af0ab8-861d-4cfa-92a5-c6281fed7fab}</AvailableViewIds>
+                      </parameters>
+                    </control>
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{a69f6fb5-19d4-4dc8-a970-1c5428f5117c}" colspan="1">
+                    <labels>
+                      <label description="客户编码" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_custname" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_custname" />
+                  </cell>
+                  <cell id="{dc8c6c73-ff7e-4ec0-b445-a643e799c08d}" colspan="1">
+                    <labels>
+                      <label description="客户英文名称" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_custnameen" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_custnameen" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{1a4b4aaa-a501-47f4-a3e6-589ff112366e}" colspan="1">
+                    <labels>
+                      <label description="国家编码" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_countrycode" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_countrycode" />
+                  </cell>
+                  <cell id="{26c5ebe5-9955-4f08-a536-7dd27184e185}" colspan="1">
+                    <labels>
+                      <label description="科法斯客户代码" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_cofaceid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_cofaceid" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{65767c76-909e-4b58-978e-58576b79534d}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="Coface订单信息" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{6f4a1581-235d-4ef3-bdd8-ed59020690cf}" colspan="1">
+                    <labels>
+                      <label description="URBA订单ID" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_urba360id" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_urba360id" />
+                  </cell>
+                  <cell id="{452cffac-a75d-47f6-a36f-41c370272ba2}" colspan="1">
+                    <labels>
+                      <label description="URBA订单状态" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_urbastatus" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_urbastatus" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{477f4e64-de03-425b-b3e1-e2dc037ecd1a}" colspan="1">
+                    <labels>
+                      <label description="Report订单ID" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_rptorderid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_rptorderid" />
+                  </cell>
+                  <cell id="{57726625-6f07-458e-9432-1985038b389e}" colspan="1">
+                    <labels>
+                      <label description="Report订单状态" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_rptstatus" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_rptstatus" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{f45eea4d-6ba9-4747-9d3a-2bd40526a419}" colspan="1">
+                    <labels>
+                      <label description="Publication ID" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_publicationid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_publicationid" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{ad568391-3a63-470e-9589-46e5acf21462}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="状态与评分" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{d317faf6-3245-4c06-ace6-ca81c6bd92ab}" colspan="1">
+                    <labels>
+                      <label description="评估状态" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_status" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_status" />
+                  </cell>
+                  <cell id="{15bb7eeb-bdca-4aa0-9dab-3892aa6b3fba}" colspan="1">
+                    <labels>
+                      <label description="客户信用评分" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_creditscore" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_creditscore" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{456171bc-8594-4228-9f4d-12306fb1ae15}" colspan="1" rowspan="1">
+                    <labels>
+                      <label description="逾期未回收率模型分" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_overduerate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_overduerate" disabled="false" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{8ae537ca-cc08-459a-9de9-1186ad6b35d3}" colspan="1">
+                    <labels>
+                      <label description="有效状态" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_active" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_active" />
+                  </cell>
+                  <cell id="{c4ea0dfb-33ce-4916-b350-b3859d1b3db1}" colspan="1">
+                    <labels>
+                      <label description="备注说明" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_remark" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_remark" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{db056ab7-5780-4f9c-a9dc-ae5ea0473482}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="人员与日期" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{20a09094-2211-4443-a848-528935a9db23}" colspan="1">
+                    <labels>
+                      <label description="申请人" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_applicant" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_applicant" />
+                  </cell>
+                  <cell id="{675c90eb-1f89-4c0b-9ec4-899dbedd202c}" colspan="1">
+                    <labels>
+                      <label description="发起评估日期" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_initdate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_initdate" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{eb74f817-6c5a-44a8-8e3c-a9efa6a7adad}" colspan="1">
+                    <labels>
+                      <label description="数据集成日期" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_abidate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_abidate" />
+                  </cell>
+                  <cell id="{fbdf5840-bdaf-40ee-866d-a1e432687ffd}" colspan="1">
+                    <labels>
+                      <label description="复核日期" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_checkdate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_checkdate" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{a1944b65-b1d0-4cba-912a-6c8dcd51cfbd}" colspan="1">
+                    <labels>
+                      <label description="评分日期" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_scoredate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_scoredate" />
+                  </cell>
+                  <cell id="{c58ff47b-3853-425a-9ae5-d815712bb972}" colspan="1">
+                    <labels>
+                      <label description="BPP审批完成日期" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_approvedate" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_approvedate" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{100f9b8f-25c8-40b4-b401-2f9af8a246a4}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="API接口信息" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{ed1cca97-3397-45ad-9d28-03f519e6e249}" colspan="1">
+                    <labels>
+                      <label description="API状态" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_api_status" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_api_status" />
+                  </cell>
+                  <cell id="{7017b234-730e-43b2-a82d-015e198586e8}" colspan="1">
+                    <labels>
+                      <label description="API名称" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_api_name" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_api_name" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{defa695a-399c-4c44-92dd-72ae1ab58402}" colspan="1">
+                    <labels>
+                      <label description="API消息" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_api_msg" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_api_msg" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{9ed9bd26-e211-4dec-b8b6-30ee047619a1}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="Coface原始数据" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{9e009e49-97b9-4e02-a953-22a5289e904d}" colspan="1">
+                    <labels>
+                      <label description="URBA JSON" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_urbajson" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_urbajson" />
+                  </cell>
+                  <cell id="{4379ec0b-64dc-44a9-8ee9-b8102afa9cc8}" colspan="1">
+                    <labels>
+                      <label description="Report JSON" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_reportjson" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_reportjson" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+            <section showlabel="true" showbar="true" IsUserDefined="1" id="{75f031c4-458e-4fef-83af-7cda6db1714c}" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="11" labelwidth="115">
+              <labels>
+                <label description="BPP审批信息" languagecode="1033" />
+              </labels>
+              <rows>
+                <row>
+                  <cell id="{ffba5f80-b2ae-4e08-87ab-bf3af0833907}" colspan="1">
+                    <labels>
+                      <label description="BPP状态" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_bppstatus" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_bppstatus" />
+                  </cell>
+                  <cell id="{68f6314a-87a3-4587-a3fc-9df039ce9198}" colspan="1">
+                    <labels>
+                      <label description="BPP审批人" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_bppappriver" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_bppappriver" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{9744678c-4625-497c-a06a-f78588a8ff6f}" locklevel="0" colspan="1" rowspan="1">
+                    <labels>
+                      <label description="BPP流程实例ID" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_workflowid" classid="{4273EDBD-AC1D-40D3-9FB2-095C621B552D}" datafieldname="mcs_workflowid" disabled="false" />
+                  </cell>
+                  <cell id="{9423b314-935f-410c-9758-397dcddd48ab}" colspan="1">
+                    <labels>
+                      <label description="BPP错误信息" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_bpperrormsg" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_bpperrormsg" />
+                  </cell>
+                </row>
+                <row>
+                  <cell id="{6167e1db-4b4b-4f79-a021-12c91c929f08}" colspan="1">
+                    <labels>
+                      <label description="BPP驳回原因" languagecode="1033" />
+                    </labels>
+                    <control id="mcs_bpprejectreason" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_bpprejectreason" />
+                  </cell>
+                </row>
+              </rows>
+            </section>
+          </sections>
+        </column>
+      </columns>
+    </tab>
+    <tab name="Credit Tags" id="71fe8555-6707-475e-b6ac-35b82bc206b7" IsUserDefined="0" locklevel="0" showlabel="true">
+      <labels>
+        <label description="Credit Tags" languagecode="1033" />
+      </labels>
+      <columns>
+        <column width="100%">
+          <sections>
+            <section name="tab_2_section_1" id="cf2d8cb0-dfb9-40b1-8912-1b9518b5bf71" IsUserDefined="0" locklevel="0" showlabel="false" showbar="false" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="1" labelwidth="115">
+              <labels>
+                <label description="新建分区" languagecode="1033" />
+              </labels>
+              <rows>
+                <row />
+                <row>
+                  <cell locklevel="0" id="{3865c5a1-eb3f-47b2-b5a3-77bd8e0238e6}" rowspan="4" colspan="1" auto="false" showlabel="false">
+                    <labels>
+                      <label description="New SG control 1780908774214" languagecode="1033" />
+                    </labels>
+                    <control indicationOfSubgrid="true" id="Subgrid_new_1" classid="{F9A8A302-114E-466A-B582-6771B2AE0D92}" uniqueid="{7406dd26-bb8e-4687-8abf-de29d50a968b}">
+                      <parameters>
+                        <RecordsPerPage>12</RecordsPerPage>
+                        <AutoExpand>Fixed</AutoExpand>
+                        <EnableQuickFind>true</EnableQuickFind>
+                        <EnableViewPicker>false</EnableViewPicker>
+                        <EnableChartPicker>true</EnableChartPicker>
+                        <ChartGridMode>All</ChartGridMode>
+                        <RelationshipName>mcs_credit_record_mcs_customer_tag_mcs_credit_record</RelationshipName>
+                        <TargetEntityType>mcs_customer_tag</TargetEntityType>
+                        <ViewId>{1DD3CDE9-1A63-F111-AB0D-7CED8DE5BBD1}</ViewId>
+                        <ViewIds>{309B7075-CBA5-4E3E-8BC5-995A3A928363},{1DD3CDE9-1A63-F111-AB0D-7CED8DE5BBD1}</ViewIds>
+                      </parameters>
+                    </control>
+                  </cell>
+                </row>
+                <row />
+                <row />
+                <row />
+              </rows>
+            </section>
+          </sections>
+        </column>
+      </columns>
+    </tab>
+  <tab name="Attachments" id="{0b150750-3a87-4bbd-9f3b-38491b56fa56}" IsUserDefined="1" locklevel="0" showlabel="true"><labels><label description="附件" languagecode="2052" /><label description="Attachments" languagecode="1033" /></labels><columns><column width="100%"><sections><section name="tab_attachments_section_1" id="{9fe05013-9895-4844-a037-707fa580e5f7}" IsUserDefined="1" locklevel="0" showlabel="false" showbar="false" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="1" labelwidth="115"><labels><label description="附件上传" languagecode="2052" /><label description="Attachment Upload" languagecode="1033" /></labels><rows><row><cell locklevel="0" id="{4e6eb809-dce3-4978-b602-a20a68f4c94f}" rowspan="12" colspan="1" auto="false" showlabel="false"><labels><label description="Uploader" languagecode="1033" /></labels><control id="mcs_credit_record_uploader" classid="{9FDF5F91-88E1-47cd-9CAE-4C7186A64CBD}"><parameters><Url>mcs_/CommonCore/Html/Uploader.html</Url><PassParameters>true</PassParameters></parameters></control></cell></row></rows></section></sections></column></columns></tab></tabs>
+  <formLibraries>
+    <Library name="mcs_credit_record.js" libraryUniqueId="{b69f5d4b-fb11-496f-834f-f9294504431a}" />
+    <Library name="mcs_credit_record.js" libraryUniqueId="{38a083e7-6faf-4aff-9bce-5c44200a4f6e}" />
+  </formLibraries>
+  <events>
+    <event name="onload" application="false" active="true">
+      <Handlers>
+        <Handler handlerUniqueId="{e6aca849-0fc9-4f35-b730-4c4d7349a03d}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onLoad" enabled="true" parameters="" passExecutionContext="true" />
+      </Handlers>
+    </event>
+    <event name="onsave" application="false" active="true">
+      <Handlers>
+        <Handler handlerUniqueId="{60579dff-769c-4d03-a596-686693e2c9af}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onSave" enabled="true" parameters="" passExecutionContext="true" />
+      </Handlers>
+    </event>
+    <event name="onload" application="false" active="true">
+      <Handlers>
+        <Handler handlerUniqueId="{e5ece3d0-200b-4af0-960b-853df2bfcc26}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onLoad" enabled="true" parameters="" passExecutionContext="true" />
+      </Handlers>
+    </event>
+    <event name="onsave" application="false" active="true">
+      <Handlers>
+        <Handler handlerUniqueId="{d7f58236-8cad-46b9-9c42-ee128d25e89f}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onSave" enabled="true" parameters="" passExecutionContext="true" />
+      </Handlers>
+    </event>
+  </events>
+  <header id="{e8de2ed0-6c77-4dc9-9edc-d7e9e141ba3e}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+    <rows>
+      <row>
+        <cell id="{d38ffde1-a3c2-40fe-9b42-1926b4b0f426}" showlabel="false">
+          <labels>
+            <label description="" languagecode="1033" />
+          </labels>
+        </cell>
+        <cell id="{dceb8ed6-a93a-48b4-9b8e-ab57b4ad0257}" showlabel="false">
+          <labels>
+            <label description="" languagecode="1033" />
+          </labels>
+        </cell>
+        <cell id="{7e1eb771-a953-4b20-a8ed-a371f9a6a939}" showlabel="false">
+          <labels>
+            <label description="" languagecode="1033" />
+          </labels>
+        </cell>
+      </row>
+    </rows>
+  </header>
+  <footer id="{c432fd1a-9bb8-4944-a3ee-ccdfb6b73765}" celllabelposition="Top" columns="111" labelwidth="115" celllabelalignment="Left">
+    <rows>
+      <row>
+        <cell id="{f01afcaa-3162-491c-b2c6-95b5545d9db5}" showlabel="false">
+          <labels>
+            <label description="" languagecode="1033" />
+          </labels>
+        </cell>
+        <cell id="{ad5e8bfb-9351-4d95-bbd9-aeb8cf3309e2}" showlabel="false">
+          <labels>
+            <label description="" languagecode="1033" />
+          </labels>
+        </cell>
+        <cell id="{9dfb9ffb-a080-41b5-b41e-397cb3de86a7}" showlabel="false">
+          <labels>
+            <label description="" languagecode="1033" />
+          </labels>
+        </cell>
+      </row>
+      <row>
+        <cell id="{d8a67a53-a5a7-4b1b-82d1-db56e6a78c55}" showlabel="true" locklevel="0">
+          <labels>
+            <label description="BPP流程实例ID" languagecode="1033" />
+          </labels>
+          <control id="mcs_workflowid" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_workflowid" disabled="true" />
+        </cell>
+      </row>
+      <row>
+        <cell id="{8026f4f3-7366-4cca-ac45-2b40fbd241aa}" showlabel="true" locklevel="0">
+          <labels>
+            <label description="当前审批人" languagecode="1033" />
+          </labels>
+          <control id="mcs_nextapprover" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_nextapprover" disabled="true" />
+        </cell>
+      </row>
+    </rows>
+  </footer>
+  <DisplayConditions Order="0" FallbackForm="true">
+    <Everyone />
+  </DisplayConditions>
+  <Navigation>
+    <NavBar>
+      <NavBarByRelationshipItem Area="Info" Show="false" RelationshipName="mcs_credit_record_mcs_customer_tag_mcs_credit_record" Id="nav_mcs_credit_record_mcs_customer_tag_mcs_credit_record" Sequence="10000">
+        <Titles>
+          <Title Text="客户信用标签表" LCID="1033" />
+        </Titles>
+      </NavBarByRelationshipItem>
+      <NavBarByRelationshipItem Area="ProcessCenter" Show="false" RelationshipName="hardcoded_{B7196B13-6B9D-42CD-BD58-B19A3953126F}navAsyncOperations" Id="navAsyncOperations" Sequence="9500">
+        <Titles>
+          <Title Text="System Jobs" LCID="1033" />
+        </Titles>
+      </NavBarByRelationshipItem>
+    </NavBar>
+  </Navigation>
+  <controlDescriptions>
+    <controlDescription forControl="{7406dd26-bb8e-4687-8abf-de29d50a968b}">
+      <customControl id="{E7A81278-8635-4D9E-8D4D-59480B391C5B}">
+        <parameters />
+      </customControl>
+      <customControl name="MscrmControls.Grid.GridControl" formFactor="0">
+        <parameters>
+          <data-set name="Grid">
+            <ViewId>{1dd3cde9-1a63-f111-ab0d-7ced8de5bbd1}</ViewId>
+            <TargetEntityType>mcs_customer_tag</TargetEntityType>
+            <IsUserView>false</IsUserView>
+            <EnableViewPicker>false</EnableViewPicker>
+            <RelationshipName>mcs_credit_record_mcs_customer_tag_mcs_credit_record</RelationshipName>
+            <FilteredViewIds>{309B7075-CBA5-4E3E-8BC5-995A3A928363},{1DD3CDE9-1A63-F111-AB0D-7CED8DE5BBD1}</FilteredViewIds>
+          </data-set>
+          <EnableGroupBy type="Enum" static="true">no</EnableGroupBy>
+          <EnableEditing type="Enum" static="true">yes</EnableEditing>
+          <ReflowBehavior type="Enum" static="true">GridOnly</ReflowBehavior>
+          <ListLayoutDirection type="Enum" static="true">Vertical</ListLayoutDirection>
+          <EnableSubGridAutoCollapse type="Enum" static="true">false</EnableSubGridAutoCollapse>
+          <EnableFiltering type="Enum" static="true">yes</EnableFiltering>
+          <HideNestedGridColumnHeader type="Enum" static="true">no</HideNestedGridColumnHeader>
+          <EnableJumpBar type="Enum" static="true">no</EnableJumpBar>
+        </parameters>
+      </customControl>
+      <customControl name="MscrmControls.Grid.GridControl" formFactor="2">
+        <parameters>
+          <data-set name="Grid">
+            <ViewId>{1dd3cde9-1a63-f111-ab0d-7ced8de5bbd1}</ViewId>
+            <TargetEntityType>mcs_customer_tag</TargetEntityType>
+            <IsUserView>false</IsUserView>
+            <EnableViewPicker>false</EnableViewPicker>
+            <RelationshipName>mcs_credit_record_mcs_customer_tag_mcs_credit_record</RelationshipName>
+            <FilteredViewIds>{309B7075-CBA5-4E3E-8BC5-995A3A928363},{1DD3CDE9-1A63-F111-AB0D-7CED8DE5BBD1}</FilteredViewIds>
+          </data-set>
+          <EnableGroupBy type="Enum" static="true">no</EnableGroupBy>
+          <EnableEditing type="Enum" static="true">yes</EnableEditing>
+          <ReflowBehavior type="Enum" static="true">GridOnly</ReflowBehavior>
+          <ListLayoutDirection type="Enum" static="true">Vertical</ListLayoutDirection>
+          <EnableSubGridAutoCollapse type="Enum" static="true">false</EnableSubGridAutoCollapse>
+          <EnableFiltering type="Enum" static="true">yes</EnableFiltering>
+          <HideNestedGridColumnHeader type="Enum" static="true">no</HideNestedGridColumnHeader>
+          <EnableJumpBar type="Enum" static="true">no</EnableJumpBar>
+        </parameters>
+      </customControl>
+      <customControl name="MscrmControls.Grid.GridControl" formFactor="1">
+        <parameters>
+          <data-set name="Grid">
+            <ViewId>{1dd3cde9-1a63-f111-ab0d-7ced8de5bbd1}</ViewId>
+            <TargetEntityType>mcs_customer_tag</TargetEntityType>
+            <IsUserView>false</IsUserView>
+            <EnableViewPicker>false</EnableViewPicker>
+            <RelationshipName>mcs_credit_record_mcs_customer_tag_mcs_credit_record</RelationshipName>
+            <FilteredViewIds>{309B7075-CBA5-4E3E-8BC5-995A3A928363},{1DD3CDE9-1A63-F111-AB0D-7CED8DE5BBD1}</FilteredViewIds>
+          </data-set>
+          <EnableGroupBy type="Enum" static="true">no</EnableGroupBy>
+          <EnableEditing type="Enum" static="true">yes</EnableEditing>
+          <ReflowBehavior type="Enum" static="true">GridOnly</ReflowBehavior>
+          <ListLayoutDirection type="Enum" static="true">Vertical</ListLayoutDirection>
+          <EnableSubGridAutoCollapse type="Enum" static="true">false</EnableSubGridAutoCollapse>
+          <EnableFiltering type="Enum" static="true">yes</EnableFiltering>
+          <HideNestedGridColumnHeader type="Enum" static="true">no</HideNestedGridColumnHeader>
+          <EnableJumpBar type="Enum" static="true">no</EnableJumpBar>
+        </parameters>
+      </customControl>
+    </controlDescription>
+  </controlDescriptions>
+</form>

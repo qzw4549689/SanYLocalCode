@@ -1,0 +1,56 @@
+{
+  "entityName": "mcs_coface_exchange_rate",
+  "displayName": "Coface汇率配置表",
+  "primaryAttribute": "mcs_currencycode",
+  "primaryAttributeDisplayName": "货币代码",
+  "primaryAttributeLength": 10,
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_currencycode",
+      "displayName": "货币代码",
+      "description": "ISO 货币代码，如 EUR/AUD/CNY",
+      "type": "string",
+      "maxLength": 10,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_currencyname",
+      "displayName": "货币名称",
+      "description": "货币英文或中文名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_rate_to_usd",
+      "displayName": "兑美元汇率",
+      "description": "1 单位本地货币可兑换的 USD 金额，如 CNY=0.1463",
+      "type": "decimal",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999.99999999,
+      "precision": 10
+    },
+    {
+      "schemaName": "mcs_effectivedate",
+      "displayName": "生效日期",
+      "description": "该汇率记录的生效日期，用于支持按年度维护多套汇率",
+      "type": "datetime",
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_isactive",
+      "displayName": "是否启用",
+      "description": "仅启用的记录参与汇率换算",
+      "type": "boolean",
+      "trueLabel": "是",
+      "falseLabel": "否"
+    },
+    {
+      "schemaName": "mcs_remark",
+      "displayName": "备注",
+      "description": "汇率来源或更新说明",
+      "type": "memo",
+      "maxLength": 4000
+    }
+  ]
+}
