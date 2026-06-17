@@ -797,8 +797,11 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
     
     Xrm.Navigation.navigateTo(pageInput, navigationOptions)
         .then(function () {
-            // 弹窗关闭后刷新表单
-            formContext.data.refresh(true);
+            // 弹窗关闭后刷新表单，并重新校验字段/清除旧提示
+            return formContext.data.refresh(true);
+        })
+        .then(function () {
+            CreditRecordForm.validateAccountFields(formContext);
         })
         .catch(function (error) {
             console.error("打开企业搜索弹窗失败:", error);

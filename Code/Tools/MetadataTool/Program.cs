@@ -42,6 +42,7 @@ class Program
         Console.WriteLine("  dotnet run test-common                  - 隔离测试 D365ToolCommon 共享库（自动创建/删除测试实体）");
         Console.WriteLine("  dotnet run cleanup-test-common          - 仅清理 D365ToolCommon 测试实体");
         Console.WriteLine("  dotnet run clear-account-credit-fields <客户名称> - 清空客户及客户主数据上的8个信用字段（用于测试）");
+        Console.WriteLine("  dotnet run check-fix-masterdata <客户名称> - 检查并修复客户主数据上的基础字段");
         Console.WriteLine();
 
         if (args.Length < 1)
@@ -337,6 +338,17 @@ class Program
                         }
                         var clearHelper = new ClearAccountCreditFieldsHelper(service);
                         clearHelper.ClearByName(args[1]);
+                        break;
+
+                    case "check-fix-masterdata":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run check-fix-masterdata <客户名称>");
+                            Console.WriteLine("  示例: dotnet run check-fix-masterdata \"LTC客户-1\"");
+                            return;
+                        }
+                        var fixHelper = new CheckAndFixAccountMasterDataHelper(service);
+                        fixHelper.CheckAndFixByAccountName(args[1]);
                         break;
 
                     case "query-plugin-namespace":
