@@ -203,23 +203,25 @@ DEV 测试通过后，将本地代码转移到远程服务器主项目：
 1. **将本地代码同步到远程服务器**（`tx-windows`）的 `C:\Projects\D365\D365` 目录
 2. **按主项目规范改写命名空间、引用、csproj**（参见 `/skill:d365-dev` 第 8.4 节）
 3. **在远程服务器编译目标项目**（如 `SanyD365.D365Extension.Sales`），确认无编译错误
-4. **编译通过后，拉取 Git 上 `uat` 最新代码**（`git pull origin uat` 或 rebase），确保后续 UAT 发布基于最新 uat
+4. **编译通过后，在远程项目仓库创建个人分支并提交推送**，**不要先拉取 `uat` 再编译**
 
 ```powershell
 ssh tx-windows
 
 cd C:\Projects\D365
 
-# 拉取最新 uat
-git checkout uat
-git pull origin uat
+# 确认当前在 uat 分支（远程仓库默认分支）
+git status
 
-# 创建/切换到个人分支
+# 创建个人开发分支
 git checkout -b uat-<日期>-<姓名>-<功能简述>
 
-# 编译验证（只编译目标 Plugin 项目，不要全编译 D365.sln）
-nuget restore D365\D365.sln
-"C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\devenv.com" D365\D365.sln /Build "Release|Any CPU" /Project "D365\SanyD365.D365Extension.Sales\SanyD365.D365Extension.Sales.csproj"
+# 添加修改的文件并提交
+git add .
+git commit -m "<功能简述>"
+
+# 推送到项目 Git（Azure DevOps）
+git push -u origin uat-<日期>-<姓名>-<功能简述>
 ```
 
 ### 6.6 Git 工作流 / 代码归并
@@ -229,33 +231,31 @@ nuget restore D365\D365.sln
 > 所有"代码推送"，除非特别指明推送到**个人 Git**（如 GitHub 备份），否则默认推送到**项目 Git（Azure DevOps `uat`）**。
 > 开发分支应基于项目 `uat` 创建，PR 目标也必须是项目 `uat`，不要默认推送到个人仓库作为主流程。
 
-远程编译通过后，走标准 Git PR 流程合并到项目 `uat`：
+远程编译通过后，按以下顺序走 Git PR 流程：
+
+1. **在远程服务器创建个人开发分支并 push**（参见 6.5 节）
+2. **用户在 Azure DevOps 网页 Create PR → 合并到 `uat`**
+   - 仓库地址：`https://dev.azure.com/SanyGlobalCRM/D365/_git/D365`
+3. **用户通知 AI "PR 已合并完成"**
+4. **AI 在远程服务器拉取已合并的 `uat` 最新代码，重新编译目标项目**
+5. **将重新编译后的 DLL 传回本地，更新 DEV Assembly**
 
 ```powershell
-cd C:\Projects\D365
+# 步骤 1：远程服务器推送分支后，用户手动在 Azure DevOps 创建 PR 并合并
 
-# 1. 确认当前在 uat 且最新
+# 步骤 4：用户通知合并完成后，在远程服务器执行
+cd C:\Projects\D365
 git checkout uat
 git pull origin uat
 
-# 2. 创建个人开发分支
-git checkout -b uat-260610-peter-coface-fix
-
-# 3. 添加修改的文件
-git add .
-
-# 4. 提交
-git commit -m "Coface API 配置化：从 ms_systemconfiguration 读取配置，移除硬编码"
-
-# 5. 推送到项目 Git（Azure DevOps `uat`）
-git push -u origin uat-260610-peter-coface-fix
-
-# 6. Azure DevOps 网页 Create PR → 合并到 uat
-#    https://dev.azure.com/SanyGlobalCRM/D365/_git/D365
+# 重新编译目标项目（不要全编译 D365.sln）
+nuget restore D365\D365.sln
+msbuild D365\SanyD365.D365Extension.Sales\SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal
 ```
 
 **⚠️ 不要直接 push `uat` 分支，必须走 PR！**
 **⚠️ 不要默认推送到个人 GitHub 仓库，除非用户明确说"备份到个人 Git"或"推送到 GitHub"。**
+**⚠️ PR 合并前不要拉取 `uat` 重新编译；必须等用户确认合并完成后再执行步骤 4。**
 
 ### 6.7 UAT 实体/元数据发布
 
@@ -276,7 +276,7 @@ git push -u origin uat-260610-peter-coface-fix
 
 ### 6.8 本地注册 DEV Assembly
 
-> **必须在 uat PR 合并完成后，再从 uat 对应分支拉取最新代码重新编译，最后用该 DLL 更新 DEV。**
+> **必须在用户确认 uat PR 已合并后，再从远程服务器拉取最新 `uat` 重新编译，最后用该 DLL 更新 DEV。**
 
 **🚨 Assembly 差异红线（更新前必读）：**
 
@@ -298,7 +298,7 @@ PluginType [xxx] not found in PluginAssembly [xxx] which has a total of [N] plug
 
 **更新 DEV Assembly 流程：**
 
-1. 在远程服务器拉取已合并后的 `uat` 最新代码
+1. 收到用户"PR 已合并"通知后，在远程服务器拉取已合并后的 `uat` 最新代码
 2. 重新编译目标项目（如 `SanyD365.D365Extension.Sales`），**不要全编译 `D365.sln`**
 3. 将远程服务器编译出的最新 DLL 传回本地
 4. 使用 MetadataTool 在 DEV 环境注册/更新该 Assembly
