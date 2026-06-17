@@ -468,7 +468,7 @@
         }
 
         /**
-         * 获取当前 accountid
+         * 获取当前 accountid（同步方式，适用于 Account 表单或 URL 传参）
          */
         function getAccountId() {
             // 1. URL 参数
@@ -492,6 +492,52 @@
             }
 
             return null;
+        }
+
+        /**
+         * 解析当前上下文，返回 accountid（支持异步查询）
+         * 当从 mcs_customermasterdata 表单打开时，通过 mcs_customermasterdataid 反查关联 account
+         */
+        function resolveAccountId() {
+            return new Promise(function(resolve, reject) {
+                // 1. 优先同步获取
+                var syncId = getAccountId();
+                if (syncId) {
+                    resolve(syncId);
+                    return;
+                }
+
+                // 2. 从 mcs_customermasterdata 表单反查 account
+                var xrm = getXrm();
+                if (xrm && xrm.Page && xrm.Page.data && xrm.Page.data.entity) {
+                    try {
+                        var entity = xrm.Page.data.entity;
+                        var entityName = entity.getEntityName();
+                        var entityId = entity.getId().replace(/[{}]/g, '').toLowerCase();
+
+                        if (entityName === 'mcs_customermasterdata' && entityId) {
+                            xrm.WebApi.retrieveMultipleRecords('account',
+                                '?$select=accountid&$filter=_mcs_customermasterdata_value eq ' + entityId)
+                                .then(function(result) {
+                                    if (result && result.entities && result.entities.length > 0) {
+                                        resolve(result.entities[0].accountid.replace(/[{}]/g, '').toLowerCase());
+                                    } else {
+                                        reject('未找到关联的 Account 记录');
+                                    }
+                                })
+                                .catch(function(err) {
+                                    reject('反查 Account 失败: ' + (err.message || err));
+                                });
+                            return;
+                        }
+                    } catch (e) {
+                        reject('解析上下文失败: ' + e.message);
+                        return;
+                    }
+                }
+
+                reject('无法获取客户标识');
+            });
         }
 
         /**
@@ -891,29 +937,24 @@
                 return;
             }
 
-            var accountId = getAccountId();
-
-            if (!accountId) {
-                renderError(app, '无法获取客户标识。请通过 Account 表单页签打开，或通过 URL 传入 accountid 参数。');
-                return;
-            }
-
-            // 并行查询数据
-            Promise.all([
-                fetchAccount(accountId),
-                fetchLatestCreditRecord(accountId),
-                fetchCustomerTags(accountId)
-            ])
-            .then(function(results) {
-                var account = results[0];
-                var creditRecord = results[1];
-                var tags = results[2];
-                render(app, account, creditRecord, tags);
-            })
-            .catch(function(error) {
-                console.error('加载画像失败:', error);
-                renderError(app, '加载客户信用画像失败: ' + (error.message || error));
-            });
+            resolveAccountId()
+                .then(function(accountId) {
+                    // 并行查询数据
+                    return Promise.all([
+                        fetchAccount(accountId),
+                        fetchLatestCreditRecord(accountId),
+                        fetchCustomerTags(accountId)
+                    ]).then(function(results) {
+                        return { accountId: accountId, account: results[0], creditRecord: results[1], tags: results[2] };
+                    });
+                })
+                .then(function(data) {
+                    render(app, data.account, data.creditRecord, data.tags);
+                })
+                .catch(function(error) {
+                    console.error('加载画像失败:', error);
+                    renderError(app, '加载客户信用画像失败: ' + (error.message || error));
+                });
         }
 
         // DOM 加载完成后初始化

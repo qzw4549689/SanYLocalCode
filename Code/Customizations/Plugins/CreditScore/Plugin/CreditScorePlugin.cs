@@ -138,31 +138,49 @@ namespace SanyD365.Plugins.CreditScore.Plugin
             Guid accountId = accountRef.Id;
             tracer.Trace($"客户ID: {accountId}");
 
-            // 查询Account客户属性（增加mcs_accounttype用于个人客户识别）
-            var account = service.Retrieve("account", accountId, 
-                new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
-            
+            // 优先从客户主数据表(mcs_customermasterdata)读取客户属性
+            // PRD: 客户编码唯一性在客户主数据表维护，引用客户数据使用客户主数据表
+            var account = service.Retrieve("account", accountId, new ColumnSet("mcs_customermasterdata"));
             if (account == null)
             {
                 tracer.Trace("未找到客户记录，使用默认值1(SA级老客户)");
                 return 1;
             }
 
+            int accountCategory = 0, accountLevel = 0, accountType = 0;
+            var masterDataRef = account.GetAttributeValue<EntityReference>("mcs_customermasterdata");
+            if (masterDataRef != null)
+            {
+                var masterData = service.Retrieve("mcs_customermasterdata", masterDataRef.Id,
+                    new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                accountCategory = masterData.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
+                accountLevel = masterData.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                accountType = masterData.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                tracer.Trace($"从客户主数据表读取: category={accountCategory}, level={accountLevel}, type={accountType}");
+            }
+            else
+            {
+                // fallback: 从 account 读取（兼容旧数据）
+                account = service.Retrieve("account", accountId,
+                    new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                accountCategory = account.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
+                accountLevel = account.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                accountType = account.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                tracer.Trace($"未找到客户主数据表关联，从Account读取: category={accountCategory}, level={accountLevel}, type={accountType}");
+            }
+
             // 输入因子2：是否经销商
             // D365实际值：10=Official Dealer(正式经销商), 90=Prospective Dealer(意向经销商)
-            int accountCategory = account.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
             bool isDealer = (accountCategory == 10 || accountCategory == 90);
             tracer.Trace($"客户类别: {accountCategory}, 是否经销商: {isDealer}");
 
             // 输入因子3：直销客户分级
             // D365实际值：4=Diamond, 3=Gold, 2=Silver, 1=Other
             // 映射到PRD定义：4=S级, 3=A级, 2=B级, 1=C级
-            int accountLevel = account.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
             tracer.Trace($"客户级别: {accountLevel}");
 
             // 输入因子4：客户类型（个人客户识别）
             // D365实际值：1=Individual Account(个人客户), 2=Company Account(公司客户)
-            int accountType = account.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
             tracer.Trace($"客户类型: {accountType}");
 
             // 输入因子1：新老客户（查询销售订单）

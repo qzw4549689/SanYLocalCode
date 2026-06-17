@@ -201,44 +201,38 @@ CreditRecordForm.onAccountChange = function (executionContext) {
     
     var accountGuid = accountValue[0].id.replace(/[{}]/g, "");
     
-    // 查询Account信息
-    // 注意：客户表字段说明
-    // - accountnumber: 客户编码（标准字段）
-    // - mcs_englishname: 客户英文名称（新增字段）
-    // - mcs_country: 注册国家/地区（Lookup），需展开取国家代码
-    // - mcs_customermasterdata: 客户主数据（Lookup），科法斯ID等8个字段迁移到该实体
-    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=accountnumber,mcs_englishname&$expand=mcs_country($select=mcs_countrycode),mcs_customermasterdata($select=mcs_cofaceid)")
+    // 查询Account信息及关联的客户主数据
+    // PRD: 客户编码唯一性在客户主数据表维护，引用客户数据使用客户主数据表
+    // - mcs_customermasterdata.mcs_accountnumber: 客户编码（SAP客户代码）
+    // - mcs_customermasterdata.mcs_englishname: 客户英文名称
+    // - mcs_customermasterdata.mcs_countrycode: 国家编码
+    // - mcs_customermasterdata.mcs_cofaceid: 科法斯ID
+    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=mcs_name&$expand=mcs_customermasterdata($select=mcs_accountnumber,mcs_englishname,mcs_countrycode,mcs_cofaceid)")
         .then(function (result) {
-            // 客户编码（从accountnumber带出）
+            var customerMasterData = result.mcs_customermasterdata || {};
+
+            // 客户编码（从客户主数据表mcs_accountnumber带出）
             var custNameField = formContext.getAttribute("mcs_custname");
             if (custNameField) {
-                custNameField.setValue(result.accountnumber || "");
+                custNameField.setValue(customerMasterData.mcs_accountnumber || "");
             }
             
-            // 客户英文名称
+            // 客户英文名称（从客户主数据表带出）
             var custNameEnField = formContext.getAttribute("mcs_custnameen");
             if (custNameEnField) {
-                custNameEnField.setValue(result.mcs_englishname || "");
+                custNameEnField.setValue(customerMasterData.mcs_englishname || "");
             }
             
-            // 国家编码（从mcs_country Lookup展开获取）
+            // 国家编码（从客户主数据表带出）
             var countryCodeField = formContext.getAttribute("mcs_countrycode");
             if (countryCodeField) {
-                var countryCode = "";
-                if (result.mcs_country && result.mcs_country.mcs_countrycode) {
-                    countryCode = result.mcs_country.mcs_countrycode;
-                }
-                countryCodeField.setValue(countryCode);
+                countryCodeField.setValue(customerMasterData.mcs_countrycode || "");
             }
             
-            // 科法斯ID（从mcs_customermasterdata Lookup展开获取）
+            // 科法斯ID（从客户主数据表带出）
             var cofaceField = formContext.getAttribute("mcs_cofaceid");
             if (cofaceField) {
-                var cofaceId = "";
-                if (result.mcs_customermasterdata && result.mcs_customermasterdata.mcs_cofaceid) {
-                    cofaceId = result.mcs_customermasterdata.mcs_cofaceid;
-                }
-                cofaceField.setValue(cofaceId);
+                cofaceField.setValue(customerMasterData.mcs_cofaceid || "");
             }
             
             // 校验提示

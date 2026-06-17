@@ -45,6 +45,8 @@ NAMESPACE_MAP = {
     "SanyD365.Plugins.BppIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditRecord",
     "SanyD365.Plugins.Account": "SanyD365.D365Extension.Sales.Plugins.Account",
     "SanyD365.Plugins.CustomerMasterData.Validation": "SanyD365.D365Extension.Sales.Plugins.Account",
+    "SanyD365.Plugins.CreditScore.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditScore",
+    "SanyD365.Plugins.CreditScore.Calculator": "SanyD365.D365Extension.Sales.Application.Sales.CreditScore",
 }
 
 # 文件映射表：本地相对路径 -> 远程相对路径
@@ -76,6 +78,12 @@ FILE_MAP = {
 
     # 客户主数据字段校验 Plugin（新增）
     "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs": r"Plugins\Account\CustomerMasterDataCreditValidationPlugin.cs",
+
+    # CreditScore Plugin
+    "CreditScore/Plugin/CreditScorePlugin.cs": r"Plugins\CreditScore\CreditScoreCalculationPlugin.cs",
+    "CreditScore/Plugin/BpfStageSyncPlugin.cs": r"Plugins\CreditScore\CreditScoreBpfStageSyncPlugin.cs",
+    "CreditScore/Plugin/BpfSyncHelper.cs": r"Plugins\CreditScore\CreditScoreBpfSyncHelper.cs",
+    "CreditScore/Calculator/ScoreCalculator.cs": r"Application\Sales\CreditScore\ScoreCalculator.cs",
 }
 
 # csproj 中 Compile 引用的排序分组（可选，保持 csproj 可读性）
@@ -269,6 +277,10 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
             transformed = transform_iplugin_to_pluginbase(transformed, "AccountValidationPlugin", "AccountCreditValidationPlugin")
         elif local_rel == "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs":
             transformed = transform_iplugin_to_pluginbase(transformed, "CustomerMasterDataValidationPlugin", "CustomerMasterDataCreditValidationPlugin")
+        elif local_rel == "CreditScore/Plugin/CreditScorePlugin.cs":
+            transformed = transform_iplugin_to_pluginbase(transformed, "CreditScorePlugin", "CreditScoreCalculationPlugin")
+        elif local_rel == "CreditScore/Plugin/BpfStageSyncPlugin.cs":
+            transformed = transform_iplugin_to_pluginbase(transformed, "BpfStageSyncPlugin", "CreditScoreBpfStageSyncPlugin")
 
         if dry_run:
             print(f"[DRY-RUN] {local_rel} -> {remote_rel}")

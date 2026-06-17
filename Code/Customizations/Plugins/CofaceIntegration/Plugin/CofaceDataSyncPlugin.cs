@@ -762,13 +762,31 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     return result;
                 }
 
-                // 查询客户属性（使用自定义字段）
+                // 优先从客户主数据表(mcs_customermasterdata)读取客户属性
+                // PRD: 客户编码唯一性在客户主数据表维护，引用客户数据使用客户主数据表
+                int accountCategory = 0, accountLevel = 0, accountType = 0;
                 var account = service.Retrieve("account", accountId.Value,
-                    new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
-
-                int accountCategory = account.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
-                int accountLevel = account.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
-                int accountType = account.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                    new ColumnSet("mcs_customermasterdata"));
+                var masterDataRef = account.GetAttributeValue<EntityReference>("mcs_customermasterdata");
+                if (masterDataRef != null)
+                {
+                    var masterData = service.Retrieve("mcs_customermasterdata", masterDataRef.Id,
+                        new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                    accountCategory = masterData.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
+                    accountLevel = masterData.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                    accountType = masterData.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                    tracer.Trace($"从客户主数据表读取属性: category={accountCategory}, level={accountLevel}, type={accountType}");
+                }
+                else
+                {
+                    // fallback: 从 account 读取（兼容旧数据）
+                    account = service.Retrieve("account", accountId.Value,
+                        new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                    accountCategory = account.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
+                    accountLevel = account.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                    accountType = account.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                    tracer.Trace($"未找到客户主数据表关联，从Account读取属性: category={accountCategory}, level={accountLevel}, type={accountType}");
+                }
 
                 // 查询是否有销售订单（判断新老客户）
                 var orderQuery = new QueryExpression("salesorder")
