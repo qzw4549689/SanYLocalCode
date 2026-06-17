@@ -68,7 +68,18 @@ public class QueryPluginSteps
                     "mode",
                     "rank",
                     "statecode",
-                    "statuscode"
+                    "statuscode",
+                    "supporteddeployment",
+                    "invocationsource",
+                    "description",
+                    "sdkmessageid",
+                    "sdkmessagefilterid",
+                    "eventhandler",
+                    "ismanaged",
+                    "iscustomizable",
+                    "solutionid",
+                    "componentstate",
+                    "overwritetime"
                 ),
                 Criteria = new FilterExpression
                 {
@@ -157,6 +168,33 @@ public class QueryPluginSteps
             Console.WriteLine($"PluginType: {typeName}");
             Console.WriteLine($"Assembly:   {assemblyName}");
             Console.WriteLine($"TypeId:     {typeId}");
+
+            // 查询 PluginType 完整属性
+            var ptDetailQuery = new QueryExpression("plugintype")
+            {
+                ColumnSet = new ColumnSet(
+                    "name", "friendlyname", "typename", "assemblyname", "workflowactivitygroupname",
+                    "ismanaged", "componentstate", "solutionid", "major", "minor",
+                    "versionnumber", "description", "pluginassemblyid"
+                ),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("plugintypeid", ConditionOperator.Equal, typeId) }
+                }
+            };
+            var ptDetailResult = _service.RetrieveMultiple(ptDetailQuery);
+            if (ptDetailResult.Entities.Count > 0)
+            {
+                var ptDetail = ptDetailResult.Entities[0];
+                Console.WriteLine("PluginType Detail:");
+                foreach (var attr in ptDetail.Attributes)
+                {
+                    if (attr.Value != null)
+                    {
+                        Console.WriteLine($"   {attr.Key}: {attr.Value} ({attr.Value.GetType().Name})");
+                    }
+                }
+            }
             Console.WriteLine(new string('-', 80));
 
             // 2. 查关联的 Steps
@@ -171,7 +209,18 @@ public class QueryPluginSteps
                     "mode",
                     "rank",
                     "statecode",
-                    "statuscode"
+                    "statuscode",
+                    "supporteddeployment",
+                    "invocationsource",
+                    "description",
+                    "sdkmessageid",
+                    "sdkmessagefilterid",
+                    "eventhandler",
+                    "ismanaged",
+                    "iscustomizable",
+                    "solutionid",
+                    "componentstate",
+                    "overwritetime"
                 ),
                 Criteria = new FilterExpression
                 {
@@ -215,6 +264,13 @@ public class QueryPluginSteps
                     var entity = step.GetAttributeValue<AliasedValue>("filter.primaryobjecttypecode")?.Value?.ToString() ?? "N/A";
                     var message = step.GetAttributeValue<AliasedValue>("msg.name")?.Value?.ToString() ?? "N/A";
 
+                    var supportedDeployment = step.GetAttributeValue<OptionSetValue>("supporteddeployment")?.Value ?? -1;
+                    var invocationSource = step.GetAttributeValue<OptionSetValue>("invocationsource")?.Value ?? -1;
+                    var description = step.GetAttributeValue<string>("description") ?? "";
+                    var eventHandler = step.GetAttributeValue<EntityReference>("eventhandler")?.Id.ToString() ?? "N/A";
+                    var msgId = step.GetAttributeValue<EntityReference>("sdkmessageid")?.Id.ToString() ?? "N/A";
+                    var filterId = step.GetAttributeValue<EntityReference>("sdkmessagefilterid")?.Id.ToString() ?? "N/A";
+
                     Console.WriteLine($"  📌 {name}");
                     Console.WriteLine($"     StepId:    {stepId}");
                     Console.WriteLine($"     Entity:    {entity}");
@@ -223,6 +279,28 @@ public class QueryPluginSteps
                     Console.WriteLine($"     Mode:      {mode}");
                     Console.WriteLine($"     Filter:    {filteringAttrs}");
                     Console.WriteLine($"     State:     {state}");
+                    Console.WriteLine($"     SupportedDeployment: {supportedDeployment}");
+                    Console.WriteLine($"     InvocationSource:    {invocationSource}");
+                    Console.WriteLine($"     Description:         {description}");
+                    Console.WriteLine($"     EventHandler:        {eventHandler}");
+                    Console.WriteLine($"     SdkMessageId:        {msgId}");
+                    Console.WriteLine($"     SdkMessageFilterId:  {filterId}");
+                    var isManaged = step.GetAttributeValue<bool?>("ismanaged");
+                    var isCustomizable = step.GetAttributeValue<BooleanManagedProperty>("iscustomizable")?.Value;
+                    var componentState = step.GetAttributeValue<OptionSetValue>("componentstate")?.Value;
+                    var stepSolutionId = step.GetAttributeValue<Guid?>("solutionid");
+                    Console.WriteLine($"     IsManaged:           {isManaged}");
+                    Console.WriteLine($"     IsCustomizable:      {isCustomizable}");
+                    Console.WriteLine($"     ComponentState:      {componentState}");
+                    Console.WriteLine($"     SolutionId:          {stepSolutionId}");
+                    Console.WriteLine("     --- Raw Attributes ---");
+                    foreach (var attr in step.Attributes)
+                    {
+                        if (attr.Value != null)
+                        {
+                            Console.WriteLine($"       {attr.Key}: {attr.Value} ({attr.Value.GetType().Name})");
+                        }
+                    }
                     Console.WriteLine();
                 }
             }
