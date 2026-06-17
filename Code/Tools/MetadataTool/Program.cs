@@ -46,6 +46,7 @@ class Program
         Console.WriteLine("  dotnet run export-coface-data <输出目录>  - 导出 Coface NACE映射和汇率配置数据");
         Console.WriteLine("  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境");
         Console.WriteLine("  dotnet run diagnose-credit-record <评估编码> - 诊断 credit record 数据集成问题");
+        Console.WriteLine("  dotnet run list-entities <前缀>        - 列出指定前缀的实体");
         Console.WriteLine();
 
         if (args.Length < 1)
@@ -388,6 +389,17 @@ class Program
                         }
                         var diagHelper = new CreditRecordDiagnosticHelper(service);
                         diagHelper.DiagnoseByScoreId(args[1]);
+                        break;
+
+                    case "list-entities":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run list-entities <前缀>");
+                            Console.WriteLine("  示例: dotnet run list-entities mcs_");
+                            return;
+                        }
+                        var listHelper = new ListEntitiesHelper(service);
+                        listHelper.ListByPrefix(args[1]);
                         break;
 
                     case "query-plugin-namespace":

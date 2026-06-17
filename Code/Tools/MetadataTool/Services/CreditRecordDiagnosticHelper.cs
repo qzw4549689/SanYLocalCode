@@ -88,15 +88,15 @@ public class CreditRecordDiagnosticHelper
         }
 
         // 3. 查询关联的 Credit Tags
-        Console.WriteLine("\n关联 Credit Tags:");
+        Console.WriteLine("\n关联 Credit Tags (mcs_customer_tag):");
         try
         {
-            var tagQuery = new QueryExpression("mcs_credit_tag")
+            var tagQuery = new QueryExpression("mcs_customer_tag")
             {
                 ColumnSet = new ColumnSet(
-                    "mcs_name", "mcs_scoringcategory", "mcs_scoringitem", "mcs_indicatorcode",
-                    "mcs_datatype", "mcs_integratedqualitative", "mcs_reviewqualitative",
-                    "mcs_integratedquantitative", "mcs_reviewquantitative"
+                    "mcs_group", "mcs_itemname", "mcs_itemcode", "mcs_datatype",
+                    "mcs_itemtxtvalue1", "mcs_itemtxtvalue2",
+                    "mcs_itemintvalue1", "mcs_itemintvalue2"
                 ),
                 Criteria = new FilterExpression
                 {
@@ -107,50 +107,81 @@ public class CreditRecordDiagnosticHelper
             Console.WriteLine($"找到 {tags.Entities.Count} 条 Credit Tags");
             foreach (var tag in tags.Entities)
             {
-                Console.WriteLine($"\n  Tag: {tag.GetAttributeValue<string>("mcs_name")}");
-                PrintField(tag, "mcs_scoringcategory", "  ");
-                PrintField(tag, "mcs_scoringitem", "  ");
-                PrintField(tag, "mcs_indicatorcode", "  ");
-                PrintField(tag, "mcs_datatype", "  ");
-                PrintField(tag, "mcs_integratedqualitative", "  集成定性: ");
-                PrintField(tag, "mcs_integratedquantitative", "  集成定量: ");
+                Console.WriteLine($"\n  Tag: {tag.GetAttributeValue<string>("mcs_itemname")} ({tag.GetAttributeValue<string>("mcs_itemcode")})");
+                PrintField(tag, "mcs_group", "  分类: ");
+                PrintField(tag, "mcs_datatype", "  数据类型: ");
+                PrintField(tag, "mcs_itemtxtvalue1", "  集成定性: ");
+                PrintField(tag, "mcs_itemintvalue1", "  集成定量: ");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ 查询 Credit Tags 失败: {ex.Message}");
-            Console.WriteLine("   可能原因: UAT 尚未部署 mcs_credit_tag 实体");
+            Console.WriteLine("   可能原因: 尚未部署 mcs_customer_tag 实体");
         }
 
-        // 4. 查询 Coface 配置
-        Console.WriteLine("\nCoface 配置:");
+        // 4. 查询 Coface API 配置 (ms_systemconfiguration)
+        Console.WriteLine("\nCoface API 配置 (ms_systemconfiguration):");
         try
         {
-            var configQuery = new QueryExpression("mcs_cofaceconfig")
+            var configQuery = new QueryExpression("ms_systemconfiguration")
             {
-                ColumnSet = new ColumnSet("mcs_name", "mcs_apiurl", "mcs_username", "mcs_password", "mcs_environment")
+                ColumnSet = new ColumnSet("ms_name", "ms_content"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("ms_name", ConditionOperator.Equal, "CofaceApiConfig") }
+                }
             };
             var configs = _service.RetrieveMultiple(configQuery);
-            Console.WriteLine($"找到 {configs.Entities.Count} 条 Coface 配置");
+            Console.WriteLine($"找到 {configs.Entities.Count} 条 Coface API 配置");
             foreach (var config in configs.Entities)
             {
-                Console.WriteLine($"  {config.GetAttributeValue<string>("mcs_name")}: {config.GetAttributeValue<string>("mcs_apiurl")} ({config.GetAttributeValue<string>("mcs_environment")})");
+                var value = config.GetAttributeValue<string>("ms_content");
+                Console.WriteLine($"  {config.GetAttributeValue<string>("ms_name")}: {value?.Substring(0, Math.Min(value?.Length ?? 0, 200))}...");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ 查询 Coface 配置失败: {ex.Message}");
-            Console.WriteLine("   可能原因: UAT 尚未部署 mcs_cofaceconfig 实体");
         }
 
         // 5. 查询评分项目配置
-        Console.WriteLine("\n评分项目配置:");
-        var itemQuery = new QueryExpression("mcs_scoring_item")
+        Console.WriteLine("\n评分项目配置 (mcs_credit_items):");
+        var itemQuery = new QueryExpression("mcs_credit_items")
         {
-            ColumnSet = new ColumnSet("mcs_name", "mcs_itemcode", "mcs_datatype")
+            ColumnSet = new ColumnSet("mcs_itemname", "mcs_credit_itemsno", "mcs_datatype", "mcs_group")
         };
         var items = _service.RetrieveMultiple(itemQuery);
         Console.WriteLine($"找到 {items.Entities.Count} 条评分项目");
+
+        // 6. 查询 Plugin Trace Log
+        Console.WriteLine("\nCofaceDataSyncPlugin 最近 Trace 日志:");
+        try
+        {
+            var traceQuery = new QueryExpression("plugintracelog")
+            {
+                ColumnSet = new ColumnSet("createdon", "messageblock", "operationtype", "plugintracelogid", "typename"),
+                Orders = { new OrderExpression("createdon", OrderType.Descending) },
+                PageInfo = { Count = 20, PageNumber = 1 }
+            };
+            var allTraces = _service.RetrieveMultiple(traceQuery).Entities
+                .Where(t => t.GetAttributeValue<string>("typename")?.Contains("CofaceDataSyncPlugin") == true)
+                .Take(5)
+                .ToList();
+            Console.WriteLine($"找到 {allTraces.Count} 条 CofaceDataSyncPlugin Trace 日志");
+            foreach (var trace in allTraces)
+            {
+                var createdOn = trace.GetAttributeValue<DateTime>("createdon");
+                var message = trace.GetAttributeValue<string>("messageblock");
+                var typeName = trace.GetAttributeValue<string>("typename");
+                Console.WriteLine($"\n  [{createdOn:yyyy-MM-dd HH:mm:ss}] {typeName}");
+                Console.WriteLine($"  {message?.Substring(0, Math.Min(message?.Length ?? 0, 500))}...");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ 查询 Trace 日志失败: {ex.Message}");
+        }
 
         Console.WriteLine("\n=== 诊断完成 ===");
     }
