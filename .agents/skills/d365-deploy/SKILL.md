@@ -87,10 +87,22 @@ C:\Projects\D365\Service\SanyD365.Main\bin\Release\net8.0\SanyD365.Main.dll
 
 ### 3.2 D365 Plugin 项目（.NET 4.6.2）
 
+> **⚠️ 不要直接编译整个 `D365.sln`**
+>
+> `D365.sln` 包含大量 Test 项目，这些项目依赖 `Secret.json` 等本地配置文件，直接编译会导致 `MSB3030 无法复制文件 Secret.json` 错误。
+> 实际发布时**只需编译目标 Plugin 项目**（如 `SanyD365.D365Extension.Sales`）。
+
 ```powershell
 cd C:\Projects\D365
 nuget restore D365\D365.sln
-msbuild D365\D365.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+# 只编译目标项目，避免 Test 项目因缺少 Secret.json 失败
+msbuild D365\D365.sln /p:Configuration=Release /p:Platform="Any CPU" /t:SanyD365_D365Extension_Sales
+```
+
+输出示例：
+```
+C:\Projects\D365\D365\SanyD365.D365Extension.Sales\bin\Release\SanyD365.D365Extension.Sales.dll
 ```
 
 ---
@@ -190,7 +202,7 @@ DEV 测试通过后，将本地代码转移到远程服务器主项目：
 
 1. **将本地代码同步到远程服务器**（`tx-windows`）的 `C:\Projects\D365\D365` 目录
 2. **按主项目规范改写命名空间、引用、csproj**（参见 `/skill:d365-dev` 第 8.4 节）
-3. **在远程服务器编译 `D365.sln`**，确认无编译错误
+3. **在远程服务器编译目标项目**（如 `SanyD365.D365Extension.Sales`），确认无编译错误
 4. **编译通过后，拉取 Git 上 `uat` 最新代码**（`git pull origin uat` 或 rebase），确保后续 UAT 发布基于最新 uat
 
 ```powershell
@@ -205,14 +217,19 @@ git pull origin uat
 # 创建/切换到个人分支
 git checkout -b uat-<日期>-<姓名>-<功能简述>
 
-# 编译验证
+# 编译验证（只编译目标 Plugin 项目，不要全编译 D365.sln）
 nuget restore D365\D365.sln
-msbuild D365\D365.sln /p:Configuration=Release /p:Platform="Any CPU"
+"C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\devenv.com" D365\D365.sln /Build "Release|Any CPU" /Project "D365\SanyD365.D365Extension.Sales\SanyD365.D365Extension.Sales.csproj"
 ```
 
 ### 6.6 Git 工作流 / 代码归并
 
-远程编译通过后，走标准 Git PR 流程合并到 `uat`：
+> **📌 Git 推送约定**
+>
+> 所有"代码推送"，除非特别指明推送到**个人 Git**（如 GitHub 备份），否则默认推送到**项目 Git（Azure DevOps `uat`）**。
+> 开发分支应基于项目 `uat` 创建，PR 目标也必须是项目 `uat`，不要默认推送到个人仓库作为主流程。
+
+远程编译通过后，走标准 Git PR 流程合并到项目 `uat`：
 
 ```powershell
 cd C:\Projects\D365
@@ -230,7 +247,7 @@ git add .
 # 4. 提交
 git commit -m "Coface API 配置化：从 ms_systemconfiguration 读取配置，移除硬编码"
 
-# 5. 推送到远程
+# 5. 推送到项目 Git（Azure DevOps `uat`）
 git push -u origin uat-260610-peter-coface-fix
 
 # 6. Azure DevOps 网页 Create PR → 合并到 uat
@@ -238,6 +255,7 @@ git push -u origin uat-260610-peter-coface-fix
 ```
 
 **⚠️ 不要直接 push `uat` 分支，必须走 PR！**
+**⚠️ 不要默认推送到个人 GitHub 仓库，除非用户明确说"备份到个人 Git"或"推送到 GitHub"。**
 
 ### 6.7 UAT 实体/元数据发布
 
@@ -281,7 +299,7 @@ PluginType [xxx] not found in PluginAssembly [xxx] which has a total of [N] plug
 **更新 DEV Assembly 流程：**
 
 1. 在远程服务器拉取已合并后的 `uat` 最新代码
-2. 重新编译 `D365.sln`
+2. 重新编译目标项目（如 `SanyD365.D365Extension.Sales`），**不要全编译 `D365.sln`**
 3. 将远程服务器编译出的最新 DLL 传回本地
 4. 使用 MetadataTool 在 DEV 环境注册/更新该 Assembly
 5. 如 Step 不存在则注册新 Step
@@ -321,8 +339,9 @@ AI 在此步骤的职责：整理好 n8n 需要填写的信息，告知用户后
 
 详见 6.6 节。核心原则：
 
-- 主集成分支是 `uat`
-- 基于 `uat` 创建个人分支：`uat-<日期>-<姓名>-<功能简述>`
+- 主集成分支是项目 Git 的 `uat`（Azure DevOps）
+- 基于项目 `uat` 创建个人分支：`uat-<日期>-<姓名>-<功能简述>`
+- **默认推送目标：项目 Git（Azure DevOps `uat`）**；只有用户明确说"推送到个人 Git/GitHub"时才备份到个人仓库
 - **不要直接 push `uat` 分支，必须走 PR！**
 - 完整开发工作流见 `/skill:d365-dev`。
 

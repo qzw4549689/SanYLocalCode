@@ -201,44 +201,45 @@ CreditRecordForm.onAccountChange = function (executionContext) {
     
     var accountGuid = accountValue[0].id.replace(/[{}]/g, "");
     
-    // 查询Account信息
-    // 注意：客户表字段说明
-    // - accountnumber: 客户编码（标准字段）
-    // - mcs_englishname: 客户英文名称（新增字段）
-    // - mcs_country: 注册国家/地区（Lookup），需展开取国家代码
-    // - mcs_customermasterdata: 客户主数据（Lookup），科法斯ID等8个字段迁移到该实体
-    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=accountnumber,mcs_englishname&$expand=mcs_country($select=mcs_countrycode),mcs_customermasterdata($select=mcs_cofaceid)")
-        .then(function (result) {
-            // 客户编码（从accountnumber带出）
+    // 业务规则：客户（account）只是导航入口，客户数据统一从关联的 mcs_customermasterdata 读取。
+    // 先查 account 找到关联的客户主数据，再从主数据读取客户编码/英文名称/国家编码/科法斯ID。
+    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=_mcs_customermasterdata_value")
+        .then(function (accountResult) {
+            var customerMasterDataId = accountResult._mcs_customermasterdata_value;
+            
+            if (!customerMasterDataId) {
+                throw new Error("该客户未关联客户主数据，请先维护客户主数据");
+            }
+            
+            var plainCustomerMasterDataId = customerMasterDataId.replace(/[{}]/g, "");
+            return Xrm.WebApi.retrieveRecord("mcs_customermasterdata", plainCustomerMasterDataId,
+                "?$select=mcs_accountnumber,mcs_englishname,mcs_countrycode,mcs_cofaceid");
+        })
+        .then(function (cm) {
+            cm = cm || {};
+            
+            // 客户编码
             var custNameField = formContext.getAttribute("mcs_custname");
             if (custNameField) {
-                custNameField.setValue(result.accountnumber || "");
+                custNameField.setValue(cm.mcs_accountnumber || "");
             }
             
             // 客户英文名称
             var custNameEnField = formContext.getAttribute("mcs_custnameen");
             if (custNameEnField) {
-                custNameEnField.setValue(result.mcs_englishname || "");
+                custNameEnField.setValue(cm.mcs_englishname || "");
             }
             
-            // 国家编码（从mcs_country Lookup展开获取）
+            // 国家编码
             var countryCodeField = formContext.getAttribute("mcs_countrycode");
             if (countryCodeField) {
-                var countryCode = "";
-                if (result.mcs_country && result.mcs_country.mcs_countrycode) {
-                    countryCode = result.mcs_country.mcs_countrycode;
-                }
-                countryCodeField.setValue(countryCode);
+                countryCodeField.setValue(cm.mcs_countrycode || "");
             }
             
-            // 科法斯ID（从mcs_customermasterdata Lookup展开获取）
+            // 科法斯ID
             var cofaceField = formContext.getAttribute("mcs_cofaceid");
             if (cofaceField) {
-                var cofaceId = "";
-                if (result.mcs_customermasterdata && result.mcs_customermasterdata.mcs_cofaceid) {
-                    cofaceId = result.mcs_customermasterdata.mcs_cofaceid;
-                }
-                cofaceField.setValue(cofaceId);
+                cofaceField.setValue(cm.mcs_cofaceid || "");
             }
             
             // 校验提示
@@ -246,7 +247,7 @@ CreditRecordForm.onAccountChange = function (executionContext) {
         })
         .catch(function (error) {
             console.error("查询客户信息失败:", error);
-            Xrm.Utility.alertDialog("查询客户信息失败，请重试。错误：" + (error.message || JSON.stringify(error)));
+            Xrm.Utility.alertDialog("查询客户信息失败：" + (error.message || JSON.stringify(error)));
         });
 };
 

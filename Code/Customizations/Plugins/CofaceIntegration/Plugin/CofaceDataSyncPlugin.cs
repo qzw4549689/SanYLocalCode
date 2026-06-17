@@ -137,6 +137,9 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
 
                 WriteToCustomerTags(service, tracer, target.Id, scoreId, creditRecord, allData, scoringCardItems);
 
+                // 反写外部评级到客户主数据
+                UpdateCustomerMasterDataExternalRate(service, tracer, creditRecord, allData);
+
                 // ========== 步骤4: 一次性更新评估记录（合并所有字段更新） ==========
                 tracer.Trace("步骤4: 记录数据集成结果");
                 var updateRecord = new Entity("mcs_credit_record")
@@ -762,13 +765,31 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     return result;
                 }
 
-                // 查询客户属性（使用自定义字段）
-                var account = service.Retrieve("account", accountId.Value,
-                    new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                // 查询Account找到关联的客户主数据，客户属性统一从 mcs_customermasterdata 读取
+                var account = service.Retrieve("account", accountId.Value, new ColumnSet("mcs_customermasterdata"));
 
-                int accountCategory = account.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
-                int accountLevel = account.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
-                int accountType = account.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                int accountCategory = 0;
+                int accountLevel = 0;
+                int accountType = 0;
+
+                if (account.Contains("mcs_customermasterdata") && account["mcs_customermasterdata"] is EntityReference cmRef)
+                {
+                    var customerMasterData = service.Retrieve("mcs_customermasterdata", cmRef.Id,
+                        new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                    accountCategory = customerMasterData.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
+                    accountLevel = customerMasterData.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                    accountType = customerMasterData.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                    tracer.Trace($"从客户主数据读取属性: category={accountCategory}, level={accountLevel}, type={accountType}");
+                }
+                else
+                {
+                    tracer.Trace("account 未关联 mcs_customermasterdata，尝试从 account 本身读取属性（兼容）");
+                    var accountFallback = service.Retrieve("account", accountId.Value,
+                        new ColumnSet("mcs_accountcategory", "mcs_accountlevel", "mcs_accounttype"));
+                    accountCategory = accountFallback.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value ?? 0;
+                    accountLevel = accountFallback.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                    accountType = accountFallback.GetAttributeValue<OptionSetValue>("mcs_accounttype")?.Value ?? 0;
+                }
 
                 // 查询是否有销售订单（判断新老客户）
                 var orderQuery = new QueryExpression("salesorder")
@@ -1121,6 +1142,43 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
         #endregion
 
         #region 辅助方法
+
+        /// <summary>
+        /// 将Coface外部评级反写到客户主数据
+        /// </summary>
+        private void UpdateCustomerMasterDataExternalRate(IOrganizationService service, ITracingService tracer, Entity creditRecord, Dictionary<string, object> data)
+        {
+            try
+            {
+                if (!creditRecord.Contains("mcs_accountid") || !(creditRecord["mcs_accountid"] is EntityReference accountRef))
+                {
+                    tracer.Trace("评估记录未关联客户，跳过外部评级反写");
+                    return;
+                }
+
+                if (!data.ContainsKey("ExternalRating") || data["ExternalRating"] == null)
+                {
+                    tracer.Trace("Coface 数据中没有 ExternalRating，跳过反写");
+                    return;
+                }
+
+                var account = service.Retrieve("account", accountRef.Id, new ColumnSet("mcs_customermasterdata"));
+                if (!account.Contains("mcs_customermasterdata") || !(account["mcs_customermasterdata"] is EntityReference cmRef))
+                {
+                    tracer.Trace("account 未关联 mcs_customermasterdata，跳过外部评级反写");
+                    return;
+                }
+
+                var updateMaster = new Entity("mcs_customermasterdata", cmRef.Id);
+                updateMaster["mcs_externalrate"] = data["ExternalRating"].ToString();
+                service.Update(updateMaster);
+                tracer.Trace($"外部评级已反写到客户主数据: {data["ExternalRating"]}");
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"外部评级反写失败: {ex.Message}");
+            }
+        }
 
         /// <summary>
         /// 转换mcs_group值：评分项目表的选项集值 → 标签表的有效选项集值

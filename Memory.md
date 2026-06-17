@@ -48,6 +48,23 @@
     └── Methodology/               # D365+AI 实施方法论
 ```
 
+### 2.0 Git 推送约定（⚠️ AI 必看）
+
+用户明确约定：
+
+> **所有"代码推送"，除非特别指明是 push 到个人 Git，否则默认都是推送到项目 Git（Azure DevOps `uat` 分支）。**
+
+| Git 仓库 | 地址 | 用途 | 推送规则 |
+|---------|------|------|---------|
+| **项目 Git** | `https://dev.azure.com/SanyGlobalCRM/D365/_git/D365` | 项目主仓库，主分支 `uat` | **默认推送目标**。代码需通过 PR 合并到 `uat` |
+| **个人 Git** | `https://github.com/qzw4549689/SanYLocalCode.git` | 用户个人备份 | 只有用户明确说"push 到个人 git"时才推送 |
+
+当前本地 `origin` 指向个人 GitHub，这是历史原因。**AI 在执行 `git push` 前必须确认目标**：
+- 如果用户说"推到项目" / "推到 uat" / 没有特别说明 → 应通过 Azure DevOps 流程或用户指定的方式推送到项目 Git
+- 如果用户说"push 到个人 git" / "备份到我 github" → 才 push 到 `origin`
+
+---
+
 ### 2.1 本地测试项目 → 远程主项目同步资产
 
 当本地 `Code/Customizations/Plugins/` 下的独立项目（如 `CofaceIntegration`、`BppIntegration`）验证通过后，需要归并到远程主项目 `SanyD365.D365Extension.Sales` 进行发布：

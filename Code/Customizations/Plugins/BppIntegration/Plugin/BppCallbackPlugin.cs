@@ -85,7 +85,7 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                         service.Update(updateRecord);
 
                         // 同步客户主数据信用信息
-                        UpdateAccountCreditInfo(service, tracer, target.Id);
+                        UpdateCustomerMasterDataCreditInfo(service, tracer, target.Id);
                         break;
 
                     case "rejected":
@@ -165,7 +165,7 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
         /// 审批通过后同步客户主数据信用信息
         /// 目标实体: mcs_customermasterdata（通过 account.mcs_customermasterdata 关联）
         /// </summary>
-        private void UpdateAccountCreditInfo(IOrganizationService service, ITracingService tracer, Guid creditRecordId)
+        private void UpdateCustomerMasterDataCreditInfo(IOrganizationService service, ITracingService tracer, Guid creditRecordId)
         {
             try
             {
