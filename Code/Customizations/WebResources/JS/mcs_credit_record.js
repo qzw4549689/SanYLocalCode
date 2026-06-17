@@ -747,6 +747,14 @@ CreditRecordForm.showBppInfo = function (formContext) {
  */
 CreditRecordForm.searchCofaceCompany = function (primaryControl) {
     var formContext = primaryControl;
+    
+    // 未保存记录时禁止搜索
+    var recordId = formContext.data.entity.getId();
+    if (!recordId) {
+        Xrm.Utility.alertDialog("请先保存记录");
+        return;
+    }
+    
     var status = formContext.getAttribute("mcs_status").getValue();
     var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
     var accountId = formContext.getAttribute("mcs_accountid").getValue();
@@ -767,7 +775,7 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
     }
     
     // 打开企业搜索弹窗，通过 data 传递上下文（Modern UI 中弹窗无法直接访问 parent.Xrm.Page）
-    var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
+    recordId = recordId.replace(/[{}]/g, "");
     var accountRef = formContext.getAttribute("mcs_accountid").getValue();
     var pageInput = {
         pageType: "webresource",
