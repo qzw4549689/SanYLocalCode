@@ -18,14 +18,12 @@ public class ClearAccountCreditFieldsHelper
 
     public void ClearByName(string accountName)
     {
-        Console.WriteLine($"\n=== 清空客户及客户主数据的信用字段: {accountName} ===");
+        Console.WriteLine($"\n=== 清空客户主数据的信用字段: {accountName} ===");
 
         // 1. 查询 account
         var accountQuery = new QueryExpression("account")
         {
-            ColumnSet = new ColumnSet("accountid", "name", "mcs_customermasterdata",
-                "mcs_cofaceid", "mcs_dealerrank", "mcs_externalrate", "mcs_overduemodel",
-                "mcs_creditscore", "mcs_creditgrade", "mcs_creditvalid", "mcs_isdd"),
+            ColumnSet = new ColumnSet("accountid", "name", "mcs_customermasterdata"),
             Criteria = new FilterExpression
             {
                 Conditions = { new ConditionExpression("name", ConditionOperator.Equal, accountName) }
@@ -55,18 +53,8 @@ public class ClearAccountCreditFieldsHelper
                 Console.WriteLine("⚠️ 该客户未关联客户主数据，跳过主数据清理");
             }
 
-            // 3. 清空 account 上的8个字段
-            var accountUpdate = new Entity("account", accountId);
-            accountUpdate["mcs_cofaceid"] = null;
-            accountUpdate["mcs_dealerrank"] = null;
-            accountUpdate["mcs_externalrate"] = null;
-            accountUpdate["mcs_overduemodel"] = null;
-            accountUpdate["mcs_creditscore"] = null;
-            accountUpdate["mcs_creditgrade"] = null;
-            accountUpdate["mcs_creditvalid"] = false;
-            accountUpdate["mcs_isdd"] = false;
-            _service.Update(accountUpdate);
-            Console.WriteLine("✅ 已清空 account 上的8个字段");
+            // account 上的8个字段已由用户删除，不再清理
+            Console.WriteLine("ℹ️ account 上的8个字段已删除，跳过");
         }
 
         Console.WriteLine("\n=== 完成 ===");
