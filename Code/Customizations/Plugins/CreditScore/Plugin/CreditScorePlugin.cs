@@ -15,7 +15,7 @@ namespace SanyD365.Plugins.CreditScore.Plugin
     /// 3. 更新客户信用标签的得分值
     /// 4. 更新状态为14(审核申请)
     /// </summary>
-    public class CreditScorePlugin : IPlugin
+    public class CreditScoreCalculationPlugin : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -24,7 +24,7 @@ namespace SanyD365.Plugins.CreditScore.Plugin
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
             ITracingService tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
-            tracer.Trace("===== CreditScorePlugin 开始执行 =====");
+            tracer.Trace("===== CreditScoreCalculationPlugin 开始执行 =====");
 
             // 严格校验：只处理Update后事件
             if (context.MessageName != "Update" || context.Stage != 40)
@@ -102,7 +102,7 @@ namespace SanyD365.Plugins.CreditScore.Plugin
 
                 service.Update(updateRecord);
 
-                tracer.Trace("===== CreditScorePlugin 执行完成，状态保持13(信用分计算) =====");
+                tracer.Trace("===== CreditScoreCalculationPlugin 执行完成，状态保持13(信用分计算) =====");
             }
             catch (InvalidPluginExecutionException)
             {
