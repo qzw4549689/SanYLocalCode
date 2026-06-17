@@ -41,6 +41,7 @@ class Program
         Console.WriteLine("  dotnet run add-webresource-to-solution <WebResource名称> <解决方案唯一名> - 将 WebResource 加入解决方案");
         Console.WriteLine("  dotnet run test-common                  - 隔离测试 D365ToolCommon 共享库（自动创建/删除测试实体）");
         Console.WriteLine("  dotnet run cleanup-test-common          - 仅清理 D365ToolCommon 测试实体");
+        Console.WriteLine("  dotnet run clear-account-credit-fields <客户名称> - 清空客户及客户主数据上的8个信用字段（用于测试）");
         Console.WriteLine();
 
         if (args.Length < 1)
@@ -325,6 +326,17 @@ class Program
                         }
                         var querySteps = new QueryPluginSteps(service);
                         querySteps.QueryStepsByPluginName(args[1]);
+                        break;
+
+                    case "clear-account-credit-fields":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run clear-account-credit-fields <客户名称>");
+                            Console.WriteLine("  示例: dotnet run clear-account-credit-fields \"LTC客户-1\"");
+                            return;
+                        }
+                        var clearHelper = new ClearAccountCreditFieldsHelper(service);
+                        clearHelper.ClearByName(args[1]);
                         break;
 
                     case "query-plugin-namespace":
