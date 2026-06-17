@@ -43,6 +43,8 @@ class Program
         Console.WriteLine("  dotnet run cleanup-test-common          - 仅清理 D365ToolCommon 测试实体");
         Console.WriteLine("  dotnet run clear-account-credit-fields <客户名称> - 清空客户及客户主数据上的8个信用字段（用于测试）");
         Console.WriteLine("  dotnet run check-fix-masterdata <客户名称> - 检查并修复客户主数据上的基础字段");
+        Console.WriteLine("  dotnet run export-coface-data <输出目录>  - 导出 Coface NACE映射和汇率配置数据");
+        Console.WriteLine("  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境");
         Console.WriteLine();
 
         if (args.Length < 1)
@@ -349,6 +351,31 @@ class Program
                         }
                         var fixHelper = new CheckAndFixAccountMasterDataHelper(service);
                         fixHelper.CheckAndFixByAccountName(args[1]);
+                        break;
+
+                    case "export-coface-data":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run export-coface-data <输出目录>");
+                            Console.WriteLine("  示例: dotnet run export-coface-data ./coface-data");
+                            return;
+                        }
+                        var syncHelper = new CofaceDataSyncHelper(service);
+                        Directory.CreateDirectory(args[1]);
+                        syncHelper.ExportToFile("mcs_coface_nace_mapping", Path.Combine(args[1], "mcs_coface_nace_mapping.json"));
+                        syncHelper.ExportToFile("mcs_coface_exchange_rate", Path.Combine(args[1], "mcs_coface_exchange_rate.json"));
+                        break;
+
+                    case "import-coface-data":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run import-coface-data <数据目录>");
+                            Console.WriteLine("  示例: D365_URL=https://sany-uat.crm5.dynamics.com dotnet run import-coface-data ./coface-data");
+                            return;
+                        }
+                        var importHelper = new CofaceDataSyncHelper(service);
+                        importHelper.ImportFromFile("mcs_coface_nace_mapping", Path.Combine(args[1], "mcs_coface_nace_mapping.json"));
+                        importHelper.ImportFromFile("mcs_coface_exchange_rate", Path.Combine(args[1], "mcs_coface_exchange_rate.json"));
                         break;
 
                     case "query-plugin-namespace":
