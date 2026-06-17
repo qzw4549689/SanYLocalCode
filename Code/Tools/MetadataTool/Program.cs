@@ -45,6 +45,7 @@ class Program
         Console.WriteLine("  dotnet run check-fix-masterdata <客户名称> - 检查并修复客户主数据上的基础字段");
         Console.WriteLine("  dotnet run export-coface-data <输出目录>  - 导出 Coface NACE映射和汇率配置数据");
         Console.WriteLine("  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境");
+        Console.WriteLine("  dotnet run diagnose-credit-record <评估编码> - 诊断 credit record 数据集成问题");
         Console.WriteLine();
 
         if (args.Length < 1)
@@ -376,6 +377,17 @@ class Program
                         var importHelper = new CofaceDataSyncHelper(service);
                         importHelper.ImportFromFile("mcs_coface_nace_mapping", Path.Combine(args[1], "mcs_coface_nace_mapping.json"));
                         importHelper.ImportFromFile("mcs_coface_exchange_rate", Path.Combine(args[1], "mcs_coface_exchange_rate.json"));
+                        break;
+
+                    case "diagnose-credit-record":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run diagnose-credit-record <评估编码>");
+                            Console.WriteLine("  示例: D365_URL=https://sany-uat.crm5.dynamics.com dotnet run diagnose-credit-record SCO202606170003");
+                            return;
+                        }
+                        var diagHelper = new CreditRecordDiagnosticHelper(service);
+                        diagHelper.DiagnoseByScoreId(args[1]);
                         break;
 
                     case "query-plugin-namespace":
