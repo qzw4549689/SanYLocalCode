@@ -53,10 +53,10 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 result["RegisteredCapital"] = registeredCapital ?? -1;
                 _tracer.Trace($"注册资本: {registeredCapital}");
 
-                // 2. 从业年限 - company.established (定量，格式YYYYMM00)
+                // 2. 从业年限 - company.registration.date (定量，格式YYYYMMDD)
                 int? establishedYear = ParseEstablishedYear(creditReport);
                 result["EstablishedYear"] = establishedYear ?? -1;
-                _tracer.Trace($"从业年限(成立年份): {establishedYear}");
+                _tracer.Trace($"从业年限(年数): {establishedYear}");
 
                 // 3. 诉讼记录 - additionalInsolvencies数组长度 (定量)
                 int litigationCount = ParseLitigationCount(creditReport);
@@ -167,43 +167,63 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
         }
 
         /// <summary>
-        /// 解析成立年份（从业年限）
-        /// JSON Path: icon.creditReport.company.established
-        /// 格式: YYYYMM00（如19470000表示1947年成立）
-        /// 返回: 成立年份（如1947）
+        /// 解析从业年限
+        /// 主路径 JSON Path: icon.creditReport.company.registration.date
+        /// 格式: YYYYMMDD（如19470101表示1947年1月1日注册）
+        /// 业务要求: 计算到当前日期的年数
+        /// 备选路径: icon.creditReport.company.established (格式YYYYMM00)
+        /// 返回: 从业年数（如78）
         /// </summary>
         private int? ParseEstablishedYear(JsonElement creditReport)
         {
             try
             {
+                // 主路径: company.registration.date (YYYYMMDD)，按文档计算“到当前日期的年数”
                 if (creditReport.TryGetProperty("company", out var company) &&
-                    company.TryGetProperty("established", out var established))
-                {
-                    int establishedValue = established.GetInt32();
-                    // 格式: YYYYMM00，取前4位作为年份
-                    int year = establishedValue / 10000;
-                    if (year > 1800 && year <= DateTime.Now.Year)
-                    {
-                        return year;
-                    }
-                }
-
-                // 备选路径: registration.date
-                if (creditReport.TryGetProperty("company", out var company2) &&
-                    company2.TryGetProperty("registration", out var registration) &&
+                    company.TryGetProperty("registration", out var registration) &&
                     registration.TryGetProperty("date", out var regDate))
                 {
                     int dateValue = regDate.GetInt32();
                     int year = dateValue / 10000;
+                    int month = (dateValue / 100) % 100;
+                    int day = dateValue % 100;
+                    if (year > 1800 && year <= DateTime.Now.Year && month >= 1 && month <= 12 && day >= 1 && day <= 31)
+                    {
+                        var regDateTime = new DateTime(year, month, day);
+                        int years = DateTime.Now.Year - regDateTime.Year;
+                        if (DateTime.Now < regDateTime.AddYears(years)) years--;
+                        if (years >= 0)
+                        {
+                            _tracer.Trace($"从业年限(registration.date {dateValue}): {years}");
+                            return years;
+                        }
+                    }
+                }
+
+                // 备选路径: company.established (YYYYMM00)，换算为年数
+                if (creditReport.TryGetProperty("company", out var company2) &&
+                    company2.TryGetProperty("established", out var established))
+                {
+                    int establishedValue = established.GetInt32();
+                    int year = establishedValue / 10000;
+                    int month = (establishedValue / 100) % 100;
+                    if (month < 1 || month > 12) month = 1;
                     if (year > 1800 && year <= DateTime.Now.Year)
                     {
-                        return year;
+                        var establishedDate = new DateTime(year, month, 1);
+                        int years = DateTime.Now.Year - establishedDate.Year;
+                        if (DateTime.Now < establishedDate.AddYears(years)) years--;
+                        if (years >= 0)
+                        {
+                            _tracer.Trace($"从业年限(established {establishedValue}): {years}");
+                            return years;
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _tracer.Trace($"解析成立年份异常: {ex.Message}");
+                _tracer.Trace($"解析从业年限异常: {ex.Message}");
             }
             return null;
         }
