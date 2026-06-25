@@ -1,0 +1,36 @@
+<appaction uniquename="mcs_credit_record_restart">
+  <buttonlabeltext default="重新发起">
+    <label description="重新发起" languagecode="1033" />
+    <label description="重新发起" languagecode="2052" />
+  </buttonlabeltext>
+  <buttontooltiptitle default="重新发起">
+    <label description="重新发起" languagecode="1033" />
+    <label description="重新发起" languagecode="2052" />
+  </buttontooltiptitle>
+  <context>1</context>
+  <contextentity>
+    <logicalname>mcs_credit_record</logicalname>
+  </contextentity>
+  <contextvalue>mcs_credit_record</contextvalue>
+  <hidden>0</hidden>
+  <iconwebresourceid>
+    <webresourceid>4bf5bc38-b315-4634-b5e7-92595e4b3469</webresourceid>
+  </iconwebresourceid>
+  <iscustomizable>1</iscustomizable>
+  <isdisabled>0</isdisabled>
+  <isgrouptitlehidden>0</isgrouptitlehidden>
+  <location>0</location>
+  <name>mcs_credit_record_restart</name>
+  <onclickeventjavascriptfunctionname>CreditRecordForm.restartEvaluation</onclickeventjavascriptfunctionname>
+  <onclickeventjavascriptparameters>[{"type":5}]</onclickeventjavascriptparameters>
+  <onclickeventjavascriptwebresourceid>
+    <webresourceid>df109d68-d55f-f111-a826-000d3aa33079</webresourceid>
+  </onclickeventjavascriptwebresourceid>
+  <onclickeventtype>2</onclickeventtype>
+  <origin>0</origin>
+  <sequence>100100017.0000000000</sequence>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+  <type>0</type>
+  <visibilitytype>0</visibilitytype>
+</appaction>

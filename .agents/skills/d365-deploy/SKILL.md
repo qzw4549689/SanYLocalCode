@@ -5,6 +5,27 @@ description: D365 项目发布部署指南。适用于 Service 项目编译、D3
 
 # D365 发布部署指南
 
+## 0. AI 行为红线（发布相关）
+
+> **除非用户明确说出"提交"或"推送"二字，否则 AI 不得执行任何 `git add` / `git commit` / `git push` / `git merge` / `git reset --hard` 操作。**
+>
+> 数据修复、环境诊断、API 测试、记录查询等操作属于 D365 数据层，**不触碰 Git**。
+
+### 0.1 McsPlugin 解决方案红线
+
+> **`McsPlugin` 解决方案中永远只能放插件（Plugin）和 Plugin Step，不能放其他任何组件（实体、字段、WebResource、角色、工作流等）。**
+>
+> 违反此规则会导致 n8n Release Tool 发布 Plugin 时因解决方案依赖冲突而失败。
+
+### 0.2 Git 推送约定
+
+- 主集成分支是项目 Git 的 `uat`（Azure DevOps）
+- 基于项目 `uat` 创建个人分支：`uat-<日期>-<姓名>-<功能简述>`
+- **默认推送目标：项目 Git（Azure DevOps）**；只有用户明确说"推送到个人 Git/GitHub"时才备份到个人仓库
+- **不要直接 push `uat` 分支，必须走 PR！**
+
+---
+
 ## 1. 部署方式优先级
 
 **所有系统更新（仅在 DEV 环境，UAT 严禁直接操作）优先使用 C# 直连 Dataverse 部署，尽量避免 Solution 导入。**
@@ -23,12 +44,14 @@ description: D365 项目发布部署指南。适用于 Service 项目编译、D3
 - 一旦开始无法取消，所有其他部署操作都必须等待
 - **🚨 严禁在 UAT/生产环境直接操作元数据（CreateAttribute/DeleteAttribute/PublishAll 等）**
 
-**发布范围规则：**
+**发布范围规则（AI 执行时）：**
 | 场景 | 发布范围 | 是否需要用户批准 |
 |------|---------|----------------|
 | 更新单个实体/WebResource | 只发布该实体 | 否 |
-| 更新多个相关实体 | 发布涉及的实体列表 | 否 |
-| 全局发布所有自定义项 | `PublishAllXmlRequest` | **✅ 必须说明理由并得到批准** |
+| 更新多个相关实体 | 发布涉及的实体/WebResource 列表 | 否 |
+| 全局发布所有自定义项 | `PublishAllXmlRequest` | **🚫 AI 禁止执行，必须向用户请求，由用户手动执行** |
+
+> **硬性规定**：AI 在任何情况下都不得调用 `PublishAllXmlRequest`/`PublishAllXml`。即使多个组件需要发布，也应使用 `PublishXmlRequest` 列出具体实体/WebResource；如确需全局发布，必须向用户说明理由，由用户在工具外手动执行。
 
 ```csharp
 // ✅ 正确：只发布当前操作的实体
@@ -38,7 +61,14 @@ var request = new PublishXmlRequest
 };
 service.Execute(request);
 
-// ❌ 错误：全局 PublishAll（会阻塞整个环境，需用户批准）
+// ✅ 正确：一次发布多个明确的实体/WebResource
+var request = new PublishXmlRequest
+{
+    ParameterXml = @"<importexportxml><entities><entity>mcs_credit_record</entity><entity>mcs_trade_stpayterm</entity></entities><webresources><webresource>mcs_trade_stpayterm.js</webresource></webresources></importexportxml>"
+};
+service.Execute(request);
+
+// ❌ 错误：AI 禁止全局 PublishAll（会阻塞整个环境）
 service.Execute(new PublishAllXmlRequest());
 ```
 
@@ -226,10 +256,7 @@ git push -u origin uat-<日期>-<姓名>-<功能简述>
 
 ### 6.6 Git 工作流 / 代码归并
 
-> **📌 Git 推送约定**
->
-> 所有"代码推送"，除非特别指明推送到**个人 Git**（如 GitHub 备份），否则默认推送到**项目 Git（Azure DevOps `uat`）**。
-> 开发分支应基于项目 `uat` 创建，PR 目标也必须是项目 `uat`，不要默认推送到个人仓库作为主流程。
+> 📌 Git 推送核心约定见本文 **0.2 Git 推送约定**。
 
 远程编译通过后，按以下顺序走 Git PR 流程：
 
@@ -332,18 +359,6 @@ DEV Assembly 更新完成且验证通过后，由用户通过 **n8n Release Tool
 - 提交发布后等待 UAT 部署完成
 
 AI 在此步骤的职责：整理好 n8n 需要填写的信息，告知用户后停止，等待用户操作。
-
----
-
-## 7. Git 工作流（快速参考）
-
-详见 6.6 节。核心原则：
-
-- 主集成分支是项目 Git 的 `uat`（Azure DevOps）
-- 基于项目 `uat` 创建个人分支：`uat-<日期>-<姓名>-<功能简述>`
-- **默认推送目标：项目 Git（Azure DevOps `uat`）**；只有用户明确说"推送到个人 Git/GitHub"时才备份到个人仓库
-- **不要直接 push `uat` 分支，必须走 PR！**
-- 完整开发工作流见 `/skill:d365-dev`。
 
 ---
 

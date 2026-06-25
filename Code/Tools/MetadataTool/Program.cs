@@ -22,7 +22,7 @@ class Program
         Console.WriteLine("  dotnet run check <解决方案名>           - 检查解决方案中的实体");
         Console.WriteLine("  dotnet run add <实体名> <解决方案名>    - 添加实体到解决方案");
         Console.WriteLine("  dotnet run remove <实体名> <解决方案名> - 从解决方案移除实体");
-        Console.WriteLine("  dotnet run publish [实体名]             - 发布所有或指定实体");
+        Console.WriteLine("  dotnet run publish [实体名]             - 发布指定实体（禁止无参数全局发布）");
         Console.WriteLine("  dotnet run delete-field <实体名> <字段名> - 删除字段");
         Console.WriteLine("  dotnet run list-fields <实体名>         - 列出实体所有字段");
         Console.WriteLine("  dotnet run update-entity-displayname <实体名> <显示名> - 更新实体显示名称（多语言）");
@@ -30,11 +30,15 @@ class Program
         Console.WriteLine("  dotnet run get-entity-displayname <实体名> - 查询实体显示名称（诊断）");
         Console.WriteLine("  dotnet run export <解决方案名> <路径>    - 导出解决方案为 ZIP");
         Console.WriteLine("  dotnet run create-credit-items          - 创建评分项目测试数据(22条)");
+        Console.WriteLine("  dotnet run query-credit-item-descs      - 查询评分项目说明(mcs_itemdesc)");
         Console.WriteLine("  dotnet run create-qualitative-enums     - 创建定性枚举值测试数据(30条)");
         Console.WriteLine("  dotnet run update-credit-record <scoreid> [status] - 更新信用评估记录状态(默认→12)");
+        Console.WriteLine("  dotnet run test-tradestpayterm          - 测试成交条件样板库 Plugin（自动编号/校验/状态流转）");
         Console.WriteLine("  dotnet run query-plugin-steps <类名>    - 查询已注册的 Plugin Steps");
         Console.WriteLine("  dotnet run query-plugin-namespace <前缀> - 查询命名空间下所有 Plugin Steps");
         Console.WriteLine("  dotnet run fix-dev-scoring-cards        - 重建DEV评分卡配置（补全mcs_itemid/mcs_datatype/mcs_cardname）");
+        Console.WriteLine("  dotnet run fix-scoring-card-typeids     - 批量修复评分卡配置(mcs_typeid)根据mcs_credititem.mcs_group");
+        Console.WriteLine("  dotnet run remove-duplicate-scoring-cards - 删除DEV1评分卡配置重复记录");
         Console.WriteLine("  dotnet run export-webresource <名称> <路径> - 导出 WebResource 内容");
         Console.WriteLine("  dotnet run update-webresource <名称> <文件路径> - 更新 WebResource 内容");
         Console.WriteLine("  dotnet run list-form-webresources <实体> - 列出实体主窗体引用的 JS WebResource");
@@ -47,6 +51,19 @@ class Program
         Console.WriteLine("  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境");
         Console.WriteLine("  dotnet run diagnose-credit-record <评估编码> - 诊断 credit record 数据集成问题");
         Console.WriteLine("  dotnet run list-entities <前缀>        - 列出指定前缀的实体");
+        Console.WriteLine("  dotnet run create-test-salesorder <客户名称> - 为客户创建一条测试销售订单（用于老客户判定）");
+        Console.WriteLine("  dotnet run list-app-actions [前缀]       - 列出 App Action (Modern Command Bar 按钮)");
+        Console.WriteLine("  dotnet run list-custom-apis [关键字]     - 列出 Custom API（含参数与响应属性）");
+        Console.WriteLine("  dotnet run check-solution-customapi <解决方案名> - 检查解决方案包含的 Custom API");
+        Console.WriteLine("  dotnet run deploy-tradestpayterm-api <DLL路径> - 部署成交条件样板库查询 Custom API");
+        Console.WriteLine("  dotnet run delete-tradestpayterm-api          - 删除成交条件样板库查询 Custom API");
+        Console.WriteLine("  dotnet run test-tradestpayterm-api <buId> <subId> <countryCode> <prdGroupId> <buyerCode> - 测试成交条件样板库查询 Custom API");
+        Console.WriteLine("  dotnet run query-tradestpayterm-samples [条数] - 查询成交条件样板库样本数据");
+        Console.WriteLine("  dotnet run create-tradestpayterm-testdata    - 创建一条生效的成交条件样板库测试数据");
+        Console.WriteLine("  dotnet run query-optionset <实体名> <字段名>       - 查询选项集字段的标签");
+        Console.WriteLine("  dotnet run list-transaction-currencies   - 列出 D365 标准交易货币及汇率");
+        Console.WriteLine("  dotnet run test-coface-exchange-rate [币种列表] - 测试 Coface 汇率读取与转换（默认 USD,EUR,CNY,JPY,VND,XXX）");
+        Console.WriteLine("  dotnet run test-upload-api <文件路径> <accountId> [mcp|mcs|all] - 测试上传 Custom API");
         Console.WriteLine();
 
         if (args.Length < 1)
@@ -89,6 +106,10 @@ class Program
                             return;
                         }
                         CheckSolution(manager, args[1]);
+                        break;
+
+                    case "list-solutions":
+                        manager.ListSolutions();
                         break;
 
                     case "add":
@@ -167,6 +188,10 @@ class Program
                         string targetScoreId = args[1];
                         int targetStatus = args.Length >= 3 && int.TryParse(args[2], out int s) ? s : 12;
                         UpdateCreditRecordStatus(service, targetScoreId, targetStatus);
+                        break;
+
+                    case "test-tradestpayterm":
+                        TestTradeStPayTerm(service);
                         break;
 
                     case "query-tags":
@@ -376,8 +401,8 @@ class Program
                             return;
                         }
                         var importHelper = new CofaceDataSyncHelper(service);
-                        importHelper.ImportFromFile("mcs_coface_nace_mapping", Path.Combine(args[1], "mcs_coface_nace_mapping.json"));
-                        importHelper.ImportFromFile("mcs_coface_exchange_rate", Path.Combine(args[1], "mcs_coface_exchange_rate.json"));
+                        importHelper.CleanAndImport("mcs_coface_nace_mapping", Path.Combine(args[1], "mcs_coface_nace_mapping.json"));
+                        importHelper.CleanAndImport("mcs_coface_exchange_rate", Path.Combine(args[1], "mcs_coface_exchange_rate.json"));
                         break;
 
                     case "diagnose-credit-record":
@@ -391,6 +416,17 @@ class Program
                         diagHelper.DiagnoseByScoreId(args[1]);
                         break;
 
+                    case "diagnose-credit-record-by-account":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run diagnose-credit-record-by-account <客户名称>");
+                            Console.WriteLine("  示例: dotnet run diagnose-credit-record-by-account LTC客户-1");
+                            return;
+                        }
+                        var diagHelperByAccount = new CreditRecordDiagnosticHelper(service);
+                        diagHelperByAccount.DiagnoseByAccountName(args[1]);
+                        break;
+
                     case "list-entities":
                         if (args.Length < 2)
                         {
@@ -400,6 +436,105 @@ class Program
                         }
                         var listHelper = new ListEntitiesHelper(service);
                         listHelper.ListByPrefix(args[1]);
+                        break;
+
+                    case "count-records":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run count-records <实体名1> [实体名2] ...");
+                            Console.WriteLine("  示例: dotnet run count-records mcs_credit_items mcs_credit_scoringcard");
+                            return;
+                        }
+                        var countHelper = new ListEntitiesHelper(service);
+                        countHelper.CountRecords(args.Skip(1).ToArray());
+                        break;
+
+                    case "list-appmodules":
+                        ListAppModules(service);
+                        break;
+
+                    case "create-test-salesorder":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run create-test-salesorder <客户名称>");
+                            Console.WriteLine("  示例: dotnet run create-test-salesorder LTC客户-1");
+                            return;
+                        }
+                        CreateTestSalesOrder(service, args[1]);
+                        break;
+
+                    case "list-app-actions":
+                        string? prefix = args.Length >= 2 ? args[1] : null;
+                        ListAppActions(service, prefix);
+                        break;
+
+                    case "list-custom-apis":
+                        string? apiKeyword = args.Length >= 2 ? args[1] : null;
+                        new QueryCustomApis(service).ListCustomApis(apiKeyword);
+                        break;
+
+                    case "check-solution-customapi":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run check-solution-customapi <解决方案名>");
+                            return;
+                        }
+                        CheckSolutionCustomApis(service, args[1]);
+                        break;
+
+                    case "deploy-tradestpayterm-api":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run deploy-tradestpayterm-api <DLL路径>");
+                            return;
+                        }
+                        string apiDllPath = args[1];
+                        string apiClassName = "SanyD365.D365Extension.Sales.Plugins.TradeStPayTerm.QueryTradeStPayTermPlugin";
+                        manager.RegisterPluginAssemblyOnly(apiDllPath, apiClassName);
+                        var deployer = new D365MetadataTool.Services.CustomApiDeployer(service);
+                        deployer.DeployTradeStPayTermQueryApi(apiClassName);
+                        break;
+
+                    case "delete-tradestpayterm-api":
+                        new D365MetadataTool.Services.CustomApiDeployer(service).DeleteCustomApi("mcs_QueryTradeStPayTerm");
+                        break;
+
+                    case "test-tradestpayterm-api":
+                        if (args.Length < 6)
+                        {
+                            Console.WriteLine("用法: dotnet run test-tradestpayterm-api <buId> <subId> <countryCode> <prdGroupId> <buyerCode>");
+                            return;
+                        }
+                        TestTradeStPayTermApi(service, args[1], args[2], args[3], args[4], args[5]);
+                        break;
+
+                    case "query-tradestpayterm-samples":
+                        int sampleCount = args.Length >= 2 && int.TryParse(args[1], out int n) ? n : 5;
+                        QueryTradeStPayTermSamples(service, sampleCount);
+                        break;
+
+                    case "create-tradestpayterm-testdata":
+                        CreateTradeStPayTermTestData(service);
+                        break;
+
+                    case "list-transaction-currencies":
+                        ListTransactionCurrencies(service);
+                        break;
+
+                    case "test-coface-exchange-rate":
+                        string currencyList = args.Length >= 2 ? args[1] : "USD,EUR,CNY,JPY,VND,XXX";
+                        TestCofaceExchangeRate(service, currencyList);
+                        break;
+
+                    case "test-upload-api":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run test-upload-api <文件路径> <accountId> [mcp|mcs|all]");
+                            Console.WriteLine("  示例: dotnet run test-upload-api /tmp/test.pdf 3c67d74c-445a-f111-a825-7ced8de5b9c3");
+                            return;
+                        }
+                        string apiType = args.Length >= 4 ? args[3].ToLower() : "all";
+                        new UploadApiTester(service).TestUploadApi(args[1], args[2], apiType);
                         break;
 
                     case "query-plugin-namespace":
@@ -531,6 +666,15 @@ class Program
                             return;
                         }
                         ExportWebResource(service, args[1], args[2]);
+                        break;
+
+                    case "export-form-xml":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run export-form-xml <实体名> <输出文件路径>");
+                            return;
+                        }
+                        ExportFormXml(service, args[1], args[2]);
                         break;
 
                     case "update-webresource":
@@ -953,6 +1097,34 @@ class Program
                         CreateQualitativeEnums(manager);
                         break;
 
+                    case "export-credititem-values":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run export-credititem-values <输出JSON文件路径>");
+                            Console.WriteLine("  示例: D365_URL=https://dev1.crm5.dynamics.com dotnet run export-credititem-values /tmp/credititem_values.json");
+                            return;
+                        }
+                        ExportCreditItemValues(service, args[1]);
+                        break;
+
+                    case "import-credititem-values":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run import-credititem-values <JSON文件路径>");
+                            Console.WriteLine("  示例: D365_URL=https://sany-uat.crm5.dynamics.com dotnet run import-credititem-values /tmp/credititem_values.json");
+                            return;
+                        }
+                        ImportCreditItemValues(service, args[1]);
+                        break;
+
+                    case "create-trade-pttype-sample-data":
+                        manager.CreateTradePtTypeSampleData();
+                        break;
+
+                    case "create-trade-stpayterm-test":
+                        manager.CreateTradeStPayTermTestRecord();
+                        break;
+
                     case "fix-coface-qualitative-enums":
                         manager.FixCofaceQualitativeEnums();
                         break;
@@ -972,6 +1144,10 @@ class Program
 
                     case "check-credit-items":
                         CheckCreditItems(manager);
+                        break;
+
+                    case "query-credit-item-descs":
+                        QueryCreditItemDescs(service);
                         break;
 
                     case "cleanup-credit-items":
@@ -1293,6 +1469,14 @@ class Program
                         FixDevScoringCards(service);
                         break;
 
+                    case "fix-scoring-card-typeids":
+                        FixScoringCardTypeIds(service);
+                        break;
+
+                    case "remove-duplicate-scoring-cards":
+                        RemoveDuplicateScoringCards(service);
+                        break;
+
                     case "seed-coface-exchange-rates":
                         SeedCofaceExchangeRates(service);
                         break;
@@ -1307,6 +1491,41 @@ class Program
 
                     case "cleanup-test-common":
                         new TestCommonService(service).CleanupOnly();
+                        break;
+
+                    case "export-scoring-cards":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run export-scoring-cards <输出JSON文件路径>");
+                            Console.WriteLine("  示例: D365_URL=https://dev1.crm5.dynamics.com dotnet run export-scoring-cards /tmp/scoring_cards.json");
+                            return;
+                        }
+                        ExportScoringCards(service, args[1]);
+                        break;
+
+                    case "import-scoring-cards":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run import-scoring-cards <JSON文件路径>");
+                            Console.WriteLine("  示例: D365_URL=https://sany-uat.crm5.dynamics.com dotnet run import-scoring-cards /tmp/scoring_cards.json");
+                            return;
+                        }
+                        ImportScoringCards(service, args[1]);
+                        break;
+
+                    case "update-integer-range":
+                        if (args.Length < 5)
+                        {
+                            Console.WriteLine("用法: dotnet run update-integer-range <实体名> <字段名> <最小值> <最大值>");
+                            Console.WriteLine("  示例: dotnet run update-integer-range mcs_credit_scoringcard mcs_weight -100 100");
+                            return;
+                        }
+                        if (!int.TryParse(args[3], out int intMin) || !int.TryParse(args[4], out int intMax))
+                        {
+                            Console.WriteLine("❌ 最小值和最大值必须是整数");
+                            return;
+                        }
+                        manager.UpdateIntegerFieldRange(args[1], args[2], intMin, intMax);
                         break;
 
                     default:
@@ -1326,6 +1545,302 @@ class Program
         }
     }
 
+    static void ExportScoringCards(ServiceClient service, string jsonPath)
+    {
+        Console.WriteLine("=== 导出评分卡配置 ===");
+
+        var query = new QueryExpression("mcs_credit_scoringcard")
+        {
+            ColumnSet = new ColumnSet("mcs_categoryid", "mcs_credititem", "mcs_itemid", "mcs_itemname",
+                "mcs_datatype", "mcs_minvalue", "mcs_maxvalue", "mcs_listvalue", "mcs_weight")
+        };
+
+        var result = service.RetrieveMultiple(query);
+        Console.WriteLine($"读取到 {result.Entities.Count} 条记录");
+
+        var records = result.Entities.Select(e => new ScoringCardImportRecord
+        {
+            CategoryId = e.GetAttributeValue<OptionSetValue>("mcs_categoryid")?.Value ?? 0,
+            ItemCode = e.GetAttributeValue<string>("mcs_itemid") ?? "",
+            ItemName = e.GetAttributeValue<string>("mcs_itemname") ?? "",
+            DataType = e.GetAttributeValue<OptionSetValue>("mcs_datatype")?.Value ?? 0,
+            Min = e.GetAttributeValue<decimal?>("mcs_minvalue"),
+            Max = e.GetAttributeValue<decimal?>("mcs_maxvalue"),
+            ListValue = e.GetAttributeValue<EntityReference>("mcs_listvalue")?.Name,
+            Weight = e.GetAttributeValue<int>("mcs_weight")
+        }).ToList();
+
+        var json = System.Text.Json.JsonSerializer.Serialize(records,
+            new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(jsonPath, json);
+        Console.WriteLine($"✅ 已导出到: {jsonPath}");
+    }
+
+    static void ImportScoringCards(ServiceClient service, string jsonPath)
+    {
+        if (!File.Exists(jsonPath))
+        {
+            Console.WriteLine($"❌ 文件不存在: {jsonPath}");
+            return;
+        }
+
+        var json = File.ReadAllText(jsonPath);
+        var records = System.Text.Json.JsonSerializer.Deserialize<List<ScoringCardImportRecord>>(json,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (records == null || records.Count == 0)
+        {
+            Console.WriteLine("❌ JSON 解析为空");
+            return;
+        }
+
+        Console.WriteLine($"=== 评分卡全量导入 ===");
+        Console.WriteLine($"JSON 记录数: {records.Count}");
+
+        // 1. 将 ExternalRating 评分项目改为定量（Excel 标准为数值区间）
+        UpdateExternalRatingItemToQuantitative(service);
+
+        // 2. 确保 mcs_weight 允许负分（Excel 中存在 -1 / -3 扣分项）
+        EnsureWeightFieldRange(service);
+
+        // 3. 加载评分项目与枚举值映射
+        var itemMap = LoadCreditItemsMap(service);
+        var (enumByValue, enumByName) = LoadCreditItemValueMap(service);
+
+        // 检查所有 itemCode 是否存在
+        var missingItems = records.Select(r => r.ItemCode).Distinct().Where(c => !itemMap.ContainsKey(c)).ToList();
+        if (missingItems.Count > 0)
+        {
+            Console.WriteLine($"⚠️ 以下评分项目编码在 D365 中不存在，将跳过:");
+            foreach (var c in missingItems) Console.WriteLine($"   - {c}");
+        }
+
+        // 3. 清空现有评分卡配置
+        int deletedCount = DeleteAllScoringCards(service);
+        Console.WriteLine($"已清空现有评分卡: {deletedCount} 条");
+
+        // 4. 批量创建
+        int createdCount = 0;
+        int skipCount = 0;
+        int index = 0;
+        foreach (var rec in records)
+        {
+            index++;
+            if (!itemMap.TryGetValue(rec.ItemCode, out var itemId))
+            {
+                Console.WriteLine($"  [{index}/{records.Count}] 跳过: 找不到评分项目 {rec.ItemCode}");
+                skipCount++;
+                continue;
+            }
+
+            var ent = new Entity("mcs_credit_scoringcard");
+            ent["mcs_categoryid"] = new OptionSetValue(rec.CategoryId);
+            ent["mcs_credititem"] = new EntityReference("mcs_credit_items", itemId);
+            ent["mcs_itemid"] = rec.ItemCode;
+            ent["mcs_itemname"] = rec.ItemName;
+            ent["mcs_datatype"] = new OptionSetValue(rec.DataType);
+            if (rec.Min.HasValue) ent["mcs_minvalue"] = rec.Min.Value;
+            if (rec.Max.HasValue) ent["mcs_maxvalue"] = rec.Max.Value;
+
+            if (!string.IsNullOrEmpty(rec.ListValue))
+            {
+                var enumKey = $"{rec.ItemCode}|{rec.ListValue}";
+                if (enumByValue.TryGetValue(enumKey, out var enumId) || enumByName.TryGetValue(enumKey, out enumId))
+                {
+                    ent["mcs_listvalue"] = new EntityReference("mcs_credititem_value", enumId);
+                }
+                else
+                {
+                    Console.WriteLine($"  [{index}/{records.Count}] ⚠️ {rec.ItemCode} 找不到枚举值 '{rec.ListValue}'");
+                    skipCount++;
+                    continue;
+                }
+            }
+
+            ent["mcs_weight"] = rec.Weight;
+
+            try
+            {
+                service.Create(ent);
+                createdCount++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  [{index}/{records.Count}] ❌ 创建失败 {rec.ItemCode} ({rec.RawCriteria}): {ex.Message}");
+                skipCount++;
+            }
+        }
+
+        Console.WriteLine($"\n✅ 导入完成: 成功 {createdCount} 条, 跳过 {skipCount} 条");
+    }
+
+    static void EnsureWeightFieldRange(ServiceClient service)
+    {
+        try
+        {
+            var request = new RetrieveAttributeRequest
+            {
+                EntityLogicalName = "mcs_credit_scoringcard",
+                LogicalName = "mcs_weight",
+                RetrieveAsIfPublished = true
+            };
+            var response = (RetrieveAttributeResponse)service.Execute(request);
+            if (response.AttributeMetadata is IntegerAttributeMetadata intAttr)
+            {
+                int currentMin = intAttr.MinValue ?? 0;
+                int currentMax = intAttr.MaxValue ?? 0;
+                if (currentMin > -100 || currentMax < 100)
+                {
+                    var updateAttr = new IntegerAttributeMetadata
+                    {
+                        LogicalName = "mcs_weight",
+                        MinValue = -100,
+                        MaxValue = 100
+                    };
+                    service.Execute(new UpdateAttributeRequest
+                    {
+                        EntityName = "mcs_credit_scoringcard",
+                        Attribute = updateAttr
+                    });
+                    Console.WriteLine($"✅ 已更新 mcs_weight 范围为 [-100, 100]");
+
+                    var pubRequest = new Microsoft.Crm.Sdk.Messages.PublishXmlRequest
+                    {
+                        ParameterXml = "<importexportxml><entities><entity>mcs_credit_scoringcard</entity></entities></importexportxml>"
+                    };
+                    service.Execute(pubRequest);
+                    Console.WriteLine($"✅ 已发布实体 mcs_credit_scoringcard");
+                }
+                else
+                {
+                    Console.WriteLine($"mcs_weight 当前范围 [{currentMin}, {currentMax}]，无需调整");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ 检查/更新 mcs_weight 范围失败: {ex.Message}");
+        }
+    }
+
+    static void UpdateExternalRatingItemToQuantitative(ServiceClient service)
+    {
+        var query = new QueryExpression("mcs_credit_items")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_itemsid", "mcs_credit_itemsno", "mcs_datatype"),
+            Criteria = new FilterExpression
+            {
+                Conditions = { new ConditionExpression("mcs_credit_itemsno", ConditionOperator.Equal, "ExternalRating") }
+            }
+        };
+        var result = service.RetrieveMultiple(query);
+        if (result.Entities.Count == 0)
+        {
+            Console.WriteLine("⚠️ 未找到 ExternalRating 评分项目，跳过 datatype 更新");
+            return;
+        }
+
+        var item = result.Entities[0];
+        var currentDataType = item.GetAttributeValue<OptionSetValue>("mcs_datatype")?.Value;
+        if (currentDataType == 100000000)
+        {
+            Console.WriteLine("ExternalRating 已是定量类型");
+            return;
+        }
+
+        var update = new Entity("mcs_credit_items") { Id = item.Id };
+        update["mcs_datatype"] = new OptionSetValue(100000000);
+        service.Update(update);
+        Console.WriteLine($"✅ 已更新 ExternalRating 为定量类型 (100000000)，原类型值: {currentDataType}");
+    }
+
+    static Dictionary<string, Guid> LoadCreditItemsMap(ServiceClient service)
+    {
+        var query = new QueryExpression("mcs_credit_items")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_itemsid", "mcs_credit_itemsno", "mcs_itemname", "mcs_datatype")
+        };
+        var result = service.RetrieveMultiple(query);
+        var map = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        foreach (var e in result.Entities)
+        {
+            var id = e.Id;
+            var no = e.GetAttributeValue<string>("mcs_credit_itemsno") ?? "";
+            var name = e.GetAttributeValue<string>("mcs_itemname") ?? "";
+            if (!string.IsNullOrEmpty(no)) map[no] = id;
+            if (!string.IsNullOrEmpty(name)) map[name] = id;
+        }
+        Console.WriteLine($"加载评分项目映射: {map.Count} 条");
+        return map;
+    }
+
+    static (Dictionary<string, Guid> ByValue, Dictionary<string, Guid> ByName) LoadCreditItemValueMap(ServiceClient service)
+    {
+        // 先取评分项目 ID -> 编码
+        var itemQuery = new QueryExpression("mcs_credit_items")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_itemsid", "mcs_credit_itemsno")
+        };
+        var itemResult = service.RetrieveMultiple(itemQuery);
+        var idToCode = new Dictionary<Guid, string>();
+        foreach (var it in itemResult.Entities)
+        {
+            idToCode[it.Id] = it.GetAttributeValue<string>("mcs_credit_itemsno") ?? "";
+        }
+
+        var query = new QueryExpression("mcs_credititem_value")
+        {
+            ColumnSet = new ColumnSet("mcs_credititem_valueid", "mcs_credititemno", "mcs_listvalue", "mcs_listname")
+        };
+        var result = service.RetrieveMultiple(query);
+        var byValue = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        var byName = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        foreach (var e in result.Entities)
+        {
+            var itemRef = e.GetAttributeValue<EntityReference>("mcs_credititemno");
+            if (itemRef == null || !idToCode.TryGetValue(itemRef.Id, out var code) || string.IsNullOrEmpty(code)) continue;
+            var val = e.GetAttributeValue<string>("mcs_listvalue") ?? "";
+            var name = e.GetAttributeValue<string>("mcs_listname") ?? "";
+            if (!string.IsNullOrEmpty(val)) byValue[$"{code}|{val}"] = e.Id;
+            if (!string.IsNullOrEmpty(name)) byName[$"{code}|{name}"] = e.Id;
+        }
+        Console.WriteLine($"加载枚举值映射: value={byValue.Count} 条, name={byName.Count} 条");
+        return (byValue, byName);
+    }
+
+    static int DeleteAllScoringCards(ServiceClient service)
+    {
+        int deletedCount = 0;
+        var query = new QueryExpression("mcs_credit_scoringcard")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_scoringcardid"),
+            PageInfo = new PagingInfo { Count = 500, PageNumber = 1 }
+        };
+        EntityCollection result;
+        do
+        {
+            result = service.RetrieveMultiple(query);
+            foreach (var e in result.Entities)
+            {
+                try
+                {
+                    service.Delete("mcs_credit_scoringcard", e.Id);
+                    deletedCount++;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  删除失败 {e.Id}: {ex.Message}");
+                }
+            }
+            if (result.MoreRecords)
+            {
+                query.PageInfo.PageNumber++;
+                query.PageInfo.PagingCookie = result.PagingCookie;
+            }
+        } while (result.MoreRecords);
+        return deletedCount;
+    }
+
     static void ShowHelp()
     {
         Console.WriteLine("可用命令:");
@@ -1333,7 +1848,7 @@ class Program
         Console.WriteLine("  check <解决方案名>    - 检查解决方案实体");
         Console.WriteLine("  add <实体> <解决方案> - 添加实体到解决方案");
         Console.WriteLine("  remove <实体> <解决方案> - 从解决方案移除实体");
-        Console.WriteLine("  publish [实体]        - 发布");
+        Console.WriteLine("  publish [实体]        - 发布指定实体（禁止无参数全局发布）");
         Console.WriteLine("  delete-field <实体> <字段> - 删除字段");
         Console.WriteLine("  list-fields <实体>    - 列出字段");
         Console.WriteLine("  export <解决方案> <路径> - 导出 ZIP");
@@ -1351,6 +1866,8 @@ class Program
         Console.WriteLine("  query-urba-json <scoreid> - 查询指定记录的 URBA JSON");
         Console.WriteLine("  query-customer-tags <scoreid> - 查询指定记录的客户标签明细");
         Console.WriteLine("  query-credit-items - 查询所有评分项目");
+        Console.WriteLine("  import-scoring-cards <JSON文件路径> - 清空现有评分卡并全量导入");
+        Console.WriteLine("  update-integer-range <实体名> <字段名> <最小值> <最大值> - 更新整数字段取值范围");
         Console.WriteLine("  add-webresource-to-solution <WebResource名称> <解决方案唯一名> - 将 WebResource 加入解决方案");
     }
 
@@ -1790,6 +2307,449 @@ class Program
         {
             Console.WriteLine($"❌ 更新失败: {ex.Message}");
         }
+    }
+
+    static void TestTradeStPayTerm(ServiceClient service)
+    {
+        Console.WriteLine("=== 测试成交条件样板库 Plugin ===");
+
+        var testRecords = new List<Guid>();
+
+        try
+        {
+            // 1. 测试自动编号 + 创建时默认状态
+            Console.WriteLine("\n--- 测试自动编号与默认状态 ---");
+            var record1 = CreateTradeStPayTermTestRecord(service, "TEST", "测试事业部", "S", 0.3m, 30, 30);
+            testRecords.Add(record1);
+
+            var retrieved = service.Retrieve("mcs_trade_stpayterm", record1, new ColumnSet("mcs_trade_stpaytermname", "mcs_status"));
+            var code = retrieved.GetAttributeValue<string>("mcs_trade_stpaytermname");
+            var status = retrieved.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("mcs_status")?.Value;
+            Console.WriteLine($"  记录ID: {record1}");
+            Console.WriteLine($"  标准条件编码: {code}");
+            Console.WriteLine($"  生效状态: {status}");
+
+            if (!string.IsNullOrEmpty(code) && code.StartsWith("TC"))
+                Console.WriteLine("  ✅ 自动编号正确");
+            else
+                Console.WriteLine("  ❌ 自动编号失败");
+
+            if (status == 0)
+                Console.WriteLine("  ✅ 默认状态正确（未生效）");
+            else
+                Console.WriteLine("  ❌ 默认状态应为 0");
+
+            // 2. 测试非法首付比例
+            Console.WriteLine("\n--- 测试首付比例校验 ---");
+            TryAction("首付比例 1.5 应被拦截", () =>
+                CreateTradeStPayTermTestRecord(service, "TEST2", "测试事业部2", "S", 1.5m, 30, 30));
+
+            // 3. 测试 100% 首付一致性
+            Console.WriteLine("\n--- 测试 100% 首付一致性校验 ---");
+            TryAction("100% 首付 + 账期 30 应被拦截", () =>
+                CreateTradeStPayTermTestRecord(service, "TEST3", "测试事业部3", "S", 1.0m, 30, 30));
+
+            // 4. 测试账期/频次 30 倍数校验
+            Console.WriteLine("\n--- 测试账期倍数校验 ---");
+            TryAction("账期 45 应被拦截", () =>
+                CreateTradeStPayTermTestRecord(service, "TEST4", "测试事业部4", "S", 0.3m, 45, 30));
+
+            // 5. 测试状态流转 0→1（申请）
+            Console.WriteLine("\n--- 测试申请（0→1）---");
+            UpdateTradeStPayTermStatus(service, record1, 1);
+            Console.WriteLine("  ✅ 申请成功");
+
+            // 6. 测试状态流转 1→2（审批）
+            Console.WriteLine("\n--- 测试审批（1→2）---");
+            UpdateTradeStPayTermStatus(service, record1, 2);
+            Console.WriteLine("  ✅ 审批成功");
+
+            // 7. 测试非法状态流转 2→0
+            Console.WriteLine("\n--- 测试非法状态流转（2→0）---");
+            TryAction("生效→未生效应被拦截", () =>
+                UpdateTradeStPayTermStatus(service, record1, 0));
+
+            // 8. 测试重复记录校验
+            Console.WriteLine("\n--- 测试重复记录校验 ---");
+            TryAction("相同维度记录应被拦截", () =>
+                CreateTradeStPayTermTestRecord(service, "TEST", "测试事业部", "S", 0.3m, 30, 30));
+        }
+        finally
+        {
+            Console.WriteLine("\n--- 清理测试记录 ---");
+            foreach (var id in testRecords)
+            {
+                try
+                {
+                    service.Delete("mcs_trade_stpayterm", id);
+                    Console.WriteLine($"  ✅ 已删除: {id}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  ⚠️ 删除失败 {id}: {ex.Message}");
+                }
+            }
+        }
+
+        Console.WriteLine("\n=== 测试完成 ===");
+    }
+
+    static Guid CreateTradeStPayTermTestRecord(ServiceClient service, string buId, string buName, string buyerGrade, decimal downPay, int payTerm, int payFreq)
+    {
+        var entity = new Microsoft.Xrm.Sdk.Entity("mcs_trade_stpayterm");
+        entity["mcs_buid"] = buId;
+        entity["mcs_buname"] = buName;
+        entity["mcs_buyergrade"] = buyerGrade;
+        entity["mcs_creditgrade"] = new Microsoft.Xrm.Sdk.OptionSetValue(100000000); // A0
+        entity["mcs_downpay"] = downPay;
+        entity["mcs_payterm"] = payTerm;
+        entity["mcs_payfreq"] = payFreq;
+        return service.Create(entity);
+    }
+
+    static void UpdateTradeStPayTermStatus(ServiceClient service, Guid id, int status)
+    {
+        var entity = new Microsoft.Xrm.Sdk.Entity("mcs_trade_stpayterm", id);
+        entity["mcs_status"] = new Microsoft.Xrm.Sdk.OptionSetValue(status);
+        service.Update(entity);
+    }
+
+    static void TryAction(string description, Action action)
+    {
+        try
+        {
+            action();
+            Console.WriteLine($"  ❌ {description}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ✅ {description}: {ex.Message}");
+        }
+    }
+
+    static void CreateTestSalesOrder(ServiceClient service, string accountName)
+    {
+        Console.WriteLine($"=== 为客户 {accountName} 创建测试销售订单 ===");
+
+        // 1. 查询客户
+        var accountQuery = new Microsoft.Xrm.Sdk.Query.QueryExpression("account")
+        {
+            ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("accountid", "name"),
+            Criteria = new Microsoft.Xrm.Sdk.Query.FilterExpression
+            {
+                Conditions = { new Microsoft.Xrm.Sdk.Query.ConditionExpression("name", Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, accountName) }
+            }
+        };
+        var accounts = service.RetrieveMultiple(accountQuery);
+        if (accounts.Entities.Count == 0)
+        {
+            Console.WriteLine($"❌ 未找到客户: {accountName}");
+            return;
+        }
+        var account = accounts.Entities[0];
+        var accountId = account.Id;
+        Console.WriteLine($"找到客户: {account.GetAttributeValue<string>("name")} ({accountId})");
+
+        // 2. 查询默认货币
+        Guid? currencyId = null;
+        try
+        {
+            var currencyQuery = new Microsoft.Xrm.Sdk.Query.QueryExpression("transactioncurrency")
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("transactioncurrencyid", "currencyname"),
+                TopCount = 1
+            };
+            var currencies = service.RetrieveMultiple(currencyQuery);
+            if (currencies.Entities.Count > 0)
+            {
+                currencyId = currencies.Entities[0].Id;
+                Console.WriteLine($"使用默认货币: {currencies.Entities[0].GetAttributeValue<string>("currencyname")} ({currencyId})");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ 查询默认货币失败: {ex.Message}");
+        }
+
+        // 3. 查询默认价格列表
+        Guid? priceLevelId = null;
+        try
+        {
+            var priceLevelQuery = new Microsoft.Xrm.Sdk.Query.QueryExpression("pricelevel")
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("pricelevelid", "name"),
+                TopCount = 1
+            };
+            var priceLevels = service.RetrieveMultiple(priceLevelQuery);
+            if (priceLevels.Entities.Count > 0)
+            {
+                priceLevelId = priceLevels.Entities[0].Id;
+                Console.WriteLine($"使用默认价格列表: {priceLevels.Entities[0].GetAttributeValue<string>("name")} ({priceLevelId})");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ 查询默认价格列表失败: {ex.Message}");
+        }
+
+        // 4. 创建销售订单
+        var salesOrder = new Microsoft.Xrm.Sdk.Entity("salesorder");
+        salesOrder["customerid"] = new Microsoft.Xrm.Sdk.EntityReference("account", accountId);
+        salesOrder["name"] = $"测试订单-{accountName}-{DateTime.Now:yyyyMMddHHmmss}";
+        salesOrder["description"] = "用于信用评估老客户判定的测试销售订单";
+        if (currencyId.HasValue)
+            salesOrder["transactioncurrencyid"] = new Microsoft.Xrm.Sdk.EntityReference("transactioncurrency", currencyId.Value);
+        if (priceLevelId.HasValue)
+            salesOrder["pricelevelid"] = new Microsoft.Xrm.Sdk.EntityReference("pricelevel", priceLevelId.Value);
+
+        try
+        {
+            var orderId = service.Create(salesOrder);
+            Console.WriteLine($"✅ 销售订单创建成功: {orderId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ 销售订单创建失败: {ex.Message}");
+            if (ex.InnerException != null)
+                Console.WriteLine($"   内部异常: {ex.InnerException.Message}");
+        }
+    }
+
+    static void ListAppActions(ServiceClient service, string? prefix)
+    {
+        Console.WriteLine($"=== 查询 App Action {(prefix != null ? $"(前缀: {prefix})" : "")}===");
+        var query = new Microsoft.Xrm.Sdk.Query.QueryExpression("appaction")
+        {
+            ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(
+                "appactionid", "uniquename", "name", "context", "contextentity", "contextvalue",
+                "fonticon", "sequence", "statecode", "statuscode", "location",
+                "onclickeventjavascriptfunctionname", "onclickeventjavascriptwebresourceid", "onclickeventjavascriptparameters",
+                "buttonlabeltext", "buttontooltiptitle", "buttontooltipdescription", "visibilitytype"
+            ),
+            Orders = { new Microsoft.Xrm.Sdk.Query.OrderExpression("uniquename", Microsoft.Xrm.Sdk.Query.OrderType.Ascending) }
+        };
+        if (!string.IsNullOrEmpty(prefix))
+        {
+            query.Criteria = new Microsoft.Xrm.Sdk.Query.FilterExpression
+            {
+                Conditions =
+                {
+                    new Microsoft.Xrm.Sdk.Query.ConditionExpression("uniquename", Microsoft.Xrm.Sdk.Query.ConditionOperator.BeginsWith, prefix)
+                }
+            };
+        }
+
+        try
+        {
+            var actions = service.RetrieveMultiple(query);
+            Console.WriteLine($"找到 {actions.Entities.Count} 条 App Action");
+            foreach (var action in actions.Entities)
+            {
+                var uniqueName = action.GetAttributeValue<string>("uniquename");
+                var name = action.GetAttributeValue<string>("name");
+                var context = action.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("context")?.Value;
+                var contextEntity = action.GetAttributeValue<Microsoft.Xrm.Sdk.EntityReference>("contextentity");
+                var contextValue = action.GetAttributeValue<string>("contextvalue");
+                var fontIcon = action.GetAttributeValue<string>("fonticon");
+                var sequence = action.GetAttributeValue<decimal?>("sequence");
+                var state = action.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("statecode")?.Value;
+                var jsFunction = action.GetAttributeValue<string>("onclickeventjavascriptfunctionname");
+                var jsWebResourceRef = action.GetAttributeValue<Microsoft.Xrm.Sdk.EntityReference>("onclickeventjavascriptwebresourceid");
+                var jsParams = action.GetAttributeValue<string>("onclickeventjavascriptparameters");
+                var label = action.GetAttributeValue<string>("buttonlabeltext");
+                var tooltipTitle = action.GetAttributeValue<string>("buttontooltiptitle");
+                var tooltipDesc = action.GetAttributeValue<string>("buttontooltipdescription");
+                var location = action.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("location")?.Value;
+                var visibilityType = action.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("visibilitytype")?.Value;
+                Console.WriteLine($"  - {uniqueName}");
+                Console.WriteLine($"      名称: {name}");
+                Console.WriteLine($"      标签: {label}");
+                Console.WriteLine($"      提示标题: {tooltipTitle}");
+                Console.WriteLine($"      提示描述: {tooltipDesc}");
+                Console.WriteLine($"      上下文: {context} / {contextValue}");
+                Console.WriteLine($"      上下文实体: {contextEntity?.LogicalName}({contextEntity?.Id})");
+                Console.WriteLine($"      图标: {fontIcon}");
+                Console.WriteLine($"      序号: {sequence}");
+                Console.WriteLine($"      Location: {location}");
+                Console.WriteLine($"      JS函数: {jsWebResourceRef?.LogicalName}({jsWebResourceRef?.Id}).{jsFunction}");
+                Console.WriteLine($"      JS参数: {jsParams}");
+                Console.WriteLine($"      VisibilityType: {visibilityType}");
+                Console.WriteLine($"      状态: {(state == 0 ? "启用" : "停用")}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ 查询 App Action 失败: {ex.Message}");
+        }
+    }
+
+    static void ListAppModules(ServiceClient service)
+    {
+        Console.WriteLine("=== 查询 Model-driven App ===");
+        try
+        {
+            var query = new QueryExpression("appmodule")
+            {
+                ColumnSet = new ColumnSet("appmoduleid", "uniquename", "name", "description"),
+                Criteria = new FilterExpression()
+            };
+            var result = service.RetrieveMultiple(query);
+            Console.WriteLine($"找到 {result.Entities.Count} 个 App");
+            foreach (var app in result.Entities)
+            {
+                Console.WriteLine($"  - {app.GetAttributeValue<string>("uniquename")}");
+                Console.WriteLine($"      名称: {app.GetAttributeValue<string>("name")}");
+                Console.WriteLine($"      ID: {app.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ 查询 App 失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 列出 D365 标准交易货币及汇率
+    /// </summary>
+    static void ListTransactionCurrencies(ServiceClient service)
+    {
+        Console.WriteLine("\n=== D365 标准交易货币及汇率 ===");
+
+        try
+        {
+            // 1. 查询组织基础货币
+            var orgQuery = new QueryExpression("organization")
+            {
+                ColumnSet = new ColumnSet("basecurrencyid", "name")
+            };
+            var orgResult = service.RetrieveMultiple(orgQuery);
+            Guid? baseCurrencyId = null;
+            if (orgResult.Entities.Count > 0)
+            {
+                var baseRef = orgResult.Entities[0].GetAttributeValue<EntityReference>("basecurrencyid");
+                baseCurrencyId = baseRef?.Id;
+                Console.WriteLine($"组织: {orgResult.Entities[0].GetAttributeValue<string>("name")}");
+                Console.WriteLine($"基础货币 ID: {baseCurrencyId}");
+            }
+
+            // 2. 查询所有交易货币
+            var query = new QueryExpression("transactioncurrency")
+            {
+                ColumnSet = new ColumnSet("transactioncurrencyid", "isocurrencycode", "currencyname", "currencysymbol", "exchangerate", "currencyprecision"),
+                Orders = { new OrderExpression("isocurrencycode", OrderType.Ascending) }
+            };
+
+            var result = service.RetrieveMultiple(query);
+            Console.WriteLine($"\n共维护 {result.Entities.Count} 种交易货币：\n");
+            Console.WriteLine(string.Format("{0,-8} {1,-25} {2,-18} {3,-6} {4,-8}", "ISO代码", "货币名称", "汇率", "精度", "基础货币"));
+            Console.WriteLine(new string('-', 75));
+
+            foreach (var currency in result.Entities)
+            {
+                var id = currency.Id;
+                var code = currency.GetAttributeValue<string>("isocurrencycode") ?? "";
+                var name = currency.GetAttributeValue<string>("currencyname") ?? "";
+                var symbol = currency.GetAttributeValue<string>("currencysymbol") ?? "";
+                var rate = currency.GetAttributeValue<decimal>("exchangerate");
+                var precision = currency.GetAttributeValue<int?>("currencyprecision") ?? 2;
+                var isBase = baseCurrencyId.HasValue && id == baseCurrencyId.Value ? "是" : "";
+
+                Console.WriteLine($"{code,-8} {name,-25} {rate,-18} {precision,-6} {isBase,-8}");
+            }
+
+            // 3. 尝试查询历史汇率记录（exchangerate 实体）
+            try
+            {
+                var historyQuery = new QueryExpression("exchangerate")
+                {
+                    ColumnSet = new ColumnSet("exchangerateid", "transactioncurrencyid", "exchangerate1", "effectivedate"),
+                    TopCount = 10,
+                    Orders = { new OrderExpression("effectivedate", OrderType.Descending) }
+                };
+                var historyResult = service.RetrieveMultiple(historyQuery);
+                Console.WriteLine($"\n历史汇率记录（exchangerate 实体）: {historyResult.Entities.Count} 条（Top 10）");
+                foreach (var h in historyResult.Entities)
+                {
+                    var currencyRef = h.GetAttributeValue<EntityReference>("transactioncurrencyid");
+                    var rate = h.GetAttributeValue<decimal>("exchangerate1");
+                    var effective = h.GetAttributeValue<DateTime?>("effectivedate");
+                    Console.WriteLine($"  {currencyRef?.Name ?? "?"}: {rate}, 生效: {effective:yyyy-MM-dd}");
+                }
+            }
+            catch (Exception historyEx)
+            {
+                Console.WriteLine($"\n⚠️ 历史汇率实体（exchangerate）不可用或未启用: {historyEx.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ 查询失败: {ex.Message}");
+        }
+    }
+
+    static void TestCofaceExchangeRate(ServiceClient service, string currencyList)
+    {
+        Console.WriteLine("\n=== Coface 汇率读取本地测试（方案 A：D365 标准汇率） ===");
+        Console.WriteLine("测试逻辑：从 transactioncurrency 读取 1 USD -> LC 汇率，取倒数得到 1 LC -> USD 汇率\n");
+
+        var codes = currencyList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                .Select(c => c.ToUpperInvariant())
+                                .Distinct()
+                                .ToList();
+
+        if (codes.Count == 0)
+        {
+            Console.WriteLine("未提供有效币种代码");
+            return;
+        }
+
+        // 批量读取所有交易货币，减少查询次数
+        var query = new QueryExpression("transactioncurrency")
+        {
+            ColumnSet = new ColumnSet("isocurrencycode", "currencyname", "exchangerate"),
+            Criteria = new FilterExpression
+            {
+                Conditions =
+                {
+                    new ConditionExpression("isocurrencycode", ConditionOperator.In, codes.ToArray())
+                }
+            }
+        };
+
+        var result = service.RetrieveMultiple(query);
+        var rateMap = result.Entities.ToDictionary(
+            e => e.GetAttributeValue<string>("isocurrencycode")?.ToUpperInvariant() ?? "",
+            e => e.GetAttributeValue<decimal>("exchangerate"),
+            StringComparer.OrdinalIgnoreCase);
+
+        const decimal sampleAmount = 10000m;
+
+        Console.WriteLine(string.Format("{0,-6} {1,-22} {2,-22} {3,-16} {4,-16} {5,-10}", "币种", "D365汇率(1USD->LC)", "转换汇率(1LC->USD)", "测试金额(LC)", "转换后(USD)", "状态"));
+        Console.WriteLine(new string('-', 100));
+
+        foreach (var code in codes)
+        {
+            if (code == "USD")
+            {
+                Console.WriteLine(string.Format("{0,-6} {1,-22} {2,-22} {3,-16:F2} {4,-16:F2} {5,-10}", code, "1.0000000000", "1.0000000000", sampleAmount, sampleAmount, "固定汇率"));
+                continue;
+            }
+
+            if (!rateMap.TryGetValue(code, out var d365Rate) || d365Rate <= 0m)
+            {
+                Console.WriteLine(string.Format("{0,-6} {1,-22} {2,-22} {3,-16:F2} {4,-16:F2} {5,-10}", code, "N/A", "N/A", sampleAmount, sampleAmount, "未配置"));
+                continue;
+            }
+
+            var rateToUsd = 1m / d365Rate;
+            var converted = sampleAmount * rateToUsd;
+            Console.WriteLine(string.Format("{0,-6} {1,-22:F10} {2,-22:F10} {3,-16:F2} {4,-16:F2} {5,-10}", code, d365Rate, rateToUsd, sampleAmount, converted, "正常"));
+        }
+
+        Console.WriteLine("\n说明：");
+        Console.WriteLine("- 转换汇率 = 1 / D365汇率");
+        Console.WriteLine("- 转换后(USD) = 测试金额(LC) * 转换汇率");
+        Console.WriteLine("- 未配置币种保持原金额不变（与 helper 行为一致）");
     }
 
     static string GetStatusName(int status)
@@ -2338,6 +3298,213 @@ class Program
         Console.WriteLine($"跳过: {skipCount} 条");
     }
 
+    /// <summary>
+    /// 批量修复 mcs_credit_scoringcard.mcs_typeid
+    /// 规则：根据 mcs_credititem 关联的 mcs_credit_items.mcs_group 映射
+    /// 100000000->1 客户实力, 100000001->2 客户财务, 100000002->3 宏观市场, 100000003->4 历史交易
+    /// </summary>
+    static void FixScoringCardTypeIds(ServiceClient service)
+    {
+        Console.WriteLine("\n=== 批量修复评分卡项目分类(mcs_typeid) ===");
+
+        var groupMap = new Dictionary<int, int>
+        {
+            { 100000000, 1 }, // 客户实力
+            { 100000001, 2 }, // 客户财务
+            { 100000002, 3 }, // 宏观市场
+            { 100000003, 4 }  // 历史交易
+        };
+
+        // 查询所有评分卡配置及其关联的评分项目分类
+        var query = new QueryExpression("mcs_credit_scoringcard")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_scoringcardid", "mcs_typeid", "mcs_credititem"),
+            PageInfo = new PagingInfo { Count = 500, PageNumber = 1 }
+        };
+
+        var link = new LinkEntity("mcs_credit_scoringcard", "mcs_credit_items", "mcs_credititem", "mcs_credit_itemsid", JoinOperator.LeftOuter)
+        {
+            Columns = new ColumnSet("mcs_group"),
+            EntityAlias = "item"
+        };
+        query.LinkEntities.Add(link);
+
+        int totalCount = 0;
+        int updateCount = 0;
+        int skipCount = 0;
+        int failCount = 0;
+
+        while (true)
+        {
+            var result = service.RetrieveMultiple(query);
+            if (result.Entities.Count == 0) break;
+
+            foreach (var record in result.Entities)
+            {
+                totalCount++;
+                var recordId = record.Id;
+
+                // 获取当前 mcs_typeid
+                var currentType = record.GetAttributeValue<OptionSetValue>("mcs_typeid");
+
+                // 获取关联的 mcs_group
+                int? groupValue = null;
+                var aliasedGroup = record.GetAttributeValue<AliasedValue>("item.mcs_group");
+                if (aliasedGroup?.Value is OptionSetValue osv)
+                {
+                    groupValue = osv.Value;
+                }
+
+                if (!groupValue.HasValue)
+                {
+                    Console.WriteLine($"  跳过 {recordId}: 关联评分项目未设置 mcs_group");
+                    skipCount++;
+                    continue;
+                }
+
+                if (!groupMap.TryGetValue(groupValue.Value, out int targetTypeValue))
+                {
+                    Console.WriteLine($"  跳过 {recordId}: 未知的 mcs_group 值 {groupValue.Value}");
+                    skipCount++;
+                    continue;
+                }
+
+                // 如果当前值已经正确，跳过
+                if (currentType != null && currentType.Value == targetTypeValue)
+                {
+                    Console.WriteLine($"  跳过 {recordId}: mcs_typeid 已经是 {targetTypeValue}");
+                    skipCount++;
+                    continue;
+                }
+
+                // 执行更新
+                var update = new Entity("mcs_credit_scoringcard", recordId);
+                update["mcs_typeid"] = new OptionSetValue(targetTypeValue);
+
+                try
+                {
+                    service.Update(update);
+                    Console.WriteLine($"  更新 {recordId}: mcs_group={groupValue.Value} -> mcs_typeid={targetTypeValue}");
+                    updateCount++;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  失败 {recordId}: {ex.Message}");
+                    failCount++;
+                }
+            }
+
+            if (result.MoreRecords)
+            {
+                query.PageInfo.PageNumber++;
+                query.PageInfo.PagingCookie = result.PagingCookie;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        Console.WriteLine("\n=== 完成 ===");
+        Console.WriteLine($"总计: {totalCount} 条");
+        Console.WriteLine($"更新: {updateCount} 条");
+        Console.WriteLine($"跳过: {skipCount} 条");
+        Console.WriteLine($"失败: {failCount} 条");
+    }
+
+    /// <summary>
+    /// 删除 DEV1 上 mcs_credit_scoringcard 的重复记录
+    /// 重复判定：category + 评分项目编码 + 数据类型 + min + max + weight + listvalue名称
+    /// 保留一条，删除其余
+    /// </summary>
+    static void RemoveDuplicateScoringCards(ServiceClient service)
+    {
+        Console.WriteLine("\n=== 删除评分卡配置重复记录 ===");
+
+        var query = new QueryExpression("mcs_credit_scoringcard")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_scoringcardid", "mcs_categoryid", "mcs_itemid", "mcs_datatype", "mcs_minvalue", "mcs_maxvalue", "mcs_weight", "mcs_listvalue"),
+            PageInfo = new PagingInfo { Count = 500, PageNumber = 1 }
+        };
+
+        var link = new LinkEntity("mcs_credit_scoringcard", "mcs_credititem_value", "mcs_listvalue", "mcs_credititem_valueid", JoinOperator.LeftOuter)
+        {
+            Columns = new ColumnSet("mcs_listname"),
+            EntityAlias = "lv"
+        };
+        query.LinkEntities.Add(link);
+
+        var records = new List<Entity>();
+
+        while (true)
+        {
+            var result = service.RetrieveMultiple(query);
+            records.AddRange(result.Entities);
+            if (result.MoreRecords)
+            {
+                query.PageInfo.PageNumber++;
+                query.PageInfo.PagingCookie = result.PagingCookie;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        Console.WriteLine($"读取到 {records.Count} 条记录");
+
+        // 按重复键分组（listvalue 用名称，避免同名不同ID导致的伪不重复）
+        var groups = records.GroupBy(r =>
+        {
+            var categoryId = r.GetAttributeValue<OptionSetValue>("mcs_categoryid")?.Value ?? 0;
+            var itemCode = r.GetAttributeValue<string>("mcs_itemid") ?? "";
+            var dataType = r.GetAttributeValue<OptionSetValue>("mcs_datatype")?.Value ?? 0;
+            var min = r.GetAttributeValue<decimal?>("mcs_minvalue");
+            var max = r.GetAttributeValue<decimal?>("mcs_maxvalue");
+            var weight = r.GetAttributeValue<int?>("mcs_weight") ?? int.MinValue;
+            var listValueName = "";
+            var aliasedName = r.GetAttributeValue<AliasedValue>("lv.mcs_listname");
+            if (aliasedName?.Value != null) listValueName = aliasedName.Value.ToString() ?? "";
+
+            return (categoryId, itemCode, dataType, min, max, weight, listValueName);
+        }).ToList();
+
+        int duplicateGroupCount = 0;
+        int deleteCount = 0;
+        int failCount = 0;
+
+        foreach (var group in groups)
+        {
+            if (group.Count() <= 1) continue;
+
+            duplicateGroupCount++;
+            var keep = group.First();
+            var duplicates = group.Skip(1).ToList();
+
+            Console.WriteLine($"  发现重复组: {group.Key}, 共 {group.Count()} 条, 保留 {keep.Id}, 删除 {duplicates.Count} 条");
+
+            foreach (var dup in duplicates)
+            {
+                try
+                {
+                    service.Delete("mcs_credit_scoringcard", dup.Id);
+                    deleteCount++;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"    删除失败 {dup.Id}: {ex.Message}");
+                    failCount++;
+                }
+            }
+        }
+
+        Console.WriteLine("\n=== 完成 ===");
+        Console.WriteLine($"重复组: {duplicateGroupCount} 个");
+        Console.WriteLine($"删除: {deleteCount} 条");
+        Console.WriteLine($"失败: {failCount} 条");
+        Console.WriteLine($"预计剩余: {records.Count - deleteCount} 条");
+    }
+
     static void QueryCreditRecordTags(ServiceClient service, string scoreId)
     {
         Console.WriteLine($"=== 查询标签详情: {scoreId} ===");
@@ -2495,13 +3662,34 @@ class Program
         // 查询SA级新客户评分卡配置
         var q = new QueryExpression("mcs_credit_scoringcard")
         {
-            ColumnSet = new ColumnSet("mcs_credit_scoringcardid", "mcs_credit_scoringcardno", "mcs_itemid", "mcs_itemname", "mcs_minvalue", "mcs_maxvalue"),
+            ColumnSet = new ColumnSet("mcs_credit_scoringcardid", "mcs_credit_scoringcardno", "mcs_itemid", "mcs_itemname", "mcs_minvalue", "mcs_maxvalue", "mcs_listvalue"),
             Criteria = new FilterExpression
             {
                 Conditions = { new ConditionExpression("mcs_categoryid", ConditionOperator.Equal, 2) }
             }
         };
         var cards = service.RetrieveMultiple(q);
+
+        // 预加载credit_items映射
+        var itemQuery = new QueryExpression("mcs_credit_items")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_itemsid", "mcs_credit_itemsno")
+        };
+        var itemResult = service.RetrieveMultiple(itemQuery);
+        var itemMap = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        foreach (var it in itemResult.Entities)
+        {
+            var no = it.GetAttributeValue<string>("mcs_credit_itemsno") ?? "";
+            if (!string.IsNullOrEmpty(no)) itemMap[no] = it.Id;
+        }
+
+        // 目标：把定性评分卡的ListValue指向与当前标签值一致的枚举记录
+        var targetQualitative = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ExternalRating"] = "3",
+            ["CountryRisk"] = "A3",
+            ["SectorRisk"] = "3"
+        };
 
         int updated = 0;
         foreach (var card in cards.Entities)
@@ -2522,23 +3710,45 @@ class Program
                     Console.WriteLine($"  {cardNo} 迟付指数: min 3→0");
                     break;
 
-                case "CountryRisk":
-                    // 清空listvalue，让"无匹配配置默认给分"
-                    update["mcs_listvalue"] = null;
-                    needUpdate = true;
-                    Console.WriteLine($"  {cardNo} 国别风险: listvalue 清空（默认给分）");
-                    break;
-
-                case "SectorRisk":
-                    // 清空listvalue，让"无匹配配置默认给分"
-                    update["mcs_listvalue"] = null;
-                    needUpdate = true;
-                    Console.WriteLine($"  {cardNo} 行业风险: listvalue 清空（默认给分）");
-                    break;
-
                 case "ExternalRating":
-                    // listvalue已经是空的，默认给分，无需修改
-                    Console.WriteLine($"  {cardNo} 外部评级: listvalue为空，已默认给分");
+                case "CountryRisk":
+                case "SectorRisk":
+                    if (targetQualitative.TryGetValue(itemCode, out string targetValue))
+                    {
+                        if (!itemMap.TryGetValue(itemCode, out Guid itemId))
+                        {
+                            Console.WriteLine($"  ⚠️ {cardNo} {itemCode}: 找不到评分项目");
+                            break;
+                        }
+                        var enumQuery = new QueryExpression("mcs_credititem_value")
+                        {
+                            ColumnSet = new ColumnSet("mcs_credititem_valueid", "mcs_listvalue", "mcs_listname"),
+                            Criteria = new FilterExpression
+                            {
+                                Conditions =
+                                {
+                                    new ConditionExpression("mcs_credititemno", ConditionOperator.Equal, itemId),
+                                    new ConditionExpression("mcs_listvalue", ConditionOperator.Equal, targetValue)
+                                }
+                            },
+                            TopCount = 1
+                        };
+                        var enums = service.RetrieveMultiple(enumQuery);
+                        if (enums.Entities.Count == 0)
+                        {
+                            Console.WriteLine($"  ⚠️ {cardNo} {itemCode}: 找不到枚举值 {targetValue}");
+                            break;
+                        }
+                        var enumId = enums.Entities[0].Id;
+                        var enumName = enums.Entities[0].GetAttributeValue<string>("mcs_listname") ?? "";
+                        update["mcs_listvalue"] = new EntityReference("mcs_credititem_value", enumId);
+                        needUpdate = true;
+                        Console.WriteLine($"  {cardNo} {itemCode}: listvalue → {targetValue} ({enumName})");
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine($"  {cardNo} {itemCode}: 无需调整");
                     break;
             }
 
@@ -2550,8 +3760,7 @@ class Program
         }
 
         Console.WriteLine($"\n✅ 已更新 {updated} 条评分卡配置");
-        Console.WriteLine("预期得分：外部评级30 + 迟付指数10 + 国别风险10 + 行业风险10 + 净资产20 = 80分");
-        Console.WriteLine("（资产负债率和流动比率是N/A，得0分）");
+        Console.WriteLine("预期得分：外部评级30 + 迟付指数10 + 国别风险10 + 行业风险10 + 净资产20 + 资产负债率10 + 流动比率10 = 100分");
     }
 
     /// <summary>
@@ -2935,7 +4144,7 @@ class Program
         {
             string typeName = field.AttributeType?.ToString() ?? "Unknown";
             string displayName = field.DisplayName?.UserLocalizedLabel?.Label ?? "";
-            Console.WriteLine($"  - {field.LogicalName,-30} {typeName,-15} {displayName}");
+            Console.WriteLine($"  - {field.LogicalName,-30} {typeName,-15} {displayName} (Id: {field.MetadataId})");
         }
         
         Console.WriteLine($"\n总计: {fields.Count} 个字段");
@@ -2947,6 +4156,51 @@ class Program
         
         switch (entityName)
         {
+            case "mcs_trade_pttype":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_typeid", "产品分类编码" },
+                    { "mcs_trade_pttypename", "成交条件产品分类名称" },
+                    { "mcs_typenameen", "产品分类英文名称" }
+                };
+                break;
+
+            case "mcs_trade_ptgrouptype":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_groupid", "产品线编码" },
+                    { "mcs_groupname", "产品线名称" },
+                    { "mcs_trade_pttypeid", "成交条件产品分类" },
+                    { "mcs_typeid", "产品分类编码" },
+                    { "mcs_typename", "产品分类名称" }
+                };
+                break;
+
+            case "mcs_trade_stpayterm":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_trade_stpaytermname", "标准条件编码" },
+                    { "mcs_businessunit", "事业部" },
+                    { "mcs_buid", "事业部编码" },
+                    { "mcs_buname", "事业部名称" },
+                    { "mcs_subsidiary", "大区/子公司" },
+                    { "mcs_subid", "子公司编码" },
+                    { "mcs_subname", "子公司名称" },
+                    { "mcs_nation", "国家" },
+                    { "mcs_countrycode", "国家代码" },
+                    { "mcs_countryname", "国家名称" },
+                    { "mcs_trade_pttype", "成交条件产品分类" },
+                    { "mcs_typeid", "产品分类编码" },
+                    { "mcs_typename", "产品分类名称" },
+                    { "mcs_buyergrade", "客户分类代码" },
+                    { "mcs_creditgrade", "客户等级" },
+                    { "mcs_downpay", "首付款比例" },
+                    { "mcs_payterm", "账期（天）" },
+                    { "mcs_payfreq", "付款频次（天）" },
+                    { "mcs_status", "生效状态" }
+                };
+                break;
+
             case "mcs_credit_items":
                 fields = new Dictionary<string, string>
                 {
@@ -3062,6 +4316,114 @@ class Program
         manager.CreateQualitativeEnumRecords();
     }
 
+    static void ExportCreditItemValues(ServiceClient service, string jsonPath)
+    {
+        Console.WriteLine("=== 导出定性评分项目枚举值 ===");
+
+        var query = new QueryExpression("mcs_credititem_value")
+        {
+            ColumnSet = new ColumnSet("mcs_listvalue", "mcs_listname")
+        };
+        var link = new LinkEntity("mcs_credititem_value", "mcs_credit_items", "mcs_credititemno", "mcs_credit_itemsid", JoinOperator.Inner)
+        {
+            Columns = new ColumnSet("mcs_credit_itemsno"),
+            EntityAlias = "item"
+        };
+        query.LinkEntities.Add(link);
+
+        var result = service.RetrieveMultiple(query);
+        Console.WriteLine($"读取到 {result.Entities.Count} 条记录");
+
+        var records = result.Entities.Select(e => new
+        {
+            creditItemCode = e.GetAttributeValue<AliasedValue>("item.mcs_credit_itemsno")?.Value?.ToString() ?? "",
+            listValue = e.GetAttributeValue<string>("mcs_listvalue") ?? "",
+            listName = e.GetAttributeValue<string>("mcs_listname") ?? ""
+        }).ToList();
+
+        var json = System.Text.Json.JsonSerializer.Serialize(records,
+            new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(jsonPath, json);
+        Console.WriteLine($"✅ 已导出到: {jsonPath}");
+    }
+
+    static void ImportCreditItemValues(ServiceClient service, string jsonPath)
+    {
+        if (!File.Exists(jsonPath))
+        {
+            Console.WriteLine($"❌ 文件不存在: {jsonPath}");
+            return;
+        }
+
+        Console.WriteLine("=== 导入定性评分项目枚举值 ===");
+
+        var json = File.ReadAllText(jsonPath);
+        var records = System.Text.Json.JsonSerializer.Deserialize<List<CreditItemValueImportRecord>>(json,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (records == null || records.Count == 0)
+        {
+            Console.WriteLine("❌ JSON 解析为空");
+            return;
+        }
+
+        // 加载评分项目映射
+        var itemQuery = new QueryExpression("mcs_credit_items")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_itemsid", "mcs_credit_itemsno")
+        };
+        var itemResult = service.RetrieveMultiple(itemQuery);
+        var itemMap = itemResult.Entities.ToDictionary(
+            e => e.GetAttributeValue<string>("mcs_credit_itemsno") ?? "",
+            e => e.Id);
+
+        // 清空现有数据
+        int deletedCount = 0;
+        var existingQuery = new QueryExpression("mcs_credititem_value")
+        {
+            ColumnSet = new ColumnSet("mcs_credititem_valueid")
+        };
+        var existing = service.RetrieveMultiple(existingQuery);
+        foreach (var e in existing.Entities)
+        {
+            service.Delete("mcs_credititem_value", e.Id);
+            deletedCount++;
+        }
+        Console.WriteLine($"已清空现有枚举值: {deletedCount} 条");
+
+        int createdCount = 0;
+        int skipCount = 0;
+        int index = 0;
+        foreach (var rec in records)
+        {
+            index++;
+            if (!itemMap.TryGetValue(rec.CreditItemCode, out var itemId))
+            {
+                Console.WriteLine($"  [{index}/{records.Count}] 跳过: 找不到评分项目 {rec.CreditItemCode}");
+                skipCount++;
+                continue;
+            }
+
+            var ent = new Entity("mcs_credititem_value");
+            ent["mcs_credititemno"] = new EntityReference("mcs_credit_items", itemId);
+            ent["mcs_listvalue"] = rec.ListValue;
+            ent["mcs_listname"] = rec.ListName;
+
+            try
+            {
+                service.Create(ent);
+                createdCount++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  [{index}/{records.Count}] ❌ 创建失败 {rec.CreditItemCode}/{rec.ListValue}: {ex.Message}");
+                skipCount++;
+            }
+        }
+
+        Console.WriteLine($"\n✅ 导入完成: 成功 {createdCount} 条, 跳过 {skipCount} 条");
+    }
+
     static void CheckCreditItems(EntityManager manager)
     {
         Console.WriteLine("检查评分项目数据...");
@@ -3072,6 +4434,27 @@ class Program
     {
         Console.WriteLine("清理评分项目重复和空编码记录...");
         manager.CleanupCreditItemRecords();
+    }
+
+    static void QueryCreditItemDescs(ServiceClient service)
+    {
+        Console.WriteLine("=== 查询评分项目说明 (mcs_itemdesc) ===");
+        var query = new QueryExpression("mcs_credit_items")
+        {
+            ColumnSet = new ColumnSet("mcs_credit_itemsno", "mcs_itemname", "mcs_itemdesc"),
+            Orders = { new OrderExpression("mcs_credit_itemsno", OrderType.Ascending) }
+        };
+        var result = service.RetrieveMultiple(query);
+        Console.WriteLine($"共 {result.Entities.Count} 条记录\n");
+        Console.WriteLine("编码".PadRight(20) + " " + "名称".PadRight(18) + " 说明 (mcs_itemdesc)");
+        Console.WriteLine(new string('-', 120));
+        foreach (var e in result.Entities)
+        {
+            var code = e.GetAttributeValue<string>("mcs_credit_itemsno") ?? "";
+            var name = e.GetAttributeValue<string>("mcs_itemname") ?? "";
+            var desc = e.GetAttributeValue<string>("mcs_itemdesc") ?? "";
+            Console.WriteLine($"{code,-20} {name,-18} {desc}");
+        }
     }
 
     static void AddFieldsToEntity(EntityManager manager, string entityName)
@@ -3358,6 +4741,49 @@ class Program
             var lookupFields = new HashSet<string> { "mcs_credit_record", "mcs_accountid", "mcs_credit_item" };
             manager.RearrangeForm(entityName, groups, lookupFields);
         }
+        else if (entityName == "mcs_trade_stpayterm")
+        {
+            var groups = new Dictionary<string, List<(string fieldName, string displayName)>>
+            {
+                ["基本信息"] = new List<(string, string)>
+                {
+                    ("mcs_trade_stpaytermname", "标准条件编码"),
+                    ("mcs_status", "生效状态"),
+                },
+                ["组织信息"] = new List<(string, string)>
+                {
+                    ("mcs_businessunit", "事业部"),
+                    ("mcs_buid", "事业部编码"),
+                    ("mcs_buname", "事业部名称"),
+                    ("mcs_subsidiary", "大区/子公司"),
+                    ("mcs_subid", "大区/子公司编码"),
+                    ("mcs_subname", "大区/子公司名称"),
+                    ("mcs_nation", "国家"),
+                    ("mcs_countrycode", "国家编码"),
+                    ("mcs_countryname", "国家名称"),
+                },
+                ["产品分类"] = new List<(string, string)>
+                {
+                    ("mcs_trade_pttype", "成交条件产品分类"),
+                    ("mcs_typeid", "产品分类编码"),
+                    ("mcs_typename", "产品分类名称"),
+                },
+                ["客户等级"] = new List<(string, string)>
+                {
+                    ("mcs_buyergrade", "客户分类代码"),
+                    ("mcs_creditgrade", "客户等级"),
+                },
+                ["付款条件"] = new List<(string, string)>
+                {
+                    ("mcs_downpay", "首付比例"),
+                    ("mcs_payterm", "账期"),
+                    ("mcs_payfreq", "付款频次"),
+                },
+            };
+            var lookupFields = new HashSet<string> { "mcs_businessunit", "mcs_subsidiary", "mcs_nation", "mcs_trade_pttype" };
+            var picklistFields = new HashSet<string> { "mcs_status", "mcs_creditgrade" };
+            manager.RearrangeForm(entityName, groups, lookupFields, null, picklistFields);
+        }
         else
         {
             Console.WriteLine($"暂不支持实体 {entityName} 的窗体重排");
@@ -3376,6 +4802,51 @@ class Program
         
         switch (entityName)
         {
+            case "mcs_trade_pttype":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_typeid", "产品分类编码" },
+                    { "mcs_trade_pttypename", "成交条件产品分类名称" },
+                    { "mcs_typenameen", "产品分类英文名称" }
+                };
+                break;
+
+            case "mcs_trade_ptgrouptype":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_groupid", "产品线编码" },
+                    { "mcs_groupname", "产品线名称" },
+                    { "mcs_trade_pttypeid", "成交条件产品分类" },
+                    { "mcs_typeid", "产品分类编码" },
+                    { "mcs_typename", "产品分类名称" }
+                };
+                break;
+
+            case "mcs_trade_stpayterm":
+                fields = new Dictionary<string, string>
+                {
+                    { "mcs_trade_stpaytermname", "标准条件编码" },
+                    { "mcs_businessunit", "事业部" },
+                    { "mcs_buid", "事业部编码" },
+                    { "mcs_buname", "事业部名称" },
+                    { "mcs_subsidiary", "大区/子公司" },
+                    { "mcs_subid", "大区/子公司编码" },
+                    { "mcs_subname", "大区/子公司名称" },
+                    { "mcs_nation", "国家" },
+                    { "mcs_countrycode", "国家代码" },
+                    { "mcs_countryname", "国家名称" },
+                    { "mcs_trade_pttype", "成交条件产品分类" },
+                    { "mcs_typeid", "产品分类编码" },
+                    { "mcs_typename", "产品分类名称" },
+                    { "mcs_buyergrade", "客户分类代码" },
+                    { "mcs_creditgrade", "客户等级" },
+                    { "mcs_downpay", "首付款比例" },
+                    { "mcs_payterm", "账期（天）" },
+                    { "mcs_payfreq", "付款频次（天）" },
+                    { "mcs_status", "生效状态" }
+                };
+                break;
+
             case "mcs_credititem_value":
                 fields = new Dictionary<string, string>
                 {
@@ -4619,6 +6090,336 @@ class Program
             Console.WriteLine($"❌ 查询失败: {ex.Message}");
         }
     }
+
+    static void CreateTradeStPayTermTestData(ServiceClient service)
+    {
+        Console.WriteLine(">>> 创建成交条件样板库测试数据");
+
+        try
+        {
+            // 创建记录
+            var record = new Entity("mcs_trade_stpayterm");
+            record["mcs_buid"] = "BU-1018";
+            record["mcs_subid"] = "SUB-001";
+            record["mcs_countrycode"] = "CN";
+            record["mcs_typeid"] = "03";
+            record["mcs_buyergrade"] = "C";
+            record["mcs_downpay"] = 0.3m;
+            record["mcs_payterm"] = 30;
+            record["mcs_payfreq"] = 30;
+
+            var recordId = service.Create(record);
+            Console.WriteLine($"  ✅ 已创建记录: {recordId}");
+
+            // 申请 (0->1)
+            var applyUpdate = new Entity("mcs_trade_stpayterm", recordId);
+            applyUpdate["mcs_status"] = new OptionSetValue(1);
+            service.Update(applyUpdate);
+            Console.WriteLine("  ✅ 申请成功 (0->1)");
+
+            // 审批 (1->2)
+            var approveUpdate = new Entity("mcs_trade_stpayterm", recordId);
+            approveUpdate["mcs_status"] = new OptionSetValue(2);
+            service.Update(approveUpdate);
+            Console.WriteLine("  ✅ 审批成功 (1->2)，记录已生效");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ❌ 创建失败: {ex.Message}");
+        }
+    }
+
+    static void QueryTradeStPayTermSamples(ServiceClient service, int topCount)
+    {
+        Console.WriteLine($">>> 查询成交条件样板库样本数据 (Top {topCount})");
+
+        var query = new QueryExpression("mcs_trade_stpayterm")
+        {
+            ColumnSet = new ColumnSet(
+                "mcs_trade_stpaytermname", "mcs_buid", "mcs_buname", "mcs_subid", "mcs_subname",
+                "mcs_countrycode", "mcs_typeid", "mcs_buyergrade", "mcs_status"),
+            Criteria = new FilterExpression
+            {
+                Conditions = { new ConditionExpression("mcs_status", ConditionOperator.Equal, 2) }
+            },
+            TopCount = topCount
+        };
+
+        var records = service.RetrieveMultiple(query).Entities;
+        Console.WriteLine($"  找到 {records.Count} 条生效记录:");
+        foreach (var r in records)
+        {
+            Console.WriteLine($"    编码={r.GetAttributeValue<string>("mcs_trade_stpaytermname")}, " +
+                              $"BU={r.GetAttributeValue<string>("mcs_buid")}, " +
+                              $"Sub={r.GetAttributeValue<string>("mcs_subid")}, " +
+                              $"Country={r.GetAttributeValue<string>("mcs_countrycode")}, " +
+                              $"Type={r.GetAttributeValue<string>("mcs_typeid")}, " +
+                              $"BuyerGrade={r.GetAttributeValue<string>("mcs_buyergrade")}");
+        }
+
+        Console.WriteLine($">>> 查询产品线-产品分类映射样本 (Top {topCount})");
+        var groupQuery = new QueryExpression("mcs_trade_ptgrouptype")
+        {
+            ColumnSet = new ColumnSet("mcs_groupid", "mcs_groupname", "mcs_typeid"),
+            TopCount = topCount
+        };
+        var groupRecords = service.RetrieveMultiple(groupQuery).Entities;
+        Console.WriteLine($"  找到 {groupRecords.Count} 条映射:");
+        foreach (var r in groupRecords)
+        {
+            Console.WriteLine($"    GroupId={r.GetAttributeValue<string>("mcs_groupid")}, " +
+                              $"GroupName={r.GetAttributeValue<string>("mcs_groupname")}, " +
+                              $"TypeId={r.GetAttributeValue<string>("mcs_typeid")}");
+        }
+
+        Console.WriteLine($">>> 查询客户主数据样本 (Top {topCount})");
+        var customerQuery = new QueryExpression("mcs_customermasterdata")
+        {
+            ColumnSet = new ColumnSet("mcs_accountnumber", "mcs_accountcategory", "mcs_accountlevel", "mcs_dealerrank"),
+            TopCount = topCount
+        };
+        var customerRecords = service.RetrieveMultiple(customerQuery).Entities;
+        Console.WriteLine($"  找到 {customerRecords.Count} 条客户主数据:");
+        foreach (var r in customerRecords)
+        {
+            Console.WriteLine($"    AccountNumber={r.GetAttributeValue<string>("mcs_accountnumber")}, " +
+                              $"Category={r.GetAttributeValue<OptionSetValue>("mcs_accountcategory")?.Value}, " +
+                              $"Level={r.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value}, " +
+                              $"DealerRank={r.GetAttributeValue<OptionSetValue>("mcs_dealerrank")?.Value}");
+        }
+    }
+
+    static void TestTradeStPayTermApi(ServiceClient service, string buId, string subId, string countryCode, string prdGroupId, string buyerCode)
+    {
+        Console.WriteLine($">>> 测试 Custom API: mcs_QueryTradeStPayTerm");
+        Console.WriteLine($"    入参: buId={buId}, subId={subId}, countryCode={countryCode}, prdGroupId={prdGroupId}, buyerCode={buyerCode}");
+
+        try
+        {
+            var request = new OrganizationRequest("mcs_QueryTradeStPayTerm");
+            request["mcs_buid"] = buId;
+            request["mcs_subid"] = subId;
+            request["mcs_countrycode"] = countryCode;
+            request["mcs_prdgroupid"] = prdGroupId;
+            request["mcs_buyercode"] = buyerCode;
+
+            var response = service.Execute(request);
+            var status = response["status"]?.ToString() ?? "?";
+            var message = response["message"]?.ToString() ?? "";
+            var records = response["records"]?.ToString() ?? "[]";
+
+            Console.WriteLine($"  ✅ 调用成功");
+            Console.WriteLine($"     Status: {status}");
+            Console.WriteLine($"     Message: {message}");
+            Console.WriteLine($"     Records: {records}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ❌ 调用失败: {ex.Message}");
+            if (ex.InnerException != null)
+                Console.WriteLine($"     Inner: {ex.InnerException.Message}");
+        }
+    }
+
+    static void CheckSolutionCustomApis(ServiceClient service, string solutionName)
+    {
+        Console.WriteLine($">>> 检查解决方案中的 Custom API: {solutionName}");
+
+        var solutionQuery = new QueryExpression("solution")
+        {
+            ColumnSet = new ColumnSet("solutionid"),
+            Criteria = new FilterExpression
+            {
+                Conditions = { new ConditionExpression("uniquename", ConditionOperator.Equal, solutionName) }
+            }
+        };
+        var solutionResult = service.RetrieveMultiple(solutionQuery).Entities.FirstOrDefault();
+        if (solutionResult == null)
+        {
+            Console.WriteLine($"  ❌ 未找到解决方案: {solutionName}");
+            return;
+        }
+        Guid solutionId = solutionResult.Id;
+
+        // 先列出该解决方案下所有不常见的 componenttype
+        var typeQuery = new QueryExpression("solutioncomponent")
+        {
+            ColumnSet = new ColumnSet("componenttype"),
+            Criteria = new FilterExpression
+            {
+                Conditions = { new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId) }
+            }
+        };
+        var allComponents = service.RetrieveMultiple(typeQuery).Entities;
+        var typeGroups = allComponents
+            .Select(c => c.GetAttributeValue<OptionSetValue>("componenttype")?.Value ?? -1)
+            .Where(v => v > 10000)
+            .GroupBy(v => v)
+            .OrderBy(g => g.Key)
+            .ToList();
+        Console.WriteLine($"  解决方案中 componenttype > 10000 的组件类型:");
+        foreach (var g in typeGroups)
+        {
+            Console.WriteLine($"    Type {g.Key}: {g.Count()} 个");
+        }
+
+        // 尝试查找 Custom API 记录本身关联的 solutionid
+        var apiQuery = new QueryExpression("customapi")
+        {
+            ColumnSet = new ColumnSet("customapiid", "uniquename", "name", "displayname", "solutionid"),
+            Criteria = new FilterExpression
+            {
+                Conditions = { new ConditionExpression("uniquename", ConditionOperator.Equal, "mcs_QueryTradeStPayTerm") }
+            }
+        };
+        var apis = service.RetrieveMultiple(apiQuery).Entities;
+        Console.WriteLine($"  找到 {apis.Count} 个 mcs_QueryTradeStPayTerm:");
+        foreach (var api in apis)
+        {
+            var apiSolutionId = api.GetAttributeValue<Guid>("solutionid");
+            Console.WriteLine($"    ID={api.Id}, SolutionId={apiSolutionId}, Match={apiSolutionId == solutionId}");
+
+            // 查询该 Custom API 是否在目标解决方案的 solutioncomponent 中
+            var componentQuery2 = new QueryExpression("solutioncomponent")
+            {
+                ColumnSet = new ColumnSet("solutioncomponentid", "componenttype", "objectid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
+                        new ConditionExpression("objectid", ConditionOperator.Equal, api.Id)
+                    }
+                }
+            };
+            var matchedComponents = service.RetrieveMultiple(componentQuery2).Entities;
+            Console.WriteLine($"    -> Custom API 在 {solutionName} 中命中 {matchedComponents.Count} 条");
+            foreach (var mc in matchedComponents)
+            {
+                var ctype = mc.GetAttributeValue<OptionSetValue>("componenttype")?.Value ?? -1;
+                Console.WriteLine($"       ComponentType={ctype}, ID={mc.Id}");
+            }
+
+            // 查询该 Custom API 的参数和响应属性
+            var paramQuery = new QueryExpression("customapirequestparameter")
+            {
+                ColumnSet = new ColumnSet("customapirequestparameterid", "uniquename"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("customapiid", ConditionOperator.Equal, api.Id) }
+                }
+            };
+            var params_ = service.RetrieveMultiple(paramQuery).Entities;
+            Console.WriteLine($"    -> 请求参数: {params_.Count} 个");
+            foreach (var p in params_)
+            {
+                var pid = p.Id;
+                var pCompQuery = new QueryExpression("solutioncomponent")
+                {
+                    ColumnSet = new ColumnSet("solutioncomponentid", "componenttype"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
+                            new ConditionExpression("objectid", ConditionOperator.Equal, pid)
+                        }
+                    }
+                };
+                var pComps = service.RetrieveMultiple(pCompQuery).Entities;
+                Console.WriteLine($"       {p.GetAttributeValue<string>("uniquename")}: 在 {solutionName} 中命中 {pComps.Count} 条");
+            }
+
+            var propQuery = new QueryExpression("customapiresponseproperty")
+            {
+                ColumnSet = new ColumnSet("customapiresponsepropertyid", "uniquename"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("customapiid", ConditionOperator.Equal, api.Id) }
+                }
+            };
+            var props = service.RetrieveMultiple(propQuery).Entities;
+            Console.WriteLine($"    -> 响应属性: {props.Count} 个");
+            foreach (var p in props)
+            {
+                var pid = p.Id;
+                var pCompQuery = new QueryExpression("solutioncomponent")
+                {
+                    ColumnSet = new ColumnSet("solutioncomponentid", "componenttype"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
+                            new ConditionExpression("objectid", ConditionOperator.Equal, pid)
+                        }
+                    }
+                };
+                var pComps = service.RetrieveMultiple(pCompQuery).Entities;
+                Console.WriteLine($"       {p.GetAttributeValue<string>("uniquename")}: 在 {solutionName} 中命中 {pComps.Count} 条");
+            }
+        }
+
+        // 验证 componenttype 10023/10024/10025 是否对应 Custom API 相关记录
+        var verifyQuery = new QueryExpression("solutioncomponent")
+        {
+            ColumnSet = new ColumnSet("objectid", "componenttype"),
+            Criteria = new FilterExpression
+            {
+                Conditions =
+                {
+                    new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
+                    new ConditionExpression("componenttype", ConditionOperator.In, new[] { 10023, 10024, 10025 })
+                }
+            },
+            TopCount = 5
+        };
+        var verifyComponents = service.RetrieveMultiple(verifyQuery).Entities;
+        Console.WriteLine("  验证 componenttype 样本:");
+        var sampleIds = new List<Guid>();
+        foreach (var c in verifyComponents)
+        {
+            var objId = c.GetAttributeValue<Guid>("objectid");
+            var ctype = c.GetAttributeValue<OptionSetValue>("componenttype")?.Value ?? -1;
+            Console.WriteLine($"    ObjectId={objId}, ComponentType={ctype}");
+            sampleIds.Add(objId);
+        }
+
+        // 分别在 customapi / customapirequestparameter / customapiresponseproperty 中查找
+        foreach (var entityName in new[] { "customapi", "customapirequestparameter", "customapiresponseproperty" })
+        {
+            var q = new QueryExpression(entityName)
+            {
+                ColumnSet = new ColumnSet(entityName + "id"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression(entityName + "id", ConditionOperator.In, sampleIds.ToArray()) }
+                }
+            };
+            var count = service.RetrieveMultiple(q).Entities.Count;
+            Console.WriteLine($"    -> 在 {entityName} 中命中 {count} 条");
+        }
+    }
+}
+
+public class CreditItemValueImportRecord
+{
+    public string CreditItemCode { get; set; } = string.Empty;
+    public string ListValue { get; set; } = string.Empty;
+    public string ListName { get; set; } = string.Empty;
+}
+
+public class ScoringCardImportRecord
+{
+    public int CategoryId { get; set; }
+    public string ItemCode { get; set; } = string.Empty;
+    public string ItemName { get; set; } = string.Empty;
+    public int DataType { get; set; }
+    public decimal? Min { get; set; }
+    public decimal? Max { get; set; }
+    public string? ListValue { get; set; }
+    public int Weight { get; set; }
+    public string? RawCriteria { get; set; }
 }
 
 public class PluginStepConfig

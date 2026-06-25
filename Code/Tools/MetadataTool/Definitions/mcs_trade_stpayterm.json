@@ -1,0 +1,173 @@
+{
+  "entityName": "mcs_trade_stpayterm",
+  "displayName": "成交条件样板库",
+  "primaryAttribute": "mcs_trade_stpaytermname",
+  "primaryAttributeDisplayName": "标准条件编码",
+  "primaryAttributeLength": 10,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_buid",
+      "displayName": "事业部编码",
+      "description": "事业部编码，必填",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_buname",
+      "displayName": "事业部名称",
+      "description": "事业部名称",
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_subid",
+      "displayName": "子公司编码",
+      "description": "子公司编码，未填时存储 NA",
+      "type": "string",
+      "required": false,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_subname",
+      "displayName": "子公司名称",
+      "description": "子公司名称",
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_countrycode",
+      "displayName": "国家代码",
+      "description": "国家代码，多选逗号分隔，未填时存储 NA",
+      "type": "string",
+      "required": false,
+      "maxLength": 300
+    },
+    {
+      "schemaName": "mcs_countryname",
+      "displayName": "国家名称",
+      "description": "国家名称，多选逗号分隔",
+      "type": "string",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_typeid",
+      "displayName": "产品分类编码",
+      "description": "成交条件产品分类编码，多选逗号分隔，未填时存储 NA",
+      "type": "string",
+      "required": false,
+      "maxLength": 300
+    },
+    {
+      "schemaName": "mcs_typename",
+      "displayName": "产品分类名称",
+      "description": "成交条件产品分类名称，多选逗号分隔",
+      "type": "string",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_businessunit",
+      "displayName": "事业部",
+      "description": "关联事业部主数据",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_bu",
+      "targetEntityDisplayName": "事业部"
+    },
+    {
+      "schemaName": "mcs_subsidiary",
+      "displayName": "大区/子公司",
+      "description": "关联大区/子公司主数据",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_region",
+      "targetEntityDisplayName": "大区"
+    },
+    {
+      "schemaName": "mcs_nation",
+      "displayName": "国家",
+      "description": "关联国家主数据",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_country",
+      "targetEntityDisplayName": "国家"
+    },
+    {
+      "schemaName": "mcs_trade_pttype",
+      "displayName": "成交条件产品分类",
+      "description": "关联成交条件产品分类主数据",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_trade_pttype",
+      "targetEntityDisplayName": "成交条件产品分类"
+    },
+    {
+      "schemaName": "mcs_buyergrade",
+      "displayName": "客户分类代码",
+      "description": "客户分类代码，多选斜杠分隔，如 S/A、D1/D2",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_creditgrade",
+      "displayName": "客户等级",
+      "description": "客户等级 A0-A4，与客户主数据保持一致",
+      "type": "picklist",
+      "required": false,
+      "options": {
+        "A0": 100000000,
+        "A1": 100000001,
+        "A2": 100000002,
+        "A3": 100000003,
+        "A4": 100000004
+      }
+    },
+    {
+      "schemaName": "mcs_downpay",
+      "displayName": "首付款比例",
+      "description": "首付款比例，0-1 之间，显示为百分比",
+      "type": "decimal",
+      "required": true,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 1,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_payterm",
+      "displayName": "账期（天）",
+      "description": "账期天数，0 或 30 的倍数",
+      "type": "integer",
+      "required": true,
+      "minValue": 0,
+      "maxValue": 9999
+    },
+    {
+      "schemaName": "mcs_payfreq",
+      "displayName": "付款频次（天）",
+      "description": "付款频次天数，0 或 30 的倍数",
+      "type": "integer",
+      "required": true,
+      "minValue": 0,
+      "maxValue": 9999
+    },
+    {
+      "schemaName": "mcs_status",
+      "displayName": "生效状态",
+      "description": "0-未生效，1-待审批，2-生效",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "未生效": 0,
+        "待审批": 1,
+        "生效": 2
+      }
+    }
+  ]
+}

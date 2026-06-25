@@ -341,7 +341,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
 
         /// <summary>
         /// 货币转换（统一转USD）
-        /// 汇率来源: D365 mcs_coface_exchange_rate 配置表（Coface 年度预算汇率）
+        /// 汇率来源: D365 transactioncurrency 标准汇率（1 LC => USD，由 CofaceExchangeRateHelper 转换方向）
         /// </summary>
         private decimal ConvertCurrency(JsonElement indicator, decimal amount)
         {

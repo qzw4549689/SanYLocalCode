@@ -45,6 +45,7 @@ NAMESPACE_MAP = {
     "SanyD365.Plugins.BppIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditRecord",
     "SanyD365.Plugins.Account": "SanyD365.D365Extension.Sales.Plugins.Account",
     "SanyD365.Plugins.CustomerMasterData.Validation": "SanyD365.D365Extension.Sales.Plugins.Account",
+    "SanyD365.Plugins.TradeStPayTerm": "SanyD365.D365Extension.Sales.Plugins.TradeStPayTerm",
 }
 
 # 文件映射表：本地相对路径 -> 远程相对路径
@@ -76,6 +77,10 @@ FILE_MAP = {
 
     # 客户主数据字段校验 Plugin（新增）
     "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs": r"Plugins\Account\CustomerMasterDataCreditValidationPlugin.cs",
+
+    # 成交条件样板库 Plugin
+    "TradeStPayTerm/AutoNumber/TradeStPayTermAutoNumberPlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermAutoNumberPlugin.cs",
+    "TradeStPayTerm/Validation/TradeStPayTermValidationPlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermValidationPlugin.cs",
 }
 
 # csproj 中 Compile 引用的排序分组（可选，保持 csproj 可读性）
@@ -269,6 +274,10 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
             transformed = transform_iplugin_to_pluginbase(transformed, "AccountValidationPlugin", "AccountCreditValidationPlugin")
         elif local_rel == "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs":
             transformed = transform_iplugin_to_pluginbase(transformed, "CustomerMasterDataValidationPlugin", "CustomerMasterDataCreditValidationPlugin")
+        elif local_rel == "TradeStPayTerm/AutoNumber/TradeStPayTermAutoNumberPlugin.cs":
+            transformed = transform_iplugin_to_pluginbase(transformed, "TradeStPayTermAutoNumberPlugin")
+        elif local_rel == "TradeStPayTerm/Validation/TradeStPayTermValidationPlugin.cs":
+            transformed = transform_iplugin_to_pluginbase(transformed, "TradeStPayTermValidationPlugin")
 
         if dry_run:
             print(f"[DRY-RUN] {local_rel} -> {remote_rel}")

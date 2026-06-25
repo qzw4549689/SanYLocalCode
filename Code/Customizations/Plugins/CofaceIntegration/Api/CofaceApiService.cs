@@ -91,10 +91,18 @@ namespace SanyD365.Plugins.CofaceIntegration.Api
         /// <summary>
         /// 查询Report订单列表
         /// </summary>
-        public JsonDocument GetReportOrders(string externalId, string countryCode)
+        /// <param name="externalId">Coface 企业标识（icon#xxx）</param>
+        /// <param name="countryCode">国家代码</param>
+        /// <param name="productSlug">Report 产品 slug（如 customized-report / full-report）</param>
+        /// <param name="productCode">Report 产品 code（customReportId，如 301 / 21000），可为空</param>
+        public JsonDocument GetReportOrders(string externalId, string countryCode, string productSlug, string productCode = null)
         {
-            _tracer.Trace($"GetReportOrders: externalId={externalId}, country={countryCode}");
-            string url = $"{_config.BaseUrl}/publications/orders?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}";
+            _tracer.Trace($"GetReportOrders: externalId={externalId}, country={countryCode}, productSlug={productSlug}, productCode={productCode}");
+            string url = $"{_config.BaseUrl}/publications/orders?externalId={Uri.EscapeDataString(externalId)}&countryCode={countryCode}&productSlug={Uri.EscapeDataString(productSlug)}";
+            if (!string.IsNullOrEmpty(productCode))
+            {
+                url += $"&productCode={Uri.EscapeDataString(productCode)}";
+            }
             return ExecuteGet(url);
         }
 
@@ -109,9 +117,131 @@ namespace SanyD365.Plugins.CofaceIntegration.Api
             return ExecuteGet(url);
         }
 
+        /// <summary>
+        /// 下载 Full Report PDF（通过publicationId）
+        /// 返回 PDF 文件二进制字节数组
+        /// </summary>
+        public byte[] GetReportPdf(string publicationId)
+        {
+            _tracer.Trace($"GetReportPdf: publicationId={publicationId}");
+            string url = $"{_config.BaseUrl}/publications?id={publicationId}&format=pdf";
+            return ExecuteDownload(url);
+        }
+
         #endregion
 
         #region HTTP执行
+
+        /// <summary>
+        /// 执行二进制文件下载（用于 PDF 等附件）
+        /// </summary>
+        private byte[] ExecuteDownload(string url)
+        {
+            string token = _tokenManager.GetValidToken();
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            request.Headers.Add("x-api-key", _config.ApiKey);
+            request.Timeout = 60000; // PDF 可能较大，60 秒超时
+
+            _tracer.Trace($"HTTP Download: {url}");
+
+            try
+            {
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    string contentType = response.ContentType?.ToLowerInvariant() ?? "";
+                    _tracer.Trace($"HTTP响应: Status={response.StatusCode}, ContentType={contentType}, Length={response.ContentLength}");
+
+                    if (contentType.Contains("application/json"))
+                    {
+                        // 某些场景下 format=pdf 仍可能返回 JSON 错误信息
+                        using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                        {
+                            string errorText = reader.ReadToEnd();
+                            throw new InvalidPluginExecutionException($"Coface PDF 接口返回 JSON 而非 PDF: {errorText}");
+                        }
+                    }
+
+                    using (Stream responseStream = response.GetResponseStream())
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        responseStream.CopyTo(ms);
+                        return ms.ToArray();
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                return HandleDownloadException(ex, url);
+            }
+        }
+
+        /// <summary>
+        /// 处理下载异常
+        /// </summary>
+        private byte[] HandleDownloadException(WebException ex, string url)
+        {
+            string errorDetail = "";
+            int statusCode = 0;
+
+            if (ex.Response != null)
+            {
+                var response = (HttpWebResponse)ex.Response;
+                statusCode = (int)response.StatusCode;
+                using (var reader = new StreamReader(response.GetResponseStream()))
+                {
+                    errorDetail = reader.ReadToEnd();
+                }
+            }
+
+            string errorMsg = $"Coface PDF 下载失败: URL={url}, Status={statusCode}, Error={ex.Message}";
+            if (!string.IsNullOrEmpty(errorDetail))
+            {
+                errorMsg += $", Detail={errorDetail}";
+            }
+
+            _tracer.Trace(errorMsg);
+
+            // 401/403 时尝试刷新 Token 重试一次
+            if (statusCode == 401 || statusCode == 403)
+            {
+                _tracer.Trace("Token 可能过期，尝试刷新后重试 PDF 下载");
+                try
+                {
+                    string newToken = _tokenManager.RefreshToken();
+                    return RetryDownload(url, newToken);
+                }
+                catch (Exception retryEx)
+                {
+                    _tracer.Trace($"重试失败: {retryEx.Message}");
+                    throw new InvalidPluginExecutionException($"Coface PDF 下载认证失败: {errorMsg}");
+                }
+            }
+
+            throw new InvalidPluginExecutionException(errorMsg);
+        }
+
+        /// <summary>
+        /// 使用新 Token 重试下载
+        /// </summary>
+        private byte[] RetryDownload(string url, string token)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            request.Headers.Add("x-api-key", _config.ApiKey);
+            request.Timeout = 60000;
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream responseStream = response.GetResponseStream())
+            using (MemoryStream ms = new MemoryStream())
+            {
+                responseStream.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
 
         /// <summary>
         /// 执行GET请求

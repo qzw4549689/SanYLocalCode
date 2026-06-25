@@ -2,9 +2,42 @@
 
 > **项目：** 三一重工 D365 客户信用评估系统
 > **技术栈：** Dynamics 365 (Dataverse) + C# Plugin + JavaScript WebResource
-> **最后更新：** 2026-06-16
+> **最后更新：** 2026-06-21（新增 Coface 汇率改用 D365 标准汇率评估）
 
 ---
+
+## 目录
+
+- [1. 项目一句话描述](#1-项目一句话描述)
+- [2. 项目结构速览](#2-项目结构速览)
+  - [2.0 AI 协作红线](#20-ai-协作红线)
+  - [2.1 本地测试项目 → 远程主项目同步资产](#21-本地测试项目-→-远程主项目同步资产)
+  - [2.2 最近一次发布记录（Coface 配置化 + BPP 回调修复）](#22-最近一次发布记录coface-配置化-+-bpp-回调修复)
+  - [2.3 当前进行中的工作（Coface 两个 Bug 修复）](#23-当前进行中的工作coface-两个-bug-修复)
+- [3. 核心资产清单](#3-核心资产清单)
+  - [3.1 实体（7 个自定义实体）](#31-实体7-个自定义实体)
+  - [3.2 Plugin（9 个 C# 类，分 6 个模块）](#32-plugin9-个-c#-类，分-6-个模块)
+  - [3.3 JS WebResource（6 个表单脚本）](#33-js-webresource6-个表单脚本)
+  - [3.4 状态流转（8 个阶段）](#34-状态流转8-个阶段)
+  - [3.5 客户信用画像（Phase 7，新增）](#35-客户信用画像phase-7，新增)
+- [4. 四大核心文件（AI 协作入口）](#4-四大核心文件ai-协作入口)
+  - [4.1 功能编号体系（F1.x ~ F6.x）](#41-功能编号体系f1x-~-f6x)
+  - [4.2 测试用例编号体系](#42-测试用例编号体系)
+- [5. 当前进度（2026-06-15）](#5-当前进度2026-06-15)
+  - [当前焦点与阻塞](#当前焦点与阻塞)
+  - [工具项目共享库规划](#工具项目共享库规划)
+  - [代码同步跟踪（2026-06-11 新增）](#代码同步跟踪2026-06-11-新增)
+- [6. 外部系统集成](#6-外部系统集成)
+  - [BPP审批对接详情（2026-06-08）](#bpp审批对接详情2026-06-08)
+- [7. 待确认 / 待处理事项](#7-待确认--待处理事项)
+  - [7.2 Coface 汇率改用 D365 标准汇率评估（2026-06-21 记录）](#72-coface-汇率改用-d365-标准汇率评估2026-06-21-记录)
+  - [7.1 客户主数据表与 Account 表架构变更（2026-06-16 记录）](#71-客户主数据表与-account-表架构变更2026-06-16-记录)
+- [8. AI 协作指南](#8-ai-协作指南)
+  - [8.1 接手项目时](#81-接手项目时)
+  - [8.2 开发新功能时](#82-开发新功能时)
+  - [8.3 修复 Bug 时](#83-修复-bug-时)
+  - [8.4 代码规范检查清单](#84-代码规范检查清单)
+  - [8.5 新增 MetadataTool 命令（2026-06-11）](#85-新增-metadatatool-命令2026-06-11)
 
 ## 1. 项目一句话描述
 
@@ -48,20 +81,16 @@
     └── Methodology/               # D365+AI 实施方法论
 ```
 
-### 2.0 Git 推送约定（⚠️ AI 必看）
+### 2.0 AI 协作红线
 
-用户明确约定：
+> 详细规则见 `/skill:d365-deploy` 第 0 章。
+>
+> - **AI 代码提交铁律**：除非用户明确说出"提交"或"推送"二字，否则 AI 不得执行任何 Git 操作。
+> - **McsPlugin 解决方案红线**：`McsPlugin` 里只能放 Plugin 和 Step，不能放实体/字段/WebResource 等其他组件。
+> - **Git 推送约定**：默认推送到项目 Git（Azure DevOps `uat`），只有用户明确说 push 到个人 Git 时才推送到 `origin`。
+> - **PublishAll 执行红线**：凡是需要 `PublishAll`（全局发布）的操作，由用户执行；AI 只运行指定实体的发布（如 `dotnet run publish mcs_customer_tag`），不运行无实体参数的 `dotnet run publish` 或等效全局发布命令。
 
-> **所有"代码推送"，除非特别指明是 push 到个人 Git，否则默认都是推送到项目 Git（Azure DevOps `uat` 分支）。**
-
-| Git 仓库 | 地址 | 用途 | 推送规则 |
-|---------|------|------|---------|
-| **项目 Git** | `https://dev.azure.com/SanyGlobalCRM/D365/_git/D365` | 项目主仓库，主分支 `uat` | **默认推送目标**。代码需通过 PR 合并到 `uat` |
-| **个人 Git** | `https://github.com/qzw4549689/SanYLocalCode.git` | 用户个人备份 | 只有用户明确说"push 到个人 git"时才推送 |
-
-当前本地 `origin` 指向个人 GitHub，这是历史原因。**AI 在执行 `git push` 前必须确认目标**：
-- 如果用户说"推到项目" / "推到 uat" / 没有特别说明 → 应通过 Azure DevOps 流程或用户指定的方式推送到项目 Git
-- 如果用户说"push 到个人 git" / "备份到我 github" → 才 push 到 `origin`
+当前本地 `origin` 指向个人 GitHub（`https://github.com/qzw4549689/SanYLocalCode.git`），这是历史备份用途。
 
 ---
 
@@ -124,6 +153,109 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | 注意 | 当前实现与已合并的 PR !3201 实现不同，用户决定用当前实现并必要时 reverse PR !3201 |
 | 下一步 | 用户手动通过 n8n Release Tool 发布 UAT（解决方案勾选 `McsPlugin`，Azure代码不勾选） |
 
+### 2.4 当前进行中的工作（Coface Report 产品选择逻辑修正）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-06-18 |
+| 目标 | 按截图修正 Coface Report 产品选择逻辑，39 国列表与截图对齐 |
+| 状态 | ✅ 已推送到新分支，等待用户合并 PR |
+| 修改文件 | `CofaceCountryConfig.cs`（重构配置模型）<br>`CofaceApiService.cs`（`GetReportOrders` 增加 `productSlug`/`productCode` 过滤）<br>`CofaceDataSyncPlugin.cs`（按国家类型选择 Report 产品并过滤 publication）<br>`CofaceConfigDeployer.cs`（39 国列表与截图对齐，增加 productCode） |
+| Git 分支 | `uat-260618-peter-coface-report-product` |
+| Commit | `a06e8c0606` — `fix(coface): Report产品按国家类型选择slug/productCode，39国列表与截图对齐` |
+| 远程编译 | ✅ 通过（项目原有警告，无新增错误） |
+| UAT 配置 | ✅ 已用 DeployTool 更新 `ms_systemconfiguration.CofaceCountryConfig`（新 JSON 结构） |
+| DEV 配置 | ✅ 已用 DeployTool 更新 `ms_systemconfiguration.CofaceCountryConfig` |
+| DEV Assembly | ✅ 已用 MetadataTool `update-assembly` 更新，`modifiedon` = `2026-06-18 00:28:19` |
+| DEV 验证 | ✅ PL 测试记录 `SCO202606160004` 重新触发状态 11，CofaceDataSync 返回 SUCCESS，7 个标签正常生成，Report 订单匹配到新 publication |
+| 产品选择逻辑 | 非受限国家：`customized-report` + `301`<br>受限国家（39 国，除 RU）：`full-report`<br>RU：`customized-report` + `21000` |
+| URBA360 | 保持不变，所有国家仍调用 `/urba360/monitorings/orders` |
+| 下一步 | 用户通过 n8n Release Tool 发布 `McsPlugin` 到 UAT |
+
+---
+
+### 2.5 当前进行中的工作（评分卡多行配置改造）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-06-18 |
+| 目标 | 支持同一评分项目下多行评分卡配置；缺失值取平均分；创建/更新评分卡时校验重复/重叠 |
+| 状态 | ✅ 多行配置 PR 已合并；Create 校验 Bug 已修复并合并；DEV1 评分卡配置已全量导入 |
+| 修改文件 | `ScoreCalculator.cs`（按 `ItemCode` 分组匹配、缺失值先匹配再取平均、允许负分）<br>`CreditScoringCardValidationPlugin.cs`（新增 Create/Update PreOperation 校验；修复 Create 时 Retrieve 未创建记录的 Bug）<br>`SanyD365.D365Extension.Sales.csproj`（加入新 Plugin） |
+| Git 分支 | `uat-20260618-peter-scoringcard-multiline`（已合并到 `uat`）<br>`uat-20260618-peter-fix-scoringcard-validation`（已合并到 `uat`） |
+| Commit | `9363153dcb` — `feat(scoringcard): 支持多行评分卡配置、缺失值平均分、创建时重叠校验`<br>`7daf0d0da6` — `fix: 评分卡校验Plugin在Create时不再Retrieve未创建的记录` |
+| 远程编译 | ✅ 通过（0 错误，项目原有警告） |
+| DEV1 Assembly | ✅ 已更新 `SanyD365.D365Extension.Sales`，`modifiedon` = `2026-06-18 06:49:00` 左右 |
+| DEV1 Plugin Steps | ✅ 已注册：<br>• Create PreOperation of `mcs_credit_scoringcard`<br>• Update PreOperation of `mcs_credit_scoringcard` |
+| 已发布实体 | ✅ `mcs_credit_scoringcard` |
+| DEV1 评分卡配置 | ✅ 已清空并全量导入 448 条（来自 `Documents/BusinessAnalysis/评分卡因子.xlsx` 7 套评分卡），覆盖 7 种客户类型；`mcs_weight` 字段范围已调整为 `[-100, 100]`；`ExternalRating` 已改为定量 |
+| 数据格式评估 | 已结合 `Documents/BusinessAnalysis/评分卡因子.xlsx` 评估：当前 `[min, max)` 模型可覆盖大部分区间分档；定性多值需拆行；显式“无/未提供资料/无评分”配置为普通分档行（权重 0）；缺失/未命中时取该项目平均分；诉讼记录暂按数量配置；预计损失率由用户算好后直接填入 |
+| 下一步 | 在 DEV1 选取测试信用评估记录（如 `SCO202606180002`）重新计算，验证 7 套评分卡得分与配置是否一致；确认 `mcs_credit_scoringcard.js` WebResource 发布 |
+
+---
+
+### 2.6 已废弃的 PR `!3530`（从业年限改动）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-06-18 |
+| 目标 | 按业务文档，将"从业年限"计算逻辑改为基于 Coface `registration.date` 计算距今年数 |
+| 状态 | ✅ **已完成**。新 PR `!3536` 已合并到 `uat`，DEV Assembly 已更新。原 PR `!3530` 已废弃并删除。 |
+| Git 分支 | `uat-20260618-peter-registrationdate-years` → `uat`（PR `!3536` 已合并） |
+| Commit | `13a9c2beaf` / `5b4dd25773` — `fix(coface): 从业年限按文档从registration.date计算年数` |
+| 冲突文件 | 无（PR `!3536` 仅修改 1 个文件） |
+| 远程编译 | ✅ 通过（项目原有警告，无新增错误） |
+| DEV Assembly | ✅ 已更新 `SanyD365.D365Extension.Sales`，ID: `9d6ff315-8c03-4d51-b641-ebeccf9e98b0`，DLL 大小 8043 KB |
+| DEV 验证 | ✅ `SCO202606160004`（PL 测试记录）重新触发状态 11，`CofaceDataSync` 返回 SUCCESS。生成 14 个标签（含多行配置分档），其中：<br>• **从业年限 (RegistrationDate) = 24**<br>• 注册资本 (RegisteredCapital) = 100000<br>• 诉讼债权金额 (LegalEvents) = 1<br>• 净利润率 (NetProfit) = 3.62<br>• 行业属性 (Sectors) = 建工 |
+| 教训 | **本地 SanYi 仓库禁止推送至 Azure DevOps D365 项目仓库**。所有 D365 项目代码的 PR 必须在远程服务器 `tx-windows`（`C:\Projects\D365`）上操作。 |
+| UAT 评分卡导入 | 🔄 已执行 `import-scoring-cards` 到 UAT：成功 374 条，跳过 74 条。失败原因：<br>1. UAT `mcs_weight` 字段范围仍为 `[0, 99]`（DEV 已改为 `[-100, 100]`），导致权重为 -3/-1 的记录创建失败<br>2. UAT `mcs_credititem_value` 缺少 CountryRisk/SectorRisk 枚举值（A1/A2/A3/A4/B/C/D/E、4），导致对应记录跳过 |
+| 下一步 | 1. 用户通过 n8n Release Tool 发布 `McsPlugin` 到 UAT<br>2. 修复 UAT `mcs_weight` 字段范围和 `mcs_credititem_value` 枚举值后，重新导入评分卡 |
+
+---
+
+### 2.7 当前进行中的工作（成交条件样板库）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-06-21 / 2026-06-23 |
+| 目标 | 新增成交条件样板库模块：产品分类、产品分类关系、样板库主表、批量审批、公共查询接口 |
+| 状态 | ✅ 阶段 2/3 已发布到 DEV1 并验证通过；修复分支已合并到 `uat`；DEV1 Assembly 已与 `uat` 对齐<br>✅ 阶段 4（公共查询接口）Custom API 已完成本地独立开发、DEV1 验证、临时 Assembly 清理，并已推送远程分支等待合并 |
+| 涉及实体 | `mcs_trade_pttype`（成交条件产品分类）<br>`mcs_trade_ptgrouptype`（成交条件产品分类关系）<br>`mcs_trade_stpayterm`（成交条件样板库） |
+| 修改文件 | **阶段 2/3**：`Code/Tools/MetadataTool/Definitions/mcs_trade_pttype.json`<br>`Code/Tools/MetadataTool/Definitions/mcs_trade_ptgrouptype.json`<br>`Code/Tools/MetadataTool/Definitions/mcs_trade_stpayterm.json`<br>`Code/Customizations/WebResources/JS/mcs_trade_stpayterm.js`（新增 `TradeStPayTermGrid` 批量申请/审批/拒绝）<br>`Code/Customizations/Plugins/TradeStPayTerm/AutoNumber/TradeStPayTermAutoNumberPlugin.cs`<br>`Code/Customizations/Plugins/TradeStPayTerm/Validation/TradeStPayTermValidationPlugin.cs`<br>`Code/Tools/MetadataTool/Program.cs`（增加 `test-tradestpayterm` 测试命令）<br>`Code/Tools/MetadataTool/Services/EntityManager.cs`<br>`Code/Tools/DeployTool/AppActionDeployer.cs`（新增批量申请/审批/拒绝 App Action + `location` 参数）<br>`Code/Tools/DeployTool/Program.cs`（新增 `tradestpayterm`/`tradestpayterm-wr` 命令）<br>`Code/Tools/DeployTool/DeployPlugin.cs`（新增 `DeployTradeStPayTermPlugin`）<br>`Code/Tools/sync-plugin-to-remote.py`（增加 TradeStPayTerm 文件/命名空间映射）<br><br>**阶段 4**：`Code/Customizations/Plugins/TradeStPayTerm.Api/QueryTradeStPayTermPlugin.cs`<br>`Code/Customizations/Plugins/TradeStPayTerm.Api/TradeStPayTermQueryService.cs`<br>`Code/Tools/MetadataTool/Services/CustomApiDeployer.cs`（Custom API 注册/更新/删除）<br>`Code/Tools/MetadataTool/Services/EntityManager.cs`（`RegisterPluginAssemblyOnly`）<br>`Code/Tools/MetadataTool/Program.cs`（`deploy-tradestpayterm-api` / `delete-tradestpayterm-api` / `test-tradestpayterm-api` / `check-solution-customapi` / `query-optionset` 等命令） |
+| 阶段 4 实现 | **接口形态**：Custom API（D365 内部接口，符合 PRD 表格 16/17）<br>**唯一名**：`mcs_QueryTradeStPayTerm`<br>**本地开发方式**：先本地独立项目 `SanyD365.Plugins.TradeStPayTerm.Api` 开发验证，再归并到远程 `SanyD365.D365Extension.Sales`<br>**临时 Assembly**：`SanyD365.Plugins.TradeStPayTerm.Api`（已清理）<br>**最终归属**：`McsCustomAPI` 解决方案 + `SanyD365.D365Extension.Sales` Assembly<br>**工具扩展**：MetadataTool 增加 Custom API 部署与测试命令<br>**输入参数**：`mcs_buid` / `mcs_subid` / `mcs_countrycode` / `mcs_prdgroupid` / `mcs_buyercode`<br>**输出参数**：`status` / `message` / `records`(JSON)<br>**客户分类映射**：经销商分级 `mcs_dealerrank` 1-5 → D1-D5；直销客户 `mcs_accountlevel` 4/3/2/1 → S/A/B/C；个人客户判断待业务确认 |
+| 解决方案 | `entity_20260603_peter`（实体/WebResource/App Action）、`McsPlugin`（Plugin/Step）、`McsCustomAPI`（阶段 4） |
+| DEV1 状态 | ✅ 阶段 1/2 实体/字段/表单/视图/JS 已发布<br>✅ `SanyD365.D365Extension.Sales` Assembly 已更新，`TradeStPayTermAutoNumberPlugin` + `TradeStPayTermValidationPlugin` Steps 已注册<br>✅ 4 个 App Action 按钮已部署（克隆新增 + 批量申请/审批/拒绝）<br>✅ `mcs_trade_stpayterm.js` 已发布<br>✅ DEV1 自动化验证通过（自动编号、校验、状态流转、重复校验）<br>✅ 阶段 4 Custom API `mcs_QueryTradeStPayTerm` 已归并到主 Assembly 并在 DEV1 注册，调用成功并返回匹配记录<br>✅ Custom API / 请求参数 / 响应属性已加入 `McsCustomAPI` 解决方案<br>✅ DEV1 临时 Assembly `SanyD365.Plugins.TradeStPayTerm.Api` 和临时 Custom API 已清理 |
+| 修复记录 | 验证时发现 `mcs_creditgrade` 改为 Picklist 后，`ValidationPlugin` 仍按 string 读取导致转换异常。已修复：按业务规则将 `mcs_creditgrade` 从重复校验中移除。<br>修复分支：`uat-260623-peter-tradestpayterm-fix`（commit `936420eabe`，已合并到 `uat`）<br><br>批量按钮隐藏 bug 修复：未勾选时显示、勾选记录后消失的根因是 `appaction` JS 参数误配为 `PrimaryControl`，且 Visibility 需用 Power Fx。修复方案：<br>1. `mcs_trade_stpayterm.js` 的 `apply/approve/reject` 改为接收 `SelectedControlSelectedItemIds`（选中记录 ID 数组或逗号分隔字符串）<br>2. Command Designer 中 4 个批量按钮的 Visibility 设为 `CountRows(Self.Selected.AllItems) > 0`<br>3. Command Designer 中参数改为 `SelectedControlSelectedItemIds`<br>已在 DEV1 `Sany CRM Sales` App 验证通过 |
+| 阶段 3 新增内容 | JS：`TradeStPayTermGrid.apply`/`approve`/`reject` + `batchUpdateStatus`，调用 `Xrm.WebApi.updateRecord` 更新 `mcs_status`<br>App Action：`mcs_trade_stpayterm_apply`（批量申请，未生效→待审批）、`mcs_trade_stpayterm_approve`（批量审批，待审批→生效）、`mcs_trade_stpayterm_reject`（批量拒绝，待审批→未生效），均位于列表命令栏 |
+| 文档 | `Documents/Planning/成交条件样板库_阶段1实施方案.md`<br>`Documents/Planning/成交条件样板库_阶段2-5实施方案.md`<br>`Documents/BusinessAnalysis/成交条件产品分类_示例数据.xlsx`<br>`Documents/DevelopmentStandards/三一D365开发规范文档.md` |
+| Git 分支 | `uat-260621-peter-tradestpayterm`（已合并到 `uat`）<br>`uat-260623-peter-tradestpayterm-fix`（已合并到 `uat`）<br>`uat-260623-peter-tradestpayterm-api`（已推送到 origin，等待用户合并到 `uat`） |
+| 关键确认 | 审批机制：D365 内批量按钮；客户等级：暂不参与查询/重复校验；重复校验：交集即重复；编码规则：`TC`+`YYMMDD`+2 位序号；产品分类 Lookup 引用 `mcs_trade_pttype` 而非 `mcs_productline`；默认 EUR 逻辑暂不修改；阶段 4 采用 Custom API（D365→D365 内部接口） |
+| 待确认 | 1. 泵路事业部真实编码（当前代码用 `BU-1018` 占位）<br>2. 个人客户判断逻辑（客户主数据表无 `mcs_customertype` 字段） |
+| 下一步 | 1. ✅ 用户已合并 PR `uat-260623-peter-tradestpayterm-api` 到 `uat`<br>2. ✅ 已在 DEV1 部署归并后的 `SanyD365.D365Extension.Sales` Assembly<br>3. ✅ 已用 MetadataTool 注册 Custom API 到 `McsCustomAPI` 解决方案并验证通过<br>4. ✅ 批量按钮隐藏 bug 已在 DEV1 修复并验证<br>5. ✅ UAT 已重新发布 `McsCustomAPI`（单独勾选），`mcs_QueryTradeStPayTerm` Custom API 调用验证通过<br>6. ⏸️ 注意 `Sany CRM Sales` App 的 Command Component Library 同步到 UAT（如需） |
+
+---
+
+### 2.8 当前进行中的工作（Coface Report PDF 平台上传改造）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-06-21 |
+| 目标 | 解决 Coface Report PDF 直接写入 `mcs_customer_file.mcs_filebyte`（Memo 字段 MaxLength=4000）导致超长报错的问题 |
+| 状态 | ✅ 本地代码改造完成，编译通过；待 DEV1 验证 |
+| 修改文件 | `Code/Customizations/Plugins/CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs` |
+| 核心改动 | `SaveCofaceReportAttachment` 改为：<br>1. 不再将 PDF Base64 写入 `mcs_filebyte`<br>2. 调用 `mcs_InitUploadFile`（EntityName=`mcs_credit_record`, Type=`002`）获取 uploadId + Blob URL<br>3. HTTP PUT 上传 PDF 字节到 Blob URL（`x-ms-blob-type: AppendBlob`）<br>4. 调用 `mcs_CommitUploadFile` 完成上传<br>5. 创建 `mcs_customer_file` 记录，`mcs_api_fileid`=uploadId，`mcs_credit_recordid`=当前评估记录，`mcs_filetype`=2（客户资信报告） |
+| 本地编译 | ✅ 通过（0 个错误，0 个警告） |
+| DEV1 验证 | ✅ 通过。测试记录 `SCO202606180003`（ID: `926cdd86-4eec-4abd-8037-f7a44f803211`）状态 10→11 触发后：<br>• `mcs_api_msg` 显示 `[Report附件已保存]`<br>• 成功创建 `mcs_customer_file` 记录（ID: `7ca84d25-fd6d-f111-ab0f-7ced8db4dda8`）<br>• 文件名：`Coface_Report_SCO202606180003_20260622.pdf`<br>• 文件类型：`2`（客户资信报告）<br>• `mcs_api_fileid` = `dc49d703-2b01-4fbe-b767-10198a8b29de`（平台 uploadId）<br>• `mcs_filebyte` 长度为 `0`，确认未直接写入 Base64<br>• `mcs_api_msg` 记录 publicationId 与 originalSize=168294 bytes |
+| DEV1 清理 | ✅ 已注销临时独立 Assembly `SanyD365.Plugins.CofaceIntegration` |
+| 前端验证 | ✅ 通过。`mcs_credit_record` 为所有者的附件可在 Uploader 中展示，`Coface_Report_SCO202606180003_20260622.pdf` 下载后内容正常 |
+| 远程同步 | ✅ 已同步到远程服务器 `tx-windows` 主项目 `SanyD365.D365Extension.Sales` |
+| 远程编译 | ✅ 通过（项目原有警告，无新增错误） |
+| Git 分支 | ✅ 已推送 `uat-20260622-peter-coface-report-upload` → Azure DevOps，用户已合并到 `uat` |
+| 涉及文件 | `D365/SanyD365.D365Extension.Sales/Plugins/CofaceIntegration/CofaceIntegrationDataSyncPlugin.cs`<br>`D365/SanyD365.D365Extension.Sales/Application/Sales/CofaceIntegration/CofaceApiService.cs`（新增 `GetReportPdf` 等 PDF 下载方法） |
+| DEV1 Assembly | ✅ 已更新 `SanyD365.D365Extension.Sales`，`modifiedon` = `2026-06-22 07:50:46 UTC` |
+| 待确认 | `account` 实体作为附件所有者时 `mcs_InitUploadFile` 仍报类型不合法，当前方案使用 `mcs_credit_record` 作为所有者，前端已验证可展示 |
+| 下一步 | 1. 用户发布相关实体（如需）<br>2. 用户通过 n8n Release Tool 发布 `McsPlugin` 到 UAT |
+
 ---
 
 ## 3. 核心资产清单
@@ -145,6 +277,7 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | Plugin | 触发实体 | 事件 | 功能 |
 |--------|---------|------|------|
 | `ScoringCardAutoNumberPlugin` | `mcs_credit_scoringcard` | Create/PreOp | 编码生成 `SCYYYYMMDD####` |
+| `CreditScoringCardValidationPlugin` | `mcs_credit_scoringcard` | Create/Update/PreOp | 同一评分项目下定性值不重复、定量区间不重叠 |
 | `CreditRecordAutoNumberPlugin` | `mcs_credit_record` | Create/PreOp | 编码生成 `SCOYYYYMMDD####` |
 | `CreditScorePlugin` | `mcs_credit_record` | Update/PostOp | 信用分计算（遍历标签×权重） |
 | `CofaceDataSyncPlugin` | `mcs_credit_record` | Update/PostOp | 调用 Coface API 获取企业数据 |
@@ -236,9 +369,8 @@ TC-BULK   — 批量处理
 **当前焦点**：
 - **`mcs_credit_items.mcs_group` 选项集标签修正**：移除"评分项目分类"选项前的数字前缀（`1 客户实力` → `客户实力` 等），保持与 `mcs_customer_tag` / `mcs_credit_scoringcard.mcs_typeid` 显示风格一致。
   - ✅ 已修改本地 `Entity.xml`
-  - ✅ 已在 DEV1 更新选项标签
+  - ✅ 已在 DEV1 更新选项标签并发布 `mcs_credit_items`
   - ✅ 已在 UAT 更新选项标签并发布 `mcs_credit_items`
-  - ⏸️ DEV1 发布 `mcs_credit_items` 因环境阻塞待重试
   - ✅ 已在 MetadataTool 封装 `rename-options` 命令
 - **资信附件上传功能（mcs_customer_file）**：基于三一通用上传组件 `mcs_/CommonCore/Html/Uploader.html` 实现评估记录表单附件上传。附件归属 `mcs_credit_record`，Uploader 以 `entityName=mcs_credit_record` + `entityId=当前评估记录ID` 传参。
   - ✅ 已创建 `CustomerFileAutoNumberPlugin`（`SanyD365.Plugins.CustomerFile`），生成 `ATT+YYYYMMDD+4位序列号`，默认填充 `mcs_filedate`
@@ -265,7 +397,7 @@ TC-BULK   — 批量处理
   - ✅ `ms_systemconfiguration` 配置 `CofaceCountryConfig` 已创建（39国 + CEE RU）
   - ✅ `mcs_credit_items` 中 10 个内部指标已标记 `mcs_source=100000000`（ProjectAmt/ProductNum/DebtAmount/TotalAssets/OverdueModel/BigAccount/SalesAmount/ARAmount/ARAge/DealerRating）
   - ✅ 【搜索 Coface 企业】弹窗 DEV1 功能验证通过：DE+Sany 返回 20 条候选企业，绑定后 `mcs_cofaceid` 已正确写入 `mcs_credit_record` 和 `account`
-  - ⏳ 39 国 / CEE Report 双格式逻辑因 Coface 测试环境数据限制，无法实际调用验证；已通过代码审查确认逻辑
+  - ✅ 39 国 / CEE Report 产品选择逻辑已按截图修正：非受限用 `customized-report/301`，受限非 RU 用 `full-report`，RU 用 `customized-report/21000`
 - **工具项目重构 — 创建 D365ToolCommon 共享库**：整理 MetadataTool 与 DeployTool 的重复功能。
   - ✅ 已创建 `Code/Tools/D365ToolCommon/` 共享库
   - ✅ 已抽取通用服务
@@ -280,10 +412,16 @@ TC-BULK   — 批量处理
 - ✅ D365 UI 创建并激活 Custom Action `mcs_CofaceSearchCompany`
 - ✅ 部署 HTML WebResource 与 Modern Command Bar 按钮
 - ✅ 创建 `ms_systemconfiguration.CofaceCountryConfig` 并修正 `mcs_credit_items.mcs_source`
+- ✅ 修复 `CofaceCountryConfig` 模型与 `CofaceDataSyncPlugin` 调用逻辑：按国家类型选择 Report 产品
 - ✅ 修复 `CofaceSearchCompanyPlugin` JSON 解析：支持 address 对象、giid 二次搜索获取 icon id
 - ✅ 修复 `D365ToolCommon.PluginRegistrationService.DeployPlugin` 中 DLL 路径被误当 base64 的 bug
 - ✅ CofaceSearchCompany Custom Action DEV 调用验证通过，返回 icon#xxx 格式企业列表
 - ✅ CofaceDataSyncPlugin DEV 触发验证通过（PL 记录状态 11 → SUCCESS）
+- ✅ PR 已合并到 `uat`，远程服务器拉取最新 `uat` 并重新编译通过
+- ✅ DEV Assembly `SanyD365.D365Extension.Sales` 已更新，`modifiedon` = `2026-06-18 00:28:19`
+- ✅ DEV/UAT `ms_systemconfiguration.CofaceCountryConfig` 已按新 JSON 结构更新
+- ✅ PL 测试记录 `SCO202606160004` 重新触发状态 11，CofaceDataSync 返回 SUCCESS
+- ✅ 评分卡配置界面增加金额类定量指标提示：`mcs_credit_scoringcard.js` 已修改并更新到 DEV WebResource
 - ✅ 更新 `d365-deploy` skill 与 `D365配置数据清单.md`
 - ✅ Coface 财务指标对照表按客户 `4国家财务指标-更新版0612.xlsx` 全量刷新：87 国 429 条记录，DEV1 已导入
 - ✅ 编写 `Documents/Planning/Coface财务指标对照逻辑说明.md`，说明 Excel 解析规则、代码读取逻辑、导入命令、测试方法
@@ -296,12 +434,18 @@ TC-BULK   — 批量处理
 - `mcs_bppstatus=Submitted` 是 `BppIntegrationPlugin` 设置，不代表 BPP 平台已创建流程实例
 
 **阻塞点**：
-- ⏳ 39 国 / CEE Report 双格式逻辑无法通过 Coface 测试环境实际调用验证（测试数据只有 PL 有 Report 订单）
+- ⏳ 39 国 / CEE Report 产品选择逻辑无法通过 Coface 测试环境实际调用验证（测试数据只有 PL 有 Report 订单）
 - ⏳ UAT 尚未通过 n8n 发布新 DLL
+- ⏳ PR `!3530`（`uat-20260618-peter-registrationdate-years` → `uat`）因 `.gitignore` 冲突无法合并（`Added in both`）
 
 **下一步**：
-1. 用户通知后，将本地 Coface 代码集成到远程主项目并部署 UAT
-2. 继续推进其他 Coface 配置化项（汇率表、NACE 映射表、字段映射表、定性值映射表）
+1. ✅ 已推送到远程分支 `uat-260618-peter-coface-report-product`，等待用户合并 PR
+2. ✅ PR 已合并，远程 `uat` 已重新编译，DEV Assembly 已更新
+3. ✅ DEV/UAT `ms_systemconfiguration.CofaceCountryConfig` 已按新 JSON 结构更新
+4. ✅ DEV 验证通过（PL 测试记录 SUCCESS）
+5. ⏳ 用户通过 n8n Release Tool 发布 `McsPlugin` 到 UAT
+6. ⏳ 解决 PR `!3530` 的 `.gitignore` 冲突并完成合并
+7. 继续推进其他 Coface 配置化项（汇率表、NACE 映射表、字段映射表、定性值映射表）
 
 ---
 
@@ -374,8 +518,12 @@ TC-BULK   — 批量处理
   - ✅ **诉讼债权标的金额解析**：Coface JSON 不提供结构化金额字段，仅返回诉讼记录数量；真实金额通过人工复核阶段线下读取 PDF 后，录入 `mcs_customer_tag.mcs_itemintvalue2`（复核定量指标），评分计算优先读取复核值（来源：Coface业务分析文档.md、评分卡响应参数.md）
   - ✅ **Coface 无法提供的 6 个指标内部录入标记**：代码已完成。`CofaceDataSyncPlugin` 读取评分项目 `mcs_credit_items.mcs_source`（100000000=内部，100000001=外部），内部数据源指标跳过 Coface 取数，创建空标签等人工复核补录。待上线前在 D365 中给 6 个指标（在手项目合同、自有设备数量、还款来源、资产证明、行业地位、财务报表真实性）设置 `mcs_source` = 内部（来源：海外客户评分卡项目和科法斯接口字段取数反馈表-不能提供数据.md）
   - ✅ **国别/行业风险等级映射**：已实现。Coface 原始值（A1-E / 1-4）通过 `mcs_credititem_value` 配置映射为中文等级（低风险/中风险/高风险），由 `CofaceQualitativeMappingHelper.GetDisplayName` 在写入标签时自动转换，`mcs_itemvalue1` 保留原始值用于算分，`mcs_itemtxtvalue1` 显示中文等级（来源：海外客户评分卡项目和科法斯接口字段取数反馈表-枚举值映射.md）
-  - ✅ **39 国 Report 双格式订单处理**：代码已完成。`CofaceDataSyncPlugin` 读取 `CofaceCountryConfig.RestrictedCountriesForSplitFormat`，39 国优先使用 `DefaultReportProductSlug` 查询 JSON 订单用于数据解析；39 国 PDF 订单本期不自动下载（诉讼金额已改为人工线下读取）。待上线前在 `ms_systemconfiguration` 中创建 `CofaceCountryConfig` 并导入 39 国列表（来源：科法斯Report不支持1个订单双格式的国家列表20260520.md）
-  - ✅ **受限国家 / 俄罗斯 CEE 特殊处理**：代码已完成。`CofaceDataSyncPlugin` 读取 `CofaceCountryConfig.CeeCountries`，CEE 国家使用 `CeeReportProductSlug` 查询 Full Report CEE 订单并解析。待上线前在 `ms_systemconfiguration` 中创建 `CofaceCountryConfig` 并配置 CEE 国家（目前为 RU）和产品标识（来源：Coface API Solutions Flow - SANY.md、科法斯对接开发说明材料.md）
+  - ✅ **39 国 / CEE Report 产品选择逻辑**：代码已完成并推送到分支 `uat-260618-peter-coface-report-product`。`CofaceDataSyncPlugin` 读取 `CofaceCountryConfig`，按国家类型选择 Report 产品：
+    - 非受限国家：`customized-report` + `customReportId=301`（Full Report URBA）
+    - 受限国家（39 国，除 RU）：`full-report`（Full Report）
+    - RU：`customized-report` + `customReportId=21000`（Full report CEE）
+    - URBA360 监控接口仍对所有国家调用
+    - 待上线前在 `ms_systemconfiguration` 中创建 `CofaceCountryConfig` 并导入 39 国列表（来源：截图确认）
   - ✅ **企业搜索弹窗 / Coface ID 人工匹配**：DEV1 已部署并验证通过。入口放在 `mcs_credit_record` 表单（状态 9/10 且 `mcs_cofaceid` 为空时显示按钮）；后端新增 Custom Action `mcs_CofaceSearchCompany` + Plugin `CofaceSearchCompanyPlugin` 调用 `CofaceApiService.SearchCompany`；前端 WebResource `mcs_coface_company_search.html` 使用原生 `fetch` 调用 Web API（避免 HTML WebResource 中 `Xrm` 对象不可用问题）；`mcs_credit_record.js` 增加 `searchCofaceCompany`；`AppActionDeployer.cs` 增加 Modern Command Bar 按钮定义。UAT 部署时：注册 Custom Action + Plugin Step、发布 WebResource、运行 `dotnet run appactions` 部署按钮（来源：Coface业务分析文档.md）
 - **待客户确认事项（2026-06-09记录）**：
   1. ✅ BPP审批 domainaccount配置（P0阻塞）已解决
@@ -490,6 +638,43 @@ Coface API 关键文档：
 
 ## 7. 待确认 / 待处理事项
 
+### 7.2 Coface 汇率改用 D365 标准汇率评估（2026-06-21 记录）
+
+> 状态：✅ 已合并到 `uat`、远程 Release 编译通过、DEV1 Plugin Assembly 已更新；默认 EUR 逻辑暂不修改；非 USD 货币真实场景验证待后续安排  
+> 详细报告：`Documents/BusinessAnalysis/coface/D365标准汇率替换评估报告.md`
+
+**背景**：业务提出将 Coface 对接中使用的汇率从自定义实体 `mcs_coface_exchange_rate`（2026 Budget 固定汇率）改为 D365 已维护的标准汇率。
+
+**核心发现**：
+
+| 评估项 | 结论 |
+|---|---|
+| 基础货币 | DEV1 / UAT 均为 **USD** |
+| 维护币种 | DEV1 55 种，UAT 81 种；Coface 当前 17 种均已覆盖 |
+| 汇率方向 | D365 为 **1 USD → LC**；Coface 需要 **1 LC → USD**，需取倒数 |
+| DEV1 数据质量 | 多处异常：KRW `1,277,000`、MYR `0.24595`、SGD `0.1`、INR `46.69`、VND 缺失 |
+| UAT 数据质量 | 相对正常，但 NZD (+43%)、JPY (+14%) 与 Coface 2026 Budget 偏差较大 |
+| 全局影响 | D365 汇率被报价/订单/发票/回款等全财务模块共享 |
+
+**结论与建议**：
+
+- **当前不建议直接替换**。DEV1 的 D365 标准汇率数据质量不足以替代 Coface 2026 Budget 汇率。
+- 若业务坚持改用 D365 汇率，需先确认：汇率更新频率/责任人、是否接受取倒数、DEV1 异常数据如何清洗、三环境如何保持一致。
+- 建议采用**双轨读取**（配置开关 + 默认走原自定义表），保留回滚能力。
+
+**已完成动作**：
+
+- `MetadataTool/Program.cs` 新增：
+  - `list-transaction-currencies` 命令，可查询 D365 标准汇率。
+  - `test-coface-exchange-rate [币种列表]` 命令，本地连接 DEV1/UAT 测试汇率读取与方向转换。
+- 已导出 Coface 汇率数据到 `Backups/Tests/coface-export/mcs_coface_exchange_rate.json`。
+- 已生成对比分析报告。
+- 已生成技术实施方案：
+  - `Documents/BusinessAnalysis/coface/Coface汇率改用D365标准汇率_实施方案.md`（含方案 A 直接替换、方案 B 配置开关双轨读取）。
+  - `Documents/BusinessAnalysis/coface/Coface汇率改用D365标准汇率_方案A实施文档.md`（方案 A 单独实施文档，待最终确认后执行）。
+
+---
+
 ### 7.1 客户主数据表与 Account 表架构变更（2026-06-16 记录）
 
 > 状态：📝 已记录，待后续与三一 IT 架构师牛同达确认后调整
@@ -599,13 +784,103 @@ account.mcs_customermasterdata = mcs_customermasterdata.new_customermasterdata_i
 
 ---
 
+### 7.2 评分卡字段外部系统取值待对接（2026-06-19 记录）
+
+> 状态：⏸️ 暂缓，待 CRM/BW 系统接口方案确认
+
+**背景：**
+评分卡中有部分字段需要从 CRM 或 BW 等外部系统取值。根据最新业务梳理，除**客户评级**已实现从 CRM 客户分类分级字段取值外，其余涉及历史交易的字段暂不具备对接条件。
+
+**字段对接状态：**
+
+| 序号 | 评分卡项目 | 数据来源 | 取数说明 | 对接状态 |
+|------|-----------|---------|---------|---------|
+| 17 | 客户评级 | CRM系统取值判断 | 根据 CRM【客户分类分级】字段取值 | ✅ 已对接 |
+| 18 | 历史采购金额 | CRM系统取值判断 | 客户在过去历史交易中的累计采购金额 | ⏸️ 待对接 |
+| 19 | 历史逾期 | BW系统取值判断 | 海外在货款明细中逾期金额的最大值 | ⏸️ 待对接 |
+| 20 | 还款习惯 | BW系统取值判断 | 海外在货款明细中逾期天数的最大值 | ⏸️ 待对接 |
+
+**阻塞原因：**
+- CRM 历史交易数据接口尚未明确（数据范围、聚合方式、权限控制）。
+- BW 系统（erp/bw，表名：海外在货款明细）接口暂未开放，当前无法自动获取历史逾期金额/天数。
+
+**当前影响与应对：**
+- 上述字段在数据集成阶段暂时为空，不影响评分卡其他字段计算。
+- 在人工复核阶段，可由业务人员线下收集数据后，通过复核字段补录到 `mcs_customer_tag`。
+- 待接口就绪后，通过 Phase 5 内部接口开发自动回填，并重新触发评分计算。
+
+**下一步行动：**
+1. 与三一 IT 确认 CRM 历史交易数据接口方案（数据视图、API、调用频率）。
+2. 与 BW 团队确认海外在货款明细接口方案（主键、字段、筛选条件）。
+3. 接口方案确认后，在 `SanyD365.D365ExtensionApi` 或 `SanyD365.InnerApi` 中新增内部 API。
+4. 在 `CofaceDataSyncPlugin` 或新增内部数据同步 Plugin 中调用内部 API，回填标签记录。
+
+---
+
+### 7.2.1 历史交易类内部指标数据源确认（2026-06-19 记录）
+
+> 状态：📝 已记录，暂不修改代码
+
+**已确认信息：**
+
+| 评分项目编码 | 评分项目名称 | 数据类型 | 内外部 | 当前状态 |
+|-------------|-------------|---------|--------|---------|
+| `SalesAmount` | 历史采购金额 | 定量 | 内部（100000000） | 数据源待确认 |
+| `ARAmount` | 历史逾期金额 | 定量 | 内部（100000000） | 数据源待确认 |
+| `ARAge` | 历史逾期账龄（还款习惯） | 定量 | 内部（100000000） | 数据源待确认 |
+
+**当前代码状态：**
+`CofaceDataSyncPlugin.WriteToCustomerTags` 中这三个指标会走到 `GetCofaceValue`，因 Coface 数据无对应 key 返回 null，标签值为空。仅 `BigAccount` 实现了 CRM 取值。
+
+**待确认问题：**
+1. `SalesAmount`：查询 `salesorder.totalamount` 累计，还是读 Account.`mcs_totalpurchaseamount`？是否筛选订单状态/日期？
+2. `ARAmount` / `ARAge`："客户月度在外货款"实体逻辑名、逾期金额字段、逾期账龄字段、生成版本年月字段。
+3. 货币转换：源货币、目标货币、汇率来源。
+
+**预计改动点（确认后执行）：**
+1. `CofaceDataSyncPlugin.WriteToCustomerTags` 增加内部指标分支
+2. 新增 `GetInternalValue` 方法按指标编码查询不同数据源
+3. 如需货币转换，复用现有汇率工具
+
+---
+
+### 7.3 BPP 审批通过 365 天后评估记录失效（2026-06-19 记录）
+
+> 状态：✅ 核心逻辑已实现（本地独立项目 `Code/ServiceJobs/CreditRecordExpiration/`），⏸️ 待确认宿主项目后集成
+
+**需求描述：**
+客户信用分经 BPP 审批通过后，评估记录的【有效状态】初始为有效。若审批日期超过 365 天，则该评估记录的【有效状态】应自动置为失效。
+
+**涉及字段：**
+- `mcs_credit_record.mcs_active`：有效状态（Boolean，审批通过时置为 `true`）
+- `mcs_credit_record.mcs_approvedate`：审批日期（DateTime，审批通过时填充 `DateTime.Now`）
+
+**当前实现状态：**
+- `CreditRecordBppCallbackPlugin` 在 BPP 审批通过分支中已设置 `mcs_active = true` 和 `mcs_approvedate = DateTime.Now`。
+- **尚未实现**超过 365 天后自动将 `mcs_active` 置为 `false` 的逻辑。
+
+**建议实现方案（待评估）：**
+1. **定时批量作业**：在 `Code/Tools/DeployTool` 或 MetadataTool 中新增命令（如 `expire-credit-records`），扫描所有 `mcs_active = true` 且 `mcs_approvedate < DateTime.Now.AddDays(-365)` 的记录，批量更新为 `mcs_active = false`。
+2. **D365 异步工作流 / System Job**：创建自定义工作流活动，由 D365 系统作业每日调度执行。
+3. **Azure Function / Service 项目定时任务**：在 `Service.sln` 中新增定时任务，每日检查并更新过期记录。
+
+**下一步行动：**
+1. 与业务确认失效后的业务影响（是否触发通知、是否允许重新发起评估、是否影响客户主数据 `mcs_creditvalid`）。
+2. 选择技术实现方案（定时工具 / D365 工作流 / Azure Function）。
+3. 开发并注册对应的 Plugin / 工具命令 / 定时任务。
+4. 补充测试用例（TC-FLOW / TC-EVAL 中增加 365 天失效场景）。
+
+---
+
 ## 8. AI 协作指南
 
-> **用户偏好（2026-06-13 更新）**：
+> **用户偏好（2026-06-18 更新）**：
 > - 所有回复使用 **中文**
 > - 需要展示 **思考过程 / 推理链**，不要只给结论
+> - **思考过程 / 推理链也必须使用中文**（已写入根目录 `AGENTS.md`，新会话自动生效）
+> - **AI 内部思考（analysis / reasoning）全程使用中文**，不需要用户每次提醒
 
-### 7.1 接手项目时
+### 8.1 接手项目时
 
 1. **读 SKILL.md**（通用D365开发技巧）→ 了解工具和规范
 2. **读 Memory**（本文件）→ 了解项目当前状态和资产
@@ -615,7 +890,7 @@ account.mcs_customermasterdata = mcs_customermasterdata.new_customermasterdata_i
 6. **读 需求变更记录.md** → 了解原始 PRD 之后的业务需求变更（如 A0–A4 等级映射规则）
 7. **按需查阅** 测试用例 / Bug 记录 / PRD / 数据字典
 
-### 7.2 开发新功能时
+### 8.2 开发新功能时
 
 1. 在 `开发计划.md` 中找到对应功能编号（如 F3.2.1）
 2. 开发完成后，更新开发计划中的状态
@@ -624,7 +899,7 @@ account.mcs_customermasterdata = mcs_customermasterdata.new_customermasterdata_i
 5. 当天工作记录到 `工作日报汇总.md`
 6. **更新 Memory 中的进度和待办**
 
-### 7.3 修复 Bug 时
+### 8.3 修复 Bug 时
 
 1. 在 `测试Bug反馈记录.md` 中找到对应 Bug
 2. 修复后更新「修复记录」和「状态」
@@ -632,7 +907,7 @@ account.mcs_customermasterdata = mcs_customermasterdata.new_customermasterdata_i
 4. 更新 `开发计划.md` 中的 Bug 关联表
 5. **更新 Memory 中的进度**
 
-### 7.4 代码规范检查清单
+### 8.4 代码规范检查清单
 
 ```
 □ Plugin 开头校验 target.LogicalName
@@ -642,9 +917,10 @@ account.mcs_customermasterdata = mcs_customermasterdata.new_customermasterdata_i
 □ 窗体复制时同步修改 functionName
 □ cell id 使用 Guid.NewGuid().ToString("B")
 □ Plugin catch OrganizationService 异常后必须 rethrow（禁止吞异常）
+□ 本地独立 Assembly 测试结束后必须执行 unregister-assembly 注销，避免影响他人发布 Solution
 ```
 
-### 7.5 新增 MetadataTool 命令（2026-06-11）
+### 8.5 新增 MetadataTool 命令（2026-06-11）
 
 | 命令 | 用途 | 示例 |
 |------|------|------|

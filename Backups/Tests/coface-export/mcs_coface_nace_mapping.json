@@ -1,0 +1,462 @@
+[
+  {
+    "mcs_nacedivisionfrom": 1,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u519C\u4E1A",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "1fc11b9a-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 1,
+    "createdon": "2026-06-13T04:37:45.0000000Z",
+    "mcs_nacedivisionname": "Crop and animal production, hunting and related service activities"
+  },
+  {
+    "mcs_nacedivisionfrom": 2,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u6797\u4E1A",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "20c11b9a-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 2,
+    "createdon": "2026-06-13T04:37:45.0000000Z",
+    "mcs_nacedivisionname": "Forestry and logging"
+  },
+  {
+    "mcs_nacedivisionfrom": 5,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u77FF\u4E1A",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "21c11b9a-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 9,
+    "createdon": "2026-06-13T04:37:45.0000000Z",
+    "mcs_nacedivisionname": "Mining and quarrying"
+  },
+  {
+    "mcs_nacedivisionfrom": 10,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u5236\u9020\u4E1A",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "22c11b9a-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:46.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 33,
+    "createdon": "2026-06-13T04:37:46.0000000Z",
+    "mcs_nacedivisionname": "Manufacturing"
+  },
+  {
+    "mcs_nacedivisionfrom": 23,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u5546\u6DF7",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "23c11b9a-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:46.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 23,
+    "createdon": "2026-06-13T04:37:46.0000000Z",
+    "mcs_nacedivisionname": "Manufacture of other non-metallic mineral products"
+  },
+  {
+    "mcs_nacedivisionfrom": 41,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u5EFA\u5DE5",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "24c11b9a-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:47.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 42,
+    "createdon": "2026-06-13T04:37:47.0000000Z",
+    "mcs_nacedivisionname": "Construction of buildings / Civil engineering"
+  },
+  {
+    "mcs_nacedivisionfrom": 43,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u540A\u88C5",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "e34f65a0-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:47.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 43,
+    "createdon": "2026-06-13T04:37:47.0000000Z",
+    "mcs_nacedivisionname": "Specialised construction activities"
+  },
+  {
+    "mcs_nacedivisionfrom": 49,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u96C6\u88C5\u7BB1\u8FD0\u529B",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "e44f65a0-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:48.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 51,
+    "createdon": "2026-06-13T04:37:48.0000000Z",
+    "mcs_nacedivisionname": "Land transport / Water transport / Air transport"
+  },
+  {
+    "mcs_nacedivisionfrom": 52,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u6E2F\u52A1",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "e54f65a0-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:49.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 52,
+    "createdon": "2026-06-13T04:37:49.0000000Z",
+    "mcs_nacedivisionname": "Warehousing and support activities for transportation"
+  },
+  {
+    "mcs_nacedivisionfrom": 77,
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_sanyindustry": "\u79DF\u8D41",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "timezoneruleversionnumber": 4,
+    "mcs_remark": "NACE Rev.2.1 Division \u2192 \u4E09\u4E00\u884C\u4E1A\u6620\u5C04\uFF0C\u6765\u6E90\uFF1A\u539F Urba360Parser \u786C\u7F16\u7801\u914D\u7F6E",
+    "mcs_coface_nace_mappingid": "e64f65a0-e166-f111-ab0c-7ced8db4dda8",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T04:37:49.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_nacedivisionto": 77,
+    "createdon": "2026-06-13T04:37:49.0000000Z",
+    "mcs_nacedivisionname": "Rental and leasing activities"
+  }
+]

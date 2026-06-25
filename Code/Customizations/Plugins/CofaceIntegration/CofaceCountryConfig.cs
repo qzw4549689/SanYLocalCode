@@ -9,41 +9,109 @@ namespace SanyD365.Plugins.CofaceIntegration
     public class CofaceCountryConfig
     {
         /// <summary>
-        /// Report 产品需要 JSON/PDF 分开下单的国家代码列表（39 个受限国家）
+        /// 受限国家代码列表（39 个受限国家，含 RU）
+        /// 这些国家使用 RestrictedReportProduct 对应的 Report 产品
         /// </summary>
-        public List<string> RestrictedCountriesForSplitFormat { get; set; } = new List<string>();
+        public List<string> RestrictedCountries { get; set; } = new List<string>();
 
         /// <summary>
         /// 需要走 Full Report CEE 产品的国家代码列表（如俄罗斯 RU）
+        /// CEE 国家优先于受限国家判断
         /// </summary>
         public List<string> CeeCountries { get; set; } = new List<string>();
 
         /// <summary>
-        /// 标准 Full Report 产品标识（用于查询订单）
+        /// 非受限国家使用的 Report 产品 slug
+        /// 对应截图中的 Full Report URBA：customized-report + 301
         /// </summary>
-        public string DefaultReportProductSlug { get; set; } = "full-report";
+        public string DefaultReportProductSlug { get; set; } = "customized-report";
 
         /// <summary>
-        /// Full Report CEE 产品标识（用于查询订单）
+        /// 非受限国家使用的 Report 产品 code（customReportId）
         /// </summary>
-        public string CeeReportProductSlug { get; set; } = "full-report-cee";
+        public string DefaultReportProductCode { get; set; } = "301";
 
         /// <summary>
-        /// 判断指定国家是否需要 JSON/PDF 分开下单
+        /// 受限国家（除 CEE 外）使用的 Report 产品 slug
+        /// 对应截图中的 Full Report：full-report
         /// </summary>
-        public bool IsSplitFormatCountry(string countryCode)
+        public string RestrictedReportProductSlug { get; set; } = "full-report";
+
+        /// <summary>
+        /// CEE 国家使用的 Report 产品 slug
+        /// 对应截图中的 Full report CEE：customized-report + 21000
+        /// </summary>
+        public string CeeReportProductSlug { get; set; } = "customized-report";
+
+        /// <summary>
+        /// CEE 国家使用的 Report 产品 code（customReportId）
+        /// </summary>
+        public string CeeReportProductCode { get; set; } = "21000";
+
+        /// <summary>
+        /// 判断指定国家是否属于受限国家（含 CEE）
+        /// </summary>
+        public bool IsRestrictedCountry(string countryCode)
         {
             return !string.IsNullOrEmpty(countryCode) &&
-                   RestrictedCountriesForSplitFormat.Contains(countryCode.ToUpperInvariant());
+                   RestrictedCountries.Contains(countryCode.ToUpperInvariant());
         }
 
         /// <summary>
-        /// 判断指定国家是否需要走 CEE 产品
+        /// 判断指定国家是否属于 CEE 国家
         /// </summary>
         public bool IsCeeCountry(string countryCode)
         {
             return !string.IsNullOrEmpty(countryCode) &&
                    CeeCountries.Contains(countryCode.ToUpperInvariant());
         }
+
+        /// <summary>
+        /// 根据 countryCode 获取对应的 Report 产品配置
+        /// 优先级：CEE > 受限国家 > 非受限国家
+        /// </summary>
+        public ReportProduct GetReportProduct(string countryCode)
+        {
+            if (IsCeeCountry(countryCode))
+            {
+                return new ReportProduct
+                {
+                    Slug = CeeReportProductSlug,
+                    ProductCode = CeeReportProductCode
+                };
+            }
+
+            if (IsRestrictedCountry(countryCode))
+            {
+                return new ReportProduct
+                {
+                    Slug = RestrictedReportProductSlug,
+                    ProductCode = null
+                };
+            }
+
+            return new ReportProduct
+            {
+                Slug = DefaultReportProductSlug,
+                ProductCode = DefaultReportProductCode
+            };
+        }
+    }
+
+    /// <summary>
+    /// Coface Report 产品配置
+    /// </summary>
+    public class ReportProduct
+    {
+        /// <summary>
+        /// Report 产品 slug（如 customized-report / full-report）
+        /// </summary>
+        public string Slug { get; set; }
+
+        /// <summary>
+        /// Report 产品 code，对应响应中的 customReportId（如 301 / 21000）
+        /// 对于 full-report 这类不需要 code 的产品可为空
+        /// </summary>
+        public string ProductCode { get; set; }
     }
 }

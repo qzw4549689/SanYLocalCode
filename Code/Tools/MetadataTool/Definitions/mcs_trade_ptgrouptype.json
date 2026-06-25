@@ -1,0 +1,52 @@
+{
+  "entityName": "mcs_trade_ptgrouptype",
+  "displayName": "成交条件产品分类关系",
+  "primaryAttribute": "mcs_trade_ptgrouptypename",
+  "primaryAttributeDisplayName": "成交条件产品分类关系名称",
+  "primaryAttributeLength": 100,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_groupid",
+      "displayName": "产品线编码",
+      "description": "产品线编码，组合关键字之一",
+      "type": "string",
+      "required": true,
+      "maxLength": 10
+    },
+    {
+      "schemaName": "mcs_groupname",
+      "displayName": "产品线名称",
+      "description": "产品线名称",
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_typeid",
+      "displayName": "产品分类编码",
+      "description": "成交条件产品分类编码，组合关键字之一",
+      "type": "string",
+      "required": true,
+      "maxLength": 10
+    },
+    {
+      "schemaName": "mcs_typename",
+      "displayName": "产品分类名称",
+      "description": "成交条件产品分类名称",
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_trade_pttypeid",
+      "displayName": "成交条件产品分类",
+      "description": "关联成交条件产品分类",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "mcs_trade_pttype",
+      "targetEntityDisplayName": "成交条件产品分类"
+    }
+  ]
+}

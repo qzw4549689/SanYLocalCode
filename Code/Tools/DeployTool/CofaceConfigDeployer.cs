@@ -37,7 +37,7 @@ namespace DeployTool
         {
             var config = new CofaceCountryConfigData
             {
-                SplitFormatCountries = new List<string>
+                RestrictedCountries = new List<string>
                 {
                     "AF", "AG", "BI", "BT", "BZ", "CF", "CU", "DJ", "ER", "ET",
                     "GD", "GN", "GQ", "GW", "IQ", "IR", "KI", "KP", "KV", "LS",
@@ -45,8 +45,11 @@ namespace DeployTool
                     "SY", "TL", "TV", "UA", "VE", "VU", "WS", "YE", "ZW"
                 },
                 CeeCountries = new List<string> { "RU" },
-                CeeReportProductSlug = "full-report-cee",
-                DefaultReportProductSlug = "full-report"
+                DefaultReportProductSlug = "customized-report",
+                DefaultReportProductCode = "301",
+                RestrictedReportProductSlug = "full-report",
+                CeeReportProductSlug = "customized-report",
+                CeeReportProductCode = "21000"
             };
 
             string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
@@ -158,10 +161,13 @@ namespace DeployTool
 
         private class CofaceCountryConfigData
         {
-            public List<string> SplitFormatCountries { get; set; } = new();
+            public List<string> RestrictedCountries { get; set; } = new();
             public List<string> CeeCountries { get; set; } = new();
-            public string CeeReportProductSlug { get; set; } = "full-report-cee";
-            public string DefaultReportProductSlug { get; set; } = "full-report";
+            public string DefaultReportProductSlug { get; set; } = "customized-report";
+            public string DefaultReportProductCode { get; set; } = "301";
+            public string RestrictedReportProductSlug { get; set; } = "full-report";
+            public string CeeReportProductSlug { get; set; } = "customized-report";
+            public string CeeReportProductCode { get; set; } = "21000";
         }
     }
 }

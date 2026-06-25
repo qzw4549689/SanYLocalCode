@@ -125,7 +125,9 @@ $steps = @(
     @("SanyD365.D365Extension.Sales.Plugins.CreditItemValueValidationPlugin", "mcs_credititem_value", "Update", "10", $null),
     @("SanyD365.D365Extension.Sales.Plugins.CustomerTagInitPlugin", "mcs_customer_tag", "Create", "40", $null),
     @("SanyD365.D365Extension.Sales.Plugins.CustomerTagValidationPlugin", "mcs_customer_tag", "Update", "20", $null),
-    @("SanyD365.D365Extension.Sales.Plugins.ScoringCardAutoNumberPlugin", "mcs_credit_scoringcard", "Create", "20", $null)
+    @("SanyD365.D365Extension.Sales.Plugins.ScoringCardAutoNumberPlugin", "mcs_credit_scoringcard", "Create", "20", $null),
+    @("SanyD365.D365Extension.Sales.Plugins.ScoringCard.CreditScoringCardValidationPlugin", "mcs_credit_scoringcard", "Create", "20", $null),
+    @("SanyD365.D365Extension.Sales.Plugins.ScoringCard.CreditScoringCardValidationPlugin", "mcs_credit_scoringcard", "Update", "20", $null)
 )
 
 Set-Location $toolPath

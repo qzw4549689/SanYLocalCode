@@ -1,0 +1,1753 @@
+<ImportExportXml version="9.2.26061.143" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26061.143" OrganizationSchemaType="Full" CRMServerServiceabilityVersion="9.2.26061.00143">
+  <SolutionManifest>
+    <UniqueName>entity_20260603_peter</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="entity_20260603_peter" languagecode="1033" />
+      <LocalizedName description="entity_20260603_peter" languagecode="2052" />
+    </LocalizedNames>
+    <Descriptions />
+    <Version>1.0.0.0</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>MCS</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="MCS" languagecode="1025" />
+        <LocalizedName description="MCS" languagecode="1031" />
+        <LocalizedName description="MCS" languagecode="1033" />
+        <LocalizedName description="MCS" languagecode="1036" />
+        <LocalizedName description="MCS" languagecode="1040" />
+        <LocalizedName description="MCS" languagecode="1046" />
+        <LocalizedName description="MCS" languagecode="1049" />
+        <LocalizedName description="MCS" languagecode="1054" />
+        <LocalizedName description="MCS" languagecode="1057" />
+        <LocalizedName description="MCS" languagecode="1066" />
+        <LocalizedName description="MCS" languagecode="1086" />
+        <LocalizedName description="MCS" languagecode="2052" />
+        <LocalizedName description="MCS" languagecode="3082" />
+      </LocalizedNames>
+      <Descriptions>
+        <Description description="MCS" languagecode="1025" />
+        <Description description="MCS" languagecode="1031" />
+        <Description description="MCS" languagecode="1033" />
+        <Description description="MCS" languagecode="1036" />
+        <Description description="MCS" languagecode="1040" />
+        <Description description="MCS" languagecode="1046" />
+        <Description description="MCS" languagecode="1049" />
+        <Description description="MCS" languagecode="1054" />
+        <Description description="MCS" languagecode="1057" />
+        <Description description="MCS" languagecode="1066" />
+        <Description description="MCS" languagecode="1086" />
+        <Description description="MCS" languagecode="2052" />
+        <Description description="MCS" languagecode="3082" />
+      </Descriptions>
+      <EMailAddress xsi:nil="true"></EMailAddress>
+      <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
+      <CustomizationPrefix>mcs</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>42970</CustomizationOptionValuePrefix>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+        <Address>
+          <AddressNumber>2</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="1" schemaName="account" behavior="1" />
+      <RootComponent type="1" schemaName="mcs_coface_exchange_rate" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_coface_financial_indicator" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_coface_nace_mapping" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_credit" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_credititem_value" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_credit_items" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_credit_record" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_credit_scoringcard" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_customermasterdata" behavior="2" />
+      <RootComponent type="1" schemaName="mcs_customer_file" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_customer_tag" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_trade_ptgrouptype" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_trade_pttype" behavior="0" />
+      <RootComponent type="1" schemaName="mcs_trade_stpayterm" behavior="0" />
+      <RootComponent type="29" id="{824edb28-b460-f111-a826-000d3aa333b3}" behavior="0" />
+      <RootComponent type="29" id="{dd74503d-8a67-f111-ab0c-7ced8de4efcf}" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_account.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_coface_company_search.html" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credititem_value.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_items.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_profile.html" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_record.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_scoringcard.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_wheel.html" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_wheel_echarts.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_credit_wheel_vue.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_customermasterdata.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_customer_tag.js" behavior="0" />
+      <RootComponent type="61" schemaName="mcs_trade_stpayterm.js" behavior="0" />
+      <RootComponent type="61" schemaName="ms_languagefile_1033" behavior="0" />
+      <RootComponent type="61" schemaName="ms_languagefile_2052" behavior="0" />
+      <RootComponent type="62" schemaName="cra80_SanyOverseasCRM" behavior="0" />
+    </RootComponents>
+    <MissingDependencies>
+      <MissingDependency>
+        <Required type="1" schemaName="lead" displayName="Lead" solution="msdynce_LeadManagement (9.0.4.0066)">
+          <package appName="msdynce_LeadManagement" version="9.0.26054.10001">msdynce_LeadManagementAnchor (9.0.26054.10001)</package>
+        </Required>
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_accountadjustment" displayName="Bad Debt" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_address" displayName="Address" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_agent" displayName="Dealer" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_agentdevelopment" displayName="Dealer Development" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_agentrenewal" displayName="Dealer Renewal" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_approvalactivity" displayName="Approval Activity" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_backdate_application" displayName="限额倒签申请" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_baddebt" displayName="Account Adjustment" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bank" displayName="Bank" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bank_code_application" displayName="银行代码申请管理" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bankmou" displayName="Bank MOU" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bankpartner" displayName="Bank Partner" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bankstatementcurrencyconversion" displayName="Currency Conversion" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bonusreport" displayName="Bonus Report" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_bulkrepaymentplanchanges" displayName="Bulk Repayment Plan Changes" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_buyer_code_application" displayName="买方代码申请管理" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_ckdorder" displayName="CKD Batch Review Form" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_claimbankstatement" displayName="Claim Bank Statement" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_collectionchange" displayName="Collection Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_companyinspection" displayName="Company Inspection" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_constonlinetemplate" displayName="Cost Calculation" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contract" displayName="Contract" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contract_signing" displayName="Contract Sign" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contractchangeorder" displayName="Contract Change Order" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contractdetail" displayName="Contract detail" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contractreviewelementdict" displayName="Dictionary Of Contract Review Elements" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contractriskrolematrix" displayName="Role Matrix" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contractstock" displayName="Contract Stock Preparation" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contractstockchange" displayName="Stock Up Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contracttemplatefield" displayName="Contract template fields" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_contracttemplatefieldtype" displayName="Contract Template Field Classification" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_country" displayName="Country" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_creditnotefundcliamorder" displayName="Credit Note Fund Cliam Order" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_currencystrappedcountries" displayName="Exchange-Constrained Country" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customerbankaccount" displayName="Customer Bank Account" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customerchangeapprove" displayName="Customer Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customercredit" displayName="Customer Asset Investigation" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customercreditamount" displayName="Customer Credit Amount" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customerexpand" displayName="Customer expansion area" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customerfreezeapprove" displayName="Customer freeze/unfreeze" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customermasterdata" displayName="Customer Master Data" solution="Active" />
+        <Dependent type="1" schemaName="mcs_customermasterdata" displayName="Customer Master Data" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customermasterdataresponsibility" displayName="Customer Master Data Responsibility" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customerresponsiblepersonapprove" displayName="Customer Access" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_customersyncacrossdc" displayName="Customer synchronization across data centers" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_dealerrebate" displayName="Dealer Rebate" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_dealerrebateaccount" displayName="Dealer Rebate Account" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_dealersales" displayName="Dealer sales" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_dealertermination" displayName="Dealer exit" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_decisionchainandkpinfo" displayName="Information on the decision - making chain and key persons" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_domestictransportationcost" displayName="Domestic Transportation Cost" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_erp_repayment_plan" displayName="ERP Repayment Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_expandcustomersalesorg" displayName="Customer Extension Sales Org" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_expertpool" displayName="Expert Pool Management" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_extrasalescost" displayName="Extra Sales Cost" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_fieldsensitiveword" displayName="Field sensitive words" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_incotermscostsetting" displayName="Incoterms Cost Setting" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_insure" displayName="Insurance Information" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_kacustomerview" displayName="Ka Customer View" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_keyaccount" displayName="Key Account" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_keyaccountlandmark" displayName="Milestone Schedule" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_keyaccountlandmarkhange" displayName="Landmark Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_keyaccountsalesplan" displayName="Sales Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_latestleadopportunitycontractupdatedlog" displayName="Sales Follow-up" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_lc_credit_limit_application" displayName="LC限额申请" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_limitantidatedapplication" displayName="Limit Anti-dated Application" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_limitapplication" displayName="Limit Application" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_lockmachine" displayName="Lock Machine" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_mainsalescountries" displayName="Main sales countries/regions" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_manufacturingcycle" displayName="Material Code" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_marketingmodelmaster" displayName="Marketing Model Master" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_middleplan" displayName="Middle Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_modelconfiguration" displayName="Model Configuration" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_moneycollection" displayName="Money Collection" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_monthplan" displayName="Month Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_nonlc_credit_limit_application" displayName="非LC限额申请" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_opportunity" displayName="Opportunity" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_opportunitylostapproval" displayName="Lost Order Approval" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_order" displayName="Sales Order" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_ordercanceldetail" displayName="Sales Order Cancellation Request Details" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_ordergoodsreceipt" displayName="Order Goods Receipt" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_orderperformancechange" displayName="Order Performance Attribution Adjustment" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_orderperformancesharing" displayName="Order Performance Sharing" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_orderproductchange" displayName="Order Product Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_ordershipmentrequest" displayName="Subsidiary Shipping Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_otherexpensespaymentapplication" displayName="Other Expenses Payment Application" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_outstanding" displayName="Outstanding (Realtime)" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_outstanding" displayName="Outstanding (Realtime)" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_overduecustomerstrategycollection" displayName="Overdue Customer Strategy Collection" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_overduestandardoperation" displayName="OverDue Standard Operation Setting" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_overduetask" displayName="OverDue Standard Operation Task" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_overduetrans" displayName="Outstanding (Monthly/Weekly)" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_parentprojectmanagement" displayName="Program Management" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_partnerfunction" displayName="Partner Function" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentcollectiontransactiondetail" displayName="Bank Statement" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentdeduction" displayName="Payment Deduction" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentinadvanceorder" displayName="Payment In Advance Order" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentloss" displayName="Report Loss" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentmethodcostsetting" displayName="Payment Method Cost Setting" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentrelease" displayName="Fund Claim" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_paymentreleasedetail" displayName="Fund Claim Detail" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_performanceattributionadjustmentform" displayName="Performance Attribution Adjustment Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_policy_inquiry" displayName="保单查询" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_pricingcondition" displayName="Pricing Condition" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_pricingconditionmaster" displayName="Pricing Condition Master" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productadditionalservices" displayName="Product Additional Services" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productcostsetting" displayName="Product Cost Setting" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productimportjob" displayName="Product Import Job" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productinfomation" displayName="Product Infomation" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productlevel1" displayName="Product Category L1" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productlevel2" displayName="Product Sub Category L2" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productlevel3" displayName="Filter Parameter L3" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productpricing" displayName="Product Pricing" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productsalesplan" displayName="Product Sales Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_productsubstitution" displayName="Product Substitution" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_projectmanagement" displayName="Sales Project Management" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_refundorder" displayName="Refund Order" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_regionyearplan" displayName="Region Year Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_repaymentplan" displayName="Repayment plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_repaymentplanbulktool" displayName="Repayment Plan Bulk Tools" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_repaymentplanchangerecord" displayName="Repayment Plan Change Record" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_returnordercustomercfg" displayName="Return order receiving customer configuration" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_reversaloffundclaim" displayName="Reversal of fund claim" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_reviewelement" displayName="Evaluation Criteria" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_reviewelementcategory" displayName="Element Classification" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesforecast" displayName="Sales Performance" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesgoalbreakdown" displayName="Goal Breakdown" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesgoalconsolidation" displayName="Goal Consolidation" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesgoalpublish" displayName="Goal Publish" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesgoalupload" displayName="Goal Upload" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesorderfee" displayName="Marketing Expense Grant" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesorderreturnbatchrequest" displayName="Sales Order Return Bulk Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salesorderreturnrequest" displayName="Sales Order Return Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_salestarget" displayName="Sales Goal" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sanysalingproduct" displayName="Sany sellable products" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sealapplication" displayName="Seal Application" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_shipconfirm" displayName="Ship Confirm" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_shipmentdeclaration" displayName="Shipment Declaration" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_shipmentdeclarationchange" displayName="Declaration Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinitiativesforgencustomerrelationships" displayName="Specific measures for general customer relationships" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinitiativesforkeycustomerrelationships" displayName="Specific measures for key customer relationships" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinitiativesfororgcustomerrelationships" displayName="Specific measures for organizational customer relationships" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinosure_buyercode" displayName="Sinosure Buyer Code" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinosure_quotaapproveinfo" displayName="Sinosure Quota Information" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinosure_realtime_creditlimit" displayName="Sinosure Real-time Limit" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinosurecountry" displayName="Sinosure Country" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_sinosurefeerate" displayName="SINOSURE Fee Rate" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_specialbookingrequest" displayName="Special Booking and Shipping Request/Cancellation" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_taskunexecuterequest" displayName="Task Unexecute Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_transferrequest" displayName="Transfer Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_trialmachine" displayName="Trial Machine" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_trialmachineapplication" displayName="Application Trial Machine" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_warrant" displayName="Warrant Management" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_warrantyextensionorder" displayName="Warranty Extension Order" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_warrantyterm" displayName="Warranty Term" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_whitelistentryrequest" displayName="WhiteList Entry Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_whitelistexit" displayName="White List Exit" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_whitelistreviewspecial" displayName="Whitelist Review/Special" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="mcs_yearplansum" displayName="Year Plan Sum" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_agentrating" displayName="Dealer rating" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_agentsalableproductdetail" displayName="List of products available for sale by agents" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_annualmarketingplan" displayName="Annual Marketing Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_annualmarketingplanbyarea" displayName="Annual Marketing Plan-large" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_annualmarketingplanbyareachange" displayName="Annual Marketing Plan-region Change" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_businessplan" displayName="Business Plan" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_businessplanindex" displayName="Business Plan Indicators" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_businessplantemplate" displayName="Business Plan Template" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_catalogitem" displayName="Risk List Details" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_check" displayName="Risk Assessment Form" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_checkitem" displayName="Risk Investigation Detail" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_countrymanager" displayName="National specific identity" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_dealerratingindicator" displayName="Evaluation indicators" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_disposalfollowup" displayName="Risk Disposition Follow-up Form" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_equityframework" displayName="Equity Framework" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_equityitem" displayName="Equity Project" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_equitypolicy" displayName="Equity Policy" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_incidentreport" displayName="Risk Report Form" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_marketingactivity" displayName="Marketing Activities" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_marketingactivitychange" displayName="Marketing Activity Changes" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_marketingactivityreview" displayName="Work Review Summary" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_noticeannouncemen" displayName="Notices and Announcements" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_purchaseapplication" displayName="Equipment Purchase Request" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_purchasechange" displayName="Host Procurement Change Request Form" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_rebateamount" displayName="Dealer annual rebate amount" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_rebatechange" displayName="Change in annual rebate amount for dealers" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_rebateusage" displayName="Annual rebate amount usage record for dealers" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_riskcatalog" displayName="Risk List" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_riskclass" displayName="Risk Category" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_riskdisposal" displayName="Risk Disposal Form" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_risksubclass" displayName="Risk Subcategory" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="new_subsidiarymanager" displayName="Subsidiary Specific Identity" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_mcs_country_mcs_customermasterdata_country" displayName="mcs_mcs_country_mcs_customermasterdata_country" parentSchemaName="mcs_country" parentDisplayName="Country" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_address_customermasterdata_mcs_customermasterdata" displayName="mcs_address_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_contact_customermasterdata_mcs_customermasterdata" displayName="mcs_contact_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_customerbankaccount_customermasterdata_mcs_customermasterdata" displayName="mcs_customerbankaccount_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_decisionchainandkpinfo_mcs_customermasterdata_mcs_customermasterdata" displayName="mcs_decisionchainandkpinfo_mcs_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_mainsalescountries_customermasterdata_mcs_customermasterdata" displayName="mcs_mainsalescountries_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_mcs_customermasterdata_mcs_customermasterdataresponsibility_customermasterdata" displayName="mcs_mcs_customermasterdata_mcs_customermasterdataresponsibility_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_mcs_customermasterdata_mcs_outstanding_customermaster" displayName="mcs_mcs_customermasterdata_mcs_outstanding_customermaster" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_sanysalingproduct_mcs_customermasterdata_mcs_customermasterdata" displayName="mcs_sanysalingproduct_mcs_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_sinitiativesforgencustomerrelationships_mcs_customermasterdata_mcs_customermasterdata" displayName="mcs_sinitiativesforgencustomerrelationships_mcs_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_sinitiativesforkeycustomerrelationships_mcs_customermasterdata_mcs_customermasterdata" displayName="mcs_sinitiativesforkeycustomerrelationships_mcs_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_sinitiativesfororgcustomerrelationships_mcs_customermasterdata_mcs_customermasterdata" displayName="mcs_sinitiativesfororgcustomerrelationships_mcs_customermasterdata_mcs_customermasterdata" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_customermasterdata_legalnature_mcs_legalnature" displayName="mcs_customermasterdata_legalnature_mcs_legalnature" parentSchemaName="mcs_legalnature" parentDisplayName="Legal Nature" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_mcs_personnel_mcs_customermasterdata_secondresponsibleperson" displayName="mcs_mcs_personnel_mcs_customermasterdata_secondresponsibleperson" parentSchemaName="mcs_personnel" parentDisplayName="Service Person" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_customermasterdata_new1stresponsiblesalesregion_mcs_region" displayName="mcs_customermasterdata_new1stresponsiblesalesregion_mcs_region" parentSchemaName="mcs_region" parentDisplayName="Region" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_customermasterdata_salesoffice_mcs_salesoffice" displayName="mcs_customermasterdata_salesoffice_mcs_salesoffice" parentSchemaName="mcs_salesoffice" parentDisplayName="Sales Office" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_customermasterdata_new1stresponsiblesales_mcs_useraccount" displayName="mcs_customermasterdata_new1stresponsiblesales_mcs_useraccount" parentSchemaName="mcs_useraccount" parentDisplayName="User Account" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="10" schemaName="mcs_mcs_customermasterdata_zipcode_mcs_zipcod" displayName="mcs_mcs_customermasterdata_zipcode_mcs_zipcod" parentSchemaName="mcs_zipcode" parentDisplayName="Zip Code" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountcategory" displayName="Account Category" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountgroup" displayName="Account Group" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountidentitytips" displayName="Account Identity Tips" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountidentitytype" displayName="Account Identity Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountlevel" displayName="Account Level" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountnumber" displayName="Reference No" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountsource" displayName="Account Source" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountstage" displayName="Account Stage" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accountstatus" displayName="Account Status" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accounttagtype" displayName="Customer Classification And Grading Labels" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_accounttype" displayName="Account Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_address" displayName="Agent Dispersion Nozzle" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_agenttag" displayName="Dealer's Mark" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_branchcode" displayName="Branch Code" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_branchdescription" displayName="Branch Description" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_brpaymentmethod" displayName="BR Payment Method" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_businessscope" displayName="Business Scope" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_businessstart" displayName="Business Start" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_businesstype" displayName="Business Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_cfopc" displayName="CFOP Category" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_cnae" displayName="CNAE" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_companytypemark" displayName="Company Type Mark (deleted)" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_companywebsite" displayName="Company Website" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_competitorstatusandtrends" displayName="Status and trends of competing products" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_coreassets" displayName="Core assets" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_country" displayName="Country" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_countrycode" displayName="Country Code" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_creditlevel" displayName="Credit Level" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_creditstanding" displayName="Credit status" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_currentcustomerrelation" displayName="Current status of customer relationships" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customerclassification" displayName="Customer Classification" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customercompetitiveenvironment" displayName="Customer competitive environment" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customerdevelopmentstrategy" displayName="Customer development strategy" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customergroup" displayName="Customer Group" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customerindustrydynamics" displayName="Industry trends of customers" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customerprocurementprocess" displayName="Customer procurement process" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_customersupplierinformation" displayName="Information on customer suppliers" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_dealerenddate" displayName="Dealer End Date" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_dealerlevel" displayName="Dealer Level" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_dealerregion" displayName="Dealer Region" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_dealerstartdate" displayName="Dealer Start Date" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_dealertype" displayName="Dealer Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_decregpc" displayName="Declaration Regimen for PIS/COFINS" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_description" displayName="Description" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_discredit" displayName="Discredit" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_domesticcompanycreated" displayName="Domestic Company Created" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_email" displayName="Email" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_englishname" displayName="Account Name(EN)" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_extend1" displayName="Extend1" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_extend2" displayName="Extend2" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_firstagreementdate" displayName="First Agreement Date" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_firstname" displayName="First Name" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_frozendate" displayName="Frozen Date" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_frozenreason" displayName="Frozen Reason" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_frozenreasontype" displayName="Frozen Reason Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_frozentype" displayName="Frozen Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_gender" displayName="Gender" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_generalcustomerrelationshipgoals" displayName="Goals of ordinary customer relationships" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_icmstaxpay" displayName="ICMS Taxpayer" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_individualnumber" displayName="Individual Number" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_industryinfluence" displayName="Industry influence" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_ipo" displayName="IPO" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_isfill_braz_taxes" displayName="Do you need to fill in the Brazilian tax?" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_isreservepartslimitordersaccount" displayName="Restricted Order Customers for Spare Parts" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_kacategory" displayName="Major Account Level" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_keyaccountlevel" displayName="Key Account Level" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_keyaccounttype" displayName="Types of major customers" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_keycustomerrelationshipgoals" displayName="Goals of key customer relationships" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_kpfoucus" displayName="Key concerns or pain points of high - level customer management" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_kvgr3" displayName="Customer usage" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_lastname" displayName="Last Name" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_latitude" displayName="Latitude" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_legainat" displayName="Legal Nature" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_legalnature" displayName="Legal Nature" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_legalnaturedescription" displayName="Description" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_legalperson" displayName="Legal Person" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_longitude" displayName="Longitude" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_macroenvironment" displayName="Macroeconomic environment" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_mainindustrymulti" displayName="Main Industry" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_maturity" displayName="Maturity" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_name" displayName="Name" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="10" schemaName="mcs_customermasterdata_mcs_credit_record_mcs_customermasterdataid" displayName="mcs_customermasterdata_mcs_credit_record_mcs_customermasterdataid" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_name" displayName="Name" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_nameenspare" displayName="NameFix(EN)" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_namespare" displayName="NameFix" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_new1stresponsiblesales" displayName="First Responsible Person" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_new1stresponsiblesalesregion" displayName="1st Responsible Sales Region" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_operationunit" displayName="Operation Unit" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_organizationtype" displayName="Organization Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_orgcustomerrelationshipgoals" displayName="Goals of organizational customer relationships" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_pannumber" displayName="PAN Number" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_phone" displayName="Mobile Phone" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_pincode" displayName="PIN Code" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_previousmasterrecordnumber" displayName="Previous Master record Number" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_procurementscale" displayName="Procurement scale" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_productstobedeveloped" displayName="Products to be developed" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_reasonsadmission" displayName="Reasons for admission" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_registrationno" displayName="Registration No" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_religiousbelief" displayName="Religious Belief" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_responsibleperson" displayName="Supplementary responsible person" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_responsibleunit" displayName="Responsible business unit" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_salesoffice" displayName="Sales Office" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sapnumber" displayName="Customer Number" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_searchterm1" displayName="Search Term 1" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_searchterm2" displayName="Search Term 2" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_secondresponsibleperson" displayName="Second Responsible Person" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_serviceleve" displayName="Service Level" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_servicetype" displayName="Service Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sinosurecode" displayName="Sinosure Code" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourcebackground" displayName="Source Background" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourcebu" displayName="Source BU" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourcefacebook" displayName="Source Facebook" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourcelastupdate" displayName="Source Last Update" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourceregion" displayName="Source Region" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourcesinosureamount" displayName="Source SINOSURE Amount" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_sourcestatus" displayName="Source Status" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_stateofoperation" displayName="State of Operation" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_stcd3" displayName="State Tax Number" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_subsidiarycategory" displayName="Subsidiary Category" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_suframa" displayName="Suframa Code" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_summarytips" displayName="Summary Tips" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_supplementindustry" displayName="Supplementary Industry" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_taxationnumber" displayName="Tax No" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_tdt" displayName="Tax Declaration Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_telephone" displayName="Fixed Telephone" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_txjcd" displayName="Tax Jurisdiction" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_txlw1" displayName="ICMS Law" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_txlw2" displayName="IPI Law" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_virtualcustomer" displayName="Virtual Customer" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_whitelist" displayName="Whitelist" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_whitelistentryreason" displayName="Whitelist Entry Reason" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_whitelistentrytype" displayName="Whitelist Entry Type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_witht1" displayName="Withholding tax type" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_witht2" displayName="Withholding tax type2" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_witht3" displayName="Withholding tax type3" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_witht4" displayName="Withholding tax type4" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdf1" displayName="Obligated from" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdf2" displayName="Obligated from2" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdf3" displayName="Obligated from3" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdf4" displayName="Obligated from4" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdt1" displayName="Obligated to" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdt2" displayName="Obligated to2" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdt3" displayName="Obligated to3" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_agtdt4" displayName="Obligated to4" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_withcd1" displayName="Withholding tax code" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_withcd2" displayName="Withholding tax code2" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_withcd3" displayName="Withholding tax code3" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_wt_withcd4" displayName="Withholding tax code4" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_xicms" displayName="ICMS-exempt" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_xsubt" displayName="SubTrib group" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_xxipi" displayName="IPI exempt" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="mcs_zipcode" displayName="Postcode" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="ms_sourceid" displayName="Source ID" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="new_is_joint_venture" displayName="Is a joint venture company" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="new_syncresource_dp" displayName="Sync source (DP)" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="2" schemaName="ownerid" displayName="Owner" parentSchemaName="mcs_customermasterdata" parentDisplayName="Customer Master Data" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="20" displayName="Account Management" solution="Active" id="{1494c446-618e-ee11-be36-000d3aa3f5e8}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="20" displayName="System Maintenance" solution="Active" id="{2bf80a9d-608e-ee11-be36-000d3aa3f5e8}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="20" displayName="CRM Maintain" solution="Active" id="{4120d97b-cf97-ee11-be37-000d3aa3f93e}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="20" displayName="Reader" solution="Active" id="{859553a1-5697-ee11-be37-000d3a07de56}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active Address" displayName="Active Address" parentSchemaName="mcs_address" parentDisplayName="Address" solution="Active" id="{15cf00c9-b319-4b7e-9211-a497fa66eeed}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active Sany sellable products" displayName="Active Sany sellable products" parentSchemaName="mcs_sanysalingproduct" parentDisplayName="Sany sellable products" solution="Active" id="{4c46fc78-6490-45e8-8bbd-be0702cd01f8}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active Customer Master Data Responsibility" displayName="Active Customer Master Data Responsibility" parentSchemaName="mcs_customermasterdataresponsibility" parentDisplayName="Customer Master Data Responsibility" solution="Active" id="{5c24dc04-7dda-4491-9cdf-7f8a13fcf4ca}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active Main sales countries/regions" displayName="Active Main sales countries/regions" parentSchemaName="mcs_mainsalescountries" parentDisplayName="Main sales countries/regions" solution="Active" id="{9bfff1d9-bf9a-4f42-b81f-e3219658cf96}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Overdue Outstanding" displayName="Overdue Outstanding" parentSchemaName="mcs_outstanding" parentDisplayName="Outstanding (Realtime)" solution="Active" id="{9d33dcfe-c86b-ee11-9ae6-000d3a07de56}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Activated information on decision - making chain and key persons" displayName="Activated information on decision - making chain and key persons" parentSchemaName="mcs_decisionchainandkpinfo" parentDisplayName="Information on the decision - making chain and key persons" solution="Active" id="{9e3e1a7c-ce1c-407e-925a-e2dfe8e68305}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active Outstanding (Realtime)" displayName="Active Outstanding (Realtime)" parentSchemaName="mcs_outstanding" parentDisplayName="Outstanding (Realtime)" solution="Active" id="{cca89046-0e77-4f80-961b-d22f733375da}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active specific measures for key customer relationships" displayName="Active specific measures for key customer relationships" parentSchemaName="mcs_sinitiativesforkeycustomerrelationships" parentDisplayName="Specific measures for key customer relationships" solution="Active" id="{cf0ad1d8-67f6-4195-963a-c45447ed14ee}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Active Customer Bank Accounts" displayName="Active Customer Bank Accounts" parentSchemaName="mcs_customerbankaccount" parentDisplayName="Customer Bank Account" solution="Active" id="{da40d090-44e7-4e5c-9bce-39adfaf37c24}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Activated specific measures for organizational customer relationships" displayName="Activated specific measures for organizational customer relationships" parentSchemaName="mcs_sinitiativesfororgcustomerrelationships" parentDisplayName="Specific measures for organizational customer relationships" solution="Active" id="{f994e9aa-099b-4662-bba2-f292492cfcad}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="26" schemaName="Specific measures for general customer relationships that have been activated" displayName="Specific measures for general customer relationships that have been activated" parentSchemaName="mcs_sinitiativesforgencustomerrelationships" parentDisplayName="Specific measures for general customer relationships" solution="Active" id="{ffb6bab3-b41d-414e-82af-0513f8c0eb3b}" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="accessChecker_icon" displayName="accessChecker_icon" solution="msft_AccessCheckerExtension (1.1.0.4)">
+          <package appName="PowerAppsUnifiedClientExtensionApp Package" version="1.0.0.62">msft_PowerAppsUnifiedClientInfraExtensions (1.0.0.62)</package>
+          <package appName="PowerAppsUnifiedClientExtensionApp Package" version="1.0.0.103">PowerAppsUnifiedClientExtensionApp_Anchor (1.0.0.103)</package>
+        </Required>
+        <Dependent type="appaction" displayName="mcs_credit_record_search_coface" id.uniquename="mcs_credit_record_search_coface" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="AppCommon/_imgs/ico/16_SSF.svg" displayName="AppCommon/_imgs/ico/16_SSF.svg" solution="msdynce_AppCommonPatch201904 (9.0.26043.10001)">
+          <package appName="msdynce_AppCommon" version="9.0.26043.10001">msdynce_AppCommonAnchor (9.0.26043.10001)</package>
+        </Required>
+        <Dependent type="appaction" displayName="mcs_credit_record_restart" id.uniquename="mcs_credit_record_restart" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="icon/msdyn_multi_sequences.svg" displayName="icon/msdyn_multi_sequences.svg" solution="msdyn_Sequence (9.1.26054.10002)">
+          <package appName="msdyn_AcceleratedSales" version="9.1.26054.10002">msdyn_AcceleratedSalesAnchor (9.1.26054.10002)</package>
+        </Required>
+        <Dependent type="appaction" displayName="mcs__!573c7ffbf3a345e0aa6d98bef171c5b8!mcs_credit_record!0" id.uniquename="mcs__!573c7ffbf3a345e0aa6d98bef171c5b8!mcs_credit_record!0" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/CommonCore/Html/Uploader.html" displayName="mcs_/CommonCore/Html/Uploader.html" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/CommonCore/Scripts/FormCommon.js" displayName="mcs_/CommonCore/Scripts/FormCommon.js" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Htmls/Sales/Account/BuSummary.html" displayName="mcs_/Htmls/Sales/Account/BuSummary.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Htmls/Sales/Account/CustomerVoice.html" displayName="mcs_/Htmls/Sales/Account/CustomerVoice.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Htmls/Sales/Account/KnowledgeCenter.html" displayName="mcs_/Htmls/Sales/Account/KnowledgeCenter.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Htmls/Sales/Account/PersonalSummary.html" displayName="mcs_/Htmls/Sales/Account/PersonalSummary.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Htmls/Sales/Account/RegionSummary.html" displayName="mcs_/Htmls/Sales/Account/RegionSummary.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Htmls/Sales/RiskControl/RiskDigital.html" displayName="mcs_/Htmls/Sales/RiskControl/RiskDigital.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Images/Icon/riskFxRightModum.svg" displayName="mcs_/Images/Icon/riskFxRightModum.svg" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Module/DynaHx/Script/DynaHx.js" displayName="mcs_/Module/DynaHx/Script/DynaHx.js" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/OM/ProductSearch/ProductSearchWinMode.html" displayName="mcs_/OM/ProductSearch/ProductSearchWinMode.html" solution="Active" />
+        <Dependent type="62" schemaName="cra80_SanyOverseasCRM" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="mcs_/Scripts/Sales/Account/CustomerMasterDataForm.js" displayName="mcs_/Scripts/Sales/Account/CustomerMasterDataForm.js" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="msdyn_CopilotIcon.svg" displayName="msdyn_CopilotIcon.svg" solution="msdyn_AppCopilotFeatures (9.2.2026052.260501061)">
+          <package appName="PowerAppsAppCopilotApp Package" version="9.2.0.1">PowerAppsAppCopilotApp_Anchor (9.2.0.1)</package>
+          <package appName="PowerAppsAppCopilotApp Package" version="1.0.0.2">msdyn_SuggestedAction (1.0.0.2)</package>
+          <package appName="PowerAppsAppCopilotApp Package" version="9.2.0.5">msdyn_M365CopilotAppInfraSettings (9.2.0.5)</package>
+        </Required>
+        <Dependent type="appaction" displayName="mcs_credit_record_refresh_data" id.uniquename="mcs_credit_record_refresh_data" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="61" schemaName="new_/js/rtcrm.min.js" displayName="new_/js/rtcrm.min.js" solution="Active" />
+        <Dependent type="60" displayName="Information" parentDisplayName="Customer Master Data" id="{3c48f4aa-1d70-425e-97e5-d45009251aae}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="66" schemaName="MscrmControls.Grid.GridControl" displayName="MscrmControls.Grid.GridControl" solution="BaseCustomControlsCore (9.0.2606.1006)">
+          <package appName="Base Custom Controls" version="9.0.2606.1006">BaseCustomControlsCore (9.0.2606.1006)</package>
+        </Required>
+        <Dependent type="60" displayName="Information" parentDisplayName="客户信用评估记录表" id="{a3e87938-2c84-4323-a99d-e98b928d80ef}" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="appaction" displayName="msdyn_Mscrm.Form.%7B!EntityLogicalName%7D.Save!0" solution="msdyn_SystemAppActions (9.1.0.57)" id.uniquename="msdyn_Mscrm.Form.{!EntityLogicalName}.Save!0">
+          <package appName="PowerAppsActions Package" version="9.1.0.57">PowerAppsActions_Anchor (9.1.0.57)</package>
+        </Required>
+        <Dependent type="appaction" displayName="msdyn_Mscrm.Form.%7B!EntityLogicalName%7D.Save!0" id.uniquename="msdyn_Mscrm.Form.{!EntityLogicalName}.Save!0" />
+      </MissingDependency>
+    </MissingDependencies>
+  </SolutionManifest>
+</ImportExportXml>

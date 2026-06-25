@@ -23,7 +23,7 @@ public class ListEntitiesHelper
 
         var query = new QueryExpression("entity")
         {
-            ColumnSet = new ColumnSet("name", "objecttypecode", "logicalname"),
+            ColumnSet = new ColumnSet("name", "objecttypecode", "logicalname", "entityid"),
             Criteria = new FilterExpression
             {
                 Conditions = { new ConditionExpression("name", ConditionOperator.BeginsWith, prefix) }
@@ -37,8 +37,47 @@ public class ListEntitiesHelper
         {
             var name = entity.GetAttributeValue<string>("name");
             var objectTypeCode = entity.GetAttributeValue<int?>("objecttypecode");
-            Console.WriteLine($"  {name} (OTC: {objectTypeCode})");
+            var entityId = entity.GetAttributeValue<Guid>("entityid");
+            Console.WriteLine($"  {name} (OTC: {objectTypeCode}, EntityId: {entityId})");
         }
+        Console.WriteLine("\n=== 完成 ===");
+    }
+
+    public void CountRecords(string[] entityNames)
+    {
+        Console.WriteLine($"\n=== 实体记录数统计 ===");
+        Console.WriteLine($"环境: {_service.ConnectedOrgUriActual}\n");
+        Console.WriteLine(string.Format("{0,-40} {1,10}", "实体逻辑名", "记录数"));
+        Console.WriteLine(new string('-', 52));
+
+        foreach (var entityName in entityNames)
+        {
+            try
+            {
+                var idAttribute = entityName + "id";
+                var fetchXml = $@"<fetch aggregate='true'>
+  <entity name='{entityName}'>
+    <attribute name='{idAttribute}' aggregate='count' alias='count'/>
+  </entity>
+</fetch>";
+                var result = _service.RetrieveMultiple(new FetchExpression(fetchXml));
+                if (result.Entities.Count > 0)
+                {
+                    var countValue = result.Entities[0].GetAttributeValue<AliasedValue>("count");
+                    var count = countValue?.Value is int i ? i : Convert.ToInt32(countValue?.Value);
+                    Console.WriteLine($"{entityName,-40} {count,10}");
+                }
+                else
+                {
+                    Console.WriteLine($"{entityName,-40} {0,10}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format("{0,-40} {1,10}", entityName, "错误: " + ex.Message));
+            }
+        }
+
         Console.WriteLine("\n=== 完成 ===");
     }
 }

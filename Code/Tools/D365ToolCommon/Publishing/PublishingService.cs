@@ -45,6 +45,8 @@ namespace D365ToolCommon.Publishing
 
         /// <summary>
         /// 发布所有元数据变更。
+        /// ⚠️ 警告：AI 禁止调用此方法。全局 PublishAll 会阻塞整个 D365 环境，必须由用户手动执行。
+        /// 如需发布，请使用 PublishEntities/PublishWebResources 等指定范围的发布方法。
         /// </summary>
         public void PublishAll()
         {

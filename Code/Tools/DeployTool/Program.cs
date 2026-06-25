@@ -49,8 +49,17 @@ namespace DeployTool
                     case "wr":
                         UpdateWebResource(serviceClient);
                         break;
+                    case "scoringcard-wr":
+                        UpdateScoringCardWebResource(serviceClient);
+                        break;
+                    case "tradestpayterm-wr":
+                        UpdateTradeStPayTermWebResource(serviceClient);
+                        break;
                     case "profile":
                         UpdateProfileWebResources(serviceClient);
+                        break;
+                    case "tradestpayterm":
+                        DeployPlugin.DeployTradeStPayTermPlugin(serviceClient);
                         break;
                     case "appactions":
                     case "buttons":
@@ -104,6 +113,7 @@ namespace DeployTool
                         break;
                     case "all":
                         UpdateWebResource(serviceClient);
+                        UpdateScoringCardWebResource(serviceClient);
                         UpdateProfileWebResources(serviceClient);
                         DeployCofaceHtmlWebResource(serviceClient);
                         new CofaceCustomActionDeployer(serviceClient).Deploy();
@@ -139,8 +149,11 @@ namespace DeployTool
             Console.WriteLine();
             Console.WriteLine("可用命令:");
             Console.WriteLine("  webresource          更新 mcs_credit_record.js WebResource");
+            Console.WriteLine("  scoringcard-wr       更新 mcs_credit_scoringcard.js WebResource");
+            Console.WriteLine("  tradestpayterm-wr    更新 mcs_trade_stpayterm.js WebResource");
             Console.WriteLine("  profile              更新信用画像 WebResource");
             Console.WriteLine("  appactions           部署 Modern Command Bar 按钮");
+            Console.WriteLine("  tradestpayterm       部署 TradeStPayTerm Plugin（自动编号 + 保存校验）");
             Console.WriteLine("  coface               部署 CofaceDataSyncPlugin");
             Console.WriteLine("  coface-search        创建 Custom Action 并部署 CofaceSearchCompanyPlugin");
             Console.WriteLine("  coface-config        部署 CofaceCountryConfig 及内部评分项目标记");
@@ -190,6 +203,88 @@ namespace DeployTool
 
             service.Update(webResource);
             Console.WriteLine($"  ✅ WebResource已更新");
+        }
+
+        static void UpdateScoringCardWebResource(ServiceClient service)
+        {
+            Console.WriteLine(">>> 更新 WebResource: mcs_credit_scoringcard.js");
+
+            var jsPath = "/Users/peterqiu/Work/AIWorkSpace/SanYi/Code/Customizations/WebResources/JS/mcs_credit_scoringcard.js";
+            var jsContent = File.ReadAllText(jsPath);
+
+            var query = new QueryExpression("webresource")
+            {
+                ColumnSet = new ColumnSet("webresourceid", "name", "content"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("name", ConditionOperator.Equal, "mcs_credit_scoringcard.js") }
+                }
+            };
+
+            var results = service.RetrieveMultiple(query);
+            if (results.Entities.Count == 0)
+            {
+                Console.WriteLine("  未找到Web资源，跳过");
+                return;
+            }
+
+            var webResource = results.Entities[0];
+            var bytes = Encoding.UTF8.GetBytes(jsContent);
+            webResource["content"] = Convert.ToBase64String(bytes);
+
+            service.Update(webResource);
+            Console.WriteLine($"  ✅ WebResource已更新");
+        }
+
+        static void UpdateTradeStPayTermWebResource(ServiceClient service)
+        {
+            Console.WriteLine(">>> 更新 WebResource: mcs_trade_stpayterm.js");
+
+            var jsPath = "/Users/peterqiu/Work/AIWorkSpace/SanYi/Code/Customizations/WebResources/JS/mcs_trade_stpayterm.js";
+            var jsContent = File.ReadAllText(jsPath);
+
+            var query = new QueryExpression("webresource")
+            {
+                ColumnSet = new ColumnSet("webresourceid", "name", "content"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("name", ConditionOperator.Equal, "mcs_trade_stpayterm.js") }
+                }
+            };
+
+            var results = service.RetrieveMultiple(query);
+            if (results.Entities.Count == 0)
+            {
+                Console.WriteLine("  未找到Web资源，跳过");
+                return;
+            }
+
+            var webResource = results.Entities[0];
+            var bytes = Encoding.UTF8.GetBytes(jsContent);
+            webResource["content"] = Convert.ToBase64String(bytes);
+
+            service.Update(webResource);
+            Console.WriteLine($"  ✅ WebResource已更新");
+
+            // 更新后自动发布单个 WebResource
+            Console.WriteLine($">>> 发布 WebResource: mcs_trade_stpayterm.js...");
+            try
+            {
+                var publishRequest = new PublishXmlRequest
+                {
+                    ParameterXml = @"<importexportxml><webresources><webresource>mcs_trade_stpayterm.js</webresource></webresources></importexportxml>"
+                };
+                service.Execute(publishRequest);
+                Console.WriteLine($"  ✅ mcs_trade_stpayterm.js 发布成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ❌ 发布失败: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"    内部异常: {ex.InnerException.Message}");
+                }
+            }
         }
 
         static void DeployCofaceHtmlWebResource(ServiceClient service)
@@ -250,7 +345,7 @@ namespace DeployTool
                 // 先尝试发布所有相关 WebResource
                 var request1 = new PublishXmlRequest
                 {
-                    ParameterXml = @"<importexportxml><webresources><webresource>mcs_credit_profile.html</webresource><webresource>mcs_credit_wheel.html</webresource><webresource>mcs_credit_record.js</webresource><webresource>mcs_coface_company_search.html</webresource></webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>"
+                    ParameterXml = @"<importexportxml><webresources><webresource>mcs_credit_profile.html</webresource><webresource>mcs_credit_wheel.html</webresource><webresource>mcs_credit_record.js</webresource><webresource>mcs_credit_scoringcard.js</webresource><webresource>mcs_coface_company_search.html</webresource><webresource>mcs_trade_stpayterm.js</webresource></webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>"
                 };
                 service.Execute(request1);
                 Console.WriteLine("  ✅ WebResource 发布成功");
@@ -265,7 +360,7 @@ namespace DeployTool
                     Console.WriteLine(">>> 降级尝试：只发布 JS WebResource...");
                     var request2 = new PublishXmlRequest
                     {
-                        ParameterXml = @"<importexportxml><webresources><webresource>mcs_credit_record.js</webresource></webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>"
+                        ParameterXml = @"<importexportxml><webresources><webresource>mcs_trade_stpayterm.js</webresource></webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>"
                     };
                     service.Execute(request2);
                     Console.WriteLine("  ✅ JS WebResource 发布成功（HTML 可能需手动发布）");

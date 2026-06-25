@@ -286,13 +286,6 @@ ScoringCardForm.onMinValueChange = function (executionContext) {
     var minValue = minField.getValue();
     var maxValue = maxField.getValue();
     
-    // 校验：最小值不能小于0
-    if (minValue !== null && minValue < 0) {
-        Xrm.Utility.alertDialog("定量最小值不能小于0");
-        minField.setValue(null);
-        return;
-    }
-    
     // 校验：最小值必须小于最大值
     if (minValue !== null && maxValue !== null && minValue >= maxValue) {
         Xrm.Utility.alertDialog("定量最小值必须小于最大值");

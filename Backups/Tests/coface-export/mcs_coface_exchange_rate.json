@@ -1,0 +1,767 @@
+[
+  {
+    "mcs_coface_exchange_rateid": "e0c5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "US Dollar",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 1.0000000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "USD",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:40.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:40.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "e8c5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Euro",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 1.2100000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "EUR",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:41.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:41.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "f5c5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Australian Dollar",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.6648000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "AUD",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:41.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:41.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "f6c5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Chinese Yuan",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.1463000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "CNY",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:41.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:41.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "f7c5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Hong Kong Dollar",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.1301000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "HKD",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:41.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:41.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "f8c5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Indian Rupee",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0122000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "INR",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:42.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:42.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "fcc5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Indonesian Rupiah",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0000644000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "IDR",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:42.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:42.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "ffc5a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Japanese Yen",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0072500000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "JPY",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:43.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:43.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "04c6a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Korean Won",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0007690000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "KRW",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:43.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:43.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "08c6a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Malaysian Ringgit",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.2479000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "MYR",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:43.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:43.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "0dc6a218-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "New Zealand Dollar",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.6335000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "NZD",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:44.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:44.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "e30bac1e-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Philippine Peso",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0186000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "PHP",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:44.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:44.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "e40bac1e-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Polish Zloty",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.2600000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "PLN",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:44.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:44.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "e70bac1e-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Singapore Dollar",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.8121000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "SGD",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:45.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "e80bac1e-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "New Taiwan Dollar",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0354000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "TWD",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:45.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "e90bac1e-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Thai Baht",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0322000000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "THB",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:45.0000000Z"
+  },
+  {
+    "mcs_coface_exchange_rateid": "ea0bac1e-c566-f111-ab0c-7ced8de4eab4",
+    "owningbusinessunit": {
+      "type": "EntityReference",
+      "logicalName": "businessunit",
+      "id": "e6cfd656-3202-ee11-8f6e-000d3ac7739b"
+    },
+    "mcs_isactive": true,
+    "statecode": {
+      "type": "OptionSetValue",
+      "value": 0
+    },
+    "statuscode": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_currencyname": "Vietnamese Dong",
+    "createdby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "mcs_effectivedate": "2026-01-01T00:00:00.0000000Z",
+    "mcs_rate_to_usd": 0.0000402000,
+    "timezoneruleversionnumber": 4,
+    "mcs_currencycode": "VND",
+    "mcs_remark": "2026 Budget \u6C47\u7387\uFF0C\u6765\u6E90\uFF1A\u6D77\u5916\u5BA2\u6237\u8BC4\u5206\u5361\u9879\u76EE\u548C\u79D1\u6CD5\u65AF\u63A5\u53E3\u5B57\u6BB5\u53D6\u6570\u53CD\u9988\u886820260408",
+    "ownerid": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedon": "2026-06-13T01:13:45.0000000Z",
+    "owninguser": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "modifiedby": {
+      "type": "EntityReference",
+      "logicalName": "systemuser",
+      "id": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+    },
+    "createdon": "2026-06-13T01:13:45.0000000Z"
+  }
+]

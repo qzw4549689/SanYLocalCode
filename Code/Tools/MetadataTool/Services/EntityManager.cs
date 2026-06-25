@@ -118,6 +118,30 @@ namespace D365MetadataTool
         }
 
         /// <summary>
+        /// 更新整数字段的取值范围
+        /// </summary>
+        public void UpdateIntegerFieldRange(string entityLogicalName, string attributeLogicalName, int minValue, int maxValue)
+        {
+            Console.WriteLine($"更新整数字段范围: {entityLogicalName}.{attributeLogicalName} -> [{minValue}, {maxValue}]");
+
+            var attribute = new IntegerAttributeMetadata
+            {
+                LogicalName = attributeLogicalName,
+                MinValue = minValue,
+                MaxValue = maxValue
+            };
+
+            var request = new UpdateAttributeRequest
+            {
+                EntityName = entityLogicalName,
+                Attribute = attribute
+            };
+
+            _service.Execute(request);
+            Console.WriteLine($"  ✓ 整数字段范围更新成功");
+        }
+
+        /// <summary>
         /// 删除实体（危险操作！）
         /// </summary>
         public void DeleteEntity(string entityName)
@@ -726,12 +750,49 @@ namespace D365MetadataTool
             return result;
         }
 
+        /// <summary>
+        /// 列出环境中所有用户可见的解决方案
+        /// </summary>
+        public void ListSolutions()
+        {
+            Console.WriteLine("环境中解决方案列表:\n");
+
+            var query = new QueryExpression("solution")
+            {
+                ColumnSet = new ColumnSet("uniquename", "friendlyname", "publisherid", "version"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("isvisible", ConditionOperator.Equal, true)
+                    }
+                },
+                Orders = { new OrderExpression("friendlyname", OrderType.Ascending) }
+            };
+
+            var solutions = _service.RetrieveMultiple(query);
+            Console.WriteLine($"{"Unique Name",-50} {"Display Name",-40} {"Version",-15}");
+            Console.WriteLine(new string('-', 105));
+
+            foreach (var solution in solutions.Entities)
+            {
+                var uniqueName = solution.GetAttributeValue<string>("uniquename") ?? "";
+                var friendlyName = solution.GetAttributeValue<string>("friendlyname") ?? "";
+                var version = solution.GetAttributeValue<string>("version") ?? "";
+                Console.WriteLine($"{uniqueName,-50} {friendlyName,-40} {version,-15}");
+            }
+
+            Console.WriteLine($"\n总计: {solutions.Entities.Count} 个解决方案");
+        }
+
         #endregion
 
         #region 发布操作
 
         /// <summary>
         /// 发布所有自定义项
+        /// ⚠️ 警告：AI 禁止调用此方法。全局 PublishAll 会阻塞整个 D365 环境，必须由用户手动执行。
+        /// 如需发布，请使用 PublishEntity/PublishEntities/PublishWebResources 等指定范围的发布方法。
         /// </summary>
         public void PublishAll()
         {
@@ -1071,6 +1132,10 @@ namespace D365MetadataTool
                 ["mcs_credit_item"] = "mcs_credit_items",
                 ["mcs_credititem"] = "mcs_credit_items",
                 ["mcs_listvalue"] = "mcs_credititem_value",
+                ["mcs_businessunit"] = "mcs_bu",
+                ["mcs_subsidiary"] = "mcs_region",
+                ["mcs_nation"] = "mcs_country",
+                ["mcs_trade_pttype"] = "mcs_trade_pttype",
             };
             
             if (lookupMap.TryGetValue(fieldName, out string target))
@@ -1136,7 +1201,7 @@ namespace D365MetadataTool
         /// <summary>
         /// 重新排列窗体字段（两列布局 + 分组）
         /// </summary>
-        public void RearrangeForm(string entityName, Dictionary<string, List<(string fieldName, string displayName)>> fieldGroups, HashSet<string> lookupFields = null, Dictionary<string, (string dependentField, string dependentEntity, string filterRelationship)> lookupFilterMap = null)
+        public void RearrangeForm(string entityName, Dictionary<string, List<(string fieldName, string displayName)>> fieldGroups, HashSet<string> lookupFields = null, Dictionary<string, (string dependentField, string dependentEntity, string filterRelationship)> lookupFilterMap = null, HashSet<string> picklistFields = null)
         {
             Console.WriteLine($"重新排列 {entityName} 窗体...");
             
@@ -1184,9 +1249,10 @@ namespace D365MetadataTool
                         
                         newSectionsXml += "<row>";
                         bool isLookup1 = lookupFields != null && lookupFields.Contains(fields[i].fieldName);
+                        bool isPicklist1 = picklistFields != null && picklistFields.Contains(fields[i].fieldName);
                         string classid1 = isLookup1 
                             ? "{270BD3DB-D9AF-4782-9025-509E298DEC0A}" 
-                            : "{4273EDBD-AC1D-40d3-9FB2-095C621B552D}";
+                            : (isPicklist1 ? "{3EF39988-22BB-4f0b-BBBE-64B5A3748AEE}" : "{4273EDBD-AC1D-40d3-9FB2-095C621B552D}");
                         
                         if (isLookup1)
                         {
@@ -1210,9 +1276,10 @@ namespace D365MetadataTool
                         if (i + 1 < fields.Count)
                         {
                             bool isLookup2 = lookupFields != null && lookupFields.Contains(fields[i+1].fieldName);
+                            bool isPicklist2 = picklistFields != null && picklistFields.Contains(fields[i+1].fieldName);
                             string classid2 = isLookup2 
                                 ? "{270BD3DB-D9AF-4782-9025-509E298DEC0A}" 
-                                : "{4273EDBD-AC1D-40d3-9FB2-095C621B552D}";
+                                : (isPicklist2 ? "{3EF39988-22BB-4f0b-BBBE-64B5A3748AEE}" : "{4273EDBD-AC1D-40d3-9FB2-095C621B552D}");
                             
                             if (isLookup2)
                             {
@@ -1743,30 +1810,52 @@ namespace D365MetadataTool
                 "mcs_customer_tag" => "CustomerTagForm",
                 "mcs_credititem_value" => "CreditItemValueForm",
                 "account" => "AccountForm",
+                "mcs_trade_stpayterm" => "TradeStPayTermForm",
                 _ => "ScoringCardForm"
             };
             
             // 3. 检查是否已绑定
             if (formXml.Contains($"library name=\"{webResourceName}\""))
             {
-                // 已绑定，检查函数名是否正确
-                if (!formXml.Contains($"{jsPrefix}.onLoad"))
+                // 已绑定，检查是否存在错误/旧的事件处理函数名
+                bool hasCorrectLoad = formXml.Contains($"functionName=\"{jsPrefix}.onLoad\"");
+                bool hasCorrectSave = formXml.Contains($"functionName=\"{jsPrefix}.onSave\"");
+                bool hasWrongHandler = System.Text.RegularExpressions.Regex.IsMatch(
+                    formXml,
+                    $"functionName=\"(?!{jsPrefix}\\.on(Load|Save))[^\"]+\\.on(Load|Save)\"");
+
+                if (!hasCorrectLoad || !hasCorrectSave || hasWrongHandler)
                 {
-                    // 函数名不匹配，更新events中的函数名
-                    formXml = formXml.Replace("ScoringCardForm.onLoad", $"{jsPrefix}.onLoad");
-                    formXml = formXml.Replace("ScoringCardForm.onSave", $"{jsPrefix}.onSave");
-                    
+                    // 移除所有来自该 WebResource 且函数名不匹配的事件 Handler
+                    formXml = System.Text.RegularExpressions.Regex.Replace(
+                        formXml,
+                        $"<Handler[^>]*libraryName=\"{webResourceName}\"[^>]*functionName=\"(?!{jsPrefix}\\.).*?\"[^>]*/>",
+                        string.Empty);
+
+                    // 确保有正确的事件节点
+                    string correctLoadHandler = $"<Handler handlerUniqueId=\"{{{Guid.NewGuid()}}}\" libraryName=\"{webResourceName}\" functionName=\"{jsPrefix}.onLoad\" enabled=\"true\" parameters=\"\" passExecutionContext=\"true\" />";
+                    string correctSaveHandler = $"<Handler handlerUniqueId=\"{{{Guid.NewGuid()}}}\" libraryName=\"{webResourceName}\" functionName=\"{jsPrefix}.onSave\" enabled=\"true\" parameters=\"\" passExecutionContext=\"true\" />";
+
+                    if (!hasCorrectLoad)
+                    {
+                        formXml = InsertEventHandler(formXml, "onload", correctLoadHandler);
+                    }
+                    if (!hasCorrectSave)
+                    {
+                        formXml = InsertEventHandler(formXml, "onsave", correctSaveHandler);
+                    }
+
                     // 更新表单
                     var updateForm2 = new Entity("systemform", form.Id);
                     updateForm2["formxml"] = formXml;
                     _service.Update(updateForm2);
-                    
+
                     // 发布
                     var publishRequest2 = new PublishXmlRequest();
                     publishRequest2.ParameterXml = $"<importexportxml><entities><entity>{entityName}</entity></entities><nodes/><securityroles/><settings/><workflows/></importexportxml>";
                     _service.Execute(publishRequest2);
-                    
-                    Console.WriteLine($"  ✓ JS函数名已更新为 {jsPrefix}");
+
+                    Console.WriteLine($"  ✓ JS事件处理函数已修正为 {jsPrefix}");
                     return;
                 }
                 Console.WriteLine($"  ⊘ JS已绑定，跳过");
@@ -1832,6 +1921,44 @@ namespace D365MetadataTool
             Console.WriteLine($"  ✓ 表单已发布");
             
             Console.WriteLine($"  ✓ JS已绑定到表单");
+        }
+
+        /// <summary>
+        /// 向表单 XML 的指定事件中插入 Handler（如事件不存在则创建）
+        /// </summary>
+        private string InsertEventHandler(string formXml, string eventName, string handlerXml)
+        {
+            var eventPattern = $"<event name=\"{eventName}\"[^>]*>.*?<Handlers>(.*?)</Handlers>.*?</event>";
+            var match = System.Text.RegularExpressions.Regex.Match(formXml, eventPattern, System.Text.RegularExpressions.RegexOptions.Singleline);
+            if (match.Success)
+            {
+                var handlersContent = match.Groups[1].Value;
+                var newHandlersContent = handlersContent + handlerXml;
+                return formXml.Substring(0, match.Groups[1].Index) + newHandlersContent + formXml.Substring(match.Groups[1].Index + match.Groups[1].Length);
+            }
+            else
+            {
+                string newEventXml = $@"
+    <event name='{eventName}' application='false' active='true'>
+      <Handlers>
+        {handlerXml}
+      </Handlers>
+    </event>";
+                int eventsEnd = formXml.IndexOf("</events>");
+                if (eventsEnd > 0)
+                {
+                    return formXml.Insert(eventsEnd, newEventXml);
+                }
+                else
+                {
+                    int formEnd = formXml.LastIndexOf("</form>");
+                    if (formEnd > 0)
+                    {
+                        return formXml.Insert(formEnd, $"<events>{newEventXml}</events>");
+                    }
+                }
+            }
+            return formXml;
         }
 
         #endregion
@@ -1995,6 +2122,86 @@ namespace D365MetadataTool
             }
             
             Console.WriteLine("  ✓ Plugin注册完成");
+        }
+
+        /// <summary>
+        /// 仅注册 Plugin Assembly 和 Plugin Type，不注册 Step。
+        /// 用于 Custom API 等由系统托管调用关系的场景。
+        /// </summary>
+        public Guid RegisterPluginAssemblyOnly(string dllPath, string className)
+        {
+            Console.WriteLine($">>> 注册 Plugin Assembly: {Path.GetFileName(dllPath)}");
+
+            if (!File.Exists(dllPath))
+            {
+                Console.WriteLine($"  ✗ DLL不存在: {dllPath}");
+                return Guid.Empty;
+            }
+
+            byte[] dllBytes = File.ReadAllBytes(dllPath);
+            string base64Dll = Convert.ToBase64String(dllBytes);
+            string assemblyName = Path.GetFileNameWithoutExtension(dllPath);
+
+            // 1. 注册/更新 Assembly
+            var assemblyQuery = new QueryExpression("pluginassembly")
+            {
+                ColumnSet = new ColumnSet("pluginassemblyid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("name", ConditionOperator.Equal, assemblyName) }
+                }
+            };
+
+            var assemblyResult = _service.RetrieveMultiple(assemblyQuery);
+            Guid assemblyId;
+
+            if (assemblyResult.Entities.Count > 0)
+            {
+                assemblyId = assemblyResult.Entities[0].Id;
+                var updateAssembly = new Entity("pluginassembly", assemblyId);
+                updateAssembly["content"] = base64Dll;
+                _service.Update(updateAssembly);
+                Console.WriteLine($"  ✓ Plugin Assembly已更新 (ID: {assemblyId})");
+            }
+            else
+            {
+                var newAssembly = new Entity("pluginassembly");
+                newAssembly["name"] = assemblyName;
+                newAssembly["content"] = base64Dll;
+                newAssembly["sourcetype"] = new OptionSetValue(0); // Database
+                newAssembly["isolationmode"] = new OptionSetValue(2); // Sandbox
+                newAssembly["culture"] = "neutral";
+                newAssembly["version"] = "1.0.0.0";
+                newAssembly["publickeytoken"] = "null";
+                assemblyId = _service.Create(newAssembly);
+                Console.WriteLine($"  ✓ Plugin Assembly已创建 (ID: {assemblyId})");
+            }
+
+            // 2. 注册/更新 Plugin Type
+            var typeQuery = new QueryExpression("plugintype")
+            {
+                ColumnSet = new ColumnSet("plugintypeid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("typename", ConditionOperator.Equal, className) }
+                }
+            };
+
+            var typeResult = _service.RetrieveMultiple(typeQuery);
+            if (typeResult.Entities.Count > 0)
+            {
+                Console.WriteLine($"  ✓ Plugin Type已存在 (ID: {typeResult.Entities[0].Id})");
+                return typeResult.Entities[0].Id;
+            }
+
+            var newType = new Entity("plugintype");
+            newType["pluginassemblyid"] = new EntityReference("pluginassembly", assemblyId);
+            newType["typename"] = className;
+            newType["friendlyname"] = className.Split('.').Last();
+            newType["name"] = className.Split('.').Last();
+            var pluginTypeId = _service.Create(newType);
+            Console.WriteLine($"  ✓ Plugin Type已创建 (ID: {pluginTypeId})");
+            return pluginTypeId;
         }
 
         /// <summary>
@@ -2185,8 +2392,13 @@ namespace D365MetadataTool
 
             // D365选项集值格式: 100000000 + index
             // dtype: 100000000=定量, 100000001=定性
-            // group: 100000000=客户实力, 100000001=客户财务, 100000002=宏观市场, 100000003=历史交易
+            // group: 100000000=客户实力, 100000001=客户财务, 100000002=宏观市场, 100000003=历史交易, 100000004=综合指标
             // source: 100000000=内部, 100000001=外部
+
+            // 确保综合指标分类选项存在
+            try { InsertOptionValue("mcs_credit_items", "mcs_group", "综合指标", 100000004); }
+            catch (Exception ex) { Console.WriteLine($"  综合指标选项可能已存在: {ex.Message}"); }
+
             var items = new (string code, string name, string desc, int dtype, int group, int source, bool validate, bool thirdParty)[]
             {
                 // 客户实力 (7项)
@@ -2213,11 +2425,16 @@ namespace D365MetadataTool
                 
                 // 历史交易 (6项)
                 ("OverdueModel", "逾期未回收率模型分", "逾期未回收率模型分（0-100）", 100000000, 100000003, 100000000, true, false),
-                ("BigAccount", "客户评级", "客户评级S/A/S或A级控股参股公司", 100000001, 100000003, 100000000, false, false),
+                ("BigAccount", "客户评级", "客户评级 S/A/S或A级控股参股公司", 100000001, 100000003, 100000000, false, false),
                 ("SalesAmount", "历史采购金额", "累计采购金额,单位元,货币USD", 100000000, 100000003, 100000000, false, false),
                 ("ARAmount", "历史逾期金额", "最大逾期付款金额（过去两年）USD/元", 100000000, 100000003, 100000000, false, false),
                 ("ARAge", "历史逾期账龄", "最大逾期账龄天数（过去两年）USD/元", 100000000, 100000003, 100000000, false, false),
                 ("DealerRating", "经销商分级", "经销商分级（钻石、铂金、白银等）", 100000001, 100000003, 100000000, false, false),
+
+                // 综合指标 (3项)
+                ("NewOldCust", "新老客户", "老客户标签需有历史销售订单交易", 100000001, 100000004, 100000000, false, false),
+                ("CreditScore", "客户信用评分", "客户信用评分基于评分卡计算获得", 100000000, 100000004, 100000000, false, false),
+                ("CreditGrade", "客户等级", "客户等级标准采用A0-A4(A0最高):A0≥80/A1≥70/A2≥60/A3≥50/A4<50客户信用分", 100000001, 100000004, 100000000, false, false),
             };
 
             int created = 0;
@@ -2243,10 +2460,12 @@ namespace D365MetadataTool
                     var existingEntity = result.Entities[0];
                     bool needUpdate = false;
                     
-                    // 检查字段是否为空，需要更新
-                    if (!existingEntity.Contains("mcs_itemname") || string.IsNullOrEmpty(existingEntity.GetAttributeValue<string>("mcs_itemname")))
+                    // 检查字段是否为空或与当前定义不一致，需要更新
+                    var existingName = existingEntity.Contains("mcs_itemname") ? existingEntity.GetAttributeValue<string>("mcs_itemname") : null;
+                    var existingDesc = existingEntity.Contains("mcs_itemdesc") ? existingEntity.GetAttributeValue<string>("mcs_itemdesc") : null;
+                    if (string.IsNullOrEmpty(existingName) || existingName != item.name)
                         needUpdate = true;
-                    if (!existingEntity.Contains("mcs_itemdesc") || string.IsNullOrEmpty(existingEntity.GetAttributeValue<string>("mcs_itemdesc")))
+                    if (string.IsNullOrEmpty(existingDesc) || existingDesc != item.desc)
                         needUpdate = true;
                     if (!existingEntity.Contains("mcs_datatype"))
                         needUpdate = true;
@@ -2467,6 +2686,120 @@ namespace D365MetadataTool
         }
 
         /// <summary>
+        /// 创建成交条件产品分类及产品分类关系示例数据
+        /// </summary>
+        public void CreateTradePtTypeSampleData()
+        {
+            Console.WriteLine("=== 创建成交条件产品分类示例数据 ===");
+
+            var ptTypes = new (string code, string name, string nameEn)[]
+            {
+                ("01", "燃油牵引车", "Fuel Tractor"),
+                ("02", "电动牵引车", "Electric Tractor"),
+                ("03", "泵车", "Concrete Pump Truck")
+            };
+
+            var ptTypeIdMap = new Dictionary<string, Guid>();
+            int createdType = 0;
+            int existingType = 0;
+
+            foreach (var pt in ptTypes)
+            {
+                // 检查是否已存在
+                var query = new QueryExpression("mcs_trade_pttype")
+                {
+                    ColumnSet = new ColumnSet("mcs_trade_pttypeid"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions = { new ConditionExpression("mcs_typeid", ConditionOperator.Equal, pt.code) }
+                    },
+                    TopCount = 1
+                };
+
+                var result = _service.RetrieveMultiple(query);
+                if (result.Entities.Count > 0)
+                {
+                    ptTypeIdMap[pt.code] = result.Entities[0].Id;
+                    Console.WriteLine($"  ⊘ 产品分类已存在: {pt.code}={pt.name}");
+                    existingType++;
+                    continue;
+                }
+
+                // 创建产品分类记录
+                var entity = new Entity("mcs_trade_pttype");
+                entity["mcs_trade_pttypename"] = pt.name;
+                entity["mcs_typeid"] = pt.code;
+                entity["mcs_typenameen"] = pt.nameEn;
+
+                var id = _service.Create(entity);
+                ptTypeIdMap[pt.code] = id;
+                Console.WriteLine($"  ✓ 创建产品分类: {pt.code}={pt.name}, ID={id}");
+                createdType++;
+            }
+
+            Console.WriteLine($"\n产品分类: 创建{createdType}条, 已存在{existingType}条");
+
+            Console.WriteLine("\n=== 创建成交条件产品分类关系示例数据 ===");
+
+            var ptGroups = new (string groupId, string groupName, string typeCode)[]
+            {
+                ("AK", "牵引车", "01"),
+                ("EL", "电动牵引车", "02"),
+                ("PM", "泵车", "03")
+            };
+
+            int createdGroup = 0;
+            int existingGroup = 0;
+
+            foreach (var pg in ptGroups)
+            {
+                if (!ptTypeIdMap.TryGetValue(pg.typeCode, out var ptTypeId))
+                {
+                    Console.WriteLine($"  ✗ 未找到产品分类 {pg.typeCode}，跳过: {pg.groupId}");
+                    continue;
+                }
+
+                // 检查是否已存在
+                var query = new QueryExpression("mcs_trade_ptgrouptype")
+                {
+                    ColumnSet = new ColumnSet("mcs_trade_ptgrouptypeid"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_groupid", ConditionOperator.Equal, pg.groupId),
+                            new ConditionExpression("mcs_typeid", ConditionOperator.Equal, pg.typeCode)
+                        }
+                    },
+                    TopCount = 1
+                };
+
+                var result = _service.RetrieveMultiple(query);
+                if (result.Entities.Count > 0)
+                {
+                    Console.WriteLine($"  ⊘ 产品分类关系已存在: {pg.groupId}={pg.groupName}");
+                    existingGroup++;
+                    continue;
+                }
+
+                // 创建产品分类关系记录
+                var entity = new Entity("mcs_trade_ptgrouptype");
+                entity["mcs_trade_ptgrouptypename"] = $"{pg.groupName}-{pg.typeCode}";
+                entity["mcs_groupid"] = pg.groupId;
+                entity["mcs_groupname"] = pg.groupName;
+                entity["mcs_typeid"] = pg.typeCode;
+                entity["mcs_typename"] = ptTypes.First(t => t.code == pg.typeCode).name;
+                entity["mcs_trade_pttypeid"] = new EntityReference("mcs_trade_pttype", ptTypeId);
+
+                var id = _service.Create(entity);
+                Console.WriteLine($"  ✓ 创建产品分类关系: {pg.groupId}={pg.groupName}, ID={id}");
+                createdGroup++;
+            }
+
+            Console.WriteLine($"\n产品分类关系: 创建{createdGroup}条, 已存在{existingGroup}条");
+        }
+
+        /// <summary>
         /// 修复 Coface 定性指标枚举值：
         /// 1. 删除 CountryRisk 旧记录 1/2/3（Coface 实际返回 A1/A2/A3/A4/B/C/D/E）
         /// 2. 删除 Sectors 英文 listValue 记录（改为中文）
@@ -2598,6 +2931,147 @@ namespace D365MetadataTool
             }
 
             Console.WriteLine($"\n完成: 共删除 {deleted} 条记录");
+        }
+
+        /// <summary>
+        /// 创建成交条件样板库测试记录，用于验证自动编码和保存校验 Plugin
+        /// </summary>
+        public void CreateTradeStPayTermTestRecord()
+        {
+            Console.WriteLine("=== 创建成交条件样板库测试记录 ===");
+
+            // 清理历史测试记录（事业部编码 = BU-TEST）
+            CleanupTradeStPayTermTestRecords();
+
+            // 测试 1：首付款比例 > 1
+            TestInvalidRecord("首付款比例 > 1", e => e["mcs_downpay"] = 1.5m);
+
+            // 测试 2：账期不是 30 倍数
+            TestInvalidRecord("账期不是 30 倍数", e => e["mcs_payterm"] = 45);
+
+            // 测试 3：首付款 100% 但账期不为 0
+            TestInvalidRecord("首付款100%但账期不为0", e =>
+            {
+                e["mcs_downpay"] = 1.0m;
+                e["mcs_payterm"] = 30;
+                e["mcs_payfreq"] = 0;
+            });
+
+            // 测试 4：创建合法记录（不同国家，避免重复）
+            Guid recordId;
+            try
+            {
+                var entity = CreateTestEntity("US", "美国");
+                recordId = _service.Create(entity);
+                Console.WriteLine($"  ✓ 合法测试记录创建成功，ID: {recordId}");
+
+                var created = _service.Retrieve("mcs_trade_stpayterm", recordId, new ColumnSet("mcs_trade_stpaytermname"));
+                var code = created.GetAttributeValue<string>("mcs_trade_stpaytermname");
+                Console.WriteLine($"  ✓ 自动生成标准条件编码: {code}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ❌ 合法测试记录创建失败: {ex.Message}");
+                throw;
+            }
+
+            // 测试 5：不传入生效状态，验证 Plugin 默认值 = 0
+            try
+            {
+                var entity = CreateTestEntity("DE", "德国");
+                entity.Attributes.Remove("mcs_status");
+                var id = _service.Create(entity);
+                var created = _service.Retrieve("mcs_trade_stpayterm", id, new ColumnSet("mcs_status"));
+                var status = created.GetAttributeValue<OptionSetValue>("mcs_status")?.Value;
+                if (status == 0)
+                {
+                    Console.WriteLine($"  ✓ 状态默认值校验通过: mcs_status = 0（未传入时 Plugin 正确默认）");
+                }
+                else
+                {
+                    Console.WriteLine($"  ❌ 状态默认值校验失败: mcs_status = {status}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ❌ 状态默认值测试失败: {ex.Message}");
+                throw;
+            }
+
+            // 测试 6：相同维度再次创建，验证重复校验
+            try
+            {
+                var entity = CreateTestEntity("US", "美国");
+                _service.Create(entity);
+                Console.WriteLine($"  ❌ 重复校验未生效，相同维度记录创建成功");
+            }
+            catch (Exception ex) when (ex.Message.Contains("保存失败") || ex.Message.Contains("存在有重复记录"))
+            {
+                Console.WriteLine($"  ✓ 重复校验生效: {ex.Message}");
+            }
+        }
+
+        private void CleanupTradeStPayTermTestRecords()
+        {
+            var query = new QueryExpression("mcs_trade_stpayterm")
+            {
+                ColumnSet = new ColumnSet("mcs_trade_stpaytermid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("mcs_buid", ConditionOperator.Equal, "BU-TEST")
+                    }
+                }
+            };
+
+            var result = _service.RetrieveMultiple(query);
+            int count = 0;
+            foreach (var record in result.Entities)
+            {
+                _service.Delete("mcs_trade_stpayterm", record.Id);
+                count++;
+            }
+            if (count > 0)
+            {
+                Console.WriteLine($"  ✓ 已清理 {count} 条历史测试记录");
+            }
+        }
+
+        private Entity CreateTestEntity(string countryCode, string countryName)
+        {
+            return new Entity("mcs_trade_stpayterm")
+            {
+                ["mcs_buid"] = "BU-TEST",
+                ["mcs_buname"] = "测试事业部",
+                ["mcs_subid"] = "SUB-TEST",
+                ["mcs_subname"] = "测试子公司",
+                ["mcs_countrycode"] = countryCode,
+                ["mcs_countryname"] = countryName,
+                ["mcs_typeid"] = "01",
+                ["mcs_typename"] = "燃油牵引车",
+                ["mcs_buyergrade"] = "S/A",
+                ["mcs_creditgrade"] = "A0",
+                ["mcs_downpay"] = 0.21m,
+                ["mcs_payterm"] = 60,
+                ["mcs_payfreq"] = 30,
+                ["mcs_status"] = new OptionSetValue(0)
+            };
+        }
+
+        private void TestInvalidRecord(string testName, Action<Entity> setup)
+        {
+            try
+            {
+                var entity = CreateTestEntity("US", "美国");
+                setup(entity);
+                _service.Create(entity);
+                Console.WriteLine($"  ❌ [{testName}] 未触发校验，创建成功");
+            }
+            catch (Exception ex) when (ex.Message.Contains("保存失败") || ex.Message.Contains("valid range") || ex.Message.Contains("outside"))
+            {
+                Console.WriteLine($"  ✓ [{testName}] 校验生效: {ex.Message}");
+            }
         }
 
         /// <summary>

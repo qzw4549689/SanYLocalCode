@@ -159,7 +159,15 @@
                           <label description="复核定性指标" languagecode="1033" />
                           <label description="复核定性指标" languagecode="2052" />
                         </labels>
-                        <control id="mcs_itemtxtvalue2" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="mcs_itemtxtvalue2" />
+                        <control id="mcs_credititem_value" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="mcs_credititem_value">
+                          <parameters>
+                            <DefaultViewId>{d07ce644-6876-44e2-918b-cf547e5982f4}</DefaultViewId>
+                            <AvailableViewIds>{d07ce644-6876-44e2-918b-cf547e5982f4}</AvailableViewIds>
+                            <DependentAttributeName>mcs_customer_tag.mcs_credit_item</DependentAttributeName>
+                            <DependentAttributeType>mcs_credit_items</DependentAttributeType>
+                            <FilterRelationshipName>mcs_credit_items_mcs_credititem_value_mcs_credititemno</FilterRelationshipName>
+                          </parameters>
+                        </control>
                       </cell>
                     </row>
                   </rows>

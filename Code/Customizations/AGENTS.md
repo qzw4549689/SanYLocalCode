@@ -93,6 +93,7 @@
 - 主集成分支是 `uat`
 - 个人分支命名：`uat-日期-姓名缩写-功能简述`
 - **不要直接 push `uat` 分支，必须走 PR**
+- **所有针对 Azure DevOps D365 项目仓库（`https://dev.azure.com/SanyGlobalCRM/D365/_git/D365`）的 push、PR 分支创建、合并操作，必须在远程服务器 `tx-windows`（`122.51.232.70`，`C:\Projects\D365`）上进行**。本地 Mac 上的 SanYi 目录禁止推送至该项目仓库。
 - 远程编译通过后尽快推分支、建 PR，避免代码积压
 
 ---

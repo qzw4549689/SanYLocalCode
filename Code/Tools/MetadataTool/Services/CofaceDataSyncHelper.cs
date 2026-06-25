@@ -47,7 +47,7 @@ public class CofaceDataSyncHelper
 
     public void ImportFromFile(string entityName, string filePath)
     {
-        Console.WriteLine($"\n=== 导入 {entityName} 数据到 UAT ===");
+        Console.WriteLine($"\n=== 导入 {entityName} 数据 ===");
 
         if (!File.Exists(filePath))
         {
@@ -63,20 +63,60 @@ public class CofaceDataSyncHelper
             return;
         }
 
-        // 先查询 UAT 中是否已有数据
+        // 先查询目标环境中是否已有数据
         var existingQuery = new QueryExpression(entityName)
         {
             ColumnSet = new ColumnSet(entityName + "id")
         };
         var existing = _service.RetrieveMultiple(existingQuery);
-        Console.WriteLine($"UAT 中已有 {existing.Entities.Count} 条记录");
+        Console.WriteLine($"目标环境中已有 {existing.Entities.Count} 条记录");
 
         if (existing.Entities.Count > 0)
         {
-            Console.WriteLine("⚠️ UAT 中已有数据，跳过导入（避免重复）");
+            Console.WriteLine("⚠️ 目标环境中已有数据，跳过导入（避免重复）");
             return;
         }
 
+        DoImport(entityName, records);
+    }
+
+    public void CleanAndImport(string entityName, string filePath)
+    {
+        Console.WriteLine($"\n=== 清空并导入 {entityName} 数据 ===");
+
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine($"❌ 文件不存在: {filePath}");
+            return;
+        }
+
+        var json = File.ReadAllText(filePath);
+        var records = JsonSerializer.Deserialize<List<Dictionary<string, object?>>>(json);
+        if (records == null || records.Count == 0)
+        {
+            Console.WriteLine("❌ 没有数据需要导入");
+            return;
+        }
+
+        // 清空现有数据
+        int deletedCount = 0;
+        var existingQuery = new QueryExpression(entityName)
+        {
+            ColumnSet = new ColumnSet(entityName + "id")
+        };
+        var existing = _service.RetrieveMultiple(existingQuery);
+        foreach (var e in existing.Entities)
+        {
+            _service.Delete(entityName, e.Id);
+            deletedCount++;
+        }
+        Console.WriteLine($"已清空现有数据: {deletedCount} 条");
+
+        DoImport(entityName, records);
+    }
+
+    private void DoImport(string entityName, List<Dictionary<string, object?>> records)
+    {
         int success = 0;
         int failed = 0;
         foreach (var record in records)
