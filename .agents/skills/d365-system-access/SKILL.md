@@ -52,6 +52,20 @@ description: D365 项目系统访问与工具认证指南。包含 Git 仓库、
 | 管理员后台 | https://sany-uat.crm5.dynamics.com/tools/Solution/home_solution.aspx?etc=7100 |
 | 用户名 | `gw_qiuzw@sanyglobal.onmicrosoft.com` |
 
+### 3.1 UAT 测试账号
+
+> 用于权限/角色测试，密码默认尝试 `CRM#2025`、`CRM#2024`、`CRM#2026`，均不对则联系李智（liz273）重置。
+
+| 角色 | 账号 |
+|------|------|
+| 营销代表 | `UATUser16@sanyglobal.onmicrosoft.com` |
+| 区域营管 | `UATUser70@sanyglobal.onmicrosoft.com` |
+| 营销代表 + 区域营管 | `UATUser08@sanyglobal.onmicrosoft.com` |
+| 总部营管 | `UATUser14@sanyglobal.onmicrosoft.com` |
+| 子总（风控权限足够） | `UATUser06@sanyglobal.onmicrosoft.com` |
+| 服务工程师 | `UATUser60@sanyglobal.onmicrosoft.com`<br>`UATUser32@sanyglobal.onmicrosoft.com` |
+| 服务部长 | `UATUser52@sanyglobal.onmicrosoft.com` |
+
 ---
 
 ## 4. 本地工具认证方式

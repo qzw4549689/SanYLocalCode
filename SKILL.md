@@ -31,6 +31,8 @@ AI 会基于当前会话和 `Memory.md`，整理出 **当前焦点 / 已完成 /
 → 查看 `/skill:d365-deploy`
 
 涵盖：
+- AI 行为红线（Git 操作必须显式授权）
+- McsPlugin 解决方案红线（只放 Plugin 和 Step）
 - 部署方式优先级与禁止事项
 - `D365.sln` vs `Service.sln` 项目区分
 - n8n Release Tool 勾选规则

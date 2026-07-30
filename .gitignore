@@ -63,3 +63,12 @@ Documents/Tests/Secret.json
 *.tmp
 *.temp
 *.bak
+
+# Playwright MCP 浏览器自动化产物
+.playwright-mcp/
+
+# 本地 AI 工作目录临时文件
+.kimi/
+
+# Excel 转换专用虚拟环境
+.venv_excel/
