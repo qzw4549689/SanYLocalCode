@@ -31,7 +31,8 @@ var response = service.Execute(request);
 
 var status = response["status"]?.ToString();
 var message = response["message"]?.ToString();
-var records = response["records"]?.ToString(); // JSON 字符串
+var records = response["records"]?.ToString(); // JSON 字符串：{"status":"1","message":"","records":[...]}
+// 解析示例：JObject.Parse(records)["records"] → 记录数组
 ```
 
 ### 2.2 JavaScript / WebResource 中调用
@@ -50,7 +51,8 @@ Xrm.WebApi.online.execute(request).then(
         result.json().then(function (response) {
             console.log("status:", response.status);
             console.log("message:", response.message);
-            console.log("records:", JSON.parse(response.records));
+            // records 为包装结构，需再取 .records 才是记录数组
+            console.log("records:", JSON.parse(response.records).records);
         });
     },
     function (error) {
@@ -81,13 +83,13 @@ Xrm.WebApi.online.execute(request).then(
 |---|---|---|
 | `status` | String | `1` 成功，`0` 失败 |
 | `message` | String | 错误信息；成功时为空 |
-| `records` | String | 匹配记录集 JSON 字符串 |
+| `records` | String | 匹配结果 JSON 字符串。成功时为完整包装结构 `{"status":"1","message":"","records":[...]}`，**需再取 `.records` 属性才是记录数组**；失败时为 `"[]"`（错误信息看顶层 `message`） |
 
 ---
 
 ## 5. 返回记录结构
 
-`records` 解析后为数组，单条记录字段如下：
+`records` 解析后为完整包装对象 `{"status":"1","message":"","records":[...]}`，取其中 `.records` 属性为记录数组，单条记录字段如下：
 
 | 字段 | 类型 | 说明 | 对应表名（架构名称） |
 |---|---|---|---|
@@ -126,6 +128,8 @@ request["mcs_buyercode"] = "ACN202605280000";
 ```
 
 ### 响应
+
+> 输出参数：`status="1"`、`message=""`、`records` = 如下 JSON **字符串**（比记录数组多包一层，解析后取 `.records` 为记录数组）。
 
 ```json
 {
@@ -167,6 +171,8 @@ request["mcs_buyercode"] = "AID202309210002";
 ```
 
 ### 响应（节选）
+
+> `records` 输出参数内容节选，解析后取 `.records` 为记录数组。
 
 ```json
 {
@@ -287,7 +293,9 @@ request["mcs_buyercode"] = "AID202309210002";
 | `0` | 产品线编码不能为空 | 缺少 `mcs_prdgroupid` |
 | `0` | 客户编码不能为空 | 缺少 `mcs_buyercode` |
 | `0` | 查询失败: ... | Plugin 执行异常 |
-| `1` | 空字符串 | 成功，但可能无匹配记录 |
+| `1` | 空字符串 | 成功，但可能无匹配记录（`records` 内层 `.records` 为空数组） |
+
+> 失败时 `records` 输出参数固定为 `"[]"`；成功时为包装结构 `{"status":"1","message":"","records":[...]}`。
 
 ---
 
