@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户信用飞轮</title>
+    <!-- 使用本地 WebResource 加载 Vue 和 ECharts，避免外部 CDN 在国内网络下加载失败导致页面卡死 -->
+    <script src="/WebResources/mcs_credit_wheel_vue.js"></script>
+    <script src="/WebResources/mcs_credit_wheel_echarts.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: #f5f6f8;
+            min-height: 100vh;
+        }
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .header-right {
+            text-align: right;
+        }
+        .total-score {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0078d4;
+        }
+        .total-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        #sunburst-chart {
+            width: 100%;
+            height: 500px;
+        }
+
+        .summary-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .summary-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .category-item {
+            margin-bottom: 16px;
+        }
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .category-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .category-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .category-score {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0078d4;
+        }
+        .progress-bar {
+            height: 6px;
+            background: #e8e8e8;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+        .item-list {
+            margin-top: 8px;
+            padding-left: 18px;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            padding: 2px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-box {
+            background: #fde7e9;
+            border: 1px solid #f3b1b7;
+            border-radius: 4px;
+            padding: 16px;
+            color: #a80000;
+            margin: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div v-if="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <div>正在加载客户信用飞轮...</div>
+        </div>
+
+        <div v-else-if="error" class="error-box">
+            &#9888; {{ error }}
+        </div>
+
+        <template v-else>
+            <div class="header">
+                <div>
+                    <h1>客户信用飞轮</h1>
+                    <div class="subtitle">{{ customerName }} ({{ buyercode }})</div>
+                </div>
+                <div class="header-right">
+                    <div class="total-score">{{ totalScore }}</div>
+                    <div class="total-label">信用总分</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="chart-card">
+                    <div class="chart-title">信用分层旭日图</div>
+                    <div id="sunburst-chart"></div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-title">分类得分概览</div>
+                    <div v-for="cat in categories" :key="cat.id" class="category-item">
+                        <div class="category-header">
+                            <div class="category-name">
+                                <span class="category-dot" :style="{background: cat.color}"></span>
+                                {{ cat.name }}
+                            </div>
+                            <div class="category-score">{{ cat.score }}</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" :style="{width: cat.percent + '%', background: cat.color}"></div>
+                        </div>
+                        <div class="item-list">
+                            <div v-for="item in cat.items" :key="item.name" class="item-row">
+                                <span>{{ item.name }}</span>
+                                <span>{{ item.score }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+    const { createApp, ref, onMounted, nextTick } = Vue;
+
+    createApp({
+        setup() {
+            const loading = ref(true);
+            const error = ref('');
+            const customerName = ref('');
+            const buyercode = ref('');
+            const totalScore = ref(0);
+            const categories = ref([]);
+            let chartInstance = null;
+
+            // ==================== 常量 ====================
+            const GROUP_MAP = {
+                1: { name: '客户实力', color: '#137333' },
+                2: { name: '客户财务', color: '#1967d2' },
+                3: { name: '宏观市场', color: '#b06000' },
+                4: { name: '历史交易', color: '#c5221f' },
+                5: { name: '综合指标', color: '#9334e6' }
+            };
+
+            const SUB_COLORS = {
+                1: ['#34a853', '#81c995', '#137333', '#0d652d'],
+                2: ['#4285f4', '#8ab4f8', '#1967d2', '#174ea6'],
+                3: ['#f9ab00', '#fde293', '#b06000', '#e37400'],
+                4: ['#ea4335', '#f6aea9', '#c5221f', '#9e1a16'],
+                5: ['#a142f4', '#d7aefb', '#9334e6', '#681da8']
+            };
+
+            // ==================== 工具函数 ====================
+            function getXrm() {
+                var sources = [
+                    function() { return typeof Xrm !== 'undefined' ? Xrm : null; },
+                    function() { return window.parent && window.parent.Xrm ? window.parent.Xrm : null; },
+                    function() { return window.opener && window.opener.Xrm ? window.opener.Xrm : null; },
+                    function() { return window.opener && window.opener.parent && window.opener.parent.Xrm ? window.opener.parent.Xrm : null; },
+                    function() { return window.opener && window.opener.top && window.opener.top.Xrm ? window.opener.top.Xrm : null; },
+                    function() { return window.top && window.top.Xrm ? window.top.Xrm : null; }
+                ];
+                for (var i = 0; i < sources.length; i++) {
+                    try {
+                        var xrm = sources[i]();
+                        if (xrm && xrm.WebApi) return xrm;
+                    } catch (e) {}
+                }
+                return null;
+            }
+
+            function getUrlParam(name) {
+                return new URLSearchParams(window.location.search).get(name);
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = String(text);
+                return div.innerHTML;
+            }
+
+            // 创建 API 客户端：优先 Xrm.WebApi，否则使用原生 fetch 直接调用 D365 Web API
+            function createApiClient() {
+                const xrm = getXrm();
+                if (xrm && xrm.WebApi) {
+                    return {
+                        retrieveMultipleRecords: function(entityName, query) {
+                            return xrm.WebApi.retrieveMultipleRecords(entityName, query);
+                        },
+                        retrieveRecord: function(entityName, id, query) {
+                            return xrm.WebApi.retrieveRecord(entityName, id, query);
+                        }
+                    };
+                }
+
+                const baseUrl = window.location.origin;
+                const apiUrl = baseUrl + '/api/data/v9.2/';
+                const headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'OData-MaxVersion': '4.0',
+                    'OData-Version': '4.0'
+                };
+
+                async function odataFetch(url) {
+                    const res = await fetch(url, { method: 'GET', headers: headers, credentials: 'same-origin' });
+                    if (!res.ok) {
+                        const text = await res.text().catch(function() { return ''; });
+                        throw new Error('Web API 请求失败 (' + res.status + '): ' + text);
+                    }
+                    return res.json();
+                }
+
+                return {
+                    retrieveMultipleRecords: async function(entityName, query) {
+                        const url = apiUrl + entityName + query;
+                        const data = await odataFetch(url);
+                        return { entities: data.value || [] };
+                    },
+                    retrieveRecord: async function(entityName, id, query) {
+                        const cleanId = String(id).replace(/[{}]/g, '').toLowerCase();
+                        const url = apiUrl + entityName + '(' + cleanId + ')' + (query || '');
+                        return odataFetch(url);
+                    }
+                };
+            }
+
+            // ==================== 数据获取 ====================
+            async function fetchData() {
+                const bc = getUrlParam('buyercode');
+                buyercode.value = bc || '';
+
+                const api = createApiClient();
+
+                // 1. 根据 buyercode 查找 account
+                let accountId = null;
+                let accountName = '';
+
+                if (bc) {
+                    const fetchXml = [
+                        '<fetch top="1">',
+                        '  <entity name="account">',
+                        '    <attribute name="accountid" />',
+                        '    <attribute name="name" />',
+                        '    <filter>',
+                        '      <condition attribute="accountnumber" operator="eq" value="' + bc + '" />',
+                        '    </filter>',
+                        '  </entity>',
+                        '</fetch>'
+                    ].join('');
+                    const accResult = await api.retrieveMultipleRecords('account', '?fetchXml=' + encodeURIComponent(fetchXml));
+                    if (accResult.entities.length > 0) {
+                        accountId = accResult.entities[0].accountid.replace(/[{}]/g, '').toLowerCase();
+                        accountName = accResult.entities[0].name || '';
+                    }
+                }
+
+                // 如果没有找到，尝试从 accountid 参数获取
+                if (!accountId) {
+                    const aid = getUrlParam('accountid');
+                    if (aid) {
+                        accountId = aid.replace(/[{}]/g, '').toLowerCase();
+                        try {
+                            const acc = await api.retrieveRecord('account', accountId, '?$select=name');
+                            accountName = acc.name || '';
+                        } catch (e) {}
+                    }
+                }
+
+                if (!accountId) {
+                    throw new Error('无法获取客户标识，请传入 buyercode 或 accountid 参数');
+                }
+
+                customerName.value = accountName;
+
+                // 2. 查询最新有效评估记录
+                const recordFetch = [
+                    '<fetch top="1">',
+                    '  <entity name="mcs_credit_record">',
+                    '    <attribute name="mcs_credit_recordid" />',
+                    '    <attribute name="mcs_creditscore" />',
+                    '    <filter>',
+                    '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
+                    '      <condition attribute="mcs_active" operator="eq" value="1" />',
+                    '    </filter>',
+                    '    <order attribute="modifiedon" descending="true" />',
+                    '  </entity>',
+                    '</fetch>'
+                ].join('');
+
+                const recordResult = await api.retrieveMultipleRecords('mcs_credit_record', '?fetchXml=' + encodeURIComponent(recordFetch));
+                const creditRecord = recordResult.entities.length > 0 ? recordResult.entities[0] : null;
+                totalScore.value = creditRecord ? (creditRecord.mcs_creditscore || 0) : 0;
+
+                // 3. 查询标签数据（取最新有效评估的标签，或该客户所有评分标签）
+                let recordId = creditRecord ? creditRecord.mcs_credit_recordid : null;
+                let tagFetch;
+
+                if (recordId) {
+                    // 有评估记录，查关联标签
+                    tagFetch = [
+                        '<fetch>',
+                        '  <entity name="mcs_customer_tag">',
+                        '    <attribute name="mcs_group" />',
+                        '    <attribute name="mcs_itemname" />',
+                        '    <attribute name="mcs_itemdesc" />',
+                        '    <attribute name="mcs_scorevalue" />',
+                        '    <attribute name="mcs_isscore" />',
+                        '    <attribute name="modifiedon" />',
+                        '    <filter>',
+                        '      <condition attribute="mcs_credit_record" operator="eq" value="' + recordId + '" />',
+                        '      <condition attribute="mcs_isscore" operator="eq" value="1" />',
+                        '    </filter>',
+                        '    <order attribute="modifiedon" descending="true" />',
+                        '  </entity>',
+                        '</fetch>'
+                    ].join('');
+                } else {
+                    // 无评估记录，查该客户所有评分标签（取最新）
+                    tagFetch = [
+                        '<fetch>',
+                        '  <entity name="mcs_customer_tag">',
+                        '    <attribute name="mcs_group" />',
+                        '    <attribute name="mcs_itemname" />',
+                        '    <attribute name="mcs_itemdesc" />',
+                        '    <attribute name="mcs_scorevalue" />',
+                        '    <attribute name="mcs_isscore" />',
+                        '    <attribute name="modifiedon" />',
+                        '    <filter>',
+                        '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
+                        '      <condition attribute="mcs_isscore" operator="eq" value="1" />',
+                        '    </filter>',
+                        '    <order attribute="modifiedon" descending="true" />',
+                        '  </entity>',
+                        '</fetch>'
+                    ].join('');
+                }
+
+                const tagResult = await api.retrieveMultipleRecords('mcs_customer_tag', '?fetchXml=' + encodeURIComponent(tagFetch));
+
+                // 去重：同一指标取最新
+                const seen = {};
+                const uniqueTags = [];
+                tagResult.entities.forEach(function(item) {
+                    const key = item.mcs_itemname || '';
+                    if (!seen[key]) {
+                        seen[key] = true;
+                        uniqueTags.push(item);
+                    }
+                });
+
+                return { tags: uniqueTags };
+            }
+
+            // ==================== 数据处理 ====================
+            function processData(tags) {
+                // 按分组聚合
+                const groupData = {};
+                tags.forEach(function(tag) {
+                    const group = tag.mcs_group || 5;
+                    if (!groupData[group]) {
+                        groupData[group] = { items: [], total: 0 };
+                    }
+                    groupData[group].items.push({
+                        name: tag.mcs_itemname || '-',
+                        desc: tag.mcs_itemdesc || '',
+                        score: tag.mcs_scorevalue || 0
+                    });
+                    groupData[group].total += (tag.mcs_scorevalue || 0);
+                });
+
+                // 构建旭日图数据
+                const sunburstData = [];
+                const categoryList = [];
+                const allGroups = Object.keys(groupData).sort();
+
+                allGroups.forEach(function(groupId, idx) {
+                    const gInfo = GROUP_MAP[groupId] || { name: '其他', color: '#666' };
+                    const items = groupData[groupId].items;
+                    const total = groupData[groupId].total;
+                    const colors = SUB_COLORS[groupId] || ['#666'];
+
+                    const children = items.map(function(item, i) {
+                        return {
+                            name: item.name,
+                            value: item.score,
+                            itemStyle: { color: colors[i % colors.length] }
+                        };
+                    });
+
+                    sunburstData.push({
+                        name: gInfo.name,
+                        value: total,
+                        itemStyle: { color: gInfo.color },
+                        children: children
+                    });
+
+                    categoryList.push({
+                        id: groupId,
+                        name: gInfo.name,
+                        color: gInfo.color,
+                        score: total,
+                        percent: totalScore.value > 0 ? Math.round((total / totalScore.value) * 100) : 0,
+                        items: items
+                    });
+                });
+
+                return { sunburstData, categoryList };
+            }
+
+            // ==================== 渲染图表 ====================
+            function renderChart(data) {
+                if (chartInstance) {
+                    chartInstance.dispose();
+                }
+
+                const chartDom = document.getElementById('sunburst-chart');
+                if (!chartDom) return;
+
+                chartInstance = echarts.init(chartDom);
+
+                const option = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            return '<b>' + escapeHtml(params.name) + '</b><br/>' +
+                                   '得分: ' + params.value + '<br/>' +
+                                   '占比: ' + params.percent + '%';
+                        }
+                    },
+                    series: {
+                        type: 'sunburst',
+                        data: data,
+                        radius: [0, '90%'],
+                        label: {
+                            rotate: 'radial',
+                            fontSize: 11
+                        },
+                        itemStyle: {
+                            borderRadius: 4,
+                            borderWidth: 1,
+                            borderColor: '#fff'
+                        },
+                        emphasis: {
+                            focus: 'ancestor'
+                        },
+                        levels: [
+                            {},
+                            {
+                                r0: '0%',
+                                r: '45%',
+                                label: { rotate: 0, fontSize: 13, fontWeight: 'bold' }
+                            },
+                            {
+                                r0: '45%',
+                                r: '80%',
+                                label: { align: 'right' }
+                            }
+                        ]
+                    }
+                };
+
+                chartInstance.setOption(option);
+
+                window.addEventListener('resize', function() {
+                    chartInstance && chartInstance.resize();
+                });
+            }
+
+            // ==================== 初始化 ====================
+            onMounted(async function() {
+                try {
+                    const { tags } = await fetchData();
+                    const { sunburstData, categoryList } = processData(tags);
+                    categories.value = categoryList;
+
+                    await nextTick();
+                    renderChart(sunburstData);
+                    loading.value = false;
+                } catch (err) {
+                    console.error('加载失败:', err);
+                    var msg = err.message || '加载客户信用飞轮失败';
+                    if (msg.indexOf('401') >= 0 || msg.indexOf('Unauthorized') >= 0) {
+                        msg = '未获取到 D365 认证上下文。请在 D365 客户表单的"信用画像"页签中打开此页面，不要直接通过 URL 访问。';
+                    }
+                    error.value = msg;
+                    loading.value = false;
+                }
+            });
+
+            return {
+                loading,
+                error,
+                customerName,
+                buyercode,
+                totalScore,
+                categories
+            };
+        }
+    }).mount('#app');
+    </script>
+</body>
+</html>

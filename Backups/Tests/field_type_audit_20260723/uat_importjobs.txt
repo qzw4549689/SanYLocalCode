@@ -1,0 +1,410 @@
+=== D365 实体管理工具 ===
+目标环境: https://sany-uat.crm5.dynamics.com
+用法:
+  dotnet run create <实体定义文件.json>   - 从JSON文件创建实体和字段
+  dotnet run check <解决方案名>           - 检查解决方案中的实体
+  dotnet run add <实体名> <解决方案名>    - 添加实体到解决方案
+  dotnet run remove <实体名> <解决方案名> - 从解决方案移除实体
+  dotnet run publish [实体名]             - 发布指定实体（禁止无参数全局发布）
+  dotnet run delete-field <实体名> <字段名> - 删除字段
+  dotnet run list-fields <实体名>         - 列出实体所有字段
+  dotnet run update-entity-displayname <实体名> <中文> [英文] - 更新实体显示名称（多语言）
+  dotnet run set-entity-label <实体名> <中文> <英文> - 设置实体显示名称（Web API PUT，中英双语）
+  dotnet run update-field-displayname <实体名> <字段名> <中文> [英文] - 更新字段显示名称（多语言）
+  dotnet run set-field-label <实体名> <字段名> <中文> <英文> - 设置字段显示名称（Web API PUT，中英双语）
+  dotnet run update-field-required <实体名> <字段名> <true|false> - 更新字段必填性
+  dotnet run update-field-range <实体名> <字段名> <最小值> <最大值> - 更新 Money 字段取值范围
+  dotnet run update-field-default <实体名> <字段名> <默认值> - 更新字段默认值（Picklist/Decimal）
+  dotnet run update-field-description <实体名> <字段名> <描述> - 更新字段描述
+  dotnet run get-entity-displayname <实体名> - 查询实体显示名称（诊断）
+  dotnet run export <解决方案名> <路径>    - 导出解决方案为 ZIP
+  dotnet run export-translations <解决方案唯一名> <输出ZIP路径> - 导出 translations ZIP（D365 标准翻译导出）
+  dotnet run import-translations <translations ZIP 路径> - 导入 translations ZIP（D365 标准翻译导入）
+  dotnet run create-credit-items          - 创建评分项目测试数据(22条)
+  dotnet run query-credit-item-descs      - 查询评分项目说明(mcs_itemdesc)
+  dotnet run create-qualitative-enums     - 创建定性枚举值测试数据(30条)
+  dotnet run fix-qualitative-enums-mapping - 整理国别/行业风险枚举值为三一标准L/M/H/O
+  dotnet run fix-percentage-scoring-cards - 修复百分比/比率类评分卡区间量纲（NetProfit/DebtRatio/LatePaymentIndex）
+  dotnet run cleanup-orphan-sectors-scoring-cards - 删除 Sectors 评分卡中无法匹配枚举值的孤儿记录
+  dotnet run dedup-credititem-values      - 清理 mcs_credititem_value 重复记录（保留最早，迁移引用）
+  dotnet run update-credit-record <scoreid> [status] - 更新信用评估记录状态(默认→12)
+  dotnet run simulate-bpp-callback <scoreid> [Approved|Rejected|Withdrawn|Abandoned] - 模拟BPP回调触发审批逻辑
+  dotnet run simulate-fca-bpp-callback <申请单编号|ID> [Approved|Rejected|Withdrawn|Abandoned] - 模拟BPP回调触发厂端授信额度调整申请审批逻辑
+  dotnet run test-fsm-bpp               - 融资管理BPP回调Plugin全场景验证（立项通过/方案通过/方案驳回/撤回）
+  dotnet run test-tradestpayterm          - 测试成交条件样板库 Plugin（自动编号/校验/状态流转）
+  dotnet run query-plugin-steps <类名>    - 查询已注册的 Plugin Steps
+  dotnet run query-plugin-namespace <前缀> - 查询命名空间下所有 Plugin Steps
+  dotnet run register-plugin-image <StepId> <Image名称> <Image别名> <字段列表> - 为Plugin Step注册PreEntityImage
+  dotnet run fix-dev-scoring-cards        - 重建DEV评分卡配置（补全mcs_itemid/mcs_datatype/mcs_cardname）
+  dotnet run fix-scoring-card-typeids     - 批量修复评分卡配置(mcs_typeid)根据mcs_credititem.mcs_group
+  dotnet run remove-duplicate-scoring-cards - 删除DEV1评分卡配置重复记录
+  dotnet run add-overdue-model-sa         - 为SA老客户评分卡补入OverdueModel(预计损失率)30分配置
+  dotnet run export-webresource <名称> <路径> - 导出 WebResource 内容
+  dotnet run update-webresource <名称> <文件路径> - 更新 WebResource 内容
+  dotnet run list-webresources [前缀]    - 列出 WebResource（默认前缀 ms_languagefile）
+  dotnet run list-form-webresources <实体> - 列出实体主窗体引用的 JS WebResource
+  dotnet run deploy-webresource <名称> <文件路径> <类型> [显示名] - 创建或更新 WebResource 并发布
+    类型: 1=HTML, 2=CSS, 3=JScript, 4=XML, 5=PNG, 6=JPG, 7=GIF, 8=XAP, 9=XSL, 10=ICO, 11=SVG, 12=RESX
+  dotnet run add-webresource-to-solution <WebResource名称> <解决方案唯一名> - 将 WebResource 加入解决方案
+  dotnet run test-common                  - 隔离测试 D365ToolCommon 共享库（自动创建/删除测试实体）
+  dotnet run cleanup-test-common          - 仅清理 D365ToolCommon 测试实体
+  dotnet run clear-account-credit-fields <客户名称> - 清空客户及客户主数据上的8个信用字段（用于测试）
+  dotnet run check-fix-masterdata <客户名称> - 检查并修复客户主数据上的基础字段
+  dotnet run set-masterdata-isdd <客户名称> <true|false> - 设置客户主数据重点尽调标志
+  dotnet run set-masterdata-creditvalid <客户名称> <true|false> - 设置客户主数据信用评估有效状态
+  dotnet run show-profile <客户名称> - 查询客户画像关键属性
+  dotnet run sync-profile <源客户名称> <目标客户名称> - 同步客户画像关键属性（用于测试）
+  dotnet run simulate-approval <客户名称/编码> <评估编码> - 模拟审批通过，将信用分/等级回写客户主数据
+  dotnet run set-countrycode <客户名称/编码> <国家代码> - 设置客户主数据国家代码（用于测试）
+  dotnet run set-cofaceid <评估编码> <cofaceId> - 设置信用评估记录的科法斯客户代码
+  dotnet run export-coface-data <输出目录>  - 导出 Coface NACE映射和汇率配置数据
+  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境
+  dotnet run diagnose-credit-record <评估编码> - 诊断 credit record 数据集成问题
+  dotnet run list-entities <前缀>        - 列出指定前缀的实体
+  dotnet run create-test-salesorder <客户名称> - 为客户创建一条测试销售订单（用于老客户判定）
+  dotnet run create-credit-testdata <客户名称> - 为客户创建信用评估测试数据（销售订单 + 逾期在外货款）
+  dotnet run create-credit-record <客户名称> - 为客户创建一条新的信用评估记录
+  dotnet run list-app-actions [前缀]       - 列出 App Action (Modern Command Bar 按钮)
+  dotnet run list-security-roles [关键字]  - 列出安全角色
+  dotnet run list-custom-apis [关键字]     - 列出 Custom API（含参数与响应属性）
+  dotnet run check-solution-customapi <解决方案名> - 检查解决方案包含的 Custom API
+  dotnet run deploy-tradestpayterm-api <DLL路径> - 部署成交条件样板库查询 Custom API
+  dotnet run delete-tradestpayterm-api          - 删除成交条件样板库查询 Custom API
+  dotnet run deploy-fcaquota-api <DLL路径> [Plugin类名] - 部署厂端授信余额调整 Custom API
+  dotnet run delete-fcaquota-api                - 删除厂端授信余额调整 Custom API
+  dotnet run test-fcaquota-api <客户编码> <金额> <环节> <动作> [合同编码] [订单编码] - 测试厂端授信余额调整 Custom API
+  dotnet run test-tradestpayterm-api <buId> <subId> <countryCode> <prdGroupId> <buyerCode> - 测试成交条件样板库查询 Custom API
+  dotnet run query-tradestpayterm-samples [条数] - 查询成交条件样板库样本数据
+  dotnet run create-tradestpayterm-testdata    - 创建一条生效的成交条件样板库测试数据
+  dotnet run rebuild-tradestpayterm-grade-fields [环境] - 重建成交条件样板库客户分类/客户等级为多选选项集
+  dotnet run recreate-fca-decimal-fields  - 将 mcs_fca_proc 的 mcs_modelgrant/mcs_initigrant 从 Money 重建为 Decimal
+  dotnet run query-optionset <实体名> <字段名>       - 查询选项集字段的标签
+  dotnet run list-transaction-currencies   - 列出 D365 标准交易货币及汇率
+  dotnet run test-coface-exchange-rate [币种列表] - 测试 Coface 汇率读取与转换（默认 USD,EUR,CNY,JPY,VND,XXX）
+  dotnet run test-upload-api <文件路径> <accountId> [mcp|mcs|all] - 测试上传 Custom API
+  dotnet run fix-form-lookup <实体名>    - 修复主窗体 Lookup 控件 classid
+  dotnet run query-contracts [accountId]  - 查询 mcs_contract 合同数据分布（只读诊断）
+  dotnet run query-contract-products <accountId> - 查询客户合同明细产品字段（只读诊断）
+  dotnet run query-optionset-labels <实体名> <字段名> [langId] - 查询选项集本地化标签
+  dotnet run update-optionset-labels <实体名> <字段名> <labels.json> [langId] - 更新选项集标签
+  dotnet run create-credit-profile-fields  - 创建客户画像所需缺失字段（mcs_blacklist/mcs_creditgrant）
+  dotnet run list-number-configs [实体名] - 查询系统自动编号配置（只读）
+  dotnet run create-number-config <实体名> <属性名> <前缀模板> <数字模板> <序列号长度> [序号开始] [使用序列号服务true|false] - 新增自动编号配置
+  dotnet run delete-number-config <实体名> <属性名> - 删除指定实体的自动编号配置
+  dotnet run test-number-config <实体名> [属性名] - 创建并删除一条测试记录验证编号生成
+  dotnet run register-number-config-step <实体名> - 为实体注册通用自动编号 Plugin Step
+  dotnet run check-release <清单.json> [--with-fields] - 通用发版 Solution 归属自检（只读，--with-fields 逐字段核对）
+  dotnet run check-solution-coverage <源Solution唯一名> [实体包Solution唯一名] - 以源 Solution 为真相源，核对组件是否已分布到发版包（只读）
+  dotnet run list-solution-components <Solution唯一名> - 列出 Solution 全部组件（类型+名称+ObjectId，只读）
+  dotnet run query-sitemap [sitemapId|名称关键字] - 查询 SiteMap 记录、App↔SiteMap 对应关系及解决方案分层（只读；单个时导出 XML 到 /tmp）
+  dotnet run query-app-components <App名称关键字> [实体名前缀] - 列出 App 包含的组件（只读）
+  dotnet run list-workflows [关键字] - 列出工作流/BPF 流程定义（只读）
+  dotnet run add-solution-component <componentType> <objectId> <Solution唯一名> - 通用加组件（写操作，需用户明确授权）
+  dotnet run check-solution-deps <Solution唯一名1> [Solution唯一名2] ... - 模拟导出时的缺少必需组件依赖检查（只读）
+
+认证方式: Device Code Flow（第一次需要浏览器登录）
+✅ 使用缓存的 token 登录
+连接成功! 用户: 
+
+>>> 查询 importjob（Top 300）: importjobid,solutionname,startedon,progress,createdon
+  返回 300 条记录
+  - 891243f9-e06d-4501-b323-463b366c57cc: importjobid=891243f9-e06d-4501-b323-463b366c57cc, solutionname=UnifiedRoutingPrimeAnchor, startedon=2026/7/22 20:18:06, progress=100, createdon=2026/7/22 20:18:06
+  - 07accb9d-8c5c-47b5-b4fc-d0c13aae3287: importjobid=07accb9d-8c5c-47b5-b4fc-d0c13aae3287, solutionname=msdyn_ConversationOrchestrationUX, startedon=2026/7/22 20:17:42, progress=100, createdon=2026/7/22 20:17:42
+  - 45e10333-46c5-4159-90cd-840a1b79cb2a: importjobid=45e10333-46c5-4159-90cd-840a1b79cb2a, solutionname=msdyn_ConversationOrchestrationConfiguration, startedon=2026/7/22 20:17:29, progress=100, createdon=2026/7/22 20:17:29
+  - 47e4f3b8-1adc-4d7c-90f1-582331f000f2: importjobid=47e4f3b8-1adc-4d7c-90f1-582331f000f2, solutionname=msdyn_ConversationOrchestration, startedon=2026/7/22 20:17:02, progress=100, createdon=2026/7/22 20:17:02
+  - 30ec03d9-32c8-4bc0-a350-bb8572802344: importjobid=30ec03d9-32c8-4bc0-a350-bb8572802344, solutionname=msdyn_OOBLanguageAndRegion, startedon=2026/7/22 20:16:48, progress=100, createdon=2026/7/22 20:16:48
+  - ae60744e-ec3a-4234-87eb-a70ae9e6f65c: importjobid=ae60744e-ec3a-4234-87eb-a70ae9e6f65c, solutionname=msdyn_OCSR, startedon=2026/7/22 20:16:29, progress=100, createdon=2026/7/22 20:16:29
+  - 7a2c0a88-c21d-48a0-863a-331335ed7d13: importjobid=7a2c0a88-c21d-48a0-863a-331335ed7d13, solutionname=msdyn_OCIER, startedon=2026/7/22 20:16:01, progress=100, createdon=2026/7/22 20:16:01
+  - 6dd6ebb0-2c7b-44b0-9347-f692d727deb8: importjobid=6dd6ebb0-2c7b-44b0-9347-f692d727deb8, solutionname=OCISBR, startedon=2026/7/22 20:15:30, progress=100, createdon=2026/7/22 20:15:30
+  - 703127d4-5f4d-418f-8277-d3cf701dafab: importjobid=703127d4-5f4d-418f-8277-d3cf701dafab, solutionname=msdyn_AssignmentSQLCacheSyncPluginManager, startedon=2026/7/22 20:15:08, progress=100, createdon=2026/7/22 20:15:08
+  - 23a739a7-6027-44c6-bb51-a8d9cc8102e5: importjobid=23a739a7-6027-44c6-bb51-a8d9cc8102e5, solutionname=msdyn_AgentGroupManager, startedon=2026/7/22 19:18:54, progress=100, createdon=2026/7/22 19:18:54
+  - 201b08ad-27bf-4d95-8636-3b8e60d66565: importjobid=201b08ad-27bf-4d95-8636-3b8e60d66565, solutionname=msdyn_AgentAvailabilityStatus, startedon=2026/7/22 19:18:25, progress=100, createdon=2026/7/22 19:18:25
+  - 1e80cf1e-087e-4252-9760-15cb54edd7b2: importjobid=1e80cf1e-087e-4252-9760-15cb54edd7b2, solutionname=OCBaseURBase, startedon=2026/7/22 19:17:00, progress=100, createdon=2026/7/22 19:17:00
+  - ab7eab0e-a3c6-4c80-91ed-7b04054fdcc5: importjobid=ab7eab0e-a3c6-4c80-91ed-7b04054fdcc5, solutionname=msdyn_D365CTQMIProd, startedon=2026/7/22 19:16:39, progress=100, createdon=2026/7/22 19:16:39
+  - bdda9a2f-ad53-438d-95f5-8650d5c01598: importjobid=bdda9a2f-ad53-438d-95f5-8650d5c01598, solutionname=MLDecisionEngine, startedon=2026/7/22 19:16:16, progress=100, createdon=2026/7/22 19:16:16
+  - 9d49106e-cf74-431e-8500-9ccac9d68cbf: importjobid=9d49106e-cf74-431e-8500-9ccac9d68cbf, solutionname=UnifiedRouting, startedon=2026/7/22 19:15:36, progress=100, createdon=2026/7/22 19:15:36
+  - e6beaa1b-4777-449b-90e3-1cdc317a510b: importjobid=e6beaa1b-4777-449b-90e3-1cdc317a510b, solutionname=msdyn_UnifiedRoutingForEntity, startedon=2026/7/22 19:14:59, progress=100, createdon=2026/7/22 19:14:59
+  - a4ff31a8-3288-4a5a-b3e1-3c0d61847c36: importjobid=a4ff31a8-3288-4a5a-b3e1-3c0d61847c36, solutionname=McsPlugin, startedon=2026/7/22 12:47:47, progress=100, createdon=2026/7/22 12:47:47
+  - 5b236f86-85fe-43d1-9ba1-8baf736412a2: importjobid=5b236f86-85fe-43d1-9ba1-8baf736412a2, solutionname=entity_20260717_hzy, startedon=2026/7/22 12:43:54, progress=100, createdon=2026/7/22 12:43:54
+  - 13c5971b-f3c7-4393-bd41-f3b7f6e9161f: importjobid=13c5971b-f3c7-4393-bd41-f3b7f6e9161f, solutionname=entity_20260304_zj, startedon=2026/7/22 12:41:08, progress=100, createdon=2026/7/22 12:41:08
+  - 887fd4ec-e52c-442d-84ec-c0a02d653cfe: importjobid=887fd4ec-e52c-442d-84ec-c0a02d653cfe, solutionname=McsPlugin, startedon=2026/7/22 12:39:05, progress=100, createdon=2026/7/22 12:39:05
+  - c42acc5a-83ab-4d6a-982d-98e2d67411c2: importjobid=c42acc5a-83ab-4d6a-982d-98e2d67411c2, solutionname=McsCustomAPI, startedon=2026/7/22 12:33:34, progress=100, createdon=2026/7/22 12:33:34
+  - 344113a8-f7d4-47f2-b3a1-72198e49da5a: importjobid=344113a8-f7d4-47f2-b3a1-72198e49da5a, solutionname=McsCustomAPI, startedon=2026/7/22 12:30:56, progress=100, createdon=2026/7/22 12:30:56
+  - c34bab61-0b7b-4780-ab1b-11bb06ecf764: importjobid=c34bab61-0b7b-4780-ab1b-11bb06ecf764, solutionname=McsWebResource, startedon=2026/7/22 12:07:53, progress=100, createdon=2026/7/22 12:07:53
+  - 6481bb12-9dd5-4cbb-a48a-4eb4fc68d718: importjobid=6481bb12-9dd5-4cbb-a48a-4eb4fc68d718, solutionname=McsWebResource, startedon=2026/7/22 11:43:37, progress=100, createdon=2026/7/22 11:43:37
+  - 5e78d08b-38c6-4af6-bbb9-3c0294c5c0dc: importjobid=5e78d08b-38c6-4af6-bbb9-3c0294c5c0dc, solutionname=McsWebResource, startedon=2026/7/22 11:40:39, progress=100, createdon=2026/7/22 11:40:39
+  - 296a5f9a-ef30-4d96-bf89-29ba1798852c: importjobid=296a5f9a-ef30-4d96-bf89-29ba1798852c, solutionname=McsCustomAPI, startedon=2026/7/22 11:34:05, progress=100, createdon=2026/7/22 11:34:05
+  - 5e578fe1-ff38-4c8c-a2dc-a2ef88b2eedb: importjobid=5e578fe1-ff38-4c8c-a2dc-a2ef88b2eedb, solutionname=McsWebResource, startedon=2026/7/22 11:31:05, progress=100, createdon=2026/7/22 11:31:05
+  - 0bd03c71-b82e-4f24-92c4-041e32e831ef: importjobid=0bd03c71-b82e-4f24-92c4-041e32e831ef, solutionname=yuanzg_20260722_2, startedon=2026/7/22 11:11:14, progress=100, createdon=2026/7/22 11:11:14
+  - 2cfb9b88-1a37-4fca-8fca-ef921ed19c72: importjobid=2cfb9b88-1a37-4fca-8fca-ef921ed19c72, solutionname=McsCustomAPI, startedon=2026/7/22 11:08:12, progress=42.857142857142854, createdon=2026/7/22 11:08:12
+  - b91b77fe-753e-483e-b84b-33fe23ed3f4f: importjobid=b91b77fe-753e-483e-b84b-33fe23ed3f4f, solutionname=McsWebResource, startedon=2026/7/22 11:00:20, progress=100, createdon=2026/7/22 11:00:20
+  - 0df96e1c-2df1-44ac-a30f-5c22372df7c4: importjobid=0df96e1c-2df1-44ac-a30f-5c22372df7c4, solutionname=McsPlugin, startedon=2026/7/22 10:42:48, progress=100, createdon=2026/7/22 10:42:48
+  - 5f8a1e4d-911a-4c02-8f3a-46dfbb8e3ec4: importjobid=5f8a1e4d-911a-4c02-8f3a-46dfbb8e3ec4, solutionname=McsPlugin, startedon=2026/7/22 10:37:16, progress=100, createdon=2026/7/22 10:37:16
+  - d3c8f331-a301-4236-86f9-6d01b58784eb: importjobid=d3c8f331-a301-4236-86f9-6d01b58784eb, solutionname=McsCustomAPI, startedon=2026/7/22 10:35:58, progress=100, createdon=2026/7/22 10:35:58
+  - f8f0ef27-f620-471d-a049-8df53090b4ef: importjobid=f8f0ef27-f620-471d-a049-8df53090b4ef, solutionname=Entity_20260722_India_Parts, startedon=2026/7/22 10:26:01, progress=100, createdon=2026/7/22 10:26:01
+  - c25544e6-653c-40eb-a656-b4c3584cae5f: importjobid=c25544e6-653c-40eb-a656-b4c3584cae5f, solutionname=yuanzg_20260722_2, startedon=2026/7/22 10:03:49, progress=100, createdon=2026/7/22 10:03:49
+  - 1b3346be-ea94-44b5-b2e9-0bd4b3364cc1: importjobid=1b3346be-ea94-44b5-b2e9-0bd4b3364cc1, solutionname=KPMG_LeadOptionSets, startedon=2026/7/22 09:27:02, progress=100, createdon=2026/7/22 09:27:02
+  - 8962d540-b32a-47f0-9b2b-2f6b43d3261d: importjobid=8962d540-b32a-47f0-9b2b-2f6b43d3261d, solutionname=McsPlugin, startedon=2026/7/22 09:20:43, progress=100, createdon=2026/7/22 09:20:43
+  - 7f32cfb7-12e6-4ce7-ac96-10ac9e0d2b99: importjobid=7f32cfb7-12e6-4ce7-ac96-10ac9e0d2b99, solutionname=wp20250325, startedon=2026/7/22 09:10:26, progress=100, createdon=2026/7/22 09:10:26
+  - f8dedb9c-9da7-4ef2-9128-52eadb65f6ee: importjobid=f8dedb9c-9da7-4ef2-9128-52eadb65f6ee, solutionname=McsWebResource, startedon=2026/7/22 09:00:32, progress=0.4101161995898838, createdon=2026/7/22 09:00:32
+  - 6c64c2bd-fe09-42bb-b90e-507445fd4da3: importjobid=6c64c2bd-fe09-42bb-b90e-507445fd4da3, solutionname=McsCustomAPI, startedon=2026/7/22 08:58:12, progress=100, createdon=2026/7/22 08:58:12
+  - 5a344eb4-682d-440c-a822-9c969f76a10e: importjobid=5a344eb4-682d-440c-a822-9c969f76a10e, solutionname=McsWebResource, startedon=2026/7/22 08:55:05, progress=100, createdon=2026/7/22 08:55:05
+  - a66cc133-791c-47a0-9696-063da7f5eb17: importjobid=a66cc133-791c-47a0-9696-063da7f5eb17, solutionname=yuanzg_20260722_2, startedon=2026/7/22 08:25:07, progress=100, createdon=2026/7/22 08:25:07
+  - a31fb86b-482d-49c2-9067-dc9009a1ec21: importjobid=a31fb86b-482d-49c2-9067-dc9009a1ec21, solutionname=McsPlugin, startedon=2026/7/22 08:22:21, progress=100, createdon=2026/7/22 08:22:21
+  - ee6ae3c6-f68b-48b9-a827-e487563cef4a: importjobid=ee6ae3c6-f68b-48b9-a827-e487563cef4a, solutionname=McsPlugin, startedon=2026/7/22 08:16:56, progress=100, createdon=2026/7/22 08:16:56
+  - 1c42895d-2db2-42da-a171-a4d68ff34269: importjobid=1c42895d-2db2-42da-a171-a4d68ff34269, solutionname=McsCustomAPI, startedon=2026/7/22 07:52:54, progress=100, createdon=2026/7/22 07:52:54
+  - 78945813-a176-48f6-aad8-24a76bef34a0: importjobid=78945813-a176-48f6-aad8-24a76bef34a0, solutionname=McsWebResource, startedon=2026/7/22 07:37:31, progress=100, createdon=2026/7/22 07:37:31
+  - 9301e08e-c405-4b8c-898b-3059e05f47e9: importjobid=9301e08e-c405-4b8c-898b-3059e05f47e9, solutionname=KPMG_LeadOptionSets, startedon=2026/7/22 07:30:28, progress=100, createdon=2026/7/22 07:30:28
+  - 02278e4f-db4c-4109-a7d0-cba8bdee392d: importjobid=02278e4f-db4c-4109-a7d0-cba8bdee392d, solutionname=McsPlugin, startedon=2026/7/22 07:23:16, progress=100, createdon=2026/7/22 07:23:16
+  - 6156c8d3-d6d6-4127-8699-116e930f55a1: importjobid=6156c8d3-d6d6-4127-8699-116e930f55a1, solutionname=wmm20260719, startedon=2026/7/22 07:19:58, progress=100, createdon=2026/7/22 07:19:58
+  - 3fc87514-addd-4d5b-91bf-0942fa48f78b: importjobid=3fc87514-addd-4d5b-91bf-0942fa48f78b, solutionname=entitiy_20260722mj, startedon=2026/7/22 07:15:46, progress=100, createdon=2026/7/22 07:15:46
+  - c3dc8b81-1631-4764-b7d1-b9fa54c5285d: importjobid=c3dc8b81-1631-4764-b7d1-b9fa54c5285d, solutionname=rider_260722, startedon=2026/7/22 07:07:24, progress=100, createdon=2026/7/22 07:07:24
+  - aaea9fe0-1a1c-43b7-8d22-5690a80f4ae7: importjobid=aaea9fe0-1a1c-43b7-8d22-5690a80f4ae7, solutionname=McsWebResource, startedon=2026/7/22 07:06:06, progress=100, createdon=2026/7/22 07:06:06
+  - 52691d4f-105d-459c-b39a-2dcc2cf25592: importjobid=52691d4f-105d-459c-b39a-2dcc2cf25592, solutionname=yuanzg_20260722, startedon=2026/7/22 05:39:30, progress=100, createdon=2026/7/22 05:39:30
+  - 424d38c5-0153-4994-aae5-a1a1bd60fd2a: importjobid=424d38c5-0153-4994-aae5-a1a1bd60fd2a, solutionname=Entity_20260722_India_Parts, startedon=2026/7/22 05:08:58, progress=100, createdon=2026/7/22 05:08:58
+  - b86a971d-7c67-4c31-bd4f-8c59a7b91700: importjobid=b86a971d-7c67-4c31-bd4f-8c59a7b91700, solutionname=entity_20260615_GuidancePriceRegion, startedon=2026/7/22 04:58:45, progress=100, createdon=2026/7/22 04:58:45
+  - 1ded5b92-0772-4d60-936b-8f138dae213c: importjobid=1ded5b92-0772-4d60-936b-8f138dae213c, solutionname=McsPlugin, startedon=2026/7/22 04:54:40, progress=100, createdon=2026/7/22 04:54:40
+  - ef45fa42-41bd-4242-97b7-822ee58868be: importjobid=ef45fa42-41bd-4242-97b7-822ee58868be, solutionname=TempLeadRoles20260617, startedon=2026/7/22 04:35:19, progress=100, createdon=2026/7/22 04:35:19
+  - cf7735b4-6554-4ecb-b474-0568faacfd2f: importjobid=cf7735b4-6554-4ecb-b474-0568faacfd2f, solutionname=McsPlugin, startedon=2026/7/22 04:33:42, progress=0.36603221083455345, createdon=2026/7/22 04:33:42
+  - 0dbd9640-9dd5-4657-b76f-9216e8615904: importjobid=0dbd9640-9dd5-4657-b76f-9216e8615904, solutionname=McsWebResource, startedon=2026/7/22 04:10:43, progress=100, createdon=2026/7/22 04:10:43
+  - b136d1e1-58f3-4148-8ed6-1c79bff02be5: importjobid=b136d1e1-58f3-4148-8ed6-1c79bff02be5, solutionname=mamf_ribbon, startedon=2026/7/22 04:03:47, progress=100, createdon=2026/7/22 04:03:47
+  - 909a2acb-df01-41fc-b39b-6e48c0b67d3b: importjobid=909a2acb-df01-41fc-b39b-6e48c0b67d3b, solutionname=Entity_20260722_India_Sales, startedon=2026/7/22 03:58:36, progress=100, createdon=2026/7/22 03:58:36
+  - 2f25d585-a230-44d0-8e18-4b3a664c939b: importjobid=2f25d585-a230-44d0-8e18-4b3a664c939b, solutionname=McsWebResource, startedon=2026/7/22 03:56:55, progress=100, createdon=2026/7/22 03:56:55
+  - b0a76f2e-d701-48cd-90d1-01fd5af4ec1a: importjobid=b0a76f2e-d701-48cd-90d1-01fd5af4ec1a, solutionname=McsCustomAPI, startedon=2026/7/22 03:54:18, progress=100, createdon=2026/7/22 03:54:18
+  - 9dd707c8-c9bb-4a97-bb3c-ef2618150794: importjobid=9dd707c8-c9bb-4a97-bb3c-ef2618150794, solutionname=McsCustomAPI, startedon=2026/7/22 03:46:39, progress=100, createdon=2026/7/22 03:46:39
+  - 272747a0-152d-4e33-9d6b-d27cbeb9aa7f: importjobid=272747a0-152d-4e33-9d6b-d27cbeb9aa7f, solutionname=McsWebResource, startedon=2026/7/22 03:39:08, progress=100, createdon=2026/7/22 03:39:08
+  - a13cf91a-f851-4d12-8f33-b78e52b711e0: importjobid=a13cf91a-f851-4d12-8f33-b78e52b711e0, solutionname=McsWebResource, startedon=2026/7/22 03:37:25, progress=100, createdon=2026/7/22 03:37:25
+  - 9a113db3-e5e3-43fc-8a8b-e4d3fc6165bf: importjobid=9a113db3-e5e3-43fc-8a8b-e4d3fc6165bf, solutionname=entity_all_0720_peter, startedon=2026/7/22 03:28:10, progress=100, createdon=2026/7/22 03:28:10
+  - 3af11922-658e-468b-acb1-c65079012434: importjobid=3af11922-658e-468b-acb1-c65079012434, solutionname=McsOptionSet, startedon=2026/7/22 03:25:56, progress=100, createdon=2026/7/22 03:25:56
+  - ecde854b-de99-4b1f-b9a3-65dc03e66fab: importjobid=ecde854b-de99-4b1f-b9a3-65dc03e66fab, solutionname=McsOptionSet, startedon=2026/7/22 03:24:30, progress=100, createdon=2026/7/22 03:24:30
+  - 9325cfdd-6321-4170-9e5b-8a36dd92c5e8: importjobid=9325cfdd-6321-4170-9e5b-8a36dd92c5e8, solutionname=McsWebResource, startedon=2026/7/22 03:02:30, progress=100, createdon=2026/7/22 03:02:30
+  - 642cb8f7-6577-47cc-9c71-7998e6f2fb28: importjobid=642cb8f7-6577-47cc-9c71-7998e6f2fb28, solutionname=LeadMain0702_Translate, startedon=2026/7/22 02:50:31, progress=100, createdon=2026/7/22 02:50:31
+  - 917eed1b-e4fb-4637-a108-18abb187efb2: importjobid=917eed1b-e4fb-4637-a108-18abb187efb2, solutionname=CPQ_Temp20260715, startedon=2026/7/22 02:44:41, progress=100, createdon=2026/7/22 02:44:41
+  - 47b67a11-cd10-449f-b8db-9e7b65c6d068: importjobid=47b67a11-cd10-449f-b8db-9e7b65c6d068, solutionname=entity_260715_gyl, startedon=2026/7/22 02:21:58, progress=100, createdon=2026/7/22 02:21:58
+  - 0180c6bc-e87e-4d96-afb5-d17c7325dcdc: importjobid=0180c6bc-e87e-4d96-afb5-d17c7325dcdc, solutionname=McsCustomAPI, startedon=2026/7/22 02:13:32, progress=100, createdon=2026/7/22 02:13:32
+  - 51e72f6d-3fb8-47b7-b87b-9fd1d31d8f1f: importjobid=51e72f6d-3fb8-47b7-b87b-9fd1d31d8f1f, solutionname=McsWebResource, startedon=2026/7/22 01:50:31, progress=100, createdon=2026/7/22 01:50:31
+  - 4ebb8195-f9e7-462d-8652-de2dd8753aa7: importjobid=4ebb8195-f9e7-462d-8652-de2dd8753aa7, solutionname=entity_20260615_GuidancePriceRegion, startedon=2026/7/22 00:57:12, progress=100, createdon=2026/7/22 00:57:12
+  - edc3daa5-6ed2-4e69-b04e-6004af046d9c: importjobid=edc3daa5-6ed2-4e69-b04e-6004af046d9c, solutionname=entity_all_0720_peter, startedon=2026/7/21 23:13:55, progress=100, createdon=2026/7/21 23:13:55
+  - d7fb50f8-8e96-42d6-bc4c-b5e6d6b0b466: importjobid=d7fb50f8-8e96-42d6-bc4c-b5e6d6b0b466, solutionname=msdynce_CustomerCareIntelligenceBots_Anchor, startedon=2026/7/21 19:35:52, progress=100, createdon=2026/7/21 19:35:52
+  - 6006d4a9-0be9-4f1a-8fe5-ed048c450ec5: importjobid=6006d4a9-0be9-4f1a-8fe5-ed048c450ec5, solutionname=PowerVirtualAgentsApiManagedSolution, startedon=2026/7/21 19:35:37, progress=100, createdon=2026/7/21 19:35:37
+  - ae2755ff-6003-4bef-8af9-1a9190aa1d05: importjobid=ae2755ff-6003-4bef-8af9-1a9190aa1d05, solutionname=PowerVirtualAgentsProd, startedon=2026/7/21 19:35:19, progress=100, createdon=2026/7/21 19:35:19
+  - f739a3bd-0efb-45d6-ab46-87e2ceb96f22: importjobid=f739a3bd-0efb-45d6-ab46-87e2ceb96f22, solutionname=PowerVirtualAgentsPrivilegeOverrides, startedon=2026/7/21 19:35:00, progress=100, createdon=2026/7/21 19:35:00
+  - 49f0196f-d1fa-4756-85b3-ea73053d735c: importjobid=49f0196f-d1fa-4756-85b3-ea73053d735c, solutionname=PowerVirtualAgents, startedon=2026/7/21 19:24:58, progress=100, createdon=2026/7/21 19:24:58
+  - 23014e8d-0e42-4c9a-8192-d22325eba5fd: importjobid=23014e8d-0e42-4c9a-8192-d22325eba5fd, solutionname=PowerVirtualAgentsCommon, startedon=2026/7/21 19:21:26, progress=100, createdon=2026/7/21 19:21:26
+  - 0bd92a22-cfdb-45d5-8a10-6c44d9bbc048: importjobid=0bd92a22-cfdb-45d5-8a10-6c44d9bbc048, solutionname=msdynce_CustomerCareIntelligenceBots, startedon=2026/7/21 19:20:58, progress=100, createdon=2026/7/21 19:20:58
+  - 8ac1e6ab-5d7a-4448-99d1-6d12430b51fe: importjobid=8ac1e6ab-5d7a-4448-99d1-6d12430b51fe, solutionname=msdyn_ServiceExtendedAnchor, startedon=2026/7/21 18:11:39, progress=100, createdon=2026/7/21 18:11:39
+  - 211c0f5b-552d-4257-8425-912146462be7: importjobid=211c0f5b-552d-4257-8425-912146462be7, solutionname=msdyn_ServiceAgent, startedon=2026/7/21 18:11:12, progress=100, createdon=2026/7/21 18:11:12
+  - 83910bd1-bc0a-42b9-8abf-fc6a285b049f: importjobid=83910bd1-bc0a-42b9-8abf-fc6a285b049f, solutionname=msdyn_QualityManagementAdminCenter, startedon=2026/7/21 18:05:56, progress=100, createdon=2026/7/21 18:05:56
+  - 09531182-8e9c-4437-8f18-d91a668fc65c: importjobid=09531182-8e9c-4437-8f18-d91a668fc65c, solutionname=msdyn_TrustCenterAdoptClient, startedon=2026/7/21 18:05:25, progress=100, createdon=2026/7/21 18:05:25
+  - 88738c10-c3c9-4ff4-807e-da4f7fe4a36a: importjobid=88738c10-c3c9-4ff4-807e-da4f7fe4a36a, solutionname=msdyn_TrustCenterAdoptCore, startedon=2026/7/21 18:05:00, progress=100, createdon=2026/7/21 18:05:00
+  - ea2890d4-4b17-4206-960c-c56855ec12bd: importjobid=ea2890d4-4b17-4206-960c-c56855ec12bd, solutionname=msdyn_CopilotTrustCenter, startedon=2026/7/21 18:04:02, progress=100, createdon=2026/7/21 18:04:02
+  - 03688daf-3482-4ed5-83e4-2f0d849a5789: importjobid=03688daf-3482-4ed5-83e4-2f0d849a5789, solutionname=msdyn_EmailSentimentManagement, startedon=2026/7/21 18:03:36, progress=100, createdon=2026/7/21 18:03:36
+  - 71d822fb-cde4-411c-b387-822ffc2564f5: importjobid=71d822fb-cde4-411c-b387-822ffc2564f5, solutionname=msdyn_EmailIntelligence, startedon=2026/7/21 18:02:45, progress=100, createdon=2026/7/21 18:02:45
+  - 5ab79a36-5f96-48e3-9a81-0289f7ce7ec7: importjobid=5ab79a36-5f96-48e3-9a81-0289f7ce7ec7, solutionname=msdyn_entityintelligence, startedon=2026/7/21 18:01:53, progress=100, createdon=2026/7/21 18:01:53
+  - 82e7524d-edf8-4c1c-88ce-43fb94be45dc: importjobid=82e7524d-edf8-4c1c-88ce-43fb94be45dc, solutionname=msdyn_entityintelligencebase, startedon=2026/7/21 18:01:23, progress=100, createdon=2026/7/21 18:01:23
+  - 9ba98800-b627-4be7-9c37-ff80e66603fa: importjobid=9ba98800-b627-4be7-9c37-ff80e66603fa, solutionname=msdyn_CSSurveyBase, startedon=2026/7/21 17:59:03, progress=100, createdon=2026/7/21 17:59:03
+  - f9f0e7c2-1196-4103-810f-7f9dd9836960: importjobid=f9f0e7c2-1196-4103-810f-7f9dd9836960, solutionname=msdyn_ModernCaseManagementForOC, startedon=2026/7/21 17:58:00, progress=100, createdon=2026/7/21 17:58:00
+  - 0c1a029a-da53-487e-9fb0-0ff2a566a9d2: importjobid=0c1a029a-da53-487e-9fb0-0ff2a566a9d2, solutionname=msdyn_ModernCaseManagement, startedon=2026/7/21 17:51:45, progress=100, createdon=2026/7/21 17:51:45
+  - 453bcfdf-216c-4706-a5e4-0f7e16bc5b4b: importjobid=453bcfdf-216c-4706-a5e4-0f7e16bc5b4b, solutionname=msdyn_SwarmingForCS, startedon=2026/7/21 17:51:20, progress=100, createdon=2026/7/21 17:51:20
+  - 8f47841c-004d-49b6-97af-1db12df93e6e: importjobid=8f47841c-004d-49b6-97af-1db12df93e6e, solutionname=msdyn_Swarming, startedon=2026/7/21 17:50:37, progress=100, createdon=2026/7/21 17:50:37
+  - a0a16c99-84d7-40de-8f8b-392548c440cd: importjobid=a0a16c99-84d7-40de-8f8b-392548c440cd, solutionname=msdyn_TeamsConfigForCS, startedon=2026/7/21 17:49:58, progress=100, createdon=2026/7/21 17:49:58
+  - fb69bdab-b3ab-464b-83cd-795f8ea5f3da: importjobid=fb69bdab-b3ab-464b-83cd-795f8ea5f3da, solutionname=msdyn_JoinMeOnTeams, startedon=2026/7/21 17:49:19, progress=100, createdon=2026/7/21 17:49:19
+  - 6030da82-a30e-4eab-a20d-3011fbebdba0: importjobid=6030da82-a30e-4eab-a20d-3011fbebdba0, solutionname=msdyn_CSW_Configuration, startedon=2026/7/21 17:48:45, progress=100, createdon=2026/7/21 17:48:45
+  - 8c4a4a28-1e8d-452f-97d6-ab360f320b95: importjobid=8c4a4a28-1e8d-452f-97d6-ab360f320b95, solutionname=msdyn_AppProfileManagementSiteMap, startedon=2026/7/21 17:48:28, progress=100, createdon=2026/7/21 17:48:28
+  - e4dcaf32-d361-4202-85ff-d4f5bd44fe3d: importjobid=e4dcaf32-d361-4202-85ff-d4f5bd44fe3d, solutionname=msdyn_CSIntelligenceConfiguration, startedon=2026/7/21 17:48:08, progress=100, createdon=2026/7/21 17:48:08
+  - 6a03ffc5-3822-46f1-8fe0-9188b9e844a8: importjobid=6a03ffc5-3822-46f1-8fe0-9188b9e844a8, solutionname=msdyn_CustomerServiceWorkspace, startedon=2026/7/21 17:47:51, progress=100, createdon=2026/7/21 17:47:51
+  - bad7e2f4-160e-4753-b2d7-d25d0a404509: importjobid=bad7e2f4-160e-4753-b2d7-d25d0a404509, solutionname=msdyn_InboxSolution, startedon=2026/7/21 17:46:48, progress=100, createdon=2026/7/21 17:46:48
+  - 542921c8-6f23-41f9-9159-a7d34344fbb9: importjobid=542921c8-6f23-41f9-9159-a7d34344fbb9, solutionname=msdyn_BulkManagement, startedon=2026/7/21 17:46:13, progress=100, createdon=2026/7/21 17:46:13
+  - 98913833-315e-4c6e-b6fe-e214cb0c1750: importjobid=98913833-315e-4c6e-b6fe-e214cb0c1750, solutionname=msdyn_CSAdminCenterApp, startedon=2026/7/21 17:45:39, progress=100, createdon=2026/7/21 17:45:39
+  - b951018a-292b-4c64-a7aa-2a6b388122db: importjobid=b951018a-292b-4c64-a7aa-2a6b388122db, solutionname=msdynce_EmailTemplateConfigSolution, startedon=2026/7/21 17:44:54, progress=100, createdon=2026/7/21 17:44:54
+  - a6dcde1b-b783-4675-bbc9-33f371071ac5: importjobid=a6dcde1b-b783-4675-bbc9-33f371071ac5, solutionname=msdyn_URModernAdminBase, startedon=2026/7/21 17:40:30, progress=100, createdon=2026/7/21 17:40:30
+  - ed24db82-7842-4a14-a0e3-d9e9a0fd5da7: importjobid=ed24db82-7842-4a14-a0e3-d9e9a0fd5da7, solutionname=msdyn_OCModernAdminBase, startedon=2026/7/21 17:28:43, progress=100, createdon=2026/7/21 17:28:43
+  - 2410b678-f15b-495c-872e-62891506337e: importjobid=2410b678-f15b-495c-872e-62891506337e, solutionname=msdyn_ConversationControl, startedon=2026/7/21 17:28:20, progress=100, createdon=2026/7/21 17:28:20
+  - d1538377-4fed-4b55-bd1e-e8d903995849: importjobid=d1538377-4fed-4b55-bd1e-e8d903995849, solutionname=msdyn_ManagedIdentityForServiceExtendedProd, startedon=2026/7/21 17:28:00, progress=100, createdon=2026/7/21 17:28:00
+  - 2d8e771d-5853-4391-9852-4faebaa60ba0: importjobid=2d8e771d-5853-4391-9852-4faebaa60ba0, solutionname=msdyn_ContactCenterAgentManagementData, startedon=2026/7/21 17:13:14, progress=100, createdon=2026/7/21 17:13:14
+  - 942e17ee-6bf7-48de-8d1e-a046a9158e30: importjobid=942e17ee-6bf7-48de-8d1e-a046a9158e30, solutionname=msdyn_ContactCenterAgentManagement, startedon=2026/7/21 17:11:48, progress=100, createdon=2026/7/21 17:11:48
+  - 6daddc23-9a2c-459d-bc29-d080d8358b27: importjobid=6daddc23-9a2c-459d-bc29-d080d8358b27, solutionname=msdyn_ContactCenterAdminCopilot, startedon=2026/7/21 17:09:39, progress=100, createdon=2026/7/21 17:09:39
+  - a48ed25d-3666-452c-8521-e4434ec700dd: importjobid=a48ed25d-3666-452c-8521-e4434ec700dd, solutionname=msdyn_OmnichannelRealtimeMonitoring, startedon=2026/7/21 17:03:17, progress=100, createdon=2026/7/21 17:03:17
+  - 7d62aacd-b9b1-488e-b455-a8e23bf370d0: importjobid=7d62aacd-b9b1-488e-b455-a8e23bf370d0, solutionname=msdyn_OmnichannelMessaging, startedon=2026/7/21 16:54:45, progress=100, createdon=2026/7/21 16:54:45
+  - f2080b17-f00f-4cee-b618-1319f369014f: importjobid=f2080b17-f00f-4cee-b618-1319f369014f, solutionname=msdyn_OmnichannelAgentAssistConfig, startedon=2026/7/21 16:42:56, progress=100, createdon=2026/7/21 16:42:56
+  - 020f789a-99c7-4884-985f-25aa7405a981: importjobid=020f789a-99c7-4884-985f-25aa7405a981, solutionname=msdyn_OmnichannelChannelConfig, startedon=2026/7/21 16:36:28, progress=100, createdon=2026/7/21 16:36:28
+  - a43d80c8-6c7d-4abb-9ec4-45c84b61af08: importjobid=a43d80c8-6c7d-4abb-9ec4-45c84b61af08, solutionname=msdyn_OmnichannelContextService__Public, startedon=2026/7/21 16:36:09, progress=100, createdon=2026/7/21 16:36:09
+  - 3a160f1b-e152-4e7f-b462-afd296eabd6d: importjobid=3a160f1b-e152-4e7f-b462-afd296eabd6d, solutionname=msdyn_OmnichannelContextService, startedon=2026/7/21 16:35:47, progress=100, createdon=2026/7/21 16:35:47
+  - 425cc0a3-26e6-4ede-85f0-1b996918edf7: importjobid=425cc0a3-26e6-4ede-85f0-1b996918edf7, solutionname=OmnichannelPrimeAnchor, startedon=2026/7/21 16:33:39, progress=100, createdon=2026/7/21 16:33:39
+  - 23d771cf-28dd-4f36-aab1-f1b1fb0fa196: importjobid=23d771cf-28dd-4f36-aab1-f1b1fb0fa196, solutionname=OmnichannelPrime, startedon=2026/7/21 16:32:28, progress=100, createdon=2026/7/21 16:32:28
+  - e503b2bd-7125-4181-bc1a-9bee3d2fa8db: importjobid=e503b2bd-7125-4181-bc1a-9bee3d2fa8db, solutionname=msdyn_OmnichannelConversationExtension, startedon=2026/7/21 16:24:59, progress=100, createdon=2026/7/21 16:24:59
+  - 47ad4157-1a89-44ab-9c03-eac934823a3c: importjobid=47ad4157-1a89-44ab-9c03-eac934823a3c, solutionname=msdyn_OmnichannelBotEnablerPatch, startedon=2026/7/21 16:21:07, progress=100, createdon=2026/7/21 16:21:07
+  - 42a506ca-d4a0-41de-b992-b25c5e59ca8e: importjobid=42a506ca-d4a0-41de-b992-b25c5e59ca8e, solutionname=msdyn_ServiceIntelligenceAnchor, startedon=2026/7/21 15:23:13, progress=100, createdon=2026/7/21 15:23:13
+  - bd707c17-a261-46f2-949e-edc6623a8641: importjobid=bd707c17-a261-46f2-949e-edc6623a8641, solutionname=msdyn_CustomerServiceIdentity_PROD, startedon=2026/7/21 15:22:49, progress=100, createdon=2026/7/21 15:22:49
+  - 58418748-f6aa-4972-8ff8-90b02d0a40cd: importjobid=58418748-f6aa-4972-8ff8-90b02d0a40cd, solutionname=msdyn_OCIntelligence, startedon=2026/7/21 15:22:09, progress=100, createdon=2026/7/21 15:22:09
+  - 756cb1f3-2f64-41f6-8c9e-1a24a8401213: importjobid=756cb1f3-2f64-41f6-8c9e-1a24a8401213, solutionname=msdyn_OCIntelligenceCore, startedon=2026/7/21 15:21:30, progress=100, createdon=2026/7/21 15:21:30
+  - 9e0048f6-2f9d-4d62-ac17-89805db8ff24: importjobid=9e0048f6-2f9d-4d62-ac17-89805db8ff24, solutionname=msdyn_CSIntelligenceWidgets, startedon=2026/7/21 15:21:07, progress=100, createdon=2026/7/21 15:21:07
+  - 12fdfc6f-cf6d-43e7-bb3d-9244e788eeea: importjobid=12fdfc6f-cf6d-43e7-bb3d-9244e788eeea, solutionname=msdyn_CustomerServiceMCP, startedon=2026/7/21 15:20:42, progress=100, createdon=2026/7/21 15:20:42
+  - d4d51668-870b-4315-a59a-c6f13d0910c8: importjobid=d4d51668-870b-4315-a59a-c6f13d0910c8, solutionname=msdyn_CaseManagementIntelligence, startedon=2026/7/21 15:15:41, progress=100, createdon=2026/7/21 15:15:41
+  - cecfc1dc-2f79-4d07-92c6-e8073c83de2a: importjobid=cecfc1dc-2f79-4d07-92c6-e8073c83de2a, solutionname=msdyn_CustomerServiceSimulation, startedon=2026/7/21 15:15:08, progress=100, createdon=2026/7/21 15:15:08
+  - 098fa3a1-00fc-4bf9-8686-781b99e400c4: importjobid=098fa3a1-00fc-4bf9-8686-781b99e400c4, solutionname=msdyn_CSCopilotPlugins, startedon=2026/7/21 15:14:49, progress=100, createdon=2026/7/21 15:14:49
+  - 5b296480-5389-4323-9f31-cbb45462ba9c: importjobid=5b296480-5389-4323-9f31-cbb45462ba9c, solutionname=msdyn_CSIntelligentBot, startedon=2026/7/21 15:14:22, progress=100, createdon=2026/7/21 15:14:22
+  - e8b591ac-805c-479c-91f8-dc4aca3a13b6: importjobid=e8b591ac-805c-479c-91f8-dc4aca3a13b6, solutionname=msdyn_IntentAssist, startedon=2026/7/21 15:13:58, progress=100, createdon=2026/7/21 15:13:58
+  - c565fb8a-52e0-4f61-a29c-d2369b8f7edf: importjobid=c565fb8a-52e0-4f61-a29c-d2369b8f7edf, solutionname=msdyn_KnowledgeManagementAgent, startedon=2026/7/21 15:13:37, progress=100, createdon=2026/7/21 15:13:37
+  - 962674f8-acf3-436f-b8ef-aa9668c19d1c: importjobid=962674f8-acf3-436f-b8ef-aa9668c19d1c, solutionname=msdyn_CSIntelligence, startedon=2026/7/21 15:11:06, progress=100, createdon=2026/7/21 15:11:06
+  - 5b3a19ea-825f-4e55-9057-7a20bb6999ac: importjobid=5b3a19ea-825f-4e55-9057-7a20bb6999ac, solutionname=msdyn_IntentEngineCoreConfiguration, startedon=2026/7/21 15:10:38, progress=100, createdon=2026/7/21 15:10:38
+  - be82be60-d6a0-45c6-b5d5-06dd94c00475: importjobid=be82be60-d6a0-45c6-b5d5-06dd94c00475, solutionname=msdyn_IntentEngineCore, startedon=2026/7/21 15:09:25, progress=100, createdon=2026/7/21 15:09:25
+  - f55bcfba-cc64-454c-bb61-ae6aa47c1c94: importjobid=f55bcfba-cc64-454c-bb61-ae6aa47c1c94, solutionname=msdyn_IntentMIProd, startedon=2026/7/21 15:09:03, progress=100, createdon=2026/7/21 15:09:03
+  - 2b038b6a-a203-4db8-82b9-b97b087349f7: importjobid=2b038b6a-a203-4db8-82b9-b97b087349f7, solutionname=msdyn_CSIntelligenceCore, startedon=2026/7/21 15:08:33, progress=100, createdon=2026/7/21 15:08:33
+  - 41211cec-73fa-436c-a634-a72ff3c2de81: importjobid=41211cec-73fa-436c-a634-a72ff3c2de81, solutionname=entity_CPQ_20260715, startedon=2026/7/21 14:18:13, progress=100, createdon=2026/7/21 14:18:13
+  - 1f2127aa-04be-4dc0-9739-942f5959e1e2: importjobid=1f2127aa-04be-4dc0-9739-942f5959e1e2, solutionname=McsPlugin, startedon=2026/7/21 14:05:40, progress=100, createdon=2026/7/21 14:05:40
+  - afd309c4-ddca-4882-8d6f-17d44fce887e: importjobid=afd309c4-ddca-4882-8d6f-17d44fce887e, solutionname=McsCustomAPI, startedon=2026/7/21 13:43:34, progress=100, createdon=2026/7/21 13:43:34
+  - 880a2ab0-245e-4d4f-8768-4cfd79e44743: importjobid=880a2ab0-245e-4d4f-8768-4cfd79e44743, solutionname=McsCustomAPI, startedon=2026/7/21 13:41:59, progress=100, createdon=2026/7/21 13:41:59
+  - 439bf165-2f77-4eaa-849c-d48914cd0296: importjobid=439bf165-2f77-4eaa-849c-d48914cd0296, solutionname=McsWebResource, startedon=2026/7/21 13:40:30, progress=100, createdon=2026/7/21 13:40:30
+  - 3e9d379b-b17a-4105-b882-c969240a23e3: importjobid=3e9d379b-b17a-4105-b882-c969240a23e3, solutionname=McsWebResource, startedon=2026/7/21 13:39:29, progress=100, createdon=2026/7/21 13:39:29
+  - ab92269f-594c-4e68-b777-9b6178ec8b39: importjobid=ab92269f-594c-4e68-b777-9b6178ec8b39, solutionname=entity_20260720_hzy, startedon=2026/7/21 13:30:21, progress=100, createdon=2026/7/21 13:30:21
+  - 9eebe47d-3e8b-496b-be3f-7e08ac922d71: importjobid=9eebe47d-3e8b-496b-be3f-7e08ac922d71, solutionname=McsWebResource, startedon=2026/7/21 13:28:50, progress=100, createdon=2026/7/21 13:28:50
+  - 57e07052-87aa-4d23-870d-24746cec5462: importjobid=57e07052-87aa-4d23-870d-24746cec5462, solutionname=entity_webResource_qy, startedon=2026/7/21 13:21:04, progress=100, createdon=2026/7/21 13:21:04
+  - 725012c4-4ceb-4bef-a5eb-f28191bd5c08: importjobid=725012c4-4ceb-4bef-a5eb-f28191bd5c08, solutionname=entity_20260721_lp, startedon=2026/7/21 12:57:16, progress=100, createdon=2026/7/21 12:57:16
+  - 25c8bfeb-7af0-40de-b85e-9465da4152d4: importjobid=25c8bfeb-7af0-40de-b85e-9465da4152d4, solutionname=McsPlugin, startedon=2026/7/21 12:55:45, progress=100, createdon=2026/7/21 12:55:45
+  - 98af1cca-a8ff-45e4-8ec9-86c6211aedaf: importjobid=98af1cca-a8ff-45e4-8ec9-86c6211aedaf, solutionname=McsOptionSet, startedon=2026/7/21 12:54:35, progress=100, createdon=2026/7/21 12:54:35
+  - 55755757-35ce-42d4-8d48-586e9070f133: importjobid=55755757-35ce-42d4-8d48-586e9070f133, solutionname=McsWebResource, startedon=2026/7/21 12:41:34, progress=100, createdon=2026/7/21 12:41:34
+  - 4b82aa6f-fae2-451f-91a6-b31b6e788181: importjobid=4b82aa6f-fae2-451f-91a6-b31b6e788181, solutionname=Ribbon_260722_Jeff, startedon=2026/7/21 12:37:39, progress=100, createdon=2026/7/21 12:37:39
+  - 6ee01c1d-fddf-4d40-a181-4a80f84e03c4: importjobid=6ee01c1d-fddf-4d40-a181-4a80f84e03c4, solutionname=McsPlugin, startedon=2026/7/21 12:35:15, progress=100, createdon=2026/7/21 12:35:15
+  - b3f78e74-f361-483d-8231-3acec8627949: importjobid=b3f78e74-f361-483d-8231-3acec8627949, solutionname=McsWebResource, startedon=2026/7/21 12:33:42, progress=100, createdon=2026/7/21 12:33:42
+  - ba9f8c1d-0c59-4cc4-b711-8a95770936b4: importjobid=ba9f8c1d-0c59-4cc4-b711-8a95770936b4, solutionname=McsWebResource, startedon=2026/7/21 12:32:16, progress=100, createdon=2026/7/21 12:32:16
+  - b3a8202e-6497-4cc4-986b-0a1addac208d: importjobid=b3a8202e-6497-4cc4-986b-0a1addac208d, solutionname=McsCustomAPI, startedon=2026/7/21 12:29:13, progress=100, createdon=2026/7/21 12:29:13
+  - b105f43d-a733-4b17-b32f-f71bdd6bbb29: importjobid=b105f43d-a733-4b17-b32f-f71bdd6bbb29, solutionname=yuanzg_20260722, startedon=2026/7/21 11:45:04, progress=100, createdon=2026/7/21 11:45:04
+  - 4f4e959d-c34d-4e45-aa91-8bf4ada05507: importjobid=4f4e959d-c34d-4e45-aa91-8bf4ada05507, solutionname=McsPlugin, startedon=2026/7/21 11:37:39, progress=100, createdon=2026/7/21 11:37:39
+  - 2def92ab-e590-4559-bd6c-ad6db98054be: importjobid=2def92ab-e590-4559-bd6c-ad6db98054be, solutionname=entity_20260410_zh, startedon=2026/7/21 11:15:35, progress=100, createdon=2026/7/21 11:15:35
+  - 4ba1ecdf-9d0d-469b-b65c-2611333b2e3c: importjobid=4ba1ecdf-9d0d-469b-b65c-2611333b2e3c, solutionname=zh_ribbon0420, startedon=2026/7/21 11:13:37, progress=100, createdon=2026/7/21 11:13:37
+  - a34d17a3-2ef4-4386-8671-8981a9918fd5: importjobid=a34d17a3-2ef4-4386-8671-8981a9918fd5, solutionname=McsWebResource, startedon=2026/7/21 11:12:08, progress=100, createdon=2026/7/21 11:12:08
+  - ddd1c455-ab12-4014-8227-d6d07526a517: importjobid=ddd1c455-ab12-4014-8227-d6d07526a517, solutionname=McsPlugin, startedon=2026/7/21 10:39:48, progress=100, createdon=2026/7/21 10:39:48
+  - 6cfe8e75-320f-4060-8827-4bf3eb2b1cbd: importjobid=6cfe8e75-320f-4060-8827-4bf3eb2b1cbd, solutionname=rider_260722, startedon=2026/7/21 10:32:31, progress=100, createdon=2026/7/21 10:32:31
+  - b2fc9f03-2247-45f2-9014-ef32ced6304d: importjobid=b2fc9f03-2247-45f2-9014-ef32ced6304d, solutionname=wp20250325, startedon=2026/7/21 10:27:16, progress=100, createdon=2026/7/21 10:27:16
+  - 0b751b1d-e644-4fc4-882e-add6d73187e1: importjobid=0b751b1d-e644-4fc4-882e-add6d73187e1, solutionname=McsWebResource, startedon=2026/7/21 10:25:33, progress=100, createdon=2026/7/21 10:25:33
+  - e971b25a-595c-42f4-ac4c-bc7c466fb609: importjobid=e971b25a-595c-42f4-ac4c-bc7c466fb609, solutionname=McsWebResource, startedon=2026/7/21 10:23:52, progress=100, createdon=2026/7/21 10:23:52
+  - ea7e2dde-93f3-4955-bdef-5dad1a503290: importjobid=ea7e2dde-93f3-4955-bdef-5dad1a503290, solutionname=entity_20260721_czy, startedon=2026/7/21 10:07:45, progress=100, createdon=2026/7/21 10:07:45
+  - 5fc5c007-2c1a-43b7-aa53-3fa3848ee646: importjobid=5fc5c007-2c1a-43b7-aa53-3fa3848ee646, solutionname=entity_20260410_zh, startedon=2026/7/21 10:03:20, progress=100, createdon=2026/7/21 10:03:20
+  - 7d25e778-97b9-4e84-8b19-c528b7c7a8fc: importjobid=7d25e778-97b9-4e84-8b19-c528b7c7a8fc, solutionname=McsPlugin, startedon=2026/7/21 10:01:08, progress=100, createdon=2026/7/21 10:01:08
+  - b1f5ed85-9561-4f9b-91b9-481e1bf2d018: importjobid=b1f5ed85-9561-4f9b-91b9-481e1bf2d018, solutionname=entity_20260629_qy, startedon=2026/7/21 09:16:18, progress=100, createdon=2026/7/21 09:16:18
+  - 788828ea-9c09-4cbf-8cc3-d14ebc974dee: importjobid=788828ea-9c09-4cbf-8cc3-d14ebc974dee, solutionname=entity_20260721_lp, startedon=2026/7/21 09:06:18, progress=100, createdon=2026/7/21 09:06:18
+  - daceae5f-ac87-4432-93d2-758ec4553cdc: importjobid=daceae5f-ac87-4432-93d2-758ec4553cdc, solutionname=McsPlugin, startedon=2026/7/21 09:01:33, progress=100, createdon=2026/7/21 09:01:33
+  - f39c1961-9bb0-4e8a-9aea-a7b0e384ddc8: importjobid=f39c1961-9bb0-4e8a-9aea-a7b0e384ddc8, solutionname=McsWebResource, startedon=2026/7/21 08:59:20, progress=100, createdon=2026/7/21 08:59:20
+  - a9032c7b-80b3-4e21-9974-96a2408cb21a: importjobid=a9032c7b-80b3-4e21-9974-96a2408cb21a, solutionname=McsCustomAPI, startedon=2026/7/21 08:57:59, progress=100, createdon=2026/7/21 08:57:59
+  - 0431b3d4-b5cc-42bf-98a8-452604c81b21: importjobid=0431b3d4-b5cc-42bf-98a8-452604c81b21, solutionname=KPMG_Entity_CZY, startedon=2026/7/21 08:15:23, progress=100, createdon=2026/7/21 08:15:23
+  - 9e52206b-234f-4ec5-bc7d-74bee248993d: importjobid=9e52206b-234f-4ec5-bc7d-74bee248993d, solutionname=McsPlugin, startedon=2026/7/21 08:12:03, progress=100, createdon=2026/7/21 08:12:03
+  - e8015e31-82fa-4f95-b6be-ffae79c48371: importjobid=e8015e31-82fa-4f95-b6be-ffae79c48371, solutionname=McsWebResource, startedon=2026/7/21 08:03:31, progress=100, createdon=2026/7/21 08:03:31
+  - d0e5dc3a-9a9f-4926-aa01-34ed5e114446: importjobid=d0e5dc3a-9a9f-4926-aa01-34ed5e114446, solutionname=McsWebResource, startedon=2026/7/21 07:47:48, progress=100, createdon=2026/7/21 07:47:48
+  - d3fdbae4-8340-4584-9d2d-96b64eb6f045: importjobid=d3fdbae4-8340-4584-9d2d-96b64eb6f045, solutionname=McsWebResource, startedon=2026/7/21 07:43:04, progress=100, createdon=2026/7/21 07:43:04
+  - 0c747cad-b625-457a-b891-13b9b762e1be: importjobid=0c747cad-b625-457a-b891-13b9b762e1be, solutionname=entity_20260714_cjs, startedon=2026/7/21 07:39:15, progress=100, createdon=2026/7/21 07:39:15
+  - ea2c8e59-b677-4da1-a54d-1bc1c9fcf934: importjobid=ea2c8e59-b677-4da1-a54d-1bc1c9fcf934, solutionname=McsWebResource, startedon=2026/7/21 07:26:05, progress=100, createdon=2026/7/21 07:26:05
+  - 4c5ec70a-6fd2-46ed-9440-008da31650a8: importjobid=4c5ec70a-6fd2-46ed-9440-008da31650a8, solutionname=LeadDetail0702_Translate_01, startedon=2026/7/21 07:18:58, progress=100, createdon=2026/7/21 07:18:58
+  - a6352110-0885-48b5-8ec1-fc556c80ff06: importjobid=a6352110-0885-48b5-8ec1-fc556c80ff06, solutionname=KPMG_LeadOptionSets, startedon=2026/7/21 07:17:40, progress=100, createdon=2026/7/21 07:17:40
+  - 88d35dc5-82cf-4b94-bd53-c0a4ac36918d: importjobid=88d35dc5-82cf-4b94-bd53-c0a4ac36918d, solutionname=KPMG_LeadWebReSource, startedon=2026/7/21 07:15:27, progress=100, createdon=2026/7/21 07:15:27
+  - 9bdc7cc7-8186-4d89-b1a7-efe237105ac1: importjobid=9bdc7cc7-8186-4d89-b1a7-efe237105ac1, solutionname=McsWebResource, startedon=2026/7/21 06:59:15, progress=100, createdon=2026/7/21 06:59:15
+  - 6bd9731c-adba-49a8-96dc-279801050fd3: importjobid=6bd9731c-adba-49a8-96dc-279801050fd3, solutionname=entity_20260721_lp, startedon=2026/7/21 06:54:43, progress=100, createdon=2026/7/21 06:54:43
+  - 84eabc42-be8d-4eea-9a5f-5b0bbd1339ed: importjobid=84eabc42-be8d-4eea-9a5f-5b0bbd1339ed, solutionname=McsWebResource, startedon=2026/7/21 06:52:06, progress=100, createdon=2026/7/21 06:52:06
+  - 56bf67eb-ed87-4987-b68b-ab977735265d: importjobid=56bf67eb-ed87-4987-b68b-ab977735265d, solutionname=WP20250820, startedon=2026/7/21 06:46:14, progress=100, createdon=2026/7/21 06:46:14
+  - 09148e87-d63f-4fb3-9899-e0425a135468: importjobid=09148e87-d63f-4fb3-9899-e0425a135468, solutionname=McsCustomAPI, startedon=2026/7/21 06:41:35, progress=100, createdon=2026/7/21 06:41:35
+  - 9271e40c-ddbe-492a-821e-913aff48e18b: importjobid=9271e40c-ddbe-492a-821e-913aff48e18b, solutionname=WP20250820, startedon=2026/7/21 05:10:32, progress=100, createdon=2026/7/21 05:10:32
+  - 11da8efa-1809-4d9e-b4a0-53f870ff0cb2: importjobid=11da8efa-1809-4d9e-b4a0-53f870ff0cb2, solutionname=McsPlugin, startedon=2026/7/21 04:30:00, progress=100, createdon=2026/7/21 04:30:00
+  - 8af5aa7c-25a1-43b1-9c09-d3a72f05d1ab: importjobid=8af5aa7c-25a1-43b1-9c09-d3a72f05d1ab, solutionname=McsWebResource, startedon=2026/7/21 04:15:46, progress=100, createdon=2026/7/21 04:15:46
+  - d56ff500-3e0c-41fc-a3bd-a2aa9dfce9be: importjobid=d56ff500-3e0c-41fc-a3bd-a2aa9dfce9be, solutionname=Entity_20260722_India_Parts, startedon=2026/7/21 04:05:38, progress=100, createdon=2026/7/21 04:05:38
+  - 0b8afeec-4274-483c-9f4d-3c3d888ef10e: importjobid=0b8afeec-4274-483c-9f4d-3c3d888ef10e, solutionname=McsCustomAPI, startedon=2026/7/21 03:59:26, progress=100, createdon=2026/7/21 03:59:26
+  - c4ca6705-6497-4b51-b126-beff2c750c9e: importjobid=c4ca6705-6497-4b51-b126-beff2c750c9e, solutionname=McsWebResource, startedon=2026/7/21 03:35:37, progress=100, createdon=2026/7/21 03:35:37
+  - 0dff21e6-9b95-4cf1-93e6-e4891f7476c6: importjobid=0dff21e6-9b95-4cf1-93e6-e4891f7476c6, solutionname=McsPlugin, startedon=2026/7/21 03:24:23, progress=0.22002200220022003, createdon=2026/7/21 03:24:23
+  - e3a0c3fb-2618-4d6f-b2ff-2f97796cb095: importjobid=e3a0c3fb-2618-4d6f-b2ff-2f97796cb095, solutionname=sln_Import, startedon=2026/7/21 03:13:56, progress=100, createdon=2026/7/21 03:13:56
+  - b8d5771e-6203-45d1-bcb5-8cd23f72af0e: importjobid=b8d5771e-6203-45d1-bcb5-8cd23f72af0e, solutionname=update_sitmap_20260709, startedon=2026/7/21 03:10:07, progress=60, createdon=2026/7/21 03:10:07
+  - 8fd16ffe-f23e-48cd-81e7-acef14d0a608: importjobid=8fd16ffe-f23e-48cd-81e7-acef14d0a608, solutionname=entity_contract_ext4, startedon=2026/7/21 02:54:46, progress=100, createdon=2026/7/21 02:54:46
+  - 50ceab87-1994-46e4-81e1-9a51d07c3b99: importjobid=50ceab87-1994-46e4-81e1-9a51d07c3b99, solutionname=McsWebResource, startedon=2026/7/21 02:45:14, progress=100, createdon=2026/7/21 02:45:14
+  - 96066bba-160f-4bf7-961e-1402dd5551b9: importjobid=96066bba-160f-4bf7-961e-1402dd5551b9, solutionname=entity_20260721_lp, startedon=2026/7/21 02:35:29, progress=100, createdon=2026/7/21 02:35:29
+  - 65d3ed28-bf9a-433a-8935-a010a8cb0b48: importjobid=65d3ed28-bf9a-433a-8935-a010a8cb0b48, solutionname=McsWebResource, startedon=2026/7/21 02:24:34, progress=100, createdon=2026/7/21 02:24:34
+  - 3fb58191-2a58-41d2-b9c9-64fe0ce602c1: importjobid=3fb58191-2a58-41d2-b9c9-64fe0ce602c1, solutionname=McsWebResource, startedon=2026/7/21 02:19:54, progress=100, createdon=2026/7/21 02:19:54
+  - ef3192ee-9d7f-40ac-be1e-84633da48eeb: importjobid=ef3192ee-9d7f-40ac-be1e-84633da48eeb, solutionname=entity_webResource_qy, startedon=2026/7/21 02:10:25, progress=100, createdon=2026/7/21 02:10:25
+  - 0af18a5d-60ae-4861-b385-7f20f6e757be: importjobid=0af18a5d-60ae-4861-b385-7f20f6e757be, solutionname=McsWebResource, startedon=2026/7/21 02:03:08, progress=100, createdon=2026/7/21 02:03:08
+  - d7ec0ecc-4a8c-4171-99cc-606ce81c4321: importjobid=d7ec0ecc-4a8c-4171-99cc-606ce81c4321, solutionname=Ribbon_GYL, startedon=2026/7/21 01:46:50, progress=100, createdon=2026/7/21 01:46:50
+  - f7a7f84d-5ec8-4c50-b011-163517cd4015: importjobid=f7a7f84d-5ec8-4c50-b011-163517cd4015, solutionname=McsWebResource, startedon=2026/7/21 01:43:00, progress=100, createdon=2026/7/21 01:43:00
+  - 5a613011-0dcc-42f0-b4b3-d45cd7bda019: importjobid=5a613011-0dcc-42f0-b4b3-d45cd7bda019, solutionname=app_allcomponents, startedon=2026/7/21 01:42:02, progress=100, createdon=2026/7/21 01:42:02
+  - 08b85d2b-4a41-44ee-90d0-febf845267f6: importjobid=08b85d2b-4a41-44ee-90d0-febf845267f6, solutionname=McsCustomAPI, startedon=2026/7/21 01:39:16, progress=47.61904761904762, createdon=2026/7/21 01:39:16
+  - ac2a4bf4-d216-476f-b8ed-05e89a65c6ad: importjobid=ac2a4bf4-d216-476f-b8ed-05e89a65c6ad, solutionname=McsPlugin, startedon=2026/7/21 01:36:52, progress=100, createdon=2026/7/21 01:36:52
+  - 521c0672-ac49-4e25-aaa9-b068dadebfed: importjobid=521c0672-ac49-4e25-aaa9-b068dadebfed, solutionname=Ribbon_GYL, startedon=2026/7/21 00:36:12, progress=100, createdon=2026/7/21 00:36:12
+  - dfa82064-26df-47f2-bb17-7274e04f1839: importjobid=dfa82064-26df-47f2-bb17-7274e04f1839, solutionname=OmnichannelPrimeTeams, startedon=2026/7/20 19:25:37, progress=100, createdon=2026/7/20 19:25:37
+  - d18718a5-d228-4d12-b767-4a1339b7a6e0: importjobid=d18718a5-d228-4d12-b767-4a1339b7a6e0, solutionname=msdyn_OmnichannelTeamsPatch, startedon=2026/7/20 19:16:24, progress=100, createdon=2026/7/20 19:16:24
+  - 845b883b-f1a8-438b-b23e-7c910ba0e0f0: importjobid=845b883b-f1a8-438b-b23e-7c910ba0e0f0, solutionname=OmnichannelTeams, startedon=2026/7/20 19:05:57, progress=100, createdon=2026/7/20 19:05:57
+  - 2ccdc2b2-2904-4f92-8131-bbba1ab24e8a: importjobid=2ccdc2b2-2904-4f92-8131-bbba1ab24e8a, solutionname=msdynce_AnyEntityRoutingRule, startedon=2026/7/20 17:57:14, progress=100, createdon=2026/7/20 17:57:14
+  - 8f02dbc0-3d55-420f-a59f-58f1b5651fee: importjobid=8f02dbc0-3d55-420f-a59f-58f1b5651fee, solutionname=OmnichannelPrimeSocialChannelsAnchor, startedon=2026/7/20 17:29:48, progress=100, createdon=2026/7/20 17:29:48
+  - 8cdedcf7-96e5-450f-938a-c35aaeeb02eb: importjobid=8cdedcf7-96e5-450f-938a-c35aaeeb02eb, solutionname=msdyn_OmnichannelSocialChannelsPatch, startedon=2026/7/20 17:23:05, progress=100, createdon=2026/7/20 17:23:05
+  - d88e1e4f-402a-4612-a1ed-baddeea72f9d: importjobid=d88e1e4f-402a-4612-a1ed-baddeea72f9d, solutionname=OmnichannelPrimeSMSAnchor, startedon=2026/7/20 16:54:28, progress=100, createdon=2026/7/20 16:54:28
+  - 81ae6048-5bd8-4282-8070-68736c9aa96c: importjobid=81ae6048-5bd8-4282-8070-68736c9aa96c, solutionname=McsWebResource, startedon=2026/7/20 15:55:28, progress=100, createdon=2026/7/20 15:55:28
+  - bc3d2a36-fd09-4df9-97ae-46d421fa8a28: importjobid=bc3d2a36-fd09-4df9-97ae-46d421fa8a28, solutionname=entity_contract_ext4, startedon=2026/7/20 13:21:56, progress=100, createdon=2026/7/20 13:21:56
+  - 7e659241-ab22-4d7d-a6bc-7bf1d96592be: importjobid=7e659241-ab22-4d7d-a6bc-7bf1d96592be, solutionname=McsWebResource, startedon=2026/7/20 13:16:12, progress=100, createdon=2026/7/20 13:16:12
+  - 9d2f2d41-7257-4fcc-9804-3e4ce90d0306: importjobid=9d2f2d41-7257-4fcc-9804-3e4ce90d0306, solutionname=McsCustomAPI, startedon=2026/7/20 13:11:39, progress=100, createdon=2026/7/20 13:11:39
+  - ddb7752e-8675-4480-99b3-8d53a77ffef8: importjobid=ddb7752e-8675-4480-99b3-8d53a77ffef8, solutionname=role_20260720_wy, startedon=2026/7/20 12:45:36, progress=100, createdon=2026/7/20 12:45:36
+  - 22a808b4-8aa8-4e73-b9ff-0a900547e7de: importjobid=22a808b4-8aa8-4e73-b9ff-0a900547e7de, solutionname=WP20250820, startedon=2026/7/20 12:40:55, progress=100, createdon=2026/7/20 12:40:55
+  - df73c1f0-765e-433f-aeb8-02f9480d8251: importjobid=df73c1f0-765e-433f-aeb8-02f9480d8251, solutionname=McsPlugin, startedon=2026/7/20 12:38:52, progress=100, createdon=2026/7/20 12:38:52
+  - 506b9bab-bc69-4ffe-acaf-fbfe490244eb: importjobid=506b9bab-bc69-4ffe-acaf-fbfe490244eb, solutionname=entity_20260629_qy, startedon=2026/7/20 12:01:36, progress=100, createdon=2026/7/20 12:01:36
+  - 70551a25-08e5-43fb-a012-4b88928fadff: importjobid=70551a25-08e5-43fb-a012-4b88928fadff, solutionname=McsWebResource, startedon=2026/7/20 11:52:09, progress=100, createdon=2026/7/20 11:52:09
+  - 78196eac-0357-4762-bb6f-590f2255ba07: importjobid=78196eac-0357-4762-bb6f-590f2255ba07, solutionname=McsWebResource, startedon=2026/7/20 11:44:25, progress=100, createdon=2026/7/20 11:44:25
+  - c96046a9-bc46-4115-88a1-48048631a355: importjobid=c96046a9-bc46-4115-88a1-48048631a355, solutionname=McsCustomAPI, startedon=2026/7/20 11:23:51, progress=100, createdon=2026/7/20 11:23:51
+  - 99015c74-7c9b-4e80-9ac2-d6470c3c66f2: importjobid=99015c74-7c9b-4e80-9ac2-d6470c3c66f2, solutionname=Entity_20260722_India_Parts, startedon=2026/7/20 11:13:39, progress=100, createdon=2026/7/20 11:13:39
+  - 40bd82fa-d486-4492-9341-14a6b57a040f: importjobid=40bd82fa-d486-4492-9341-14a6b57a040f, solutionname=entity_20260722_xzh, startedon=2026/7/20 11:06:11, progress=100, createdon=2026/7/20 11:06:11
+  - f9b8f4c8-56e6-427d-b13b-0daf2e4bd62b: importjobid=f9b8f4c8-56e6-427d-b13b-0daf2e4bd62b, solutionname=WP20250820, startedon=2026/7/20 10:29:27, progress=100, createdon=2026/7/20 10:29:27
+  - f8ba493e-5b40-41d6-bb9d-a23a5c385bc2: importjobid=f8ba493e-5b40-41d6-bb9d-a23a5c385bc2, solutionname=yangjh39_message, startedon=2026/7/20 10:24:17, progress=100, createdon=2026/7/20 10:24:17
+  - eede5ebc-dc45-438a-947e-8b3e8fe0cfc4: importjobid=eede5ebc-dc45-438a-947e-8b3e8fe0cfc4, solutionname=yuanzg_20260722, startedon=2026/7/20 09:42:36, progress=100, createdon=2026/7/20 09:42:36
+  - cb58aa4f-bac1-435c-95cc-e408db07cebd: importjobid=cb58aa4f-bac1-435c-95cc-e408db07cebd, solutionname=yangjh39_message, startedon=2026/7/20 09:36:55, progress=100, createdon=2026/7/20 09:36:55
+  - b6d01b57-ac34-4e2d-a462-3bc0ba0d7c7e: importjobid=b6d01b57-ac34-4e2d-a462-3bc0ba0d7c7e, solutionname=entity_20260714_cjs, startedon=2026/7/20 09:32:45, progress=100, createdon=2026/7/20 09:32:45
+  - 63cb5c81-04fc-4e79-b70b-9c87e61db9da: importjobid=63cb5c81-04fc-4e79-b70b-9c87e61db9da, solutionname=McsPlugin, startedon=2026/7/20 09:28:46, progress=100, createdon=2026/7/20 09:28:46
+  - 7e54070a-08ce-4354-8e7f-99ebd62b3f29: importjobid=7e54070a-08ce-4354-8e7f-99ebd62b3f29, solutionname=Ribbon_GYL, startedon=2026/7/20 08:48:07, progress=100, createdon=2026/7/20 08:48:07
+  - 0c868fa6-e008-4267-9781-c456b2bd4b6b: importjobid=0c868fa6-e008-4267-9781-c456b2bd4b6b, solutionname=McsWebResource, startedon=2026/7/20 08:40:47, progress=100, createdon=2026/7/20 08:40:47
+  - 7f0b66ad-517a-4316-a661-8364e1faa64a: importjobid=7f0b66ad-517a-4316-a661-8364e1faa64a, solutionname=McsWebResource, startedon=2026/7/20 08:39:41, progress=100, createdon=2026/7/20 08:39:41
+  - bcedf1b2-2318-426f-962f-1dd88acb3a0e: importjobid=bcedf1b2-2318-426f-962f-1dd88acb3a0e, solutionname=McsWebResource, startedon=2026/7/20 08:34:47, progress=100, createdon=2026/7/20 08:34:47
+  - a364b3f4-b6ba-4a1d-945a-5aaa251bf759: importjobid=a364b3f4-b6ba-4a1d-945a-5aaa251bf759, solutionname=entity_260707_lius_translation, startedon=2026/7/20 08:16:04, progress=100, createdon=2026/7/20 08:16:04
+  - 004ff4e7-fc80-4f79-91a4-9f2e59505e16: importjobid=004ff4e7-fc80-4f79-91a4-9f2e59505e16, solutionname=McsPlugin, startedon=2026/7/20 08:01:32, progress=100, createdon=2026/7/20 08:01:32
+  - 1dbe8685-f1ba-44e8-a33b-cdde1683a624: importjobid=1dbe8685-f1ba-44e8-a33b-cdde1683a624, solutionname=McsCustomAPI, startedon=2026/7/20 07:55:47, progress=100, createdon=2026/7/20 07:55:47
+  - a69c160b-b013-4b61-a8fe-941b6fe56abf: importjobid=a69c160b-b013-4b61-a8fe-941b6fe56abf, solutionname=entity_20260615_GuidancePriceRegion, startedon=2026/7/20 07:44:12, progress=100, createdon=2026/7/20 07:44:12
+  - 923e690b-ca38-4b48-9f05-42bbd8e5db4e: importjobid=923e690b-ca38-4b48-9f05-42bbd8e5db4e, solutionname=McsWebResource, startedon=2026/7/20 07:36:15, progress=100, createdon=2026/7/20 07:36:15
+  - 6dc6ef93-5ff2-4fb0-a0e9-d465cedae507: importjobid=6dc6ef93-5ff2-4fb0-a0e9-d465cedae507, solutionname=entity_20260714_cjs, startedon=2026/7/20 07:15:36, progress=100, createdon=2026/7/20 07:15:36
+  - 725ce77f-e4a8-4224-984d-40268b9a9439: importjobid=725ce77f-e4a8-4224-984d-40268b9a9439, solutionname=entity_260703_zj, startedon=2026/7/20 07:09:21, progress=100, createdon=2026/7/20 07:09:21
+  - dc79adc8-fd5a-4773-8084-d15c657956bb: importjobid=dc79adc8-fd5a-4773-8084-d15c657956bb, solutionname=entity_20260629_qy, startedon=2026/7/20 05:18:52, progress=97.30848861283644, createdon=2026/7/20 05:18:52
+  - 3a7ae722-c8f6-46fa-8c94-031d6702f84f: importjobid=3a7ae722-c8f6-46fa-8c94-031d6702f84f, solutionname=McsPlugin, startedon=2026/7/20 04:17:28, progress=100, createdon=2026/7/20 04:17:28
+  - 7dbc5766-6c20-4378-a226-d18a5ead0b61: importjobid=7dbc5766-6c20-4378-a226-d18a5ead0b61, solutionname=McsWebResource, startedon=2026/7/20 04:14:41, progress=100, createdon=2026/7/20 04:14:41
+  - 9becd8f7-063a-4932-af43-24fe0dac5652: importjobid=9becd8f7-063a-4932-af43-24fe0dac5652, solutionname=McsCustomAPI, startedon=2026/7/20 03:56:40, progress=100, createdon=2026/7/20 03:56:40
+  - 1116c5d8-4cb4-4a87-b1fc-51aa0e475791: importjobid=1116c5d8-4cb4-4a87-b1fc-51aa0e475791, solutionname=McsCustomAPI, startedon=2026/7/20 03:47:21, progress=100, createdon=2026/7/20 03:47:21
+  - b6986e67-2eac-4e62-b81b-f6cd731fcb1d: importjobid=b6986e67-2eac-4e62-b81b-f6cd731fcb1d, solutionname=Entity_20260722_India_Sales, startedon=2026/7/20 03:35:42, progress=100, createdon=2026/7/20 03:35:42
+  - bd346575-80c7-4b43-8880-0e23f331c179: importjobid=bd346575-80c7-4b43-8880-0e23f331c179, solutionname=rider_260722, startedon=2026/7/20 03:18:08, progress=100, createdon=2026/7/20 03:18:08
+  - 0e00ee4e-8c5c-4a27-aa99-c1d24f137fcd: importjobid=0e00ee4e-8c5c-4a27-aa99-c1d24f137fcd, solutionname=entity_260707_lius_translation, startedon=2026/7/20 03:10:25, progress=100, createdon=2026/7/20 03:10:25
+  - d935cd47-f88c-437c-a540-97478efc9f91: importjobid=d935cd47-f88c-437c-a540-97478efc9f91, solutionname=McsWebResource, startedon=2026/7/20 02:27:27, progress=100, createdon=2026/7/20 02:27:27
+  - 11953c84-0cbe-43c4-aebe-206d792108fb: importjobid=11953c84-0cbe-43c4-aebe-206d792108fb, solutionname=entity_20260717_hzy, startedon=2026/7/20 02:22:50, progress=100, createdon=2026/7/20 02:22:50
+  - 7aa1c38f-7da4-458f-b016-ea9d333f67f3: importjobid=7aa1c38f-7da4-458f-b016-ea9d333f67f3, solutionname=McsPlugin, startedon=2026/7/20 02:18:14, progress=100, createdon=2026/7/20 02:18:14
+  - eb00071f-07f5-41e9-8811-1b1f24bd6f33: importjobid=eb00071f-07f5-41e9-8811-1b1f24bd6f33, solutionname=mamf_ribbon, startedon=2026/7/20 02:12:32, progress=100, createdon=2026/7/20 02:12:32
+  - 5477fa80-efc7-4ca6-8958-f4fd57d5020f: importjobid=5477fa80-efc7-4ca6-8958-f4fd57d5020f, solutionname=entity_20260629_qy, startedon=2026/7/20 01:27:29, progress=100, createdon=2026/7/20 01:27:29
+  - fc05761a-9494-47bb-ba9c-328041d19ec1: importjobid=fc05761a-9494-47bb-ba9c-328041d19ec1, solutionname=McsCustomAPI, startedon=2026/7/20 00:54:09, progress=100, createdon=2026/7/20 00:54:09
+  - d9fb5c06-c4f5-4474-9674-4990271b367e: importjobid=d9fb5c06-c4f5-4474-9674-4990271b367e, solutionname=OmnichannelPrimeChatAnchor, startedon=2026/7/19 20:02:35, progress=100, createdon=2026/7/19 20:02:35
+  - ac23d05c-72d0-4fb6-8700-4155c88fcd76: importjobid=ac23d05c-72d0-4fb6-8700-4155c88fcd76, solutionname=OmnichannelChat, startedon=2026/7/19 19:48:56, progress=100, createdon=2026/7/19 19:48:56
+  - 0374fe9c-3da3-46a4-8657-7e35a4927364: importjobid=0374fe9c-3da3-46a4-8657-7e35a4927364, solutionname=msdyn_OmnichannelPrimeProactiveAIAnchor, startedon=2026/7/19 19:47:07, progress=100, createdon=2026/7/19 19:47:07
+  - e0987d9b-eff6-48ec-92be-6ca170780478: importjobid=e0987d9b-eff6-48ec-92be-6ca170780478, solutionname=msdyn_OmnichannelMCPServerPESTools, startedon=2026/7/19 19:46:55, progress=100, createdon=2026/7/19 19:46:55
+  - c064b977-0815-497a-bff3-277f78a1a6b8: importjobid=c064b977-0815-497a-bff3-277f78a1a6b8, solutionname=msdyn_OmnichannelCCaaSPESApi, startedon=2026/7/19 19:45:50, progress=100, createdon=2026/7/19 19:45:50
+  - e30b2a89-7363-4f6a-b46c-27ee0ee11a60: importjobid=e30b2a89-7363-4f6a-b46c-27ee0ee11a60, solutionname=msdyn_OmnichannelPESPermissions__Public, startedon=2026/7/19 19:45:21, progress=100, createdon=2026/7/19 19:45:21
+  - cd0f0bb1-4107-4d84-b314-277d008bf2bb: importjobid=cd0f0bb1-4107-4d84-b314-277d008bf2bb, solutionname=msdyn_OmnichannelProactiveEngagement, startedon=2026/7/19 19:35:12, progress=100, createdon=2026/7/19 19:35:12
+  - 9d54858d-197f-48de-bea0-54688fbfcd6e: importjobid=9d54858d-197f-48de-bea0-54688fbfcd6e, solutionname=DynamicsMKT_SendOptimization, startedon=2026/7/19 19:32:11, progress=100, createdon=2026/7/19 19:32:11
+  - 38e6b5d3-abfa-4c76-8107-3af53fb846fc: importjobid=38e6b5d3-abfa-4c76-8107-3af53fb846fc, solutionname=msdynce_SalesAnchor, startedon=2026/7/19 19:27:18, progress=100, createdon=2026/7/19 19:27:18
+  - e5fc16e7-73b1-4980-bd28-dce81b0012a3: importjobid=e5fc16e7-73b1-4980-bd28-dce81b0012a3, solutionname=msdyn_SalesCopilot, startedon=2026/7/19 19:25:45, progress=100, createdon=2026/7/19 19:25:45
+  - 065fa32f-2ba6-4596-83d2-a9b6b56bd3cd: importjobid=065fa32f-2ba6-4596-83d2-a9b6b56bd3cd, solutionname=msdyn_SalesProdIdentities, startedon=2026/7/19 19:25:35, progress=100, createdon=2026/7/19 19:25:35
+  - 0b876d11-7b31-44f0-9675-f8c8a7d12638: importjobid=0b876d11-7b31-44f0-9675-f8c8a7d12638, solutionname=msdynce_SalesPatch202001, startedon=2026/7/19 19:20:40, progress=100, createdon=2026/7/19 19:20:40
+  - 82375d57-d2a4-4ed7-88c1-68b41b132025: importjobid=82375d57-d2a4-4ed7-88c1-68b41b132025, solutionname=OmnichannelPrimeTelephony, startedon=2026/7/19 19:01:46, progress=100, createdon=2026/7/19 19:01:46
+  - f6beeffa-e30f-4b25-b183-ecca33279c13: importjobid=f6beeffa-e30f-4b25-b183-ecca33279c13, solutionname=msdyn_OmnichannelCCaaSVoiceAPI, startedon=2026/7/19 18:59:28, progress=100, createdon=2026/7/19 18:59:28
+  - 7f60662c-76aa-4b6e-8093-53c39ee4fcf0: importjobid=7f60662c-76aa-4b6e-8093-53c39ee4fcf0, solutionname=msdyn_OmnichannelSporch__Public, startedon=2026/7/19 18:59:11, progress=100, createdon=2026/7/19 18:59:11
+  - 36119b4d-3177-4c8b-953d-b0adc0d3abd7: importjobid=36119b4d-3177-4c8b-953d-b0adc0d3abd7, solutionname=msdyn_OmnichannelVoiceRuntime__Public, startedon=2026/7/19 18:58:41, progress=100, createdon=2026/7/19 18:58:41
+  - c26fc418-97f5-43d4-8931-cb15758ea2b7: importjobid=c26fc418-97f5-43d4-8931-cb15758ea2b7, solutionname=msdyn_OmnichannelEngagementHubPatch, startedon=2026/7/19 18:56:22, progress=100, createdon=2026/7/19 18:56:22
+  - 021bd508-24cd-49f0-9cf6-ece62e8a8cd0: importjobid=021bd508-24cd-49f0-9cf6-ece62e8a8cd0, solutionname=OmnichannelTelephony, startedon=2026/7/19 18:40:45, progress=100, createdon=2026/7/19 18:40:45
+  - c34905c5-0223-419e-aaf2-4427cb9f30a7: importjobid=c34905c5-0223-419e-aaf2-4427cb9f30a7, solutionname=OmnichannelCommunicationBase, startedon=2026/7/19 18:36:57, progress=100, createdon=2026/7/19 18:36:57
+  - f6dfaa33-1387-4a4e-854d-ae6c87a5aaf1: importjobid=f6dfaa33-1387-4a4e-854d-ae6c87a5aaf1, solutionname=msdyn_OmnichannelProfileConfiguration, startedon=2026/7/19 18:36:17, progress=100, createdon=2026/7/19 18:36:17
+  - 6fe67fd9-0a80-407d-a469-9be60a256a43: importjobid=6fe67fd9-0a80-407d-a469-9be60a256a43, solutionname=InsightsAppPlatformApp_Anchor, startedon=2026/7/19 18:30:50, progress=100, createdon=2026/7/19 18:30:50
+  - ded9e7b6-5c78-4eb0-b11d-c613bc3d5649: importjobid=ded9e7b6-5c78-4eb0-b11d-c613bc3d5649, solutionname=msdyn_DatalakeFolderPermissionsProd, startedon=2026/7/19 18:30:36, progress=100, createdon=2026/7/19 18:30:36
+  - e730ac56-d4ad-480b-804c-2f5a3d212c93: importjobid=e730ac56-d4ad-480b-804c-2f5a3d212c93, solutionname=msdyn_InsightsAppPlatform, startedon=2026/7/19 18:29:56, progress=100, createdon=2026/7/19 18:29:56
+  - 85e00899-a972-401f-b406-44fcd51b4921: importjobid=85e00899-a972-401f-b406-44fcd51b4921, solutionname=msdyn_InsightsAppPlatformProd, startedon=2026/7/19 18:29:43, progress=100, createdon=2026/7/19 18:29:43
+  - b2b9af16-17a9-4263-8f4f-63f9d5dd53d7: importjobid=b2b9af16-17a9-4263-8f4f-63f9d5dd53d7, solutionname=msdynce_KnowledgeManagementAnchor, startedon=2026/7/19 18:25:41, progress=100, createdon=2026/7/19 18:25:41
+  - 95834615-e27f-482f-bad5-0590c3bf3ebf: importjobid=95834615-e27f-482f-bad5-0590c3bf3ebf, solutionname=msdynce_KnowledgeManagementOnlineExtension, startedon=2026/7/19 18:25:28, progress=100, createdon=2026/7/19 18:25:28
+  - ab38ccc5-4e10-45fc-8820-476a7a7abf33: importjobid=ab38ccc5-4e10-45fc-8820-476a7a7abf33, solutionname=msdynce_KnowledgeManagementHarvestingSolution, startedon=2026/7/19 18:25:09, progress=100, createdon=2026/7/19 18:25:09
+  - 69056224-c888-4795-87e0-657db441755f: importjobid=69056224-c888-4795-87e0-657db441755f, solutionname=msdynce_KnowledgeManagementConfiguration, startedon=2026/7/19 18:24:55, progress=100, createdon=2026/7/19 18:24:55
+  - 5de53ef7-42a8-48d9-9182-03c174f623c7: importjobid=5de53ef7-42a8-48d9-9182-03c174f623c7, solutionname=msdynce_KnowledgeManagementFeatures, startedon=2026/7/19 18:23:37, progress=100, createdon=2026/7/19 18:23:37
+  - f130a961-ba0b-4891-ae49-778752cea0e4: importjobid=f130a961-ba0b-4891-ae49-778752cea0e4, solutionname=msdynce_KnowledgeManagementOnlineFeatures, startedon=2026/7/19 18:23:14, progress=100, createdon=2026/7/19 18:23:14
+  - acd47cd4-80a7-4e31-80a1-b859aa04be2d: importjobid=acd47cd4-80a7-4e31-80a1-b859aa04be2d, solutionname=msdynce_KnowledgeManagementCommonProd, startedon=2026/7/19 18:18:31, progress=100, createdon=2026/7/19 18:18:31
+  - 0e98d0cf-0cc8-4632-95c1-1264dec16ec0: importjobid=0e98d0cf-0cc8-4632-95c1-1264dec16ec0, solutionname=msdynce_KnowledgeManagementPatch, startedon=2026/7/19 18:17:47, progress=100, createdon=2026/7/19 18:17:47
+  - da5d1830-bc4c-4e00-a3db-e4bf1633ac8a: importjobid=da5d1830-bc4c-4e00-a3db-e4bf1633ac8a, solutionname=msdyn_AcceleratedSalesAnchor, startedon=2026/7/19 18:12:21, progress=100, createdon=2026/7/19 18:12:21

@@ -1,0 +1,502 @@
+=== D365 实体管理工具 ===
+目标环境: https://sany-uat.crm5.dynamics.com
+用法:
+  dotnet run create <实体定义文件.json>   - 从JSON文件创建实体和字段
+  dotnet run check <解决方案名>           - 检查解决方案中的实体
+  dotnet run add <实体名> <解决方案名>    - 添加实体到解决方案
+  dotnet run remove <实体名> <解决方案名> - 从解决方案移除实体
+  dotnet run publish [实体名]             - 发布指定实体（禁止无参数全局发布）
+  dotnet run delete-field <实体名> <字段名> - 删除字段
+  dotnet run list-fields <实体名>         - 列出实体所有字段
+  dotnet run update-entity-displayname <实体名> <中文> [英文] - 更新实体显示名称（多语言）
+  dotnet run set-entity-label <实体名> <中文> <英文> - 设置实体显示名称（Web API PUT，中英双语）
+  dotnet run update-field-displayname <实体名> <字段名> <中文> [英文] - 更新字段显示名称（多语言）
+  dotnet run set-field-label <实体名> <字段名> <中文> <英文> - 设置字段显示名称（Web API PUT，中英双语）
+  dotnet run update-field-required <实体名> <字段名> <true|false> - 更新字段必填性
+  dotnet run update-field-range <实体名> <字段名> <最小值> <最大值> - 更新 Money 字段取值范围
+  dotnet run update-field-default <实体名> <字段名> <默认值> - 更新字段默认值（Picklist/Decimal）
+  dotnet run update-field-description <实体名> <字段名> <描述> - 更新字段描述
+  dotnet run get-entity-displayname <实体名> - 查询实体显示名称（诊断）
+  dotnet run export <解决方案名> <路径>    - 导出解决方案为 ZIP
+  dotnet run export-translations <解决方案唯一名> <输出ZIP路径> - 导出 translations ZIP（D365 标准翻译导出）
+  dotnet run import-translations <translations ZIP 路径> - 导入 translations ZIP（D365 标准翻译导入）
+  dotnet run create-credit-items          - 创建评分项目测试数据(22条)
+  dotnet run query-credit-item-descs      - 查询评分项目说明(mcs_itemdesc)
+  dotnet run create-qualitative-enums     - 创建定性枚举值测试数据(30条)
+  dotnet run fix-qualitative-enums-mapping - 整理国别/行业风险枚举值为三一标准L/M/H/O
+  dotnet run fix-percentage-scoring-cards - 修复百分比/比率类评分卡区间量纲（NetProfit/DebtRatio/LatePaymentIndex）
+  dotnet run cleanup-orphan-sectors-scoring-cards - 删除 Sectors 评分卡中无法匹配枚举值的孤儿记录
+  dotnet run dedup-credititem-values      - 清理 mcs_credititem_value 重复记录（保留最早，迁移引用）
+  dotnet run update-credit-record <scoreid> [status] - 更新信用评估记录状态(默认→12)
+  dotnet run simulate-bpp-callback <scoreid> [Approved|Rejected|Withdrawn|Abandoned] - 模拟BPP回调触发审批逻辑
+  dotnet run simulate-fca-bpp-callback <申请单编号|ID> [Approved|Rejected|Withdrawn|Abandoned] - 模拟BPP回调触发厂端授信额度调整申请审批逻辑
+  dotnet run test-fsm-bpp               - 融资管理BPP回调Plugin全场景验证（立项通过/方案通过/方案驳回/撤回）
+  dotnet run test-tradestpayterm          - 测试成交条件样板库 Plugin（自动编号/校验/状态流转）
+  dotnet run query-plugin-steps <类名>    - 查询已注册的 Plugin Steps
+  dotnet run query-plugin-namespace <前缀> - 查询命名空间下所有 Plugin Steps
+  dotnet run register-plugin-image <StepId> <Image名称> <Image别名> <字段列表> - 为Plugin Step注册PreEntityImage
+  dotnet run fix-dev-scoring-cards        - 重建DEV评分卡配置（补全mcs_itemid/mcs_datatype/mcs_cardname）
+  dotnet run fix-scoring-card-typeids     - 批量修复评分卡配置(mcs_typeid)根据mcs_credititem.mcs_group
+  dotnet run remove-duplicate-scoring-cards - 删除DEV1评分卡配置重复记录
+  dotnet run add-overdue-model-sa         - 为SA老客户评分卡补入OverdueModel(预计损失率)30分配置
+  dotnet run export-webresource <名称> <路径> - 导出 WebResource 内容
+  dotnet run update-webresource <名称> <文件路径> - 更新 WebResource 内容
+  dotnet run list-webresources [前缀]    - 列出 WebResource（默认前缀 ms_languagefile）
+  dotnet run list-form-webresources <实体> - 列出实体主窗体引用的 JS WebResource
+  dotnet run deploy-webresource <名称> <文件路径> <类型> [显示名] - 创建或更新 WebResource 并发布
+    类型: 1=HTML, 2=CSS, 3=JScript, 4=XML, 5=PNG, 6=JPG, 7=GIF, 8=XAP, 9=XSL, 10=ICO, 11=SVG, 12=RESX
+  dotnet run add-webresource-to-solution <WebResource名称> <解决方案唯一名> - 将 WebResource 加入解决方案
+  dotnet run test-common                  - 隔离测试 D365ToolCommon 共享库（自动创建/删除测试实体）
+  dotnet run cleanup-test-common          - 仅清理 D365ToolCommon 测试实体
+  dotnet run clear-account-credit-fields <客户名称> - 清空客户及客户主数据上的8个信用字段（用于测试）
+  dotnet run check-fix-masterdata <客户名称> - 检查并修复客户主数据上的基础字段
+  dotnet run set-masterdata-isdd <客户名称> <true|false> - 设置客户主数据重点尽调标志
+  dotnet run set-masterdata-creditvalid <客户名称> <true|false> - 设置客户主数据信用评估有效状态
+  dotnet run show-profile <客户名称> - 查询客户画像关键属性
+  dotnet run sync-profile <源客户名称> <目标客户名称> - 同步客户画像关键属性（用于测试）
+  dotnet run simulate-approval <客户名称/编码> <评估编码> - 模拟审批通过，将信用分/等级回写客户主数据
+  dotnet run set-countrycode <客户名称/编码> <国家代码> - 设置客户主数据国家代码（用于测试）
+  dotnet run set-cofaceid <评估编码> <cofaceId> - 设置信用评估记录的科法斯客户代码
+  dotnet run export-coface-data <输出目录>  - 导出 Coface NACE映射和汇率配置数据
+  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境
+  dotnet run diagnose-credit-record <评估编码> - 诊断 credit record 数据集成问题
+  dotnet run list-entities <前缀>        - 列出指定前缀的实体
+  dotnet run create-test-salesorder <客户名称> - 为客户创建一条测试销售订单（用于老客户判定）
+  dotnet run create-credit-testdata <客户名称> - 为客户创建信用评估测试数据（销售订单 + 逾期在外货款）
+  dotnet run create-credit-record <客户名称> - 为客户创建一条新的信用评估记录
+  dotnet run list-app-actions [前缀]       - 列出 App Action (Modern Command Bar 按钮)
+  dotnet run list-security-roles [关键字]  - 列出安全角色
+  dotnet run list-custom-apis [关键字]     - 列出 Custom API（含参数与响应属性）
+  dotnet run check-solution-customapi <解决方案名> - 检查解决方案包含的 Custom API
+  dotnet run deploy-tradestpayterm-api <DLL路径> - 部署成交条件样板库查询 Custom API
+  dotnet run delete-tradestpayterm-api          - 删除成交条件样板库查询 Custom API
+  dotnet run deploy-fcaquota-api <DLL路径> [Plugin类名] - 部署厂端授信余额调整 Custom API
+  dotnet run delete-fcaquota-api                - 删除厂端授信余额调整 Custom API
+  dotnet run test-fcaquota-api <客户编码> <金额> <环节> <动作> [合同编码] [订单编码] - 测试厂端授信余额调整 Custom API
+  dotnet run test-tradestpayterm-api <buId> <subId> <countryCode> <prdGroupId> <buyerCode> - 测试成交条件样板库查询 Custom API
+  dotnet run query-tradestpayterm-samples [条数] - 查询成交条件样板库样本数据
+  dotnet run create-tradestpayterm-testdata    - 创建一条生效的成交条件样板库测试数据
+  dotnet run rebuild-tradestpayterm-grade-fields [环境] - 重建成交条件样板库客户分类/客户等级为多选选项集
+  dotnet run recreate-fca-decimal-fields  - 将 mcs_fca_proc 的 mcs_modelgrant/mcs_initigrant 从 Money 重建为 Decimal
+  dotnet run query-optionset <实体名> <字段名>       - 查询选项集字段的标签
+  dotnet run list-transaction-currencies   - 列出 D365 标准交易货币及汇率
+  dotnet run test-coface-exchange-rate [币种列表] - 测试 Coface 汇率读取与转换（默认 USD,EUR,CNY,JPY,VND,XXX）
+  dotnet run test-upload-api <文件路径> <accountId> [mcp|mcs|all] - 测试上传 Custom API
+  dotnet run fix-form-lookup <实体名>    - 修复主窗体 Lookup 控件 classid
+  dotnet run query-contracts [accountId]  - 查询 mcs_contract 合同数据分布（只读诊断）
+  dotnet run query-contract-products <accountId> - 查询客户合同明细产品字段（只读诊断）
+  dotnet run query-optionset-labels <实体名> <字段名> [langId] - 查询选项集本地化标签
+  dotnet run update-optionset-labels <实体名> <字段名> <labels.json> [langId] - 更新选项集标签
+  dotnet run create-credit-profile-fields  - 创建客户画像所需缺失字段（mcs_blacklist/mcs_creditgrant）
+  dotnet run list-number-configs [实体名] - 查询系统自动编号配置（只读）
+  dotnet run create-number-config <实体名> <属性名> <前缀模板> <数字模板> <序列号长度> [序号开始] [使用序列号服务true|false] - 新增自动编号配置
+  dotnet run delete-number-config <实体名> <属性名> - 删除指定实体的自动编号配置
+  dotnet run test-number-config <实体名> [属性名] - 创建并删除一条测试记录验证编号生成
+  dotnet run register-number-config-step <实体名> - 为实体注册通用自动编号 Plugin Step
+  dotnet run check-release <清单.json> [--with-fields] - 通用发版 Solution 归属自检（只读，--with-fields 逐字段核对）
+  dotnet run check-solution-coverage <源Solution唯一名> [实体包Solution唯一名] - 以源 Solution 为真相源，核对组件是否已分布到发版包（只读）
+  dotnet run list-solution-components <Solution唯一名> - 列出 Solution 全部组件（类型+名称+ObjectId，只读）
+  dotnet run query-sitemap [sitemapId|名称关键字] - 查询 SiteMap 记录、App↔SiteMap 对应关系及解决方案分层（只读；单个时导出 XML 到 /tmp）
+  dotnet run query-app-components <App名称关键字> [实体名前缀] - 列出 App 包含的组件（只读）
+  dotnet run list-workflows [关键字] - 列出工作流/BPF 流程定义（只读）
+  dotnet run add-solution-component <componentType> <objectId> <Solution唯一名> - 通用加组件（写操作，需用户明确授权）
+  dotnet run check-solution-deps <Solution唯一名1> [Solution唯一名2] ... - 模拟导出时的缺少必需组件依赖检查（只读）
+
+认证方式: Device Code Flow（第一次需要浏览器登录）
+✅ 使用缓存的 token 登录
+连接成功! 用户: 
+
+>>> 查询导入失败的 Solution（progress < 100，Top 200）
+  返回 126 条失败记录
+
+=== McsCustomAPI | 2026-07-22 11:08 | progress=42.86 | id=2cfb9b88-1a37-4fca-8fca-ef921ed19c72
+  错误码: -2147220969
+  摘要: Entity 'SdkMessage' With Id = cf3ce695-e0f4-493d-9360-493683f5dbf2 Does Not Exist
+=== McsWebResource | 2026-07-22 09:00 | progress=0.41 | id=f8dedb9c-9da7-4ef2-9128-52eadb65f6ee
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== McsPlugin | 2026-07-22 04:33 | progress=0.37 | id=cf7735b4-6554-4ecb-b474-0568faacfd2f
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3ed5d65d3b475ddd caused an exception.: Existing plug-in types have been removed. Please update major or minor verion of plug-in assembly.
+=== McsPlugin | 2026-07-21 03:24 | progress=0.22 | id=0dff21e6-9b95-4cf1-93e6-e4891f7476c6
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [PublishAll] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== update_sitmap_20260709 | 2026-07-21 03:10 | progress=60 | id=b8d5771e-6203-45d1-bcb5-8cd23f72af0e
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchEntityBase' with unique index 'ndx_for_entitykey_key_dvtablesearch_entitylogicalname'. The duplicate key value is (0, de17d379-405a-f111-a824-70a8a5727049, mcs_experiencesummary, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExe...
+=== McsCustomAPI | 2026-07-21 01:39 | progress=47.62 | id=08b85d2b-4a41-44ee-90d0-febf845267f6
+  错误码: -2147220969
+  摘要: Entity 'SdkMessage' With Id = cf3ce695-e0f4-493d-9360-493683f5dbf2 Does Not Exist
+=== entity_20260629_qy | 2026-07-20 05:18 | progress=97.31 | id=dc79adc8-fd5a-4773-8084-d15c657956bb
+=== CPQ_entity_20260713_temp | 2026-07-18 09:57 | progress=13.08 | id=931a839d-936d-4e6c-9921-3d928e3b3fcc
+  错误码: -2147214842
+  摘要: Attribute mcs_shipping_factory is a String, but a Lookup type was specified.
+  ⚠️ 字段类型冲突: mcs_shipping_factory（环境中=String，包中=Lookup）
+=== entity_20260722_xrj | 2026-07-18 02:48 | progress=38.89 | id=fc324ee2-0399-4dea-8dcf-1e1cd7d0ce76
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260722_xrj. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="True"><MissingDependency canResolveMissingDependency="True"><Required type="1" schemaName="msdyn_ocvoicemail" displayName="Voicemail" solution="OmnichannelTelephony (1.10.0.292)"><package appName="OmnichannelPrimeTelephony" version="1.5.27.616" applicationName="Omnichannel for Custom...
+=== McsPlugin | 2026-07-17 01:13 | progress=0.29 | id=b2f726a3-ebd8-4d8a-a86f-7f7bb96628ae
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Sales, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3ed5d65d3b475ddd caused an exception.: Existing plug-in types have been removed. Please update major or minor verion of plug-in assembly.
+=== entity_20260713 | 2026-07-16 23:31 | progress=30.43 | id=8b0bd419-a7d7-461c-a780-6d0922c0d408
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260713. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="mcs_fsm_data.js" displayName="mcs_fsm_data.js" solution="Active" /><Dependent type="appaction" displayName="mcs_fsm_data_submit_initiation" id.uniquename="mcs_fsm_data_submit_initiation" /></Mis...
+=== entity_20260722 | 2026-07-16 14:51 | progress=1.92 | id=7f4808a0-57a6-4ae3-957b-c59295b68998
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260722. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="True"><MissingDependency canResolveMissingDependency="True"><Required type="1" schemaName="msdyn_ocvoicemail" displayName="Voicemail" solution="OmnichannelTelephony (1.10.0.292)"><package appName="OmnichannelPrimeTelephony" version="1.5.27.616" applicationName="Omnichannel for Customer S...
+=== McsCustomAPI | 2026-07-16 11:17 | progress=35 | id=ae2e98f2-7930-4c18-bdb5-deff5a6b60ab
+=== entity_20260629_qy | 2026-07-16 08:09 | progress=4.38 | id=b9bdf2ae-b908-4b2a-a6d0-87bf961f953a
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260629_qy. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="mcs_/Scripts/Sales/ShipmentDeclare/mcs_claimapply_form.js" displayName="mcs_/Scripts/Sales/ShipmentDeclare/mcs_claimapply_form.js" solution="Active" /><Dependent type="60" displayName="Inform...
+=== McsCustomAPI | 2026-07-16 03:36 | progress=45 | id=72b9b3e2-5a9e-4967-b578-1d7772da26a3
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365ExtensionApi.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=47c7b162e6c9997e caused an exception.: Existing plug-in types have been removed. Please update major or minor verion of plug-in assembly.
+=== McsCustomAPI | 2026-07-16 03:21 | progress=40 | id=6f47cdd4-b57e-447c-83b5-bc3c3e48ec96
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365ExtensionApi.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=47c7b162e6c9997e caused an exception.: Existing plug-in types have been removed. Please update major or minor verion of plug-in assembly.
+=== entity_20260713 | 2026-07-16 02:09 | progress=23.33 | id=a6eee8f3-7703-4bce-be2e-aabf778595d1
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260713. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_claimapply" displayName="索赔" solution="Active" /><Dependent type="80" schemaName="cra80_SanyOverseasCRM" displayName="Sany CRM Sales" /></MissingDependency></MissingDependencies> , ProductUpd...
+=== McsPlugin | 2026-07-15 02:48 | progress=0.22 | id=64f21ea7-ba69-4050-8412-0fbe3ae0bcd2
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== BaseCustomControlsCore | 2026-07-14 16:08 | progress=89.13 | id=5836aa54-c79e-432d-9d23-298d0679d681
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [PublishAll] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== entity_20260629_qy | 2026-07-14 15:39 | progress=4.29 | id=22399bda-8645-4186-8a17-039febaf6f4b
+  错误码: -2147020463
+  摘要: Cannot start another [Import] because there is a previous [Import] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== entity_20260629_qy | 2026-07-14 08:57 | progress=5 | id=85dd3ec6-a625-4390-990f-6fa0e26154bc
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260629_qy. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_fsm_data" displayName="Financing Management" solution="Active" /><Dependent type="1" schemaName="mcs_contract" displayName="Contract" /></MissingDependency><MissingDependency canResolveMis...
+=== yuanzg_20260722 | 2026-07-14 01:57 | progress=11.29 | id=dce24b5c-91a6-434e-865f-95d7f79ad4e0
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: yuanzg_20260722. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_entrustmentrecoverydetail" displayName="委追明细" solution="Active" /><Dependent type="1" schemaName="mcs_contract" displayName="Contract" /></MissingDependency><MissingDependency canResolveMissi...
+=== entity_20260629_qy | 2026-07-13 09:52 | progress=5.56 | id=26c3ae5f-bd74-47b5-afa0-31f7e4aeadc4
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260629_qy. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_fsm_data" displayName="Financing Management" solution="Active" /><Dependent type="1" schemaName="mcs_contract" displayName="Contract" /></MissingDependency><MissingDependency canResolveMis...
+=== McsPlugin | 2026-07-13 09:38 | progress=0.22 | id=f75d2f8c-314c-43e6-b933-a00ec7f9b347
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== entity_20260708_cjs | 2026-07-13 09:15 | progress=73.91 | id=12354c1d-f750-4969-9c18-37fca495397a
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchEntityBase' with unique index 'ndx_for_entitykey_key_dvtablesearch_entitylogicalname'. The duplicate key value is (0, de17d379-405a-f111-a824-70a8a5727049, mcs_projdecisionchain, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExe...
+=== entity_20260629_qy | 2026-07-13 08:23 | progress=5.56 | id=112ac085-ed00-4d85-860b-733e7655df58
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260629_qy. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_fsm_data" displayName="Financing Management" solution="Active" /><Dependent type="1" schemaName="mcs_contract" displayName="Contract" /></MissingDependency><MissingDependency canResolveMis...
+=== TempLeadRoles20260617 | 2026-07-13 05:03 | progress=71.23 | id=ef89d81b-f733-4fbe-9bcb-160dde8e772b
+  错误码: -2147188475
+  摘要: More than one concurrent Delete requests detected for an Entity 5c3ed302-75d6-f011-8543-002248579009 and ObjectTypeCode 12.
+=== entity_20260708_peter | 2026-07-10 21:48 | progress=14.89 | id=552f3a82-9654-4053-99cc-06fbbe1f0eb6
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260708_peter. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_creditmodelprocess" displayName="厂端授信模型计算流程" solution="Active" /><Dependent type="1" schemaName="mcs_fca_proc" displayName="Factory Credit Model Calculation" /></MissingDependency><Miss...
+=== entity_20260708_wyj | 2026-07-10 06:51 | progress=30.43 | id=800d48ec-a80c-4df7-8769-c7467ceb8716
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260708_wyj. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="9" schemaName="mcs_reviewresults" displayName="评审结果" solution="Active" /><Dependent type="2" schemaName="mcs_reviewresults" displayName="评审结果" parentSchemaName="mcs_contractassessmentcomment" parentDisplayN...
+=== update_sitmap_20260709 | 2026-07-10 04:53 | progress=60 | id=d0b456f9-f587-41b4-b97e-3e5d5f553788
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchEntityBase' with unique index 'ndx_for_entitykey_key_dvtablesearch_entitylogicalname'. The duplicate key value is (0, de17d379-405a-f111-a824-70a8a5727049, mcs_experiencesummary, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExe...
+=== update_sitmap_20260709 | 2026-07-09 09:38 | progress=60 | id=3a70f76d-4d6b-4c84-80f5-f36ad86f09c2
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchEntityBase' with unique index 'ndx_for_entitykey_key_dvtablesearch_entitylogicalname'. The duplicate key value is <redacted>.
+   at Microsoft.Crm.CrmDbConnection.HandleExecutionException(Exception exception, String commandText, IDbConnection connection, IDbCommand command, IDbTrans...
+=== update_sitmap_20260709 | 2026-07-09 04:46 | progress=77.78 | id=54e0feea-967d-4e6f-bcb5-44b2adc5c407
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchEntityBase' with unique index 'ndx_for_entitykey_key_dvtablesearch_entitylogicalname'. The duplicate key value is (0, de17d379-405a-f111-a824-70a8a5727049, mcs_projdecisionchain, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExe...
+=== McsWebResource | 2026-07-09 03:26 | progress=0.49 | id=0ff23933-52d9-4948-bc15-e04bfb5f460a
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== McsWebResource | 2026-07-09 03:20 | progress=0.49 | id=0a22e530-188a-435b-a7c1-43ac9ad092a7
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== entity_20260708_peter | 2026-07-08 12:32 | progress=53.33 | id=6fb5fe2a-0b2c-48d2-986c-564f99d3d055
+  错误码: -2147214842
+  摘要: Attribute mcs_applygenre is a Picklist, but a String type was specified.
+  ⚠️ 字段类型冲突: mcs_applygenre（环境中=Picklist，包中=String）
+=== McsWebResource | 2026-07-08 07:14 | progress=0.49 | id=c102cbe2-5bbc-4f32-bbc9-4072b25b3c95
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== McsWebResource | 2026-07-08 06:12 | progress=0.49 | id=4b8e484e-f0cf-4707-ada6-a64fba594a16
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== lzp_entity | 2026-07-08 03:52 | progress=15.22 | id=80159933-b950-4bd1-90a9-f16060aaf8f8
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: lzp_entity. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="2" schemaName="mcs_erptransferordernumber" displayName="ERP Transfer Ordern Nmber" parentSchemaName="mcs_transferrequest" parentDisplayName="Transfer Request" solution="Active" /><Dependent type="60" displayName="In...
+=== entity_20260614mj | 2026-07-07 11:31 | progress=25.81 | id=4a98ce51-6932-41bc-a84a-bc0fc0325209
+  错误码: -2147220970
+  摘要: OptionSetId cannot be null for existing attribute mcs_bppstatus with attributeId- cdffee1b-068d-443a-937d-402e95b9e925 and entityId- d2be4f0c-bab8-48fb-a4c2-df7b1e28812e
+=== entity_20260614mj | 2026-07-07 11:28 | progress=25.81 | id=a7634de3-1571-43ff-952b-1bf148d3db2a
+  错误码: -2147220970
+  摘要: OptionSetId cannot be null for existing attribute mcs_bppstatus with attributeId- cdffee1b-068d-443a-937d-402e95b9e925 and entityId- d2be4f0c-bab8-48fb-a4c2-df7b1e28812e
+=== Entity_20260703_India_Services | 2026-07-03 07:09 | progress=11.54 | id=b0f60726-0b4e-4b58-9a4f-79708e2a111b
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [EntityCustomization] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== McsPlugin | 2026-07-03 05:44 | progress=0.23 | id=2afdca1f-5262-4d7e-83d3-f040da2c7f12
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== LtcEntityZsl0703 | 2026-07-03 02:10 | progress=41.18 | id=a5bec517-d77a-4837-8ca9-7f40c66b868a
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: LtcEntityZsl0703. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentalter" displayName="出运投保变更" solution="Active" /><Dependent type="1" schemaName="mcs_contract" displayName="Contract" /></MissingDependency></MissingDependencies> , ProductUpdatesOnly...
+=== Entity_20260703_India_Services | 2026-07-02 10:39 | progress=14.89 | id=fad2e837-3e67-427e-b5d6-8c3ea887d1f5
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Entity_20260703_India_Services. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="2" schemaName="mcs_basicunit" displayName="Basic unit" parentSchemaName="mcs_wcsrdetail" parentDisplayName="Payment Application Details" solution="Active" /><Dependent type="60" displayName="Info...
+=== McsWebResource | 2026-07-02 02:34 | progress=0.43 | id=6d24bec3-b0b6-422a-a03b-d33e8f5449c0
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Uninstall] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== Entity_20260703_India_Services | 2026-07-01 13:34 | progress=15.22 | id=03bad432-a7c0-4f1a-82d6-7731ed650957
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Entity_20260703_India_Services. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="2" schemaName="mcs_basicunit" displayName="Basic unit" parentSchemaName="mcs_wcsrdetail" parentDisplayName="Payment Application Details" solution="Active" /><Dependent type="60" displayName="Info...
+=== McsWebResource | 2026-07-01 09:40 | progress=0.43 | id=17300c57-25cc-432b-9b5f-d0ab023f0367
+  错误码: -2147020463
+  摘要: Cannot start another [Import] because there is a previous [Import] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== Entity_20260703_India_Services | 2026-07-01 05:31 | progress=16.28 | id=fc219dbb-7ce4-41c7-82a3-1c9b1886c801
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Entity_20260703_India_Services. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="2" schemaName="mcs_basicunit" displayName="Basic unit" parentSchemaName="mcs_wcsrdetail" parentDisplayName="Payment Application Details" solution="Active" /><Dependent type="60" displayName="Info...
+=== Entity_20260703_India_Services | 2026-06-30 03:50 | progress=16.28 | id=31832dc5-14bd-4b9c-8f55-56fea4bac63b
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Entity_20260703_India_Services. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="2" schemaName="mcs_basicunit" displayName="Basic unit" parentSchemaName="mcs_wcsrdetail" parentDisplayName="Payment Application Details" solution="Active" /><Dependent type="60" displayName="Info...
+=== McsWebResource | 2026-06-30 03:45 | progress=0.43 | id=15fdeedf-0fac-4baa-9a11-f445e892de5a
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== entity_zhangj0703 | 2026-06-30 03:19 | progress=34.29 | id=ffa58abe-01a4-48c3-85ca-87a8bf2188aa
+  错误码: -2147192829
+  摘要: EntityRelationship [mcs_internalcontractlist_choicereceiveaccountid_mcs_customerbankaccount] is invalid. The lookup attribute [mcs_choicereceiveaccountid] is already associated with an existing relationship.
+=== entity_20260626_peter_trans | 2026-06-30 00:46 | progress=12.73 | id=42ac86a3-5863-44cc-9a9a-5fe797535da4
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260626_peter_trans. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_fca_quotaapp" displayName="Factory Credit Quota Application" solution="Active" /><Dependent type="1" schemaName="mcs_trade_pttype" displayName="Trade Payment Terms Product Categor...
+=== entity_20260615_GuidancePriceRegion | 2026-06-29 16:13 | progress=16.28 | id=0f18a1bb-1faa-44cb-b6b7-947c3a523ea9
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260615_GuidancePriceRegion. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_quoterdetail" displayName="报价单产品明细" solution="Active" /><Dependent type="1" schemaName="mcs_productline" displayName="产品线" /></MissingDependency></MissingDependencies> , P...
+=== entity_20260629_qy | 2026-06-29 09:11 | progress=13.21 | id=499ba2bc-f68c-4048-8d18-7fd71d05e887
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260629_qy. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="mcs_/Scripts/Sales/CreditLimitApplication/mcs_common_form.js" displayName="mcs_/Scripts/Sales/CreditLimitApplication/mcs_common_form.js" solution="Active" /><Dependent type="60" displayName="...
+=== McsWebResource | 2026-06-29 05:51 | progress=0.5 | id=b7ed5c4b-99d4-4611-b0dd-b8a1d72e0a8c
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-29 05:38 | progress=0.5 | id=5c4f7793-7f70-4782-8df4-f63f78c32906
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsCustomAPI | 2026-06-29 05:18 | progress=30 | id=702e0549-fe9e-4957-950f-bbb62c1f3287
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [PublishAll] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== McsWebResource | 2026-06-29 05:17 | progress=0.5 | id=8b992d03-ad49-4f71-bfae-f527d5d3de5e
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== entity_20260617_qy | 2026-06-29 02:57 | progress=38.89 | id=0cf01091-e0c1-4742-890c-efc2f39635e5
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260617_qy. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="10" schemaName="mcs_leadmain_lostlead_mcs_leadreview" displayName="mcs_leadmain_lostlead_mcs_leadreview" parentSchemaName="mcs_leadreview" parentDisplayName="线索复盘" solution="Active" /><Dependent type="60" di...
+=== McsPlugin | 2026-06-27 03:19 | progress=0.27 | id=d78e437d-ce54-42a7-a3ac-9040c7a6138f
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentdeclare" displayName="出运投保" solution="Active" /><Dependent type="92" displayName="MSLibrary.D365.Common.Plugins.EntityValidateCreateForGenerateNumber: Create of mcs_shipmentdeclare" id="{06...
+=== entity_20260703 | 2026-06-27 01:12 | progress=0 | id=c10a8081-5d02-4d2a-b505-82d18a4dc84a
+=== entity_20260703 | 2026-06-27 00:31 | progress=5.56 | id=bad1c5d9-d62e-4792-85f7-17c818033862
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260703. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentdeclare_process" displayName="SD Process" solution="Active" /><Dependent type="1" schemaName="mcs_shipmentdeclare" displayName="出运投保" /></MissingDependency><MissingDependency canResol...
+=== McsPlugin | 2026-06-26 15:55 | progress=0.27 | id=19fa36f7-484f-4a1a-a70b-09391555b4f0
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentdeclare" displayName="出运投保" solution="Active" /><Dependent type="92" displayName="MSLibrary.D365.Common.Plugins.EntityValidateCreateForGenerateNumber: Create of mcs_shipmentdeclare" id="{06...
+=== McsPlugin | 2026-06-26 14:24 | progress=0.27 | id=57b17c50-1706-4f75-8474-bc103fbd7ed0
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentdeclare" displayName="出运投保" solution="Active" /><Dependent type="92" displayName="MSLibrary.D365.Common.Plugins.EntityValidateCreateForGenerateNumber: Create of mcs_shipmentdeclare" id="{06...
+=== McsWebResource | 2026-06-26 10:57 | progress=0.5 | id=d4e97870-0c7e-4e4c-a62a-227f33f34f5b
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 10:56 | progress=0.5 | id=54bc0b49-a7bf-4e5d-ad23-6d718f2d4a6d
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 10:50 | progress=0.5 | id=aa18b489-471c-4bfe-bb0c-abfbcad9c76f
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 10:50 | progress=0.5 | id=27088245-569f-4a4f-9d2b-2c413328af3a
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 10:46 | progress=0.5 | id=1353815c-185c-4899-8fa4-c6a36560c437
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== KPMG_Entity_CZY | 2026-06-26 10:40 | progress=5.88 | id=1956e271-17d2-48d8-b459-81ce58cc1c46
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== McsWebResource | 2026-06-26 10:20 | progress=0.5 | id=25619e7f-fa57-4e5b-afc7-3fe0a71543f0
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 10:19 | progress=0.5 | id=9454cc35-0d4e-4cf8-825a-89d360db5950
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 10:01 | progress=0.5 | id=af6cde80-59f9-4d21-8a5e-68557fa7cac1
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 09:50 | progress=0.5 | id=b8093ead-5259-4dbf-97f4-3133cb60395e
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 09:38 | progress=0.5 | id=07169526-0ea0-438a-9caf-3202749a1d2d
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== McsWebResource | 2026-06-26 09:22 | progress=0.5 | id=39efb969-d38c-4dbb-99de-c40e1fe5d5af
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsWebResource. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="dev1_/images/runworkflow.svg" displayName="dev1_/images/runworkflow.svg" solution="Develop1SmartButtons (1.2.638.1)" /><Dependent type="61" schemaName="dev1_/images/runworkflow.svg" displayName="...
+=== entity_20260615_GuidancePriceRegion | 2026-06-26 07:51 | progress=13.73 | id=f037c5f1-cf8e-444e-b1e0-b72352e22083
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260615_GuidancePriceRegion. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentdeclare" displayName="出运投保" solution="Active" /><Dependent type="1" schemaName="mcs_customermasterdata" displayName="Customer Master Data" /></MissingDependency></...
+=== Entity_20260703_India_Sales | 2026-06-26 03:29 | progress=28 | id=27a5d087-5931-4937-80bb-4b385d1ab333
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Entity_20260703_India_Sales. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="10" schemaName="new_mcs_productgroup_mcs_contractdetail_mcs_productgroup" displayName="new_mcs_productgroup_mcs_contractdetail_mcs_productgroup" parentSchemaName="mcs_productgroup" parentDisplayName...
+=== entity_20260603_peter | 2026-06-25 22:54 | progress=24.14 | id=5bd68fb7-2b8f-4b9d-ac2c-a03f701e3d61
+  错误码: -2147220970
+  摘要: OptionSetId cannot be null for existing attribute mcs_buyergrade with attributeId- 0b736ad4-56c5-47cc-b2ed-583e6aa7b057 and entityId- 26e0332e-0a41-46d3-89fa-ac62f2101790
+=== entity_20260603_peter | 2026-06-25 13:57 | progress=8.14 | id=1810586d-3ea3-481b-8b19-dfdffe8637c8
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260603_peter. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="mcs_trade_ptgrouptype.js" displayName="mcs_trade_ptgrouptype.js" solution="Active" /><Dependent type="60" displayName="Information" parentDisplayName="成交条件产品分类关系" id="{b26d86fb-ba8e-4ef9-8...
+=== entity_20260703 | 2026-06-25 10:24 | progress=7.95 | id=2bd08240-7c6e-4a30-9c25-08447fcc5395
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260703. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_shipmentdeclare" displayName="出运投保" solution="Active" /><Dependent type="1" schemaName="mcs_contract" displayName="Contract" /></MissingDependency><MissingDependency canResolveMissingDependen...
+=== entity_20260603_peter | 2026-06-25 09:31 | progress=8.14 | id=93b57511-376a-473c-aa57-e9513467b124
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260603_peter. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="mcs_trade_ptgrouptype.js" displayName="mcs_trade_ptgrouptype.js" solution="Active" /><Dependent type="60" displayName="Information" parentDisplayName="成交条件产品分类关系" id="{b26d86fb-ba8e-4ef9-8...
+=== entity_contract_ext4 | 2026-06-25 08:08 | progress=46.67 | id=d7669c72-55ff-4ef9-9412-74346104c190
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_contract_ext4. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="2" schemaName="mcs_name" displayName="WBS项目编号" parentSchemaName="mcs_wbs" parentDisplayName="WBS" solution="Active" /><Dependent type="10" schemaName="new_mcs_wbs_mcs_contractdetail_mcs_wbs" displayName="n...
+=== Update20260625 | 2026-06-25 07:44 | progress=46.67 | id=fe128706-cb2c-408e-8d62-a7f7f0603cc3
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Update20260625. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="61" schemaName="mcs_/Htmls/Sales/Account/ItineraryManagement.html" displayName="mcs_/Htmls/Sales/Account/ItineraryManagement.html" solution="Active" /><Dependent type="62" schemaName="cra80_SanyOverseasCRM" /></...
+=== McsRole | 2026-06-25 07:18 | progress=3.32 | id=0cd8c149-15c9-4747-8182-55359f6ed3a4
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== McsRole | 2026-06-25 07:12 | progress=3.32 | id=cf21146b-b7ed-46a1-8a0c-541533c92a9c
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== Entity_20260703_India_Sales | 2026-06-24 11:00 | progress=29.17 | id=42a091b2-f75f-4323-92e9-c643335bb7d9
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: Entity_20260703_India_Sales. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="10" schemaName="new_mcs_productgroup_mcs_contractdetail_mcs_productgroup" displayName="new_mcs_productgroup_mcs_contractdetail_mcs_productgroup" parentSchemaName="mcs_productgroup" parentDisplayName...
+=== McsPlugin | 2026-06-23 17:46 | progress=0.31 | id=f8a1c4aa-3b9f-42f1-84cf-4e5f815f05db
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 17:41 | progress=0.31 | id=224cdb59-f0dc-48dc-a27a-ca2892a665b9
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 17:33 | progress=0.31 | id=9219a7ea-a81b-40d6-9c53-33f3be4773bf
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== CPQPlugin | 2026-06-23 12:01 | progress=47.06 | id=670c9ce3-50d4-4253-b61d-405807f6ecd2
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin.GuidancePriceConfigSpecification.GuidancePriceConfigSpecificationCreatePostPlugin] not found in PluginAssembly [SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551] which has a total of [13] plugin/workflow activity types. Could be due to customi...
+=== McsPlugin | 2026-06-23 09:04 | progress=0.31 | id=87a1477d-503b-43ba-a499-3cf98195ea0e
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 08:08 | progress=0.31 | id=e0ee9fa3-3f29-4044-8021-6141ab92efcb
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== entity_20260615_GuidancePriceRegion | 2026-06-23 07:46 | progress=18.42 | id=e300024c-bbcb-45d0-9bd0-d41b2fdf1b09
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260615_GuidancePriceRegion. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="70" displayName="区域主机指导价的成本和毛利率" solution="Active" id="{95b36d9a-906d-f111-ab0f-7ced8db4dd60}" /><Dependent type="70" displayName="区域主机指导价的成本和毛利率" id="{95b36d9a-906d-f111-ab0f-7ced8db4dd60}"...
+=== McsPlugin | 2026-06-23 07:44 | progress=0.31 | id=d61a2dfb-b348-4622-beeb-958a39847105
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 05:58 | progress=0.31 | id=9bd27677-33ed-4888-b468-851cb68fbe50
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 05:19 | progress=0.31 | id=8528f3d9-32f6-4ba2-a07d-99bc7efd2513
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 04:43 | progress=0.31 | id=b4409232-2afa-48ef-8b6d-1a6ee8796a27
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsCustomAPI | 2026-06-23 03:40 | progress=35 | id=47ce0d24-a4ea-4e1e-b692-040c15e6bcc5
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsCustomAPI. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.D365Extension.Sales.Plugins.TradeStPayTerm.QueryTradeStPayTermPlugin, SanyD365.D365Extension.Sales, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3ed5d65d3b475ddd" displayName="QueryTra...
+=== McsPlugin | 2026-06-23 03:08 | progress=0.31 | id=f2d39777-a707-41d3-bc2a-f426bae8958b
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 01:27 | progress=0.31 | id=45692abc-1064-42ec-bd67-a9337007d38a
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-23 00:19 | progress=0.31 | id=2bb11cde-42f7-42e3-9099-078dcb82b3d3
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-22 23:44 | progress=0.31 | id=5ee0b67e-16df-4727-bbe3-32d16d29757c
+  错误码: -2147188685
+  摘要: Plugin Assemblies import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType and PluginTypeNode:  caused an exception.: Plugin Types import: FAILURE. Error: Plugin: SanyD365.D365Extension.Cpq, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0395d249b9d1a551 of PluginTypeName: Microsoft.Crm.Entities.PluginType caused an exception.: PluginType [SanyD365.D365Extension.Cpq.Plugin....
+=== McsPlugin | 2026-06-22 12:40 | progress=0.23 | id=716774e3-69b5-4c6b-b2ab-384d0cb92be0
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [Publish] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== McsRole | 2026-06-22 12:16 | progress=3.32 | id=67aac9bf-ab74-48e5-84cc-e5dac35a0007
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The solution is already installed on this system as a managed solution and the package supplied is attempting to install it in unmanaged mode. Import can only update solutions when the modes match. Uninstall the current solution and try again.
+=== McsWebResource | 2026-06-22 10:35 | progress=0.44 | id=e6b7c280-e1d8-409c-9244-4d01ce090835
+  错误码: -2147020463
+  摘要: Cannot start the requested operation [Import] because there is another [EntityCustomization] running at this moment. Use Solution History for more details. -- The solution installation or removal failed due to the installation or removal of another solution at the same time. Please try again later.
+=== entity_20260603_peter | 2026-06-22 06:56 | progress=24.42 | id=fd0b8943-d212-42e8-a8f4-a869d5359e24
+  错误码: -2147220970
+  摘要: OptionSetId cannot be null for existing attribute mcs_creditgrade with attributeId- 3d17f2a3-91a4-443a-bf1b-14edc86b5f73 and entityId- 26e0332e-0a41-46d3-89fa-ac62f2101790
+=== entity_20260603_peter | 2026-06-22 05:30 | progress=25 | id=ecf66759-8043-429d-84d8-48cef43ec1e9
+  错误码: -2147220970
+  摘要: OptionSetId cannot be null for existing attribute mcs_creditgrade with attributeId- 3d17f2a3-91a4-443a-bf1b-14edc86b5f73 and entityId- 26e0332e-0a41-46d3-89fa-ac62f2101790
+=== entity_20260622 | 2026-06-22 03:56 | progress=1.09 | id=962cea63-a25f-4f5a-a9dc-26d05ad55359
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: entity_20260622. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="9" schemaName="mcs_productsalestype" displayName="Product Sales Type" solution="Active" /><Dependent type="2" schemaName="mcs_productsalestype" displayName="产品销售类型" parentSchemaName="mcs_opportunity" parentDisp...
+=== McsPlugin | 2026-06-22 02:06 | progress=0.27 | id=92c66751-1b0d-411d-8324-d8442bc84671
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.Plugins.TradeStPayTerm.TradeStPayTermValidationPlugin, SanyD365.Plugins.TradeStPayTerm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b4febd08e892e024" displayName="TradeStPayTermValidatio...
+=== McsPlugin | 2026-06-22 02:05 | progress=0.27 | id=8e889cf8-8667-43d2-9795-5b1749665e35
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.Plugins.TradeStPayTerm.TradeStPayTermValidationPlugin, SanyD365.Plugins.TradeStPayTerm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b4febd08e892e024" displayName="TradeStPayTermValidatio...
+=== McsPlugin | 2026-06-22 02:02 | progress=0.27 | id=6ddc0332-4f9f-4249-bee8-6bf547a876e5
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.Plugins.TradeStPayTerm.TradeStPayTermValidationPlugin, SanyD365.Plugins.TradeStPayTerm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b4febd08e892e024" displayName="TradeStPayTermValidatio...
+=== McsPlugin | 2026-06-22 01:54 | progress=0.27 | id=f63ab6b8-4a5b-4634-bad1-39f8e3b4bbb7
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.Plugins.TradeStPayTerm.TradeStPayTermValidationPlugin, SanyD365.Plugins.TradeStPayTerm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b4febd08e892e024" displayName="TradeStPayTermValidatio...
+=== McsPlugin | 2026-06-22 01:33 | progress=0.27 | id=ff49c936-af1a-42c1-87fb-c82f2980f38b
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== McsPlugin | 2026-06-22 01:26 | progress=0.27 | id=8631c1cc-b59a-49eb-b4c0-caf2587dd33b
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== TempLead20260621 | 2026-06-21 14:58 | progress=66.67 | id=30c872a6-cf66-45e0-8ab0-68c7b3a35e37
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchBase' with unique index 'ndx_for_entitykey_key_name'. The duplicate key value is (0, M365_Primary_model_new_NewSalesHub, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExecutionException(Exception exception, String commandText, I...
+=== McsPlugin | 2026-06-21 14:54 | progress=0.27 | id=3ccad6bf-911c-447f-b339-9f9f549e5952
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== McsPlugin | 2026-06-21 14:44 | progress=0.27 | id=6e3314ec-eb3f-44a4-b115-cf2b905b54b5
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== McsPlugin | 2026-06-21 14:31 | progress=0.27 | id=049a8ebd-2c85-4c8b-aa4f-9d45f37a11f9
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== TempLead0621 | 2026-06-21 14:02 | progress=55.56 | id=5e825fc4-121b-4d70-80c8-eef921c24e8d
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchBase' with unique index 'ndx_for_entitykey_key_name'. The duplicate key value is (0, M365_Primary_model_new_NewSalesHub, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExecutionException(Exception exception, String commandText, I...
+=== TempLead0621 | 2026-06-21 13:53 | progress=55.56 | id=f83f3a32-9dfa-4022-a7ee-2f30305409c4
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchBase' with unique index 'ndx_for_entitykey_key_name'. The duplicate key value is (0, M365_Primary_model_new_NewSalesHub, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExecutionException(Exception exception, String commandText, I...
+=== TempLead0621 | 2026-06-21 13:48 | progress=55.56 | id=e71a40ac-a41b-4375-97e2-8a5c3554fda7
+  错误码: -2147220937
+  摘要: Cannot insert duplicate key exception when executing non-query: System.Data.SqlClient.SqlCommand Exception: System.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'dbo.DVTableSearchBase' with unique index 'ndx_for_entitykey_key_name'. The duplicate key value is (0, M365_Primary_model_new_NewSalesHub, Jan  1 1900 12:00AM).
+The statement has been terminated.
+   at Microsoft.Crm.CrmDbConnection.HandleExecutionException(Exception exception, String commandText, I...
+=== McsPlugin | 2026-06-21 13:36 | progress=0.27 | id=585019d8-fa75-4d1f-b232-2711a54cc0af
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== McsPlugin | 2026-06-21 13:21 | progress=0.27 | id=fea03857-c967-4679-a9e9-8c9aff249014
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="1" schemaName="mcs_dd_data_process" displayName="DD Process" solution="Active" /><Dependent type="92" displayName="SanyD365.D365Extension.Sales.Plugins.DDData.DDDataProcessUpdatePlugin: Update of mcs_dd_data_process"...
+=== McsPlugin | 2026-06-21 12:24 | progress=0.27 | id=5429ed75-691d-4916-8423-5b9c507b842f
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.Plugins.TradeStPayTerm.TradeStPayTermValidationPlugin, SanyD365.Plugins.TradeStPayTerm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b4febd08e892e024" displayName="TradeStPayTermValidatio...
+=== McsPlugin | 2026-06-21 05:44 | progress=0.27 | id=a72cb1a5-4cb4-4e4f-a9bd-3296f2e4cfc3
+  错误码: -2147188685
+  摘要: Solution manifest import: FAILURE: The following solution cannot be imported: McsPlugin. Some dependencies are missing. The missing dependencies are : <MissingDependencies canResolveAllMissingDependencies="False"><MissingDependency canResolveMissingDependency="False"><Required type="90" schemaName="SanyD365.Plugins.TradeStPayTerm.TradeStPayTermValidationPlugin, SanyD365.Plugins.TradeStPayTerm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b4febd08e892e024" displayName="TradeStPayTermValidatio...

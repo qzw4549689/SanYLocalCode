@@ -1,0 +1,3359 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width" />
+    <title>File Uploader</title>
+
+    <link rel="stylesheet" href="/WebResources/mcs_/element-plus/index.css" />
+    <script src="../../../ClientGlobalContext.js.aspx"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/vue3/vue.global.prod.js"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/element-plus/index.full.min.js"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/element-plus/locale/en.js"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/element-plus/icons-vue.min.js"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/Module/DynaHx/Script/DynaHx.js"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/Scripts/Common/waterMark.js"></script>
+    <script type="text/javascript" src="/WebResources/mcs_/Scripts/Common/RoleButton.js"></script>
+
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .full-height-layout {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-height-layout .el-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .full-height-layout .el-main {
+            overflow: auto;
+            flex-grow: 1;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .full-height-layout .el-footer {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: right;
+        }
+
+        .full-height-layout .el-table {
+            height: 100%;
+            width: 100%;
+        }
+
+        .el-progress--line {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 8px;
+        }
+
+        .el-progress-bar__innerText {
+            font-size: 8px;
+        }
+
+        .header-wrapper {
+            width: 100%;
+        }
+
+        .el-space__item>label {
+            font-size: 14px;
+            font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+            color: rgb(36, 36, 36);
+        }
+
+        .dialog-label {
+            padding: 10px 0;
+            font-weight: 600;
+        }
+
+        .dialog-selector {
+            width: 100%;
+        }
+
+        .el-input__wrapper {
+            width: 265px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="App" style="font-family: undefined;">
+        <el-container v-loading="loading" class="full-height-layout">
+            <el-header>
+                <div class="header-wrapper">
+                    <el-progress v-show="showUploadBar" :text-inside="true" :stroke-width="10"
+                        :percentage="uploadPercentage"></el-progress>
+                    <el-space :size="10" v-if="canWrite">
+                        <input type="file" ref="file" id="file" name="file"
+                            accept="image/png, image/jpeg, .doc,.docx, .csv, .xls, .xlsx, video/mp4, video/x-m4v, video/*, application/pdf, application/zip, application/rar, application/.7z, application/.gz"
+                            multiple="" style="display: none" @change="handleFileChange">
+                        <label v-text="multilanguage.fileType"></label>
+                        <el-select v-model="fileType" :disabled="disableUpload" placeholder="Select file type">
+                            <el-option v-for="item in fileTypes" :key="item.value" :label="item.label"
+                                :value="item.value"></el-option>
+                        </el-select>
+                        <el-button
+                            v-if="FileBtnRole && (fileType!='017' || (fileType=='017' && this.entityName=='mcs_agentdevelopment') ||(fileType=='017' && this.entityName=='mcs_agent'))"
+                            circle="" :disabled="disableUpload" @click="handleUploadFile">
+                            <el-icon style="vertical-align: middle">
+                                <upload>
+                                </upload>
+                            </el-icon>
+                        </el-button>
+                        <div v-if="isMobilePhone" @click="uploaByCamera" style="font-size:35px;display:flex;">
+                            <svg t="1702813754107" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                                xmlns="http://www.w3.org/2000/svg" p-id="4347" width="35" height="35">
+                                <path
+                                    d="M426.666667 256v42.666667H213.333333v469.333333h640V298.666667h-213.333333V256h-213.333333zM384 256V213.333333h298.666667v42.666667h213.333333v554.666667H170.666667V256h213.333333z m149.333333 426.666667C452.266667 682.666667 384 614.4 384 533.333333S452.266667 384 533.333333 384s149.333333 68.266667 149.333334 149.333333-68.266667 149.333333-149.333334 149.333334z m0-42.666667c59.733333 0 106.666667-46.933333 106.666667-106.666667S593.066667 426.666667 533.333333 426.666667 426.666667 473.6 426.666667 533.333333s46.933333 106.666667 106.666666 106.666667z"
+                                    fill="#444444" p-id="4348"></path>
+                            </svg>
+                        </div>
+                        <el-button circle="" v-if="canDelBtn && showDelBtn && FileBtnRole" @click="handleDeleteFile">
+                            <el-icon style="vertical-align: middle">
+                                <delete>
+                                </delete>
+                            </el-icon>
+                        </el-button>
+                    </el-space>
+                    <el-button circle="" title="Preview Images" @click="handlePreviewClick" id='PreviewImages'>
+                        <el-icon style="vertical-align: middle">
+                            <search>
+                            </search>
+                        </el-icon>
+                    </el-button>
+                    <el-button circle="" title="PreviewAll Images" @click="handlePreviewAllImage" id='PreviewAllImages'>
+                        <el-icon style="vertical-align: middle">
+                            <svg data-v-58697b5c="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"
+                                width="14" height="14">
+                                <path fill="currentColor"
+                                    d="M160 448a32 32 0 0 1-32-32V160.064a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V416a32 32 0 0 1-32 32zm448 0a32 32 0 0 1-32-32V160.064a32 32 0 0 1 32-32h255.936a32 32 0 0 1 32 32V416a32 32 0 0 1-32 32zM160 896a32 32 0 0 1-32-32V608a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32v256a32 32 0 0 1-32 32zm448 0a32 32 0 0 1-32-32V608a32 32 0 0 1 32-32h255.936a32 32 0 0 1 32 32v256a32 32 0 0 1-32 32z">
+                                </path>
+                            </svg>
+                        </el-icon>
+                    </el-button>
+                    <el-button circle="" title="Download All" @click="handleDownloadAllFile" id='DownloadAll'>
+                        <el-icon style="vertical-align: middle">
+                            <download>
+                            </download>
+                        </el-icon>
+                    </el-button>
+                </div>
+            </el-header>
+            <el-main>
+                <el-table ref="fileTable" :data="tableData" @selection-change="handleRowSelectionChange"
+                    :empty-text="emptyText">
+                    <el-table-column v-if="canWrite" :selectable='checkboxSelect' type="selection"
+                        width="55"></el-table-column>
+                    <el-table-column prop="Type" :label="multilanguage.fileType" width="278">
+                        <template #default="scope">
+                            <el-select v-if="canWrite && !readOnly"
+                                :disabled="(scope.row.TypeValue=='017' || scope.row.TypeValue == '100' || scope.row.TypeValue == '101') && entityName=='mcs_serviceorder'"
+                                v-model="scope.row.TypeValue" :placeholder="multilanguage.selectDocumentType"
+                                @change="handleFileTypeChange(scope.row.ID, scope.row.TypeValue, scope.row.FileName, scope.row.FileExt)">
+                                <!--当实体==服务订单(mcs_serviceorder)&& 文件类型==人机合影(017)-->
+                                <el-option :disabled="item.value=='017' && entityName=='mcs_serviceorder'"
+                                    v-for="item in fileTypes" :key="item.value" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                            <span v-else>{{ scope.row.Type }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column :label="multilanguage.fileName" width="250">
+                        <template #default="scope">
+                            <el-input v-if="canWrite && !readOnly" v-model="scope.row.FileName"
+                                @change="handleFileNameChange(scope.row.ID, scope.row.FileName, scope.row.FileExt)"></el-input>
+                            <span v-else>{{ scope.row.FileName }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column :label="multilanguage.ExtensionName" width="100">
+                        <template #default="scope">
+                            <span>{{ scope.row.FileExt }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column :label="multilanguage.operation" width="150">
+                        <template #default="scope">
+                            <el-button link="" type="primary" size="small"
+                                @click="handleFileNameClick($event, scope.row.ID)">
+                                {{ multilanguage.download }}
+                            </el-button>
+                            <el-button v-if="getPreviewUrl(scope.row.Name)" link="" type="primary" size="small"
+                                @click="handlePreviewClick($event, scope.row,scope.$index)">
+                                {{ multilanguage.preview }}
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="CreateTime" :label="multilanguage.uploadedOn" width="200"></el-table-column>
+                    <el-table-column prop="UserName" :label="multilanguage.uploadedBy" width="300"></el-table-column>
+                </el-table>
+            </el-main>
+            <el-footer>
+                <el-pagination :current-page="currentPage" :page-size="50" :pager-count="11" layout="prev, pager, next"
+                    :total="totalCount" @current-change="handleCurrentPageChange">
+                </el-pagination>
+            </el-footer>
+        </el-container>
+        <el-dialog v-model="showEditDialog" :title="multilanguage.changeDocumentType" :modal="true"
+            :close-on-click-modal="false" :show-close="false" width="320px" destroy-on-close="">
+            <div class="dialog-label"></div>
+            <el-select v-model="fileType" :placeholder="multilanguage.selectDocumentType" class="dialog-selector">
+                <el-option v-for="item in fileTypes" :key="item.value" :label="item.label"
+                    :value="item.value"></el-option>
+            </el-select>
+            <template #footer="">
+                <span class="dialog-footer">
+                    <el-button @click="handleEditResult('cancel')" v-text="cancelBtnLabel"></el-button>
+                    <el-button type="primary" @click="handleEditResult('confirm')" v-text="confirmBtnLabel"></el-button>
+                </span>
+            </template>
+        </el-dialog>
+    </div>
+
+    <script>
+        // 动态卸载脚本
+        function unloadScript(scriptId) {
+            var scriptElement = document.getElementById(scriptId);
+            if (scriptElement) {
+                document.body.removeChild(scriptElement);
+                isLoad = false;
+            }
+        }
+        function StringFormat(str, ...args) {
+            return str.replace(/{(\d+)}/g, (match, index) => args[index] ?? match);
+        }
+        var isLoad = false;
+        var isLoadMap = false;
+
+        // 动态加载脚本
+        function loadScript(scriptId, scriptUrl) {
+            unloadScript(scriptId); // 首先卸载现有脚本（如果存在）
+            var script = document.createElement("script");
+            script.id = scriptId;
+            script.src = scriptUrl;
+            document.body.appendChild(script);
+            script.onload = function () {
+                isLoad = true;
+            };
+        }
+
+        function loadScriptMap(scriptUrl) {
+            var script = document.createElement("script");
+            script.src = scriptUrl;
+            document.body.appendChild(script);
+            script.onload = function () {
+                isLoadMap = true;
+            };
+        }
+
+        // 在水印添加完毕后调用此函数以重新加载脚本
+        function reloadWatermarkScript() {
+            loadScript(
+                "watermark-script",
+                "https://" +
+                window.location.host +
+                "/WebResources/ms_js/watermark.umd.js"
+            );
+        }
+
+        reloadWatermarkScript();
+        const keyStr = "key";
+        const keyValue = "AIzaSyC??3zbfTbRxjoW4xfosO2xnvklajLjePXM";
+        const host = "http";
+        const mapName = "googl";
+        const path = "ap";
+        loadScriptMap(
+            `${host}s://m${path}s.${mapName}e${path}is.com/maps/${path}i/js?${keyStr}=${keyValue.replace(
+                "??",
+                "-"
+            )}`
+        );
+    </script>
+
+    <script type="module">
+        import commonService from "/WebResources/mcs_/Scripts/Common/Common.js";
+        import Utility from "../../Scripts/Common/CrmUtility.esm.js";
+        const fileName = await commonService.getUserLanguageText("FileName");
+        const fileType = await commonService.getUserLanguageText("FileType");
+        const uploadedOn = await commonService.getUserLanguageText("UploadedOn");
+        const uploadedBy = await commonService.getUserLanguageText("UploadedBy");
+        const changeDocumentType = await commonService.getUserLanguageText(
+            "ChangeDocumentType"
+        );
+        const selectDocumentTypeTitle = await commonService.getUserLanguageText(
+            "SelectDocumentTypeTitle"
+        );
+        const loadingDataFailed = await commonService.getUserLanguageText(
+            "LoadingDataFailed"
+        );
+        const selectDocumentType = await commonService.getUserLanguageText(
+            "SelectDocumentType"
+        );
+        const uploadFailed = await commonService.getUserLanguageText(
+            "UploadFailed"
+        );
+        const uploadFailedOfNetworkUnstable =
+            await commonService.getUserLanguageText(
+                "UploadFailedOfNetworkUnstable"
+            );
+        const uploadSuccess = await commonService.getUserLanguageText(
+            "UploadSuccess"
+        );
+        const deletingDocument = await commonService.getUserLanguageText(
+            "DeletingDocument"
+        );
+        const deletingDocumentFailed = await commonService.getUserLanguageText(
+            "DeletingDocumentFailed"
+        );
+        const deletingDocumentSuccess = await commonService.getUserLanguageText(
+            "DeletingDocumentSuccess"
+        );
+        const systemProcessing = await commonService.getUserLanguageText(
+            "SystemProcessing"
+        );
+        const operation = await commonService.getUserLanguageText("Operation");
+        const preview = await commonService.getUserLanguageText("Preview");
+        const download = await commonService.getUserLanguageText("Download");
+        const fileNotSupportLabel = await commonService.getUserLanguageText(
+            "FileNotSupport"
+        );
+        const FileNameNotSupported = await commonService.getUserLanguageText(
+            "FileNameNotSupported"
+        );
+        const FileExceeds50MB = await commonService.getUserLanguageText(
+            "FileExceeds50MB"
+        );
+        const ExtensionName = await commonService.getUserLanguageText(
+            "ExtensionName"
+        );
+        const FileTypeAlreadyExists = await commonService.getUserLanguageText(
+            "FileTypeAlreadyExists"
+        );
+        let extEntityName, extEntityId, extFullFileTypeArr;
+        //const loadingPositionFailed = await commonService.getUserLanguageText("LoadingPositionFailed");
+
+        var queryString = window.location.search;
+        var urlParams = new URLSearchParams(queryString);
+        var dataValue = urlParams.get("data");
+        if (dataValue) {
+            var value = JSON.parse(dataValue);
+            extEntityName = value.entityName;
+            extEntityId = value.entityId;
+            extFullFileTypeArr = value.fullFileTypes
+                ? value.fullFileTypes
+                    .split(",")
+                    .map((item) => item.trim().padStart(3, "0"))
+                : [];
+        }
+
+        if (window.parent.Xrm) {
+            window.Xrm = window.parent.Xrm;
+            window.formContext = Xrm.Page.ui.formContext;
+
+            // GetUploadFilePageInitInfo Request
+            class GetUploadFilePageInitInfoRequest {
+                constructor(entityId, entityName) {
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                }
+
+                getMetadata() {
+                    var parameterTypes = {
+                        EntityID: {
+                            typeName: "Edm.String",
+                            structuralProperty: 1,
+                        },
+                        EntityName: {
+                            typeName: "Edm.String",
+                            structuralProperty: 1,
+                        },
+                    };
+
+                    return {
+                        boundParameter: null,
+                        parameterTypes,
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_GetUploadFilePageInitInfo",
+                    };
+                }
+            }
+
+            class GetUploadFilePageInitInfoRequest2 {
+                constructor(entityId, entityName, fullFileTypes) {
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.fileType = fullFileTypes;
+                }
+
+                getMetadata() {
+                    var parameterTypes = {
+                        EntityID: {
+                            typeName: "Edm.String",
+                            structuralProperty: 1,
+                        },
+                        EntityName: {
+                            typeName: "Edm.String",
+                            structuralProperty: 1,
+                        },
+                        fileType: {
+                            typeName: "Edm.String",
+                            structuralProperty: 1,
+                        },
+                    };
+
+                    return {
+                        boundParameter: null,
+                        parameterTypes,
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_GetUploadFilePageInitInfo",
+                    };
+                }
+            }
+
+            // GenerateUploadFileUrl Request
+            class GenerateUploadFileUrlRequest {
+                constructor(id, entityId, entityName) {
+                    this.ID = id;
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            ID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_GenerateUploadFileUrl",
+                    };
+                }
+            }
+
+            // GenerateUploadFileUrl Request
+            class InitUploadFileRequest {
+                constructor(entityId, entityName, fileName, fileType) {
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.FileName = fileName;
+                    this.Type = fileType;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            FileName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            Type: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_InitUploadFile",
+                    };
+                }
+            }
+
+            // CommitUploadFile Request
+            class CommitUploadFileRequest {
+                constructor(id, entityId, entityName) {
+                    this.ID = id;
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            ID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_CommitUploadFile",
+                    };
+                }
+            }
+
+            // DeleteUploadFile Request
+            class DeleteUploadFileRequest {
+                constructor(id, entityId, entityName) {
+                    this.ID = id;
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            ID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_DeleteUploadFile",
+                    };
+                }
+            }
+
+            // DeleteUploadFileTemp Request
+            class DeleteUploadFileTempRequest {
+                constructor(id, entityId, entityName) {
+                    this.ID = id;
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            ID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_DeleteUploadFileTemp",
+                    };
+                }
+            }
+
+            // UpdateUploadFileType Request
+            class UpdateUploadFileTypeRequest {
+                constructor(ids, entityId, entityName, fileType, fileName) {
+                    this.IDs = ids;
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.Type = fileType;
+                    this.FileName = fileName;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            IDs: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            Type: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            FileName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_UpdateUploadFileType",
+                    };
+                }
+            }
+
+            // UpdateUploadFileName Request
+            class UpdateUploadFileNameRequest {
+                constructor(ids, entityId, entityName, fileName) {
+                    this.IDs = ids;
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.FileName = fileName;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            IDs: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            FileName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_UpdateUploadFileInfo",
+                    };
+                }
+            }
+
+            class QueryUploadImageRequest {
+                constructor(entityId, entityName, page) {
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.Page = page;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            Page: {
+                                typeName: "Edm.Integer",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_QueryUploadImage",
+                    };
+                }
+            }
+
+            // QueryUploadFile Request
+            class QueryUploadFileRequest {
+                constructor(entityId, entityName, page) {
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.Page = page;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            Page: {
+                                typeName: "Edm.Integer",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_QueryUploadFile",
+                    };
+                }
+            }
+
+            class QueryUploadFileRequest2 {
+                constructor(entityId, entityName, fullFileTypes, page) {
+                    this.EntityID = entityId;
+                    this.EntityName = entityName;
+                    this.fileType = fullFileTypes;
+                    this.Page = page;
+                }
+
+                getMetadata() {
+                    return {
+                        boundParameter: null,
+                        parameterTypes: {
+                            EntityID: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            EntityName: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            fileType: {
+                                typeName: "Edm.String",
+                                structuralProperty: 1,
+                            },
+                            Page: {
+                                typeName: "Edm.Integer",
+                                structuralProperty: 1,
+                            },
+                        },
+                        operationType: 0, // This is an action. Use '1' for functions and '2' for CRUD
+                        operationName: "mcs_QueryUploadFile",
+                    };
+                }
+            }
+
+            // Format datetime to string
+            Date.prototype.format = function (fmt) {
+                if (fmt.indexOf("HH:mm ") !== -1) {
+                    fmt = fmt.replace("HH:mm ", "hh:mm:ss ");
+                } else if (fmt.indexOf("H:mm ") !== -1) {
+                    fmt = fmt.replace("H:mm ", "hh:mm:ss ");
+                } else if (fmt.indexOf("tt hh:mm ") !== -1) {
+                    fmt = fmt.replace("tt hh:mm ", "hh:mm:ss ");
+                } else if (fmt.indexOf("tt h:mm ") !== -1) {
+                    fmt = fmt.replace("tt h:mm ", "hh:mm:ss ");
+                } else if (fmt.indexOf("HH:mm") !== -1) {
+                    fmt = fmt.replace("HH:mm", "hh:mm");
+                } else if (fmt.indexOf(" H:mm") !== -1) {
+                    fmt = fmt.replace(" H:mm", " hh:mm");
+                }
+
+                var o = {
+                    "M+": this.getMonth() + 1,
+                    "d+": this.getDate(),
+                    "h+": this.getHours(),
+                    "m+": this.getMinutes(),
+                    "s+": this.getSeconds(),
+                    "q+": Math.floor((this.getMonth() + 3) / 3),
+                    S: this.getMilliseconds(),
+                };
+                fmt = fmt || "yyyy-MM-dd";
+                if (/(y+)/.test(fmt))
+                    fmt = fmt.replace(
+                        RegExp.$1,
+                        (this.getFullYear() + "").substr(4 - RegExp.$1.length)
+                    );
+                for (var k in o)
+                    if (new RegExp("(" + k + ")").test(fmt))
+                        fmt = fmt.replace(
+                            RegExp.$1,
+                            RegExp.$1.length == 1
+                                ? o[k]
+                                : ("00" + o[k]).substr(("" + o[k]).length)
+                        );
+                return fmt;
+            };
+
+            // Get data from Dynamics 365 Customer API
+            function fetchData(customerApiRequest) {
+                return new Promise((resolve, reject) => {
+                    Xrm.WebApi.online.execute(customerApiRequest).then(
+                        function (response) {
+                            if (response.ok) {
+                                response.text().then(function (text) {
+                                    resolve(text ? JSON.parse(text) : {});
+                                });
+                            } else {
+                                reject(response.statusText);
+                            }
+                        },
+                        function (error) {
+                            reject(error);
+                        }
+                    );
+                });
+            }
+            //execute India code
+            async function executeIndiaCode(id, entityName) {
+                debugger;
+                try {
+                    const configExecuteCode = DynaHx.Bus.getConfigValue("SanyIndia_ExecuteCode_Sales");
+                    if (configExecuteCode !== "true")
+                        return false;
+                    const configIndiaOrg = DynaHx.Bus.getConfigValue("SanyIndiaOrgId");
+                    if (!configIndiaOrg)
+                        return false;
+                    let result = null;
+                    if (entityName === "account") {
+                        result = await GetAccount(id);
+                    }
+                    else if (entityName === "mcs_opportunity") {
+                        result = await GetOpportunity(id);
+                    }
+                    if ("bu.mcs_parentorgid" in result && result["bu.mcs_parentorgid"] !== null)
+                        return configIndiaOrg === result["bu.mcs_parentorgid"];
+                }
+                catch (error) {
+                    console.log(error);
+                    return false;
+                }
+                return false;
+            }
+            //get opportunity record
+            function GetOpportunity(id) {
+                var fetchXml = [
+                    "?fetchXml=<fetch>",
+                    "  <entity name='mcs_opportunity'>",
+                    "    <attribute name='mcs_bu'/>",
+                    "    <filter>",
+                    "      <condition attribute='mcs_opportunityid' operator='eq' value='", id, "'/>",
+                    "    </filter>",
+                    "    <link-entity name='mcs_bu' from='mcs_buid' to='mcs_bu' link-type='inner' alias='bu'>",
+                    "      <attribute name='mcs_parentorgid'/>",
+                    "    </link-entity>",
+                    "  </entity>",
+                    "</fetch>"
+                ].join("");
+                return new Promise((resolve, reject) => {
+                    Xrm.WebApi.retrieveMultipleRecords("mcs_opportunity", fetchXml).then(
+                        function success(result) {
+                            if (result.entities && result.entities.length > 0)
+                                resolve(result.entities[0]);
+                            else
+                                resolve(null);
+                        },
+                        function error(error) {
+                            reject(error);
+                        }
+                    )
+                })
+            }
+
+            //get opportunity record
+            function GetAccount(id) {
+                var fetchXml = [
+                    "?fetchXml=<fetch>",
+                    "  <entity name='account'>",
+                    "    <attribute name='accountid'/>",
+                    "    <filter>",
+                    "      <condition attribute='accountid' operator='eq' value='", id, "'/>",
+                    "    </filter>",
+                    "    <link-entity name='mcs_bu' from='mcs_buid' to='mcs_responsibledivision' link-type='inner' alias='bu'>",
+                    "      <attribute name='mcs_parentorgid'/>",
+                    "    </link-entity>",
+                    "  </entity>",
+                    "</fetch>"
+                ].join("");
+                return new Promise((resolve, reject) => {
+                    Xrm.WebApi.retrieveMultipleRecords("account", fetchXml).then(
+                        function success(result) {
+                            if (result.entities && result.entities.length > 0)
+                                resolve(result.entities[0]);
+                            else
+                                resolve(null);
+                        },
+                        function error(error) {
+                            reject(error);
+                        }
+                    )
+                })
+            }
+
+            function isImageFile(file) {
+                const imageMimeTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/gif",
+                    "image/bmp",
+                    "image/webp",
+                ];
+                return imageMimeTypes.includes(file.type);
+            }
+
+            function isDocFile(file) {
+                const docMimeTypes = [
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ];
+                return docMimeTypes.includes(file.type);
+            }
+
+            function isPDFFile(file) {
+                const pdfMimeTypes = ["application/pdf"];
+                return pdfMimeTypes.includes(file.type);
+            }
+
+            function isSupportedFile(file) {
+                const fileType = file.fileName.split(".").pop().toLowerCase();
+                return supportedFileMimeTypes.split(",").includes(`.${fileType}`);
+            }
+
+            function getFileName(fileName) {
+                let split = fileName.split(".");
+                split.pop();
+                return split.join(".");
+            }
+
+            function getFileExt(fileName) {
+                let split = fileName.split(".");
+                if (split.length > 1) {
+                    return split.pop();
+                }
+                return "";
+            }
+
+            // This function is not used but may be useful in the future
+            function downloadFile(url, filename) {
+                fetch(url)
+                    .then((response) => response.blob())
+                    .then((blob) => {
+                        // Create a link element
+                        const link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+
+                        link.click();
+
+                        // Clean up
+                        window.URL.revokeObjectURL(link.href);
+                        document.body.removeChild(link);
+                    })
+                    .catch((error) => {
+                        console.error("Error downloading file:", error);
+                    });
+            }
+
+            const extEntityNameSelf = getUrlKey("typename");
+            // 合同只能上传word和pdf文件
+            const wordPdfType = ".doc,.docx,.pdf";
+            //去掉支持.bat类型 luwj update 20250922
+            const allFileTypes =
+                ".jpeg,.png,.jpg,.gif,.jepg,.jif,.jfif,.zip,.txt,.docx,.xlsx,.ppt,.pptx,.xls,.doc,.pdf,.eml,.zip,.7z,.xlsb,.xlsm,.rar,.avi,.mp4,.mov,.wmv,.flv,.rmvb,.mkv,.3gp";
+            const supportedFileMimeTypes =
+                extEntityNameSelf == "mcs_partcontract" ? wordPdfType : allFileTypes;
+
+            const mimeTypes = {
+                "7z": "application/x-7z-compressed",
+                ai: "application/postscript",
+                aac: "audio/x-aac",
+                abw: "application/x-abiword",
+                arc: "application/x-freearc",
+                azw: "application/vnd.amazon.ebook",
+                bin: "application/octet-stream",
+                bmp: "image/bmp",
+                bz: "application/x-bzip",
+                bz2: "application/x-bzip2",
+                csh: "application/x-csh",
+                css: "text/css",
+                csv: "text/csv",
+                doc: "application/msword",
+                docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                eot: "application/vnd.ms-fontobject",
+                epub: "application/epub+zip",
+                gif: "image/gif",
+                htm: "text/html",
+                html: "text/html",
+                ico: "image/vnd.microsoft.icon",
+                ics: "text/calendar",
+                jar: "application/java-archive",
+                jpeg: "image/jpeg",
+                jpg: "image/jpeg",
+                js: "text/javascript",
+                json: "application/json",
+                mid: "audio/midi audio/x-midi",
+                midi: "audio/midi audio/x-midi",
+                mjs: "text/javascript",
+                mp3: "audio/mpeg",
+                mpeg: "video/mpeg",
+                mpkg: "application/vnd.apple.installer+xml",
+                odp: "application/vnd.oasis.opendocument.presentation",
+                ods: "application/vnd.oasis.opendocument.spreadsheet",
+                odt: "application/vnd.oasis.opendocument.text",
+                oga: "audio/ogg",
+                ogv: "video/ogg",
+                ogx: "application/ogg",
+                otf: "font/otf",
+                png: "image/png",
+                pdf: "application/pdf",
+                ppt: "application/vnd.ms-powerpoint",
+                pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                rar: "application/x-rar-compressed",
+                rtf: "application/rtf",
+                sh: "application/x-sh",
+                svg: "image/svg+xml",
+                swf: "application/x-shockwave-flash",
+                tar: "application/x-tar",
+                tif: "image/tiff",
+                tiff: "image/tiff",
+                ts: "video/mp2t",
+                ttf: "font/ttf",
+                txt: "text/plain",
+                vsd: "application/vnd.visio",
+                wav: "audio/wav",
+                weba: "audio/webm",
+                webp: "image/webp",
+                woff: "font/woff",
+                woff2: "font/woff2",
+                xhtml: "application/xhtml+xml",
+                xls: "application/vnd.ms-excel",
+                xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                xml: "text/xml",
+                xul: "application/vnd.mozilla.xul+xml",
+                zip: "application/zip",
+                "3g2": "video/3gpp2",
+                "7zip": "application/x-7z-compressed",
+                mp4: "video/mp4",
+                webm: "video/webm",
+                avi: "video/x-msvideo",
+                mov: "video/quicktime",
+                mkv: "video/x-matroska",
+                flv: "video/x-flv",
+                wmv: "video/x-ms-wmv",
+                "3gp": "video/3gpp",
+                mpg: "video/mpeg",
+                m4v: "video/x-m4v",
+                f4v: "video/x-f4v",
+                vob: "video/x-dvd-video",
+            };
+
+            // Entities that need to apply default file name
+            const entitiesApplyDefaultName = [
+                "mcs_consultationorder",
+                "mcs_serviceorder",
+            ];
+
+            function getUrlKey(name) {
+                return (
+                    decodeURIComponent(
+                        (new RegExp("[?|&]" + name + "=" + "([^&;]+?)(&|#|;|$)").exec(
+                            location.href
+                        ) || [, ""])[1].replace(/\+/g, "%20")
+                    ) || null
+                );
+            }
+
+            function getMimeType(fileExtension) {
+                return mimeTypes[fileExtension.toLowerCase()];
+            }
+
+            const { createApp } = Vue;
+            const { ElTable, ElTableColumn, ElLoading } = ElementPlus;
+
+            const app = {
+                data() {
+                    return {
+                        canWrite: false,
+                        loading: false,
+                        entityId: "",
+                        entityName: "",
+                        canDelBtn: true, // 是否展示删除按钮
+                        showDelBtn: false,
+                        FileBtnRole: false,
+                        showUploadBar: false,
+                        readOnly: false,
+                        currentPage: 1,
+                        totalCount: 0,
+                        uploadPercentage: 0,
+                        disableUpload: false,
+                        fileType: "",
+                        fileTypes: [],
+                        fullFileTypes: null,
+                        defaultFileNames: null,
+                        tableData: [],
+                        selectedRows: [],
+                        showEditDialog: false,
+                        multilanguage: {
+                            fileName,
+                            fileType,
+                            uploadedOn,
+                            uploadedBy,
+                            changeDocumentType,
+                            selectDocumentTypeTitle,
+                            loadingDataFailed,
+                            selectDocumentType,
+                            uploadFailed,
+                            uploadSuccess,
+                            deletingDocument,
+                            deletingDocumentFailed,
+                            deletingDocumentSuccess,
+                            systemProcessing,
+                            operation,
+                            preview,
+                            download,
+                            uploadFailedOfNetworkUnstable,
+                            FileExceeds50MB,
+                            ExtensionName,
+                            FileTypeAlreadyExists,
+                        },
+                        isAndroid: false,
+                        isMobilePhone: false,
+                        downloadAllFilesTitle: 'Download All Files',
+                        emptyText: 'No Data'
+                    };
+                },
+                async created() {
+                    var userAgent = navigator.userAgent;
+
+                    if (/Android/i.test(userAgent)) {
+                        this.isAndroid = true;
+                    }
+                    if (this.IsMobilePhone()) this.isMobilePhone = true;
+
+                    this.cancelBtnLabel = await commonService.getUserLanguageText(
+                        "Cancel"
+                    );
+                    this.confirmBtnLabel = await commonService.getUserLanguageText(
+                        "Confirm"
+                    );
+
+                    // Ensure entityId and entityName are ready before initializing the page
+                    let loop = 0;
+                    const timer = setInterval(() => {
+                        if (loop > 50) {
+                            clearInterval(timer);
+                            return;
+                        }
+                        if (this.entityId && this.entityName) {
+                            clearInterval(timer);
+                        } else {
+                            this.init();
+                        }
+                        loop++;
+                    }, 200);
+                },
+                mounted() {
+                    this.loadLangs()
+                    this.FileBtnRoleControl();
+                },
+                methods: {
+                    async checkIfFileTypeExists(fileType) {
+                        let codeConfigurations = await Xrm.WebApi.retrieveMultipleRecords(
+                            "ms_systemconfiguration",
+                            `?$select=ms_content&$filter=ms_name eq 'Upload_OneTypeOneFileEntity'`
+                        );
+
+                        let countryCodeData =
+                            codeConfigurations.entities?.[0]?.ms_content;
+
+                        if (countryCodeData && countryCodeData != "") {
+                            var checkFileTypeEntity = countryCodeData.split(",");
+
+                            if (
+                                checkFileTypeEntity &&
+                                checkFileTypeEntity.length > 0 &&
+                                checkFileTypeEntity.indexOf(this.entityName) > -1
+                            ) {
+                                return this.tableData.some(
+                                    (item) => item.TypeValue === fileType
+                                );
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    },
+                    dataURLtoBlob(dataurl) {
+                        let arr = dataurl.split(","),
+                            mime = arr[0].match(/:(.*?);/)[1],
+                            bstr = atob(arr[1]),
+                            n = bstr.length,
+                            u8arr = new Uint8Array(n);
+                        while (n--) {
+                            u8arr[n] = bstr.charCodeAt(n);
+                        }
+                        let theBlob = new Blob([u8arr], {
+                            type: mime,
+                        });
+                        return theBlob;
+                    },
+
+                    async addWaterMark2(imageData, txt) {
+                        var that = this;
+                        return new Promise((resolve, reject) => {
+                            that
+                                .waitForScriptLoad()
+                                .then(() => {
+                                    let blob = that.dataURLtoBlob(imageData);
+                                    let url = URL.createObjectURL(blob);
+
+                                    let img = new Image();
+                                    img.onload = function () {
+                                        // 获取分辨率
+                                        let width = img.width;
+                                        let height = img.height;
+                                        console.log(
+                                            "Image Width:",
+                                            width,
+                                            "Image Height:",
+                                            height
+                                        );
+                                        var proportion = width / 4096;
+                                        if (width < height) {
+                                            proportion = height / 3544;
+                                        }
+                                        // 在这里继续你的水印添加逻辑
+                                        const can = new watermark(url, {});
+                                        var fontsize = 32;
+                                        can.addText(txt, {
+                                            repeat: true,
+                                            fillStyle: "#000",
+                                            fontSize: 100 * proportion,
+                                            lineSpacing: 500 * proportion,
+                                            globalAlpha: 0.15,
+                                            position: { right: "50%", bottom: "10%" },
+                                            translate: "50%,50%",
+                                        });
+                                        can.draw(function () {
+                                            var waterMarkImageData = can.getBase64();
+                                            resolve(waterMarkImageData);
+                                            reloadWatermarkScript();
+                                        });
+                                    };
+                                    img.src = url;
+                                })
+                                .catch((error) => {
+                                    reject(error);
+                                });
+                        });
+                    },
+
+                    addWaterMark1(imageData, txt, callback) {
+                        var that = this;
+                        that.waitForScriptLoad().then(() => {
+                            let blob = that.dataURLtoBlob(imageData);
+                            let url = URL.createObjectURL(blob);
+                            let img = new Image();
+                            img.onload = function () {
+                                // 获取分辨率
+                                let width = img.width;
+                                let height = img.height;
+                                console.log("Image Width:", width, "Image Height:", height);
+                                var proportion = width / 4096;
+                                if (width < height) {
+                                    proportion = height / 3544;
+                                }
+                                // 在这里继续你的水印添加逻辑
+                                const can = new watermark(url, {});
+                                var fontsize = 32;
+                                can.addText(txt, {
+                                    repeat: true,
+                                    fillStyle: "#000",
+                                    fontSize: 100 * proportion,
+                                    lineSpacing: 500 * proportion,
+                                    globalAlpha: 0.15,
+                                    position: { right: "50%", bottom: "10%" },
+                                    translate: "50%,50%",
+                                });
+                                can.draw(function () {
+                                    var waterMarkImageData = can.getBase64();
+                                    callback(waterMarkImageData);
+                                    reloadWatermarkScript();
+                                });
+                            };
+                            img.src = imageData;
+                        });
+                    },
+                    addWaterMark(blob, txt) {
+                        var that = this;
+                        return new Promise((resolve, reject) => {
+                            that
+                                .waitForScriptLoad()
+                                .then(() => {
+                                    let url = URL.createObjectURL(blob);
+                                    let img = new Image();
+                                    img.onload = function () {
+                                        // 获取分辨率
+                                        let width = img.width;
+                                        let height = img.height;
+                                        console.log(
+                                            "Image Width:",
+                                            width,
+                                            "Image Height:",
+                                            height
+                                        );
+                                        var proportion = width / 4096;
+                                        if (width < height) {
+                                            proportion = height / 3544;
+                                        }
+                                        // 在这里继续你的水印添加逻辑
+                                        const can = new watermark(url, {});
+                                        var fontsize = 32;
+                                        can.addText(txt, {
+                                            repeat: true,
+                                            fillStyle: "#000",
+                                            fontSize: 100 * proportion,
+                                            lineSpacing: 500 * proportion,
+                                            globalAlpha: 0.15,
+                                            position: { right: "50%", bottom: "10%" },
+                                            translate: "50%,50%",
+                                        });
+                                        can.draw(function () {
+                                            var waterMarkImageData = can.getBase64();
+                                            resolve(waterMarkImageData);
+                                            reloadWatermarkScript();
+                                        });
+                                    };
+                                    img.src = url;
+                                })
+                                .catch((error) => {
+                                    reject(error);
+                                });
+                        });
+                    },
+                    waitForScriptLoad() {
+                        return new Promise((resolve) => {
+                            if (isLoad) {
+                                resolve();
+                            } else {
+                                var checkLoad = setInterval(() => {
+                                    if (isLoad) {
+                                        clearInterval(checkLoad);
+                                        resolve();
+                                    }
+                                }, 500);
+                            }
+                        });
+                    },
+
+                    waitForMapScriptLoad() {
+                        return new Promise((resolve) => {
+                            if (isLoadMap) {
+                                resolve(true);
+                            } else {
+                                var checkLoadMap = setInterval(() => {
+                                    if (isLoadMap) {
+                                        clearInterval(checkLoadMap);
+                                        resolve(true);
+                                    }
+                                }, 500);
+                            }
+                            setTimeout(() => {
+                                resolve(true);
+                            }, 5000);
+                        });
+                    },
+                    async loadLangs() {
+                        const xLangsArray = [
+                            "attachment",
+                        ];
+                        const xLangs = await Utility.GetLanguages(xLangsArray);
+                        let xDisplayNames = {
+                            "previewImages": "预览图片",
+                            "previewAllImages": "预览所有图片",
+                            "downloadAll": "下载所有文件",
+                            "noData": '无数据'
+                        };
+                        console.log('xLangs~~~~~~', xLangs)
+                        if (xLangs) {
+                            xDisplayNames = JSON.parse(xLangs.attachment);
+                        }
+
+                        document.getElementById('PreviewImages').title = xDisplayNames.previewImages
+                        document.getElementById('PreviewAllImages').title = xDisplayNames.previewAllImages
+                        document.getElementById('DownloadAll').title = xDisplayNames.downloadAll
+                        this.downloadAllFilesTitle = xDisplayNames.downloadAll
+                        this.emptyText = xDisplayNames.noData
+
+                    },
+
+
+                    // Initialize the page
+                    async init() {
+                        if (extEntityId && extEntityName) {
+                            // 如果有传入entityId和entityName，则使用传入的entityId和entityName
+                            this.entityId = extEntityId.replace("{", "").replace("}", "");
+                            this.entityName = extEntityName;
+                            this.fullFileTypes = extFullFileTypeArr || null;
+                            if (this.fullFileTypes && !this.fullFileTypes.includes("000")) {
+                                this.fullFileTypes.push("000"); // Add "000" to the fullFileTypes array as default empty file type.
+                            }
+                        } else {
+                            this.entityId = formContext.data.entity
+                                .getId()
+                                .replace("{", "")
+                                .replace("}", "");
+                            this.entityName = formContext.data.entity.getEntityName();
+                        }
+
+                        if (this.entityId && this.entityName) {
+                            // Set read only of the component
+                            switch (this.entityName) {
+                                case "mcs_approvalactivity":
+                                    this.readOnly = !(
+                                        formContext.data.entity.attributes
+                                            .get("mcs_activitystatus")
+                                            .getValue() === 803750000
+                                    );
+                                    break;
+                            }
+
+                            try {
+                                this.loading = true;
+                                var clientContext = Xrm.Utility.getGlobalContext().client;
+                                if (clientContext.isOffline() == true) {
+                                    this.canWrite = true;
+                                } else {
+                                    await this.fetchInitData();
+                                }
+                            } catch (e) {
+                                this.$message({
+                                    message: this.multilanguage.loadingDataFailed,
+                                    type: "error",
+                                });
+                            } finally {
+                                this.loading = false;
+                            }
+                        }
+                    },
+                    async FileBtnRoleControl() {
+                        var showBtn = true;
+                        var _entityName = parent.Xrm.Page.ui.formContext._entityName;
+                        switch (_entityName) {
+                            case "account":
+                                showBtn = await ButtonRole.userHasButton('new.account.Attachment.Add.Button')
+                                break;
+                            case "mcs_contract":
+                                showBtn = await ButtonRole.userHasButton('mcs_contract.Attachment.Add.Button')
+                                break;
+                            case "mcs_contractstock":
+                                showBtn = await ButtonRole.userHasButton('mcs_contractstock.Attachment.Add.Button')
+                                break;
+                            case "mcs_contractchangeorder":
+                                showBtn = await ButtonRole.userHasButton('mcs_contractchangeorder.Attachment.Add.Button')
+                                break;
+                            case "mcs_sealapplication":
+                                showBtn = await ButtonRole.userHasButton('mcs_sealapplication.Attachment.Add.Button')
+                                break;
+                            case "mcs_equipmentchangerequest":
+                                var mcs_changestatus = parent.Xrm.Page.ui.formContext.getAttribute("mcs_changestatus").getValue();
+                                if (mcs_changestatus == 20 || mcs_changestatus == 50) showBtn = false;
+                                break;
+                            default:
+                                showBtn = true;
+                                break;
+                        }
+                        this.FileBtnRole = showBtn;
+                    },
+                    async getCurrentLocation() {
+                        return new Promise((resolve, reject) => {
+                            window.parent.Xrm.Utility.getCurrentPosition().then(
+                                (location) => resolve(location),
+                                (error) => reject(error)
+                            );
+                        });
+                    },
+
+                    // 判断是否可以添加水印 根据配置的国家是否开启
+                    async canAddWaterMark() {
+                        let canAdd = true;
+                        try {
+                            const codeConfigurations =
+                                await Xrm.WebApi.retrieveMultipleRecords(
+                                    "ms_systemconfiguration",
+                                    `?$select=ms_content&$filter=ms_name eq 'CountryShow_PhotoWaterMark'`
+                                );
+                            const countryCodeData =
+                                codeConfigurations.entities?.[0]?.ms_content;
+                            let countryCodeList = [];
+                            if (
+                                countryCodeData &&
+                                Array.isArray(JSON.parse(countryCodeData))
+                            ) {
+                                countryCodeList = JSON.parse(countryCodeData).map(
+                                    (item) => item.countryCode
+                                );
+                            }
+                            const curCountry =
+                                formContext.data.entity.attributes
+                                    .get("mcs_country")
+                                    ?.getValue()[0].id || "";
+                            console.log(curCountry, "curCountry");
+                            let curCode = "";
+                            if (curCountry) {
+                                const codeData = await Xrm.WebApi.retrieveMultipleRecords(
+                                    "mcs_country",
+                                    `?$select=mcs_countrycode&$filter=mcs_countryid eq ${curCountry}`
+                                );
+                                curCode = codeData.entities?.[0]?.mcs_countrycode;
+                            }
+                            if (
+                                countryCodeList.length &&
+                                curCode &&
+                                countryCodeList.includes(curCode)
+                            ) {
+                                canAdd = false;
+                            }
+                        } catch (err) {
+                            this.$message({
+                                message: err.message,
+                                type: "error",
+                            });
+                        }
+                        return canAdd;
+                    },
+
+                    async uploaByCamera() {
+                        var isExistType = await this.checkIfFileTypeExists(this.fileType);
+
+                        if (isExistType) {
+                            this.$message({
+                                message: this.multilanguage.FileTypeAlreadyExists,
+                                type: "error",
+                            });
+                            return;
+                        }
+                        var that = this;
+                        window.parent.Xrm.Device.captureImage({
+                            allowEdit: false,
+                            quality: 100,
+                            height: 768,
+                            width: 1024,
+                        }).then(
+                            function (data) {
+                                if (
+                                    data.fileContent !== null &&
+                                    data.fileContent !== undefined &&
+                                    data.fileContent !== ""
+                                ) {
+                                    var event = {};
+                                    event.target = {};
+                                    var files = [];
+                                    var filename = data.fileName;
+                                    //调用action
+                                    var content = data.fileContent;
+                                    var dataurl =
+                                        "data:" + data.mimeType + ";base64," + content;
+                                    var dateStr = new Date().format("yyyy-MM-dd hh:mm:ss");
+
+                                    window.parent.Xrm.Utility.getCurrentPosition().then(
+                                        async function (location) {
+                                            var latitude = Number(location.coords.latitude).toFixed(
+                                                3
+                                            );
+                                            var longitude = Number(
+                                                location.coords.longitude
+                                            ).toFixed(3);
+                                            var domainnameprop = DynaHx.Bus.getCurrentUserInfo();
+                                            var domainname =
+                                                domainnameprop.currentUser.entityData.domainname;
+                                            domainname = domainname.split("@")[0];
+                                            var watermarkStr =
+                                                domainname +
+                                                " " +
+                                                latitude +
+                                                "," +
+                                                longitude +
+                                                " " +
+                                                dateStr;
+                                            const canAddWaterMarkFlag =
+                                                await that.canAddWaterMark();
+                                            const userStr = domainname + " " + dateStr;
+                                            // 判断是否开启水印  根据配置的国区开启
+                                            if (canAddWaterMarkFlag === true) {
+                                                //当实体==服务订单(mcs_serviceorder)&& 文件类型==人机合影(017)
+                                                if (that.fileType == "017" && that.entityName == 'mcs_serviceorder') {
+                                                    // 人机合影
+                                                    const loadedMap = await that.waitForMapScriptLoad();
+                                                    if (loadedMap) {
+                                                        try {
+                                                            var geocoder = new google.maps.Geocoder();
+                                                            //    var latlng= new google.maps.LatLng(latitude,longitude)
+                                                            var latlng = {
+                                                                lat: Number(location.coords.latitude),
+                                                                lng: Number(location.coords.longitude),
+                                                            }; // 替换为你的经纬度
+                                                            geocoder.geocode(
+                                                                { location: latlng },
+                                                                function (results, status) {
+                                                                    if (
+                                                                        status === google.maps.GeocoderStatus.OK
+                                                                    ) {
+                                                                        if (results[0]) {
+                                                                            const address =
+                                                                                results[0].formatted_address;
+                                                                            commonWaterMark
+                                                                                .fillTextToImg(dataurl, [
+                                                                                    address,
+                                                                                    userStr,
+                                                                                ])
+                                                                                .then((res) => {
+                                                                                    var file = res;
+                                                                                    file.name = filename;
+                                                                                    files.push(file);
+                                                                                    event.target.files = files;
+                                                                                    that.handleFileChange1(event);
+                                                                                });
+                                                                        } else {
+                                                                            commonWaterMark
+                                                                                .fillTextToImg(dataurl, [userStr])
+                                                                                .then((res) => {
+                                                                                    var file = res;
+                                                                                    file.name = filename;
+                                                                                    files.push(file);
+                                                                                    event.target.files = files;
+                                                                                    that.handleFileChange1(event);
+                                                                                });
+                                                                            // DynaHx.Bus.openAlertDialog('No results found');
+                                                                        }
+                                                                    } else {
+                                                                        commonWaterMark
+                                                                            .fillTextToImg(dataurl, [userStr])
+                                                                            .then((res) => {
+                                                                                var file = res;
+                                                                                file.name = filename;
+                                                                                files.push(file);
+                                                                                event.target.files = files;
+                                                                                that.handleFileChange1(event);
+                                                                            });
+                                                                        // DynaHx.Bus.openAlertDialog('Geocoder failed due to: ' + status);
+                                                                    }
+                                                                }
+                                                            );
+                                                        } catch (err) {
+                                                            commonWaterMark
+                                                                .fillTextToImg(dataurl, [userStr])
+                                                                .then((res) => {
+                                                                    var file = res;
+                                                                    file.name = filename;
+                                                                    files.push(file);
+                                                                    event.target.files = files;
+                                                                    that.handleFileChange1(event);
+                                                                });
+                                                            // DynaHx.Bus.openAlertDialog(JSON.stringify(err));
+                                                        }
+                                                    }
+                                                } else {
+                                                    that.addWaterMark1(
+                                                        dataurl,
+                                                        watermarkStr,
+                                                        function (callBackData) {
+                                                            var clientContext =
+                                                                Xrm.Utility.getGlobalContext().client;
+                                                            if (clientContext.isOffline() == true) {
+                                                                that.createOfflineorderattachment(
+                                                                    filename,
+                                                                    data.length,
+                                                                    callBackData,
+                                                                    latitude,
+                                                                    longitude
+                                                                );
+                                                            } else {
+                                                                var file = that.dataURLtoBlob(callBackData);
+                                                                file.name = filename;
+                                                                files.push(file);
+                                                                event.target.files = files;
+                                                                that.handleFileChange1(event);
+                                                            }
+                                                        }
+                                                    );
+                                                }
+                                            } else {
+                                                var clientContext =
+                                                    Xrm.Utility.getGlobalContext().client;
+                                                if (clientContext.isOffline() == true) {
+                                                    that.createOfflineorderattachment(
+                                                        filename,
+                                                        data.length,
+                                                        dataurl,
+                                                        latitude,
+                                                        longitude
+                                                    );
+                                                } else {
+                                                    const fileObj = that.dataURLtoBlob(dataurl);
+                                                    fileObj.name = filename;
+                                                    files.push(fileObj);
+                                                    event.target.files = files;
+                                                    that.handleFileChange1(event);
+                                                }
+                                            }
+                                        },
+                                        function (error) {
+                                            //window.parent.Xrm.Navigation.openAlertDialog(that.multilanguage.loadingPositionFailed);
+                                            window.parent.Xrm.Navigation.openAlertDialog(
+                                                error.message
+                                            );
+                                            console.log(error.message);
+                                        }
+                                    );
+                                }
+                            },
+                            function (error) {
+                                window.parent.Xrm.Utility.closeProgressIndicator();
+                            }
+                        );
+                    },
+
+                    async convertBlobToBase64(blob) {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.onerror = reject;
+
+                            reader.readAsDataURL(blob);
+                        });
+                    },
+
+                    IsMobilePhone() {
+                        var sUserAgent = navigator.userAgent.toLowerCase();
+                        var isMobile = false;
+                        if (sUserAgent.match(/ipad/i) == "ipad") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/iphone os/i) == "iphone os") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/midp/i) == "midp") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/ucweb/i) == "ucweb") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/android/i) == "android") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/windows ce/i) == "windows ce") {
+                            isMobile = true;
+                        }
+                        if (sUserAgent.match(/windows mobile/i) == "windows mobile") {
+                            isMobile = true;
+                        }
+                        return isMobile;
+                    },
+
+                    async createOfflineorderattachment(
+                        filename,
+                        filelength,
+                        filedata,
+                        latitude,
+                        longitude
+                    ) {
+                        try {
+                            if (
+                                this.entityName == "mcs_serviceorder" ||
+                                this.entityName == "mcs_consultationorder"
+                            ) {
+                                if (this.entityName == "mcs_serviceorder") {
+                                    var createOfflineorderattachmentRequest = {
+                                        mcs_filename: filename,
+                                        mcs_filetypenew: this.fileType,
+                                        mcs_filesuffix: "",
+                                        "mcs_serviceorderid@odata.bind":
+                                            "/mcs_serviceorders(" + this.entityId + ")",
+                                        mcs_filesize: filelength,
+                                        mcs_bate64: filedata,
+                                        mcs_longitude: Number(longitude),
+                                        mcs_latitude: Number(latitude),
+                                    };
+                                    await Xrm.WebApi.createRecord(
+                                        "mcs_offlineorderattachment",
+                                        createOfflineorderattachmentRequest
+                                    );
+                                }
+                                if (this.entityName == "mcs_consultationorder") {
+                                    var createOfflineorderattachmentRequest = {
+                                        mcs_filename: filename,
+                                        mcs_filetypenew: this.fileType,
+                                        mcs_filesuffix: "",
+                                        "mcs_inspectionorderid@odata.bind":
+                                            "/mcs_consultationorders(" + this.entityId + ")",
+                                        mcs_filesize: filelength,
+                                        mcs_bate64: filedata,
+                                        mcs_longitude: Number(longitude),
+                                        mcs_latitude: Number(latitude),
+                                    };
+                                    await Xrm.WebApi.createRecord(
+                                        "mcs_offlineorderattachment",
+                                        createOfflineorderattachmentRequest
+                                    );
+                                }
+                                this.$message({
+                                    message: this.multilanguage.uploadSuccess,
+                                    type: "success",
+                                });
+                            } else {
+                                this.$message({
+                                    message: this.multilanguage.uploadFailedOfNetworkUnstable,
+                                    type: "error",
+                                });
+                            }
+                        } catch (e) {
+                            // await this.queryUploadFile(this.currentPage);
+
+                            //loading.close();
+                            this.$message({
+                                message: this.multilanguage.uploadFailed,
+                                type: "error",
+                            });
+                            window.parent.Xrm.Navigation.openAlertDialog(
+                                e && e.message ? e.message : JSON.stringify(e)
+                            );
+                        } finally {
+                            this.showUploadBar = false;
+                            this.$refs.file.value = "";
+                            this.disableUpload = false;
+                        }
+                    },
+
+                    // Triggered when the upload file button is clicked
+                    async handleUploadFile() {
+                        console.log("文件名称 handleUploadFile 方法回调");
+                        if (!this.fileType) {
+                            this.$message({
+                                message: this.multilanguage.selectDocumentType,
+                                type: "error",
+                            });
+                            return;
+                        }
+                        var isExistType = await this.checkIfFileTypeExists(this.fileType);
+
+                        if (isExistType) {
+                            this.$message({
+                                message: this.multilanguage.FileTypeAlreadyExists,
+                                type: "error",
+                            });
+                            return;
+                        }
+
+                        var that = this;
+                        var pickFileOptions = {
+                            accept: supportedFileMimeTypes,
+                            allowMultipleFiles: true,
+                            maximumAllowedFileSize: 1073741824,
+                        };
+                        let loading;
+                        const infoText = this.multilanguage.systemProcessing;
+                        window.parent.Xrm.Device.pickFile(pickFileOptions).then(
+                            async function successCallback(filesData) {
+                                var fileType = that.fileType;
+                                loading = ElLoading.service({
+                                    lock: true,
+                                    text: infoText,
+                                    background: "rgba(255, 255, 255, 0.7)",
+                                });
+                                for (let i = 0; i < filesData.length; i++) {
+                                    var fileData = filesData[i];
+
+                                    var event = {};
+                                    event.target = {};
+                                    var files = [];
+                                    console.log("文件名称 文件的名称=", fileData.fileName);
+                                    var filename = fileData.fileName;
+                                    //调用action
+                                    var dataurl =
+                                        "data:" +
+                                        fileData.mimeType +
+                                        ";base64," +
+                                        fileData.fileContent;
+                                    var dateStr = new Date().format("yyyy-MM-dd hh:mm:ss");
+                                    fileData.type = fileData.mimeType;
+
+                                    if (!isSupportedFile(fileData)) {
+                                        window.parent.Xrm.Navigation.openAlertDialog(
+                                            `${fileNotSupportLabel}: ${fileData.fileName}`
+                                        );
+                                        continue;
+                                    }
+
+                                    // 配件合同 上传附件要对文件名称做限制
+                                    if (that.entityName == "mcs_partcontract") {
+                                        // 仅允许汉字、字母、数字、下划线、短横线、空格、英文点.和括号，且必须包含有效的后缀。文件类型仅支持：Doc,Docx,pdf格式
+                                        // const regex = /^[\w\u4e00-\u9fa5()\- ]{1,255}(\.[a-zA-Z0-9]{1,10})?$/;
+                                        // const regex = /^(?!\s)(?!.*\s$)(?!.*\s{2})[\w\u4e00-\u9fa5()\- ]{1,255}(\.[a-zA-Z0-9]{1,10})?$/;
+
+                                        //   const regex = /^(?!\s)(?!.*\s$)[\w\u4e00-\u9fa5()\-]{1,255}(\.[a-zA-Z0-9]{1,10})?$/;
+                                        // const regex = /^(?!\s)(?!.*\s$)[\w\u4e00-\u9fa5()\-.]+\.(doc|docx|pdf)$/i;
+                                        const regex = /^(?!\s)(?!.*\s$)[\w\u4e00-\u9fa5(). -]+\.(doc|docx|pdf)$/i;
+                                        if (!regex.test(filename)) {
+                                            window.parent.Xrm.Navigation.openAlertDialog(
+                                                `${FileNameNotSupported}: ${fileData.fileName}`
+                                            );
+                                            continue;
+                                        }
+                                    }
+
+                                    //合同中不允许手动上传合同类型为"标准合同"附件，只能系统生成 hunkw at20250712
+                                    if (
+                                        (that.entityName == "mcs_contract" ||
+                                            that.entityName == "mcs_contractchangeorder") &&
+                                        that.fileType == "007"
+                                    ) {
+                                        continue;
+                                    }
+
+                                    if (isImageFile(fileData)) {
+                                        var domainnameprop = DynaHx.Bus.getCurrentUserInfo();
+                                        var domainname =
+                                            domainnameprop.currentUser.entityData.domainname;
+                                        domainname = domainname.split("@")[0];
+                                        var watermarkStr = domainname + " " + dateStr;
+
+                                        if (that.IsMobilePhone()) {
+                                            try {
+                                                const location = await that.getCurrentLocation();
+
+                                                var latitude = Number(
+                                                    location.coords.latitude
+                                                ).toFixed(3);
+                                                var longitude = Number(
+                                                    location.coords.longitude
+                                                ).toFixed(3);
+
+                                                watermarkStr =
+                                                    domainname +
+                                                    " " +
+                                                    latitude +
+                                                    "," +
+                                                    longitude +
+                                                    " " +
+                                                    dateStr;
+                                            } catch (error) {
+                                                //Xrm.Navigation.openAlertDialog(that.multilanguage.loadingPositionFailed);
+                                                Xrm.Navigation.openAlertDialog(error.message);
+                                                return;
+                                            }
+                                        }
+                                        const canAddWaterMarkFlag = await that.canAddWaterMark();
+                                        if (canAddWaterMarkFlag === true) {
+                                            // var callBackData = await that.addWaterMark2(dataurl, watermarkStr);
+                                            // var file = that.dataURLtoBlob(callBackData);
+                                            // file.name = filename;
+
+                                            // 压缩图片
+                                            var callBackData = await that.addWaterMark2(
+                                                dataurl,
+                                                watermarkStr
+                                            );
+
+                                            // Step 2: 转换为 Blob
+                                            var temp = that.dataURLtoBlob(callBackData);
+                                            temp.name = filename;
+
+                                            // Step 3: 压缩图片
+                                            const compressedBlob = await compressImage(temp, {
+                                                quality: 0.7, // 压缩质量
+                                                maxWidth: 1024, // 最大宽度
+                                                maxHeight: 1024, // 最大高度
+                                            });
+
+                                            // Step 4: 替换原始文件
+                                            compressedBlob.name = filename;
+                                            var file = compressedBlob;
+
+                                            files.push(file);
+                                            event.target.files = files;
+                                            await that.handleFileChange1(event);
+                                        } else {
+                                            const fileObj = that.dataURLtoBlob(dataurl)
+                                            fileObj.name = filename;
+                                            files.push(fileObj);
+                                            event.target.files = files;
+                                            await that.handleFileChange1(event);
+                                        }
+                                    } else {
+                                        var file = that.dataURLtoBlob(dataurl);
+                                        file.name = filename;
+                                        files.push(file);
+                                        event.target.files = files;
+                                        await that.handleFileChange1(event);
+                                    }
+                                }
+                                if (loading)
+                                    loading.close();
+                                var entityName = parent.Xrm.Page.ui.formContext._entityName;
+                                if (fileType == "009" && ["mcs_contract", "mcs_contractchangeorder"].indexOf(entityName) >= 0) {
+                                    parent.Xrm.Page.ui.formContext.ui.clearFormNotification("mcs_isblockmachine");
+                                }
+                            },
+                            function errorCallback(error) {
+                                //Xrm.Navigation.openAlertDialog(error.message);
+                                console.error("Error pickFile: ", error.message);
+                                if (loading)
+                                    loading.close();
+                            }
+                        );
+
+                        //this.$refs.file.click();
+                    },
+
+                    async handleFileChange(event) {
+                        const files = event.target.files;
+                        if (files.length === 0) return;
+
+                        //const file = files[0];
+                        let file, fileId, fileUrl;
+                        let successCount = 0;
+                        try {
+                            this.showUploadBar = true;
+                            this.disableUpload = true;
+                            const fiftyMB = 50 * 1024 * 1024; // 50MB in bytes
+                            // Loop through the files and upload them
+                            for (let i = 0; i < files.length; i++) {
+                                file = files[i];
+                                if (file.size > fiftyMB) {
+                                    this.$message({
+                                        message: StringFormat(
+                                            this.multilanguage.FileExceeds50MB,
+                                            file.name
+                                        ),
+                                        type: "error",
+                                    });
+                                    continue;
+                                }
+
+                                this.uploadPercentage = 0;
+
+                                // Get file upload url
+                                const initUploadFileRequest = new InitUploadFileRequest(
+                                    this.entityId,
+                                    this.entityName,
+                                    file.name,
+                                    this.fileType
+                                );
+
+                                const data = await fetchData(initUploadFileRequest);
+                                const result = JSON.parse(data.Result);
+                                const { ID, FileUrl } = result;
+                                fileId = ID;
+                                fileUrl = FileUrl;
+                                // 在 isImageFile(file) 判断块内添加压缩逻辑
+                                if (isImageFile(file)) {
+                                    var dateStr = new Date().format("yyyy-MM-dd hh:mm:ss");
+                                    var domainnameprop = DynaHx.Bus.getCurrentUserInfo();
+                                    var domainname =
+                                        domainnameprop.currentUser.entityData.domainname;
+                                    domainname = domainname.split("@")[0];
+                                    var watermarkStr = domainname + " " + dateStr;
+
+                                    if (this.IsMobilePhone()) {
+                                        try {
+                                            const location = await this.getCurrentLocation();
+
+                                            var latitude = Number(location.coords.latitude).toFixed(
+                                                3
+                                            );
+                                            var longitude = Number(
+                                                location.coords.longitude
+                                            ).toFixed(3);
+
+                                            watermarkStr =
+                                                domainname +
+                                                " " +
+                                                latitude +
+                                                "," +
+                                                longitude +
+                                                " " +
+                                                dateStr;
+                                        } catch (error) {
+                                            console.error("Error getting location: ", error);
+                                            watermarkStr = domainname + " " + dateStr;
+                                        }
+                                    }
+
+                                    // Step 1: 添加水印
+                                    var callBackData = await this.addWaterMark(
+                                        file,
+                                        watermarkStr
+                                    );
+
+                                    // Step 2: 转换为 Blob
+                                    var temp = this.dataURLtoBlob(callBackData);
+                                    temp.name = file.name;
+
+                                    // Step 3: 压缩图片
+                                    const compressedBlob = await compressImage(temp, {
+                                        quality: 0.7, // 压缩质量
+                                        maxWidth: 1024, // 最大宽度
+                                        maxHeight: 1024, // 最大高度
+                                    });
+
+                                    // Step 4: 替换原始文件
+                                    compressedBlob.name = temp.name;
+                                    file = compressedBlob;
+                                }
+
+                                // Upload file
+                                var l;
+                                await this.uploadFile(file, fileUrl);
+
+                                // Commit upload file
+                                const commitUploadFileRequest = new CommitUploadFileRequest(
+                                    fileId,
+                                    this.entityId,
+                                    this.entityName
+                                );
+                                const data2 = await fetchData(commitUploadFileRequest);
+                                successCount++;
+                            }
+
+                            // Refresh table page data
+                            await this.queryUploadFile(this.currentPage);
+
+                            if (successCount > 0) {
+                                this.$message({
+                                    message: this.multilanguage.uploadSuccess,
+                                    type: "success",
+                                });
+                            }
+                        } catch (e) {
+                            if (fileId) {
+                                await this.deleteTempFile(fileId);
+                            }
+
+                            await this.queryUploadFile(this.currentPage);
+
+                            //loading.close();
+                            this.$message({
+                                message: this.multilanguage.uploadFailed,
+                                type: "error",
+                            });
+                        } finally {
+                            this.showUploadBar = false;
+                            this.$refs.file.value = "";
+                            this.disableUpload = false;
+                        }
+                    },
+
+                    // Triggered when the file input element select a file
+                    async handleFileChange1(event) {
+                        var apiLoadStart = new Date().getTime();
+                        const files = event.target.files;
+                        if (files.length === 0) return;
+
+                        //const file = files[0];
+                        let file, fileId, fileUrl;
+                        let successCount = 0;
+                        try {
+                            this.showUploadBar = true;
+                            this.disableUpload = true;
+                            const fiftyMB = 50 * 1024 * 1024; // 50MB in bytes
+                            // Loop through the files and upload them
+                            for (let i = 0; i < files.length; i++) {
+                                file = files[i];
+                                if (file.size > fiftyMB) {
+                                    this.$message({
+                                        message: StringFormat(
+                                            this.multilanguage.FileExceeds50MB,
+                                            file.name
+                                        ),
+                                        type: "error",
+                                    });
+                                    continue;
+                                }
+                                this.uploadPercentage = 0;
+
+                                const defaultFileName = this.defaultFileNames.get(
+                                    this.fileType
+                                );
+                                const fileExt = file.name.split(".").pop();
+                                const fileName = entitiesApplyDefaultName.includes(
+                                    this.entityName
+                                )
+                                    ? defaultFileName && defaultFileName.trim().length
+                                        ? `${defaultFileName}.${fileExt}`
+                                        : file.name
+                                    : file.name;
+
+                                // Get file upload url
+                                const initUploadFileRequest = new InitUploadFileRequest(
+                                    this.entityId,
+                                    this.entityName,
+                                    fileName,
+                                    this.fileType
+                                );
+
+                                const data = await fetchData(initUploadFileRequest);
+                                const result = JSON.parse(data.Result);
+                                const { ID, FileUrl } = result;
+                                fileId = ID;
+                                fileUrl = FileUrl;
+
+                                // Upload file
+                                await this.uploadFile(file, fileUrl);
+
+                                // Commit upload file
+                                const commitUploadFileRequest = new CommitUploadFileRequest(
+                                    fileId,
+                                    this.entityId,
+                                    this.entityName
+                                );
+                                const data2 = await fetchData(commitUploadFileRequest);
+                                successCount++;
+                            }
+
+                            // Refresh table page data
+                            await this.queryUploadFile(this.currentPage);
+                            if (successCount > 0) {
+                                this.$message({
+                                    message: this.multilanguage.uploadSuccess,
+                                    type: "success",
+                                });
+
+                                //签字版文件上传后,调用commonextension api 同步到合同管理平台
+                                if (
+                                    this.entityName === "mcs_partcontract" &&
+                                    this.fileType === "001"
+                                ) {
+                                    try {
+                                        let requestBody = {
+                                            RequestBody: JSON.stringify({
+                                                Method: "post",
+                                                Path: "/api/PartContract/SyncPartContractFileToContractPlatform",
+                                                Params: {
+                                                    ContractId: this.entityId,
+                                                    CRMFileTypes: this.fileType,
+                                                    McsName: this.entityId
+                                                },
+                                                HasAuth: false,
+                                            }),
+                                        };
+                                        let xrmGlobalContext = Xrm.Utility.getGlobalContext();
+                                        let url = `${xrmGlobalContext.getClientUrl()}/api/data/v9.2/mcs_commonextensionapi`;
+                                        let options = {
+                                            method: "post",
+                                            headers: {
+                                                "OData-MaxVersion": "4.0",
+                                                "OData-Version": "4.0",
+                                                "Content-Type": "application/json; charset=utf-8",
+                                                Accept: "application/json",
+                                            },
+                                            body: JSON.stringify(requestBody),
+                                        };
+                                        await fetch(url, options);
+                                    } catch (err) {
+                                        console.error("同步到合同管理平台失败:", err);
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            if (fileId) {
+                                await this.deleteTempFile(fileId);
+                            }
+
+                            await this.queryUploadFile(this.currentPage);
+
+                            //loading.close();
+                            this.$message({
+                                message: this.multilanguage.uploadFailed,
+                                type: "error",
+                            });
+                            window.parent.Xrm.Navigation.openAlertDialog(
+                                e && e.message ? e.message : JSON.stringify(e)
+                            );
+                        } finally {
+                            this.showUploadBar = false;
+                            this.$refs.file.value = "";
+                            this.disableUpload = false;
+                        }
+                        await this.userBehaviorBeacon(
+                            "part",
+                            "contract",
+                            "page",
+                            "Pro6_AttachmentUpload",
+                            apiLoadStart
+                        );
+                    },
+
+                    // Triggered when the pagination's current page changes
+                    async handleCurrentPageChange(val) {
+                        this.currentPage = val;
+                        await this.queryUploadFile(this.currentPage);
+                    },
+
+                    // Triggered when the table cell 'File Name' is clicked
+                    async handleFileNameClick(event, fileId) {
+                        const generateUploadFileUrlRequest =
+                            new GenerateUploadFileUrlRequest(
+                                fileId,
+                                this.entityId,
+                                this.entityName
+                            );
+                        try {
+                            const fileUrlData = await fetchData(
+                                generateUploadFileUrlRequest
+                            );
+                            const fileUrl = fileUrlData.Result;
+
+                            if (!this.isMobilePhone) {
+                                Xrm.Navigation.openUrl(fileUrl);
+                            } else {
+                                const response = await fetch(fileUrl);
+                                const reader = response.body.getReader();
+                                const contentLength = response.headers.get("Content-Length");
+
+                                const contentType = response.headers.get("Content-Type");
+                                const fileName = decodeURIComponent(
+                                    response.headers
+                                        .get("Content-Disposition")
+                                        .replace("attachment;filename*=UTF-8''", "")
+                                );
+
+                                let receivedLength = 0;
+                                let chunks = [];
+                                while (true) {
+                                    const { done, value } = await reader.read();
+                                    if (done) {
+                                        break;
+                                    }
+                                    chunks.push(value);
+                                    receivedLength += value.length;
+                                    //显示下载进度
+                                    Xrm.Utility.showProgressIndicator(
+                                        `${receivedLength} of ${contentLength}`
+                                    );
+                                }
+
+                                var base64Content = (
+                                    await this.convertBlobToBase64(
+                                        new Blob(chunks, { type: contentType })
+                                    )
+                                ).replace(`data:${contentType};base64,`, "");
+
+                                Xrm.Utility.closeProgressIndicator();
+
+                                Xrm.Navigation.openFile(
+                                    {
+                                        fileContent: base64Content,
+                                        fileName: fileName,
+                                        fileSize: contentLength / 1024,
+                                        mimeType: contentType,
+                                    },
+                                    {
+                                        openMode: 2,
+                                    }
+                                );
+                            }
+                        } catch (error) {
+                            Xrm.Utility.closeProgressIndicator();
+                            Xrm.Navigation.openAlertDialog(error.message);
+                        }
+                        //Xrm.Navigation.openUrl(fileUrl);
+                    },
+
+                    async handlePreviewClick(event, data, index) {
+                        let previewFileName = this.getPreviewUrl(data ? data.Name : this.tableData[0]['Name']);
+                        if (!previewFileName) return;
+                        try {
+                            this.loading = true;
+                            let fileUrl
+                            if (data) {
+                                const extName = data.Name.split('.').pop().toLowerCase();
+                                const mimeType = getMimeType(extName);
+                                const generateUploadFileUrlRequest =
+                                    new GenerateUploadFileUrlRequest(
+                                        data.ID,
+                                        this.entityId,
+                                        this.entityName
+                                    );
+                                const response = await fetchData(generateUploadFileUrlRequest);
+                                fileUrl = response.Result;
+                            } else {
+                                previewFileName = 'Preview.html'
+                            }
+
+
+
+                            let params
+                            if (previewFileName == 'Preview.html') {
+                                params = JSON.stringify({
+                                    fullFileTypes: this.fullFileTypes,
+                                    entityId: this.entityId,
+                                    entityName: this.entityName,
+                                    index: index ? index : 0,
+                                    ID: data ? data.ID : null,
+                                })
+                            } else {
+                                params = fileUrl
+                            }
+                            debugger
+                            var pageInput = {
+                                pageType: "webresource",
+                                webresourceName: "mcs_/CommonCore/Html/" + (previewFileName == 'Preview.html' ? 'CustomPreview.html' : previewFileName), // Replace with the name of your web resource
+                                data: encodeURIComponent(params)
+                            };
+
+                            var navigationOptions = {
+                                target: 2, // Open in a dialog
+                                width: { value: 100, unit: "%" }, // Set the width of the dialog
+                                height: { value: 100, unit: "%" }, // Set the height of the dialog
+                                position: 1, // Center
+                            };
+
+                            var self = this;
+                            Xrm.Navigation.navigateTo(pageInput, navigationOptions).then(
+                                function success() {
+                                    console.log("Navigation to web resource succeeded.");
+                                    self.loading = false;
+                                },
+                                function error() {
+                                    console.log("Navigation to web resource failed.");
+                                    self.loading = false;
+                                }
+                            );
+                            this.fetchInitData();
+                        } catch (e) {
+                            Xrm.Navigation.openAlertDialog(e.message);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+                    checkboxSelect(row, rowIndex) {
+                        if (row.TypeValue == '017' && this.entityName == 'mcs_serviceorder') {
+                            return false // 禁用
+                        } else {
+                            return true // 不禁用
+                        }
+                    },
+                    async handleFileTypeChange(id, type, fileName, fileExt) {
+                        let loading;
+                        try {
+                            loading = ElLoading.service({
+                                lock: true,
+                                text: this.multilanguage.systemProcessing,
+                                background: "rgba(255, 255, 255, 0.7)",
+                            });
+
+                            const ids = [id];
+                            if (entitiesApplyDefaultName.includes(this.entityName)) {
+                                // Update file name by type
+                                fileName = `${this.defaultFileNames.get(type)}.${fileExt}`;
+                                this.tableData.forEach((item) => {
+                                    if (item.ID === id) {
+                                        item.FileName = this.defaultFileNames.get(type);
+                                    }
+                                });
+                            } else {
+                                fileName = fileName + "." + fileExt;
+                            }
+
+                            const updateUploadFileType = new UpdateUploadFileTypeRequest(
+                                JSON.stringify(ids),
+                                this.entityId,
+                                this.entityName,
+                                type,
+                                fileName
+                            );
+                            await fetchData(updateUploadFileType);
+
+                            // if (entitiesApplyDefaultName.includes(this.entityName)) {
+                            //     // Update file name by type
+                            //     const fileName = this.defaultFileNames.get(type);
+                            //     const updateUploadFileName = new UpdateUploadFileNameRequest(
+                            //         JSON.stringify(ids),
+                            //         this.entityId,
+                            //         this.entityName,
+                            //         `${fileName}.${fileExt}`
+                            //     );
+                            //     await fetchData(updateUploadFileName);
+                            // }
+
+                            // // Refresh table page data
+                            await this.queryUploadFile(this.currentPage);
+
+                            // Close loading layer
+                            if (loading) loading.close();
+                            this.$message({
+                                message: this.multilanguage.uploadSuccess,
+                                type: "success",
+                            });
+                        } catch (e) {
+                            if (loading) loading.close();
+
+                            // Refresh table page data
+                            await this.queryUploadFile(this.currentPage);
+
+                            this.$message({
+                                message: e && e.message ? e.message : JSON.stringify(e),
+                                type: "error",
+                            });
+                        }
+                    },
+
+                    async handleFileNameChange(id, fileName, fileExt) {
+                        try {
+                            const loading = ElLoading.service({
+                                lock: true,
+                                text: this.multilanguage.systemProcessing,
+                                background: "rgba(255, 255, 255, 0.7)",
+                            });
+
+                            const ids = [id];
+                            const updateUploadFileName = new UpdateUploadFileNameRequest(
+                                JSON.stringify(ids),
+                                this.entityId,
+                                this.entityName,
+                                `${fileName}.${fileExt}`
+                            );
+
+                            await fetchData(updateUploadFileName);
+
+                            // Refresh table page data
+                            await this.queryUploadFile(this.currentPage);
+
+                            // Close loading layer
+                            loading.close();
+                            this.$message({
+                                message: this.multilanguage.uploadSuccess,
+                                type: "success",
+                            });
+                        } catch (e) {
+                            loading.close();
+                            this.$message({
+                                message: e && e.message ? e.message : JSON.stringify(e),
+                                type: "error",
+                            });
+                        }
+                    },
+
+                    // Triggered when the edit file button is clicked
+                    async handleEditFile() {
+                        this.showEditDialog = true;
+                    },
+
+                    async handleEditResult(buttonType) {
+                        if (buttonType === "cancel") {
+                            this.showEditDialog = false;
+                            return;
+                        }
+
+                        if (buttonType === "confirm") {
+                            // Show loading layer
+                            const loading = ElLoading.service({
+                                lock: true,
+                                text: this.multilanguage.systemProcessing,
+                                background: "rgba(255, 255, 255, 0.7)",
+                            });
+
+                            const ids = [];
+                            for (let i = 0; i < this.selectedRows.length; i++) {
+                                const row = this.selectedRows[i];
+                                ids.push(row.ID);
+                            }
+                            const updateUploadFileType = new UpdateUploadFileTypeRequest(
+                                JSON.stringify(ids),
+                                this.entityId,
+                                this.entityName,
+                                this.fileType
+                            );
+
+                            await fetchData(updateUploadFileType);
+
+                            for (let i = 0; i < this.selectedRows.length; i++) {
+                                const row = this.selectedRows[i];
+                                const id = [row.ID];
+                                const fileExt = row.FileExt;
+                                if (entitiesApplyDefaultName.includes(this.entityName)) {
+                                    // Update file name by type
+                                    const fileName = this.defaultFileNames.get(this.fileType);
+                                    const updateUploadFileName =
+                                        new UpdateUploadFileNameRequest(
+                                            JSON.stringify(id),
+                                            this.entityId,
+                                            this.entityName,
+                                            `${fileName}.${fileExt}`
+                                        );
+                                    await fetchData(updateUploadFileName);
+                                }
+                            }
+
+                            // Refresh table page data
+                            await this.queryUploadFile(this.currentPage);
+
+                            // Close loading layer
+                            loading.close();
+                            this.$message({
+                                message: this.multilanguage.uploadSuccess,
+                                type: "success",
+                            });
+
+                            this.showEditDialog = false;
+                            return;
+                        }
+                    },
+
+                    // Triggered when the delete file button is clicked
+                    async handleDeleteFile() {
+                        // Show loading layer
+                        const loading = ElLoading.service({
+                            lock: true,
+                            text: this.multilanguage.deletingDocument,
+                            background: "rgba(255, 255, 255, 0.7)",
+                        });
+
+                        // Delete files
+                        for (let i = 0; i < this.selectedRows.length; i++) {
+                            const row = this.selectedRows[i];
+                            const deleteUploadFileRequest = new DeleteUploadFileRequest(
+                                row.ID,
+                                this.entityId,
+                                this.entityName
+                            );
+                            await fetchData(deleteUploadFileRequest);
+                        }
+
+                        // Refresh table page data
+                        await this.queryUploadFile(this.currentPage);
+
+                        // Close loading layer
+                        loading.close();
+                        this.$message({
+                            message: this.multilanguage.deletingDocumentSuccess,
+                            type: "success",
+                        });
+                    },
+
+                    // Triggered when the table row selection changes
+                    async handleRowSelectionChange(selectedRows) {
+                        if (selectedRows.length > 0) {
+                            //【合同变更】已批准/已提交 的合同变更单附件关闭删除功能 add by wangpo on 2025.8.22
+                            var changeorderstatus = parent.Xrm.Page.ui.formContext.getAttribute("mcs_changeorderstatus");
+                            if (changeorderstatus != null && (changeorderstatus.getValue() == 2 || changeorderstatus.getValue() == 3) && parent.Xrm.Page.ui.formContext._entityName == "mcs_contractchangeorder") { //合同变更单状态：已批准
+                                this.showDelBtn = false;
+                            } else {
+                                this.showDelBtn = true;
+                            }
+
+                        } else {
+                            this.showDelBtn = false;
+                        }
+                        this.selectedRows = selectedRows;
+                    },
+
+                    // Triggered when the preview all image button is clicked
+                    async handlePreviewAllImage() {
+                        try {
+                            this.loading = true;
+                            const data = JSON.stringify({
+                                entityName: this.entityName,
+                                entityId: this.entityId,
+                            });
+
+                            var pageInput = {
+                                pageType: "webresource",
+                                webresourceName: "mcs_/CommonCore/Html/PreviewAll.html", // Replace with the name of your web resource
+                                data: encodeURIComponent(data),
+                            };
+
+                            var navigationOptions = {
+                                target: 2, // Open in a dialog
+                                width: { value: 100, unit: "%" }, // Set the width of the dialog
+                                height: { value: 100, unit: "%" }, // Set the height of the dialog
+                                position: 1, // Center
+                            };
+
+                            var self = this;
+                            Xrm.Navigation.navigateTo(pageInput, navigationOptions).then(
+                                function success() {
+                                    console.log("Navigation to web resource succeeded.");
+                                    self.loading = false;
+                                },
+                                function error() {
+                                    console.log("Navigation to web resource failed.");
+                                    self.loading = false;
+                                }
+                            );
+                            this.fetchInitData();
+                        } catch (e) {
+                            Xrm.Navigation.openAlertDialog(e.message);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    // Triggered when the download all file button is clicked
+                    async handleDownloadAllFile() {
+                        try {
+                            this.loading = true;
+                            const data = JSON.stringify({
+                                entityName: this.entityName,
+                                entityId: this.entityId,
+                            });
+
+                            var pageInput = {
+                                pageType: "webresource",
+                                webresourceName: "mcs_/CommonCore/Html/DownloadAll.html", // Replace with the name of your web resource
+                                data: encodeURIComponent(data),
+                            };
+
+                            var navigationOptions = {
+                                target: 2, // Open in a dialog
+                                width: { value: 80, unit: "%" }, // Set the width of the dialog
+                                height: { value: 100, unit: "%" }, // Set the height of the dialog
+                                position: 1, // Center
+                                title: this.downloadAllFilesTitle,
+                            };
+
+                            var self = this;
+                            Xrm.Navigation.navigateTo(pageInput, navigationOptions).then(
+                                function success() {
+                                    console.log("Navigation to web resource succeeded.");
+                                    self.loading = false;
+                                },
+                                function error() {
+                                    console.log("Navigation to web resource failed.");
+                                    self.loading = false;
+                                }
+                            );
+                        } catch (e) {
+                            Xrm.Navigation.openAlertDialog(e.message);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    async fetchInitData() {
+                        let getUploadFilePageInitInfoRequest;
+                        if (this.fullFileTypes) {
+                            getUploadFilePageInitInfoRequest =
+                                new GetUploadFilePageInitInfoRequest2(
+                                    this.entityId,
+                                    this.entityName,
+                                    JSON.stringify(this.fullFileTypes)
+                                );
+                        } else {
+                            getUploadFilePageInitInfoRequest =
+                                new GetUploadFilePageInitInfoRequest(
+                                    this.entityId,
+                                    this.entityName
+                                );
+                        }
+
+                        const data = await fetchData(getUploadFilePageInitInfoRequest);
+                        const result = JSON.parse(data.Result);
+
+                        // Set permission
+                        this.canWrite = result.CanWrite;
+                        switch (this.entityName) {
+                            case "mcs_serviceorder":
+                                var mcs_orderstatus = formContext.data.entity.attributes
+                                    .get("mcs_orderstatus")
+                                    .getValue();
+                                if (mcs_orderstatus > 100 || mcs_orderstatus == 15) {
+                                    this.canWrite = false;
+                                }
+                                break;
+                            case "mcs_repairmaterialorder":
+                                var mcs_orderstatus = formContext.data.entity.attributes
+                                    .get("mcs_orderstatus")
+                                    .getValue();
+                                if (mcs_orderstatus > 10 && mcs_orderstatus != 40) {
+                                    this.canWrite = false;
+                                }
+                                break;
+                            case "mcs_warranty":
+                                var mcs_orderstatus = formContext.data.entity.attributes
+                                    .get("mcs_orderstatus")
+                                    .getValue();
+                                if (mcs_orderstatus > 10 && mcs_orderstatus != 40) {
+                                    this.canWrite = false;
+                                }
+                                break;
+                            case "mcs_consultationorder":
+                                var mcs_orderstatus = formContext.data.entity.attributes
+                                    .get("mcs_status")
+                                    .getValue();
+                                if (
+                                    mcs_orderstatus == 80 ||
+                                    mcs_orderstatus == 90 ||
+                                    mcs_orderstatus == 100
+                                ) {
+                                    this.canWrite = false;
+                                }
+                                break;
+                            case "mcs_partcontract":
+                                var mcs_contractstatus = formContext.data.entity.attributes
+                                    .get("mcs_contractstatus")
+                                    .getValue();
+                                if (
+                                    mcs_contractstatus == 4 ||
+                                    mcs_contractstatus == 5 ||
+                                    mcs_contractstatus == 10
+                                ) {
+                                    this.canDelBtn = false;
+                                }
+                                break;
+                            case "mcs_fullmaintenancequotation":
+                                var quotationstatus = formContext.data.entity.attributes
+                                    .get("mcs_quotationstatus")
+                                    .getValue();
+                                if (quotationstatus == 50) {
+                                    this.canWrite = false;
+                                }
+                                break;
+                        }
+
+                        // Set file types
+                        let localFileTypes = [];
+                        let defaultFileNamesByType = new Map();
+                        for (let i = 0; i < result.Types.length; i++) {
+                            const value = result.Types[i];
+                            try {
+                                const label = await commonService.getUserLanguageText(
+                                    `${this.entityName}_filetype_${result.Types[i]}`
+                                );
+                                const defaultFileName = await commonService.getLanguageText(
+                                    "1033",
+                                    `${this.entityName}_filetype_${result.Types[i]}`
+                                );
+                                if (this.fullFileTypes) {
+                                    if (
+                                        this.fullFileTypes.length > 0 &&
+                                        this.fullFileTypes.includes(value)
+                                    ) {
+                                        localFileTypes.push({
+                                            value,
+                                            label,
+                                        });
+                                        defaultFileNamesByType.set(value, defaultFileName);
+                                    }
+                                } else {
+                                    localFileTypes.push({
+                                        value,
+                                        label,
+                                    });
+                                    defaultFileNamesByType.set(value, defaultFileName);
+                                }
+                            } catch (e) {
+                                localFileTypes.push({
+                                    value,
+                                    label: " ",
+                                });
+                                defaultFileNamesByType.set(value, " ");
+                            }
+                            this.fileType = localFileTypes[0].value;
+                        }
+
+                        console.log(
+                            "收入确认申请 表名===",
+                            this.entityName,
+                            localFileTypes
+                        );
+                        // 收入确认申请 根据服务订单是否有值，动态改变附件上传的类型
+                        if (this.entityName == "mcs_invoiceapplicationorder") {
+                            localFileTypes =
+                                this.returnInvoiceApplicationOrderFileTypes(localFileTypes);
+                            console.log("进来了表名的判断", localFileTypes);
+                        }
+                        // 合同 + 合同变更 （为标准时，隐藏 草稿 类型）
+                        // 1，是否标准=是时，文件类型只显示签字版和其他
+                        // 2，是否标准=否时，显示三种类型
+                        if (
+                            this.entityName == "mcs_partcontract" ||
+                            this.entityName == "mcs_partcontractchange"
+                        ) {
+                            const mcs_standard = formContext.data.entity.attributes
+                                .get("mcs_isstandard")
+                                .getValue();
+                            if (!mcs_standard) {
+                                // 是：标准合同
+                                var newTypes = [];
+                                localFileTypes.map((item) => {
+                                    if (item.value != "002") {
+                                        // 剔除 草稿类型的附件
+                                        newTypes.push(item);
+                                    }
+                                });
+                                localFileTypes = newTypes;
+                            }
+                        }
+                        if (this.entityName == "mcs_opportunity") {
+                            var newTypes = [];
+
+                            //20260421 opportunity document global remove India document type
+                            const executeIndia = await executeIndiaCode(this.entityId, "mcs_opportunity");
+                            const excludeDocTypeGlobal = ["001", "003", "004", "005", "006", "007", "008", "009", "010"];
+                            if (executeIndia) {
+                                localFileTypes.map((item) => {
+                                    newTypes.push(item);
+                                });
+                            }
+                            else {
+                                localFileTypes.map((item) => {
+                                    //if (item.value != "001") {
+                                    //    //20250917版本 剔除 SAS协议
+                                    //    newTypes.push(item);
+                                    //}
+
+                                    //20260421 remove India document type and 版本 剔除 SAS协议
+                                    if (!excludeDocTypeGlobal.includes(item.value)) {
+                                        newTypes.push(item);
+                                    }
+                                });
+                            }
+                            localFileTypes = newTypes;
+                        }
+
+                        if (this.entityName == "account") {
+                            const executeIndia = await executeIndiaCode(this.entityId, "account");
+                            if (executeIndia) {
+                                localFileTypes;
+                                const tempItem = localFileTypes.find(x => x.value === "001");
+                                if (tempItem) {                                    
+                                    let xrmGlobalContext = commonService.getXrmGlobalContext();
+                                    if (xrmGlobalContext?.userSettings?.languageId === 2052) {
+                                        tempItem.label = "GST" + tempItem.label;
+                                    }
+                                    else {
+                                        tempItem.label = "GST Registration No.";
+                                    }
+                                }
+                            }
+                        }
+
+                        if (this.entityName == "mcs_agent") {
+                            const mcs_agenttype = formContext.data.entity.attributes
+                                .get("mcs_type")
+                                .getValue();
+                            const mcs_dealercategory = formContext.data.entity.attributes
+                                .get("mcs_dealercategory")
+                                .getValue();
+                            var newTypes = [];
+                            const dealer_types = ["001", "002", "003", "004", "005"];
+                            const network_types_1 = ["006", "007", "008", "009"];
+                            const network_types_2 = [
+                                "006",
+                                "007",
+                                "010",
+                                "011",
+                                "012",
+                                "013",
+                                "014",
+                                "015",
+                                "021",
+                            ];
+                            const network_types_3 = [
+                                "006",
+                                "007",
+                                "009",
+                                "016",
+                                "017",
+                                "018",
+                                "019",
+                                "020",
+                            ];
+
+                            if (mcs_agenttype != 2) {
+                                localFileTypes.map((item) => {
+                                    if (dealer_types.indexOf(item.value) != -1) {
+                                        newTypes.push(item);
+                                    }
+                                });
+                            } else if (mcs_agenttype == 2) {
+                                if (mcs_dealercategory != 50 && mcs_dealercategory != 60) {
+                                    localFileTypes.map((item) => {
+                                        if (network_types_1.indexOf(item.value) != -1) {
+                                            newTypes.push(item);
+                                        }
+                                    });
+                                }
+                                if (mcs_dealercategory == 50) {
+                                    localFileTypes.map((item) => {
+                                        if (network_types_2.indexOf(item.value) != -1) {
+                                            newTypes.push(item);
+                                        }
+                                    });
+                                } else if (mcs_dealercategory == 60) {
+                                    localFileTypes.map((item) => {
+                                        if (network_types_3.indexOf(item.value) != -1) {
+                                            newTypes.push(item);
+                                        }
+                                    });
+                                }
+                            }
+
+                            localFileTypes = newTypes;
+                            //if (mcs_agenttype == "1") {
+                            //    newTypes = dealer_types;
+                            //} else if (mcs_agenttype == "2") {
+                            //    if (mcs_dealercategory != "50" && mcs_dealercategory != "60") {
+                            //        newTypes = network_types_1;
+                            //    } else if (mcs_dealercategory == "50") {
+                            //        newTypes = network_types_2;
+                            //    } else if (mcs_dealercategory == "60") {
+                            //        newTypes = network_types_3;
+                            //    }
+                            //}
+                            //if (allowedTypes.length > 0) {
+                            //    localFileTypes = localFileTypes.filter(item =>
+                            //        newTypes.includes(item.value)
+                            //    );
+                            //} else {
+                            //    localFileTypes = []; // No matching types
+                            //}
+                            //localFileTypes = newTypes;
+                        }
+
+                        this.fileTypes = localFileTypes;
+                        this.defaultFileNames = defaultFileNamesByType;
+
+                        // Set table data
+                        this.tableData = await this.convertTableDataToLocal(
+                            result.UploadFiles.Results
+                        );
+
+                        // Set pagination
+                        this.currentPage = result.UploadFiles.CurrentPage;
+                        this.totalCount = result.UploadFiles.TotalCount;
+                    },
+
+                    // 收入确认申请 根据服务订单/结算订单是否有值，动态改变附件上传的类型
+                    // 有值：服务工单，工作小时照片，整机照片，发票
+                    // 无值：客户签收证明，合同/PO，发票，其它文件
+                    returnInvoiceApplicationOrderFileTypes(types) {
+                        let array = [];
+                        let list1 = ["004", "005", "006", "003"],
+                            list2 = ["001", "002", "003", "007"],
+                            list3 = ["004", "005", "006", "008", "003"];;
+                        let serviceOrder = formContext.data.entity.attributes
+                            .get("mcs_serviceorder")
+                            .getValue();
+                        let mcs_servicesettlementid = formContext.data.entity.attributes
+                            .get("mcs_servicesettlementid")
+                            .getValue();
+                        console.log("方法里 serviceOrder", serviceOrder);
+                        if (serviceOrder && serviceOrder.length > 0) {
+                            types.map((item) => {
+                                if (list1.indexOf(item.value) != -1) {
+                                    array.push(item);
+                                }
+                            });
+                            // 第一个和最后一个 互换位置
+                            let firstItem = array[0];
+                            array = array.slice(1, 4);
+                            array.push(firstItem);
+                        } else if (mcs_servicesettlementid && mcs_servicesettlementid.length > 0) {
+                            types.map((item) => {
+                                if (list3.indexOf(item.value) != -1) {
+                                    array.push(item);
+                                }
+                            });
+                            // 第一个和最后一个 互换位置
+                            let firstItem = array[0];
+                            array = array.slice(1, 5);
+                            array.push(firstItem);
+                        } else {
+                            types.map((item) => {
+                                if (list2.indexOf(item.value) != -1) {
+                                    array.push(item);
+                                }
+                            });
+                        }
+                        console.log("方法里打印返回的数组", array);
+                        this.fileType = array[0].value;
+                        return array;
+                    },
+
+                    // Deprecated: Because we can't get upload progress from fetch api
+                    async uploadFile2(file, fileUrl) {
+                        let start = 0;
+                        let size = 1024 * 1024 * 4;
+                        while (true) {
+                            let isBreak = false;
+                            let end = start + size;
+                            if (start + size >= file.size) {
+                                end = file.size;
+                                isBreak = true;
+                            }
+
+                            let subBlob = file.slice(start, end);
+                            let strUtcTime = new Date().toUTCString();
+
+                            let response = await fetch(fileUrl, {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/octet-stream",
+                                    "x-ms-version": strUtcTime,
+                                    "x-ms-version": "2019-12-12",
+                                },
+                                body: subBlob,
+                            });
+                            if (!response.ok) {
+                                throw new Error(`Error:${await response.text()}`);
+                            }
+
+                            start = start + size;
+                            if (isBreak) {
+                                break;
+                            }
+                        }
+                    },
+
+                    async uploadFile(file, fileUrl) {
+                        let start = 0;
+                        let size = 1024 * 1024 * 4;
+                        let totalSize = file.size;
+                        let preLoadedSize = 0;
+                        let curLoadedSize = 0;
+                        let vmInstance = this;
+
+                        return new Promise((resolve, reject) => {
+                            function sendChunk() {
+                                let end = Math.min(start + size, totalSize);
+                                let chunk = file.slice(start, end);
+                                let xhr = new XMLHttpRequest();
+                                let strUtcTime = new Date().toUTCString();
+                                preLoadedSize = curLoadedSize;
+
+                                // Track progress
+                                xhr.upload.onprogress = function (event) {
+                                    if (event.lengthComputable) {
+                                        curLoadedSize = preLoadedSize + event.loaded;
+                                        const percentComplete = (curLoadedSize / totalSize) * 100;
+                                        //const percentComplete = (event.loaded / event.total) * 100;
+                                        vmInstance.uploadPercentage = Math.floor(percentComplete);
+                                    }
+                                };
+
+                                xhr.onreadystatechange = function () {
+                                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                                        if (xhr.status >= 200 && xhr.status < 300) {
+                                            start = end;
+
+                                            if (start < totalSize) {
+                                                sendChunk();
+                                            } else {
+                                                console.log("File upload completed!");
+                                                resolve("File upload completed!");
+                                            }
+                                        } else {
+                                            console.error(`Error: ${xhr.status}`);
+                                            reject(`Error: ${xhr.status} - ${xhr.statusText}`);
+                                        }
+                                    }
+                                };
+
+                                xhr.open("PUT", fileUrl, true);
+                                xhr.setRequestHeader(
+                                    "Content-Type",
+                                    "application/octet-stream"
+                                );
+                                xhr.setRequestHeader("x-ms-version", "2019-12-12");
+                                xhr.setRequestHeader("x-ms-date", strUtcTime);
+                                xhr.send(chunk);
+                            }
+
+                            sendChunk();
+                        });
+                    },
+                    //用户行为分析埋点
+                    async userBehaviorBeacon(
+                        ModuleName,
+                        MenuName,
+                        PageName,
+                        BehaviourName,
+                        behaviorStart
+                    ) {
+                        var behaviorEnd = new Date().getTime();
+                        // 自定义页面需要多加一层parent判断和执行
+                        if (
+                            window &&
+                            window.parent &&
+                            window.parent.parent &&
+                            window.parent.parent.userBehaviorReport
+                        ) {
+                            window.parent.parent.userBehaviorReport({
+                                module_name: ModuleName, //模块名称
+                                menu_name: MenuName, //菜单名称
+                                page_name: PageName, //页面名称
+                                behaviour_name: BehaviourName, //操作/按钮名称
+                                behaviour_start_time: behaviorStart, //起始时间
+                                behaviour_end_time: behaviorEnd, //结束时间
+                            });
+                        }
+                    },
+
+                    async queryUploadFile(page) {
+                        let queryUploadFileRequest;
+                        if (this.fullFileTypes) {
+                            queryUploadFileRequest = new QueryUploadFileRequest2(
+                                this.entityId,
+                                this.entityName,
+                                JSON.stringify(this.fullFileTypes),
+                                page
+                            );
+                        } else {
+                            queryUploadFileRequest = new QueryUploadFileRequest(
+                                this.entityId,
+                                this.entityName,
+                                page
+                            );
+                        }
+
+                        const data = await fetchData(queryUploadFileRequest);
+                        const result = JSON.parse(data.Result);
+                        this.totalCount = result.TotalCount;
+                        this.tableData = await this.convertTableDataToLocal(
+                            result.Results
+                        );
+                    },
+
+                    async queryUploadImage(page) {
+                        const queryUploadImageRequest = new QueryUploadImageRequest(
+                            this.entityId,
+                            this.entityName,
+                            page
+                        );
+                        const data = await fetchData(queryUploadImageRequest);
+                        const result = JSON.parse(data.Result);
+                        return result;
+                    },
+
+                    async deleteTempFile(fileId) {
+                        const deleteUploadFileTempRequest =
+                            new DeleteUploadFileTempRequest(
+                                fileId,
+                                this.entityId,
+                                this.entityName
+                            );
+                        const data = await fetchData(deleteUploadFileTempRequest);
+                    },
+
+                    // Convert the table data to localized data for display according to the user's setting
+                    async convertTableDataToLocal(rawData) {
+                        let localTableData = [];
+                        const userSettings = Xrm.Utility.getGlobalContext().userSettings;
+                        const localTimeDiff = userSettings.getTimeZoneOffsetMinutes();
+                        const dateFormat = `${userSettings.dateFormattingInfo.ShortDatePattern
+                            } ${userSettings.dateFormattingInfo.ShortTimePattern.replace(
+                                " tt",
+                                ""
+                            )}`;
+                        for (let i = 0; i < rawData.length; i++) {
+                            const row = rawData[i];
+                            let localType = " ";
+                            try {
+                                localType = await commonService.getUserLanguageText(
+                                    `${this.entityName}_filetype_${row.Type}`
+                                );
+                            } catch (e) {
+                                localType = " ";
+                            }
+
+                            const localTime = await commonService.getUserLocalTime(
+                                new Date(row.CreateTime)
+                            );
+                            const localTimeStr = localTime.format(dateFormat);
+
+                            if (
+                                ["mcs_spmorder", "mcs_invoiceapplicationorder"].includes(
+                                    this.entityName
+                                )
+                            ) {
+                                // 剔除099的虚假文件类型
+                                if (row.Type != "099") {
+                                    localTableData.push({
+                                        ID: row.ID,
+                                        Name: row.Name,
+                                        Type: localType,
+                                        TypeValue: row.Type,
+                                        CreateTime: localTimeStr,
+                                        UserName: row.UserName,
+                                        FileName: getFileName(row.Name),
+                                        FileExt: getFileExt(row.Name),
+                                    });
+                                }
+                            } else {
+                                localTableData.push({
+                                    ID: row.ID,
+                                    Name: row.Name,
+                                    Type: localType,
+                                    TypeValue: row.Type,
+                                    CreateTime: localTimeStr,
+                                    UserName: row.UserName,
+                                    FileName: getFileName(row.Name),
+                                    FileExt: getFileExt(row.Name),
+                                });
+                            }
+                        }
+                        return localTableData;
+                    },
+
+                    getPreviewUrl(fileName) {
+                        if (!fileName) return;
+                        // List of image MIME types
+                        const imageMimeTypes = [
+                            "jpg",
+                            "jpeg",
+                            "png",
+                            "gif",
+                            "bmp",
+                            "webp",
+                        ];
+                        const docMimeTypes = ["doc", "docx"];
+                        const pdfMimeTypes = ["pdf"];
+                        const fileType = fileName.split(".").pop().toLowerCase();
+
+                        // Check if the file's MIME type is in the list
+                        if (imageMimeTypes.includes(fileType)) return "Preview.html";
+                        else if (docMimeTypes.includes(fileType))
+                            return "PreviewDoc.html";
+                        else if (pdfMimeTypes.includes(fileType))
+                            return "PreviewPdf.html";
+                        else return "";
+                    },
+                    checkFileType(fileType) {
+                        if (this.entityName == "account" && fileType == "000") {
+                            return false;
+                        }
+                        return true;
+                    },
+                },
+            };
+            const vm = createApp(app);
+            for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+                vm.component(key, component);
+            }
+
+            vm.use(ElementPlus).mount("#App");
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,149 @@
+=== D365 实体管理工具 ===
+目标环境: https://pre.crm5.dynamics.com
+用法:
+  dotnet run create <实体定义文件.json>   - 从JSON文件创建实体和字段
+  dotnet run check <解决方案名>           - 检查解决方案中的实体
+  dotnet run add <实体名> <解决方案名>    - 添加实体到解决方案
+  dotnet run remove <实体名> <解决方案名> - 从解决方案移除实体
+  dotnet run publish [实体名]             - 发布指定实体（禁止无参数全局发布）
+  dotnet run delete-field <实体名> <字段名> - 删除字段
+  dotnet run list-fields <实体名>         - 列出实体所有字段
+  dotnet run update-entity-displayname <实体名> <中文> [英文] - 更新实体显示名称（多语言）
+  dotnet run set-entity-label <实体名> <中文> <英文> - 设置实体显示名称（Web API PUT，中英双语）
+  dotnet run update-field-displayname <实体名> <字段名> <中文> [英文] - 更新字段显示名称（多语言）
+  dotnet run set-field-label <实体名> <字段名> <中文> <英文> - 设置字段显示名称（Web API PUT，中英双语）
+  dotnet run update-field-required <实体名> <字段名> <true|false> - 更新字段必填性
+  dotnet run update-field-range <实体名> <字段名> <最小值> <最大值> - 更新 Money 字段取值范围
+  dotnet run update-field-default <实体名> <字段名> <默认值> - 更新字段默认值（Picklist/Decimal）
+  dotnet run update-field-description <实体名> <字段名> <描述> - 更新字段描述
+  dotnet run get-entity-displayname <实体名> - 查询实体显示名称（诊断）
+  dotnet run export <解决方案名> <路径>    - 导出解决方案为 ZIP
+  dotnet run export-translations <解决方案唯一名> <输出ZIP路径> - 导出 translations ZIP（D365 标准翻译导出）
+  dotnet run import-translations <translations ZIP 路径> - 导入 translations ZIP（D365 标准翻译导入）
+  dotnet run create-credit-items          - 创建评分项目测试数据(22条)
+  dotnet run query-credit-item-descs      - 查询评分项目说明(mcs_itemdesc)
+  dotnet run create-qualitative-enums     - 创建定性枚举值测试数据(30条)
+  dotnet run fix-qualitative-enums-mapping - 整理国别/行业风险枚举值为三一标准L/M/H/O
+  dotnet run fix-percentage-scoring-cards - 修复百分比/比率类评分卡区间量纲（NetProfit/DebtRatio/LatePaymentIndex）
+  dotnet run cleanup-orphan-sectors-scoring-cards - 删除 Sectors 评分卡中无法匹配枚举值的孤儿记录
+  dotnet run dedup-credititem-values      - 清理 mcs_credititem_value 重复记录（保留最早，迁移引用）
+  dotnet run update-credit-record <scoreid> [status] - 更新信用评估记录状态(默认→12)
+  dotnet run simulate-bpp-callback <scoreid> [Approved|Rejected|Withdrawn|Abandoned] - 模拟BPP回调触发审批逻辑
+  dotnet run simulate-fca-bpp-callback <申请单编号|ID> [Approved|Rejected|Withdrawn|Abandoned] - 模拟BPP回调触发厂端授信额度调整申请审批逻辑
+  dotnet run test-fsm-bpp               - 融资管理BPP回调Plugin全场景验证（立项通过/方案通过/方案驳回/撤回）
+  dotnet run test-tradestpayterm          - 测试成交条件样板库 Plugin（自动编号/校验/状态流转）
+  dotnet run query-plugin-steps <类名>    - 查询已注册的 Plugin Steps
+  dotnet run query-plugin-namespace <前缀> - 查询命名空间下所有 Plugin Steps
+  dotnet run register-plugin-image <StepId> <Image名称> <Image别名> <字段列表> - 为Plugin Step注册PreEntityImage
+  dotnet run fix-dev-scoring-cards        - 重建DEV评分卡配置（补全mcs_itemid/mcs_datatype/mcs_cardname）
+  dotnet run fix-scoring-card-typeids     - 批量修复评分卡配置(mcs_typeid)根据mcs_credititem.mcs_group
+  dotnet run remove-duplicate-scoring-cards - 删除DEV1评分卡配置重复记录
+  dotnet run add-overdue-model-sa         - 为SA老客户评分卡补入OverdueModel(预计损失率)30分配置
+  dotnet run export-webresource <名称> <路径> - 导出 WebResource 内容
+  dotnet run update-webresource <名称> <文件路径> - 更新 WebResource 内容
+  dotnet run list-webresources [前缀]    - 列出 WebResource（默认前缀 ms_languagefile）
+  dotnet run list-form-webresources <实体> - 列出实体主窗体引用的 JS WebResource
+  dotnet run deploy-webresource <名称> <文件路径> <类型> [显示名] - 创建或更新 WebResource 并发布
+    类型: 1=HTML, 2=CSS, 3=JScript, 4=XML, 5=PNG, 6=JPG, 7=GIF, 8=XAP, 9=XSL, 10=ICO, 11=SVG, 12=RESX
+  dotnet run add-webresource-to-solution <WebResource名称> <解决方案唯一名> - 将 WebResource 加入解决方案
+  dotnet run test-common                  - 隔离测试 D365ToolCommon 共享库（自动创建/删除测试实体）
+  dotnet run cleanup-test-common          - 仅清理 D365ToolCommon 测试实体
+  dotnet run clear-account-credit-fields <客户名称> - 清空客户及客户主数据上的8个信用字段（用于测试）
+  dotnet run check-fix-masterdata <客户名称> - 检查并修复客户主数据上的基础字段
+  dotnet run set-masterdata-isdd <客户名称> <true|false> - 设置客户主数据重点尽调标志
+  dotnet run set-masterdata-creditvalid <客户名称> <true|false> - 设置客户主数据信用评估有效状态
+  dotnet run show-profile <客户名称> - 查询客户画像关键属性
+  dotnet run sync-profile <源客户名称> <目标客户名称> - 同步客户画像关键属性（用于测试）
+  dotnet run simulate-approval <客户名称/编码> <评估编码> - 模拟审批通过，将信用分/等级回写客户主数据
+  dotnet run set-countrycode <客户名称/编码> <国家代码> - 设置客户主数据国家代码（用于测试）
+  dotnet run set-cofaceid <评估编码> <cofaceId> - 设置信用评估记录的科法斯客户代码
+  dotnet run export-coface-data <输出目录>  - 导出 Coface NACE映射和汇率配置数据
+  dotnet run import-coface-data <数据目录>  - 导入 Coface 基础数据到当前环境
+  dotnet run diagnose-credit-record <评估编码> - 诊断 credit record 数据集成问题
+  dotnet run list-entities <前缀>        - 列出指定前缀的实体
+  dotnet run create-test-salesorder <客户名称> - 为客户创建一条测试销售订单（用于老客户判定）
+  dotnet run create-credit-testdata <客户名称> - 为客户创建信用评估测试数据（销售订单 + 逾期在外货款）
+  dotnet run create-credit-record <客户名称> - 为客户创建一条新的信用评估记录
+  dotnet run list-app-actions [前缀]       - 列出 App Action (Modern Command Bar 按钮)
+  dotnet run list-security-roles [关键字]  - 列出安全角色
+  dotnet run list-custom-apis [关键字]     - 列出 Custom API（含参数与响应属性）
+  dotnet run check-solution-customapi <解决方案名> - 检查解决方案包含的 Custom API
+  dotnet run deploy-tradestpayterm-api <DLL路径> - 部署成交条件样板库查询 Custom API
+  dotnet run delete-tradestpayterm-api          - 删除成交条件样板库查询 Custom API
+  dotnet run deploy-fcaquota-api <DLL路径> [Plugin类名] - 部署厂端授信余额调整 Custom API
+  dotnet run delete-fcaquota-api                - 删除厂端授信余额调整 Custom API
+  dotnet run test-fcaquota-api <客户编码> <金额> <环节> <动作> [合同编码] [订单编码] - 测试厂端授信余额调整 Custom API
+  dotnet run test-tradestpayterm-api <buId> <subId> <countryCode> <prdGroupId> <buyerCode> - 测试成交条件样板库查询 Custom API
+  dotnet run query-tradestpayterm-samples [条数] - 查询成交条件样板库样本数据
+  dotnet run create-tradestpayterm-testdata    - 创建一条生效的成交条件样板库测试数据
+  dotnet run rebuild-tradestpayterm-grade-fields [环境] - 重建成交条件样板库客户分类/客户等级为多选选项集
+  dotnet run recreate-fca-decimal-fields  - 将 mcs_fca_proc 的 mcs_modelgrant/mcs_initigrant 从 Money 重建为 Decimal
+  dotnet run query-optionset <实体名> <字段名>       - 查询选项集字段的标签
+  dotnet run list-transaction-currencies   - 列出 D365 标准交易货币及汇率
+  dotnet run test-coface-exchange-rate [币种列表] - 测试 Coface 汇率读取与转换（默认 USD,EUR,CNY,JPY,VND,XXX）
+  dotnet run test-upload-api <文件路径> <accountId> [mcp|mcs|all] - 测试上传 Custom API
+  dotnet run fix-form-lookup <实体名>    - 修复主窗体 Lookup 控件 classid
+  dotnet run query-contracts [accountId]  - 查询 mcs_contract 合同数据分布（只读诊断）
+  dotnet run query-contract-products <accountId> - 查询客户合同明细产品字段（只读诊断）
+  dotnet run query-optionset-labels <实体名> <字段名> [langId] - 查询选项集本地化标签
+  dotnet run update-optionset-labels <实体名> <字段名> <labels.json> [langId] - 更新选项集标签
+  dotnet run create-credit-profile-fields  - 创建客户画像所需缺失字段（mcs_blacklist/mcs_creditgrant）
+  dotnet run list-number-configs [实体名] - 查询系统自动编号配置（只读）
+  dotnet run create-number-config <实体名> <属性名> <前缀模板> <数字模板> <序列号长度> [序号开始] [使用序列号服务true|false] - 新增自动编号配置
+  dotnet run delete-number-config <实体名> <属性名> - 删除指定实体的自动编号配置
+  dotnet run test-number-config <实体名> [属性名] - 创建并删除一条测试记录验证编号生成
+  dotnet run register-number-config-step <实体名> - 为实体注册通用自动编号 Plugin Step
+  dotnet run check-release <清单.json> [--with-fields] - 通用发版 Solution 归属自检（只读，--with-fields 逐字段核对）
+  dotnet run check-solution-coverage <源Solution唯一名> [实体包Solution唯一名] - 以源 Solution 为真相源，核对组件是否已分布到发版包（只读）
+  dotnet run list-solution-components <Solution唯一名> - 列出 Solution 全部组件（类型+名称+ObjectId，只读）
+  dotnet run query-sitemap [sitemapId|名称关键字] - 查询 SiteMap 记录、App↔SiteMap 对应关系及解决方案分层（只读；单个时导出 XML 到 /tmp）
+  dotnet run query-app-components <App名称关键字> [实体名前缀] - 列出 App 包含的组件（只读）
+  dotnet run list-workflows [关键字] - 列出工作流/BPF 流程定义（只读）
+  dotnet run add-solution-component <componentType> <objectId> <Solution唯一名> - 通用加组件（写操作，需用户明确授权）
+  dotnet run check-solution-deps <Solution唯一名1> [Solution唯一名2] ... - 模拟导出时的缺少必需组件依赖检查（只读）
+
+认证方式: Device Code Flow（第一次需要浏览器登录）
+✅ 使用缓存的 token 登录
+连接成功! 用户: 
+
+实体 mcs_credititem_value 的字段列表:
+
+  - createdby                      Lookup          Created By [1033:Created By, 2052:创建者, 1057:Dibuat Oleh, 3082:Autor, 1025:منشأ بواسطة, 1046:Criador, 1040:Autore, 1066:Người tạo, 1036:Créé par, 1049:Создано, 1086:Dicipta Oleh, 1031:Erstellt von] Required=None (Id: ae1acc75-48cc-4497-9423-0a349d182032)
+  - createdbyname                  String           [] Required=None (Id: 49ae67d9-036b-4bab-995a-d8d8a1c3a9f7)
+  - createdbyyominame              String           [] Required=SystemRequired (Id: bc5c7ea5-0c63-4704-b4d7-b744c4d3a009)
+  - createdon                      DateTime        Created On [1033:Created On, 2052:创建时间, 1057:Dibuat Pada, 3082:Fecha de creación, 1025:تاريخ الإنشاء, 1046:Hora de criação, 1040:Data creazione, 1066:Ngày tạo, 1036:Créé le, 1049:Дата создания, 1086:Dicipta Pada, 1031:Erstellt am] Required=None (Id: 97b735c4-2610-4148-86d4-d60dec5647ff)
+  - createdonbehalfby              Lookup          Created By (Delegate) [1033:Created By (Delegate), 2052:创建者(代理), 1057:Dibuat Oleh (Delegasi), 3082:Autor (delegado), 1025:قام بإنشائه (المفوّض), 1046:Criador (Agente), 1040:Autore (delegato), 1066:Người tạo (Đại diện), 1036:Créé par (délégué), 1049:Кем создано (делегат), 1086:Dicipta Oleh (Wakil), 1031:Erstellt von (Stellvertreter)] Required=None (Id: 5d992b06-8475-42bf-b7e7-fb85ee5b6700)
+  - createdonbehalfbyname          String           [] Required=None (Id: a7d6e8bf-4f88-4487-a4e3-1c985d22c3df)
+  - createdonbehalfbyyominame      String           [] Required=SystemRequired (Id: 7c478e85-e7be-4fd0-afd8-51dd650bde90)
+  - importsequencenumber           Integer         Import Sequence Number [1033:Import Sequence Number, 2052:导入序列号, 1057:Nomor Urut Impor, 3082:Número de secuencia de importación, 1025:الرقم التسلسلي للاستيراد, 1046:Importar número de série, 1040:Numero sequenza importazione, 1066:Số Thứ tự Nhập, 1036:Numéro séquentiel d’importation, 1049:Порядковый номер импорта, 1086:Import Nombor Jujukan, 1031:Importsequenznummer] Required=None (Id: c6e788e2-35a0-4581-bc9f-72356edcb74a)
+  - mcs_cofacevalue                String          Coface Raw Value [1033:Coface Raw Value, 2052:Coface 原始值] Required=None (Id: 0e29f2bb-0775-f111-ab0e-7ced8db4d37f)
+  - mcs_credititem_valueid         Uniqueidentifier Scoring Item Code [1033:Scoring Item Code, 2052:评分项目编码, 1057:定性评分项目枚举值, 1054:定性评分项目枚举值, 3082:定性评分项目枚举值, 1025:定性评分项目枚举值, 1046:定性评分项目枚举值, 1040:定性评分项目枚举值, 1066:定性评分项目枚举值, 1036:定性评分项目枚举值, 1049:定性评分项目枚举值, 1086:定性评分项目枚举值, 1031:定性评分项目枚举值] Required=SystemRequired (Id: 23d33164-1e59-44af-81d6-3f8a093009af)
+  - mcs_credititemno               Lookup          Scoring Item Code [1033:Scoring Item Code, 2052:评分项目编码] Required=None (Id: 2f47563c-8a70-40b1-a686-2d134a4f48ab)
+  - mcs_credititemnoname           String           [] Required=None (Id: 381225f9-3ec9-495a-9973-3dd68b7eb8f5)
+  - mcs_listname                   String          Option Name [1033:Option Name, 2052:选择项名称, 1057:mcs_listname, 1054:mcs_listname, 3082:mcs_listname, 1025:mcs_listname, 1046:mcs_listname, 1040:mcs_listname, 1066:mcs_listname, 1036:mcs_listname, 1049:mcs_listname, 1086:mcs_listname, 1031:mcs_listname] Required=None (Id: e0688abb-3470-4177-a29c-41f947a5a307)
+  - mcs_listvalue                  String          Option Code [1033:Option Code, 2052:选择项编码] Required=None (Id: a363b898-275f-f111-a826-000d3aa33d1b)
+  - modifiedby                     Lookup          Modified By [1033:Modified By, 2052:修改者, 1057:Dimodifikasi Oleh, 3082:Modificado por, 1025:تعديل بواسطة, 1046:Modificado Por, 1040:Autore modifica, 1066:Người Sửa đổi, 1036:Modifié par, 1049:Изменено, 1086:Diubah Suai Oleh, 1031:Geändert von] Required=None (Id: 058399f5-64d5-44a4-8657-d23a929faee9)
+  - modifiedbyname                 String           [] Required=None (Id: 0405e89c-5dcd-4703-99d4-d69ddbcb771a)
+  - modifiedbyyominame             String           [] Required=SystemRequired (Id: 7adcc463-7cd5-480b-9d1d-4b2034d7754c)
+  - modifiedon                     DateTime        Modified On [1033:Modified On, 2052:修改时间, 1057:Dimodifikasi Pada, 3082:Fecha de modificación, 1025:تاريخ التعديل, 1046:Modificado em, 1040:Data modifica, 1066:Sửa đổi Vào, 1036:Modifié le, 1049:Дата изменения, 1086:Diubah Suai Pada, 1031:Geändert am] Required=None (Id: bffb9a23-c5cb-4476-be47-1f580a0f264d)
+  - modifiedonbehalfby             Lookup          Modified By (Delegate) [1033:Modified By (Delegate), 2052:修改者(代理), 1057:Dimodifikasi Oleh (Delegasi), 3082:Modificado por (delegado), 1025:قام بالتعديل (المفوّض), 1046:Modificado por (Delegado), 1040:Autore modifica (delegato), 1066:Người Sửa đổi (Đại diện), 1036:Modifié par (délégué), 1049:Кем изменено (делегат), 1086:Diubah Suai Oleh (Wakil), 1031:Geändert von (Stellvertreter)] Required=None (Id: af0bb758-901e-4587-913d-be80ac229781)
+  - modifiedonbehalfbyname         String           [] Required=None (Id: e6e52e89-c627-4be3-b8d5-64f1e1bf842c)
+  - modifiedonbehalfbyyominame     String           [] Required=SystemRequired (Id: 4b047c58-840f-46be-a20e-9c6975c9fceb)
+  - overriddencreatedon            DateTime        Record Created On [1033:Record Created On, 2052:创建记录的时间, 1057:Rekaman Dibuat Pada, 3082:Fecha de creación del registro, 1025:تم إنشاء السجل في, 1046:Hora de criação do registro, 1040:Data creazione record, 1066:Ngày tạo Bản ghi, 1036:Enregistrement créé le, 1049:Дата создания записи, 1086:Rekod Dicipta Pada, 1031:Datensatz erstellt am] Required=None (Id: 18a3386e-0169-4ece-b8f9-00b19b8eecae)
+  - ownerid                        Owner           Owner [1033:Owner, 2052:负责人, 1057:Pemilik, 3082:Propietario, 1025:المالك, 1046:Responsável, 1040:Proprietario, 1066:Chủ sở hữu, 1036:Propriétaire, 1049:Ответственный, 1086:Pemilik, 1031:Besitzer] Required=SystemRequired (Id: f06d591f-25ec-47cb-8305-bfa34dee4ead)
+  - owneridname                    String           [] Required=SystemRequired (Id: a4c55b78-40a9-4f40-8330-c08b0e04cf9f)
+  - owneridtype                    EntityName       [] Required=SystemRequired (Id: cd4f637c-944b-4ea4-b9d1-a5efeae84ee2)
+  - owneridyominame                String           [] Required=SystemRequired (Id: 7b1c4ae5-8331-44a8-b72c-ebe5483db52e)
+  - owningbusinessunit             Lookup          Owning Business Unit [1033:Owning Business Unit, 2052:负责的业务部门, 1057:Kepemilikan Unit Bisnis, 3082:Unidad de negocio propietaria, 1025:وحدة الأعمال المالكة, 1046:Departamento responsável pelo negócio, 1040:Business Unit proprietaria, 1066:Đơn vị Kinh doanh Sở hữu, 1036:Division propriétaire, 1049:Ответственная бизнес-единица, 1086:Unit Perniagaan Pemilikan, 1031:Besitzer (Unternehmenseinheit)] Required=None (Id: 011d3376-f54f-46d4-abed-5ff9b2049bd8)
+  - owningbusinessunitname         String           [] Required=SystemRequired (Id: 6129a6e1-ee26-4464-a5a0-49a42ef18362)
+  - owningteam                     Lookup          Owning Team [1033:Owning Team, 2052:负责团队, 1057:Kepemilikan Tim, 3082:Equipo propietario, 1025:الفريق المالك, 1046:Responsável pela equipe, 1040:Team proprietario, 1066:Nhóm Sở hữu, 1036:Équipe propriétaire, 1049:Ответственная рабочая группа, 1086:Pasukan Pemilikan, 1031:Besitzer (Team)] Required=None (Id: 3ed4d5e0-ba66-41d4-beec-7190b42ebdce)
+  - owninguser                     Lookup          Owning User [1033:Owning User, 2052:负责人用户, 1057:Kepemilikan Pengguna, 3082:Usuario propietario, 1025:المستخدم المالك, 1046:Usuário responsável, 1040:Utente proprietario, 1066:Người dùng Sở hữu, 1036:Utilisateur propriétaire, 1049:Ответственный пользователь, 1086:Pengguna Pemilikan, 1031:Besitzer (Benutzer)] Required=None (Id: def0d8a8-7177-45de-8753-db77b677dc77)
+  - statecode                      State           Status [1033:Status, 2052:状态, 3082:Estado, 1025:الحالة, 1046:Status do compartilhamento de desempenho do pedido de peças, 1040:Stato, 1066:Trạng thái, 1036:Statut, 1049:Статус] Required=SystemRequired (Id: 543fb750-09ed-4bc8-85b6-189591f62470)
+  - statecodename                  Virtual          [] Required=None (Id: 62598f1f-a4d4-453e-9557-eca88f86f020)
+  - statuscode                     Status          Status Reason [1033:Status Reason, 2052:状态描述, 1057:Alasan Status, 3082:Razón para el estado, 1025:سبب الحالة, 1046:Motivo pelo status, 1040:Motivo stato, 1066:Lý do dẫn đến Trạng thái, 1036:Raison du statut, 1049:Причина состояния, 1086:Sebab Status, 1031:Statusgrund] Required=None (Id: 7263b735-9247-43f4-a4dd-e3e1d5bbce4c)
+  - statuscodename                 Virtual          [] Required=None (Id: e3a08ebf-d5c5-4b2e-8bbc-bcd1b96d07e4)
+  - timezoneruleversionnumber      Integer         Time Zone Rule Version Number [1033:Time Zone Rule Version Number, 2052:时区规则版本号, 1057:Nomor Versi Aturan Zona Waktu, 3082:Número de versión de regla de zona horaria, 1025:رقم إصدار قاعدة المنطقة الزمنية‬, 1046:Número da versão das regras do fuso horário, 1040:Numero di versione regola fuso orario, 1066:Số phiên bản của quy tắc múi giờ, 1036:Numéro de version de la règle du fuseau horaire, 1049:Номер версии правила часового пояса, 1086:Nombor Versi Peraturan Zon Waktu, 1031:Versionsnummer der Zeitzonenregel] Required=None (Id: 6c29e400-2c7e-4aaf-92b1-8ab88cea2ed6)
+  - utcconversiontimezonecode      Integer         UTC Conversion Time Zone Code [1033:UTC Conversion Time Zone Code, 2052:UTC 转换时区代码, 1057:Kode Zona Waktu Konversi UTC, 3082:Código de zona horaria de conversión UTC, 1025:رمز المنطقة الزمنية للتحويل بتنسيق التوقيت العالمي المتفق عليه (UTC), 1046:Código de fuso horário para conversão UTC, 1040:Codice fuso orario conversione UTC, 1066:Mã múi giờ chuyển đổi UTC, 1036:Code de fuseau horaire pour la conversion UTC, 1049:Код часового пояса для преобразования в UTC, 1086:Kod Zon Waktu Penukaran UTC, 1031:Zeitzonencode für UTC-Konvertierung] Required=None (Id: e5641ef7-d589-40b6-9447-f9638554941b)
+  - versionnumber                  BigInt          Version Number [1033:Version Number, 2052:版本号, 1057:Nomor Versi, 1054:หมายเลขรุ่น, 3082:Número de versión, 1025:رقم الإصدار, 1046:Número da versão, 1040:Numero di versione, 1066:Số phiên bản, 1036:Numéro de version, 1049:Номер версии, 1086:Nombor Versi, 1031:Versionsnummer] Required=None (Id: 72244223-3de1-48c9-94da-dea9676c8089)
+
+总计: 37 个字段

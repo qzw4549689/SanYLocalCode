@@ -1,0 +1,32 @@
+<appaction uniquename="mcs_credit_scoringcard_clone">
+  <buttonlabeltext default="克隆新建">
+    <label description="克隆新建" languagecode="1033" />
+  </buttonlabeltext>
+  <buttontooltiptitle default="克隆当前评分卡分档记录，保留评分项目信息，可修改分档区间和赋分">
+    <label description="克隆当前评分卡分档记录，保留评分项目信息，可修改分档区间和赋分" languagecode="1033" />
+  </buttontooltiptitle>
+  <context>1</context>
+  <contextentity>
+    <logicalname>mcs_credit_scoringcard</logicalname>
+  </contextentity>
+  <contextvalue>mcs_credit_scoringcard</contextvalue>
+  <fonticon>Copy</fonticon>
+  <hidden>0</hidden>
+  <iscustomizable>1</iscustomizable>
+  <isdisabled>0</isdisabled>
+  <isgrouptitlehidden>0</isgrouptitlehidden>
+  <location>0</location>
+  <name>mcs_credit_scoringcard_clone</name>
+  <onclickeventjavascriptfunctionname>ScoringCardForm.cloneRecord</onclickeventjavascriptfunctionname>
+  <onclickeventjavascriptparameters>[{"type":5}]</onclickeventjavascriptparameters>
+  <onclickeventjavascriptwebresourceid>
+    <webresourceid>a3bfe3ae-cd5f-f111-a826-000d3aa333b3</webresourceid>
+  </onclickeventjavascriptwebresourceid>
+  <onclickeventtype>2</onclickeventtype>
+  <origin>0</origin>
+  <sequence>100100010.0000000000</sequence>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+  <type>0</type>
+  <visibilitytype>0</visibilitytype>
+</appaction>

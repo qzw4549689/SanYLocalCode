@@ -1,0 +1,36 @@
+<appaction uniquename="mcs__!573c7ffbf3a345e0aa6d98bef171c5b8!mcs_credit_record!0">
+  <buttonlabeltext default="进入下一阶段">
+    <label description="进入下一阶段" languagecode="1033" />
+    <label description="进入下一阶段" languagecode="2052" />
+  </buttonlabeltext>
+  <buttontooltiptitle default="下一步">
+    <label description="下一步" languagecode="1033" />
+    <label description="下一步" languagecode="2052" />
+  </buttontooltiptitle>
+  <context>1</context>
+  <contextentity>
+    <logicalname>mcs_credit_record</logicalname>
+  </contextentity>
+  <contextvalue>mcs_credit_record</contextvalue>
+  <hidden>0</hidden>
+  <iconwebresourceid>
+    <webresourceid>bca97412-4417-449a-a436-62ffbe586e7d</webresourceid>
+  </iconwebresourceid>
+  <iscustomizable>1</iscustomizable>
+  <isdisabled>0</isdisabled>
+  <isgrouptitlehidden>0</isgrouptitlehidden>
+  <location>0</location>
+  <name>!573c7ffbf3a345e0aa6d98bef171c5b8</name>
+  <onclickeventjavascriptfunctionname>CreditRecordForm.nextStep</onclickeventjavascriptfunctionname>
+  <onclickeventjavascriptparameters>[{"type":5}]</onclickeventjavascriptparameters>
+  <onclickeventjavascriptwebresourceid>
+    <webresourceid>df109d68-d55f-f111-a826-000d3aa33079</webresourceid>
+  </onclickeventjavascriptwebresourceid>
+  <onclickeventtype>2</onclickeventtype>
+  <origin>0</origin>
+  <sequence>100100015.0000000000</sequence>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+  <type>0</type>
+  <visibilitytype>0</visibilitytype>
+</appaction>

@@ -1,0 +1,130 @@
+/**
+ * 成交条件样板库 - 表单逻辑
+ * 实体: mcs_trade_stpayterm
+ * 功能: 克隆新增、表单默认值、字段联动
+ */
+
+var TradeStPayTermForm = TradeStPayTermForm || {};
+
+/**
+ * 表单加载事件
+ */
+TradeStPayTermForm.onLoad = function (executionContext) {
+    var formContext = executionContext.getFormContext();
+    var formType = formContext.ui.getFormType();
+
+    // 新建时如 URL 携带克隆源参数，则回填字段
+    if (formType === 1) {
+        TradeStPayTermForm.fillCloneData(formContext);
+    }
+};
+
+/**
+ * 克隆当前记录：打开新建表单并预填充字段
+ */
+TradeStPayTermForm.cloneRecord = function (primaryControl) {
+    var formContext = primaryControl;
+    var entityName = formContext.data.entity.getEntityName();
+    var entityId = formContext.data.entity.getId();
+
+    if (!entityId) {
+        Xrm.Navigation.openAlertDialog({ text: "请先保存当前记录后再克隆。" });
+        return;
+    }
+
+    var fieldNames = [
+        "mcs_buid", "mcs_buname",
+        "mcs_subid", "mcs_subname",
+        "mcs_countrycode", "mcs_countryname",
+        "mcs_typeid", "mcs_typename",
+        "mcs_buyergrade", "mcs_creditgrade",
+        "mcs_downpay", "mcs_payterm", "mcs_payfreq"
+    ];
+
+    var parameters = {};
+    fieldNames.forEach(function (fieldName) {
+        var attr = formContext.getAttribute(fieldName);
+        if (attr) {
+            var value = attr.getValue();
+            if (value !== null && value !== undefined) {
+                parameters[fieldName] = value;
+            }
+        }
+    });
+
+    // 生效状态重置为未生效
+    parameters["mcs_status"] = 0;
+
+    Xrm.Navigation.openForm({
+        entityName: entityName,
+        formId: null,
+        openInNewWindow: false,
+        useQuickCreate: false
+    }, parameters);
+};
+
+/**
+ * 新建表单时，从 URL 参数回填克隆字段
+ */
+TradeStPayTermForm.fillCloneData = function (formContext) {
+    var url = Xrm.Utility.getGlobalContext().getCurrentAppUrl
+        ? Xrm.Utility.getGlobalContext().getCurrentAppUrl()
+        : window.parent.location.href;
+
+    var params = TradeStPayTermForm.parseUrlParams(url);
+    if (!params) {
+        return;
+    }
+
+    var fieldNames = [
+        "mcs_buid", "mcs_buname",
+        "mcs_subid", "mcs_subname",
+        "mcs_countrycode", "mcs_countryname",
+        "mcs_typeid", "mcs_typename",
+        "mcs_buyergrade", "mcs_creditgrade",
+        "mcs_downpay", "mcs_payterm", "mcs_payfreq", "mcs_status"
+    ];
+
+    fieldNames.forEach(function (fieldName) {
+        if (params.hasOwnProperty(fieldName)) {
+            var attr = formContext.getAttribute(fieldName);
+            if (attr && !attr.getValue()) {
+                var rawValue = params[fieldName];
+                var value = rawValue;
+
+                // 数值类型字段转换
+                if (fieldName === "mcs_downpay") {
+                    value = parseFloat(rawValue);
+                } else if (fieldName === "mcs_payterm" || fieldName === "mcs_payfreq" || fieldName === "mcs_status") {
+                    value = parseInt(rawValue, 10);
+                }
+
+                attr.setValue(value);
+            }
+        }
+    });
+};
+
+/**
+ * 解析 URL 查询参数
+ */
+TradeStPayTermForm.parseUrlParams = function (url) {
+    if (!url) return null;
+    var queryIndex = url.indexOf("?");
+    if (queryIndex < 0) return null;
+
+    var query = url.substring(queryIndex + 1);
+    var pairs = query.split("&");
+    var result = {};
+
+    pairs.forEach(function (pair) {
+        var eq = pair.indexOf("=");
+        if (eq > 0) {
+            var key = decodeURIComponent(pair.substring(0, eq));
+            var value = decodeURIComponent(pair.substring(eq + 1));
+            result[key] = value;
+        }
+    });
+
+    return result;
+};
