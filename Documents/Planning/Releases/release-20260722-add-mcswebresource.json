@@ -1,0 +1,4 @@
+{
+  "name": "2026-07-22 发版：加入 McsWebResource（mcs_language_helper.js，来源 AllComponent_Peter_NoUAT 核对缺口）",
+  "webresources": [ "mcs_language_helper.js" ]
+}

@@ -48,6 +48,7 @@ Coface 财务指标对照表用于告诉系统：**从 Coface URBA360 / Report �
 
 ```
 Documents/BusinessAnalysis/coface/10Coface数据字典补充/4国家财务指标-更新版0612.xlsx
+Documents/BusinessAnalysis/coface/10Coface数据字典补充/SANY-financial indicators-combined-updated20160709按国家取财务指标Final version.xlsx
 ```
 
 Excel 列结构：
@@ -298,6 +299,9 @@ dotnet run test-coface trigger <mcs_credit_record ID>
 | 2026-06-15 | 按客户 `4国家财务指标-更新版0612.xlsx` 全量刷新为 87 国 429 条记录，DEV1 已导入 | Peter |
 | 2026-06-15 | DEV1 触发 PL 国家测试记录，CofaceDataSync 成功，生成 7 个标签 | Peter |
 | 2026-06-15 | UAT 环境同步相同配置数据（87 国 429 条记录） | Peter |
+| 2026-07-10 | 按客户 `SANY-financial indicators-combined-updated20160709按国家取财务指标Final version.xlsx` 全量刷新为 107 国 510 条记录，DEV1/UAT 已导入 | Peter |
+| 2026-07-10 | DEV1 用 PL 测试记录 `SCO202607020005` 验证通过，生成 15 个客户信用标签 | Peter |
+| 2026-07-10 | UAT 用 CN 测试记录 `SCO202607070008` 验证通过，CofaceDataSync 成功执行并正确读取新配置 | Peter |
 
 ---
 

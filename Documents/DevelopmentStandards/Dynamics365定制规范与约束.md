@@ -58,6 +58,16 @@
 | **禁止插件/脚本阻塞系统事件** | 如在原生核心事件（如 `contact.Create`）中编写长耗时同步插件、无限循环脚本；升级后微软会强化事件超时机制，直接终止这类代码。 |
 | **禁止绕过 Dataverse 安全模型** | 如通过插件模拟系统管理员权限、直接修改权限元数据；升级会修复这类"漏洞"，导致代码执行失败。 |
 
+### 4. 元数据创建红线
+
+**所有实体、字段、表单、视图、关系、WebResource 等元数据的创建与更新，必须使用 `D365ToolCommon` 或 `MetadataTool` 中已有的公共方法。**
+
+| 禁止项 | 说明 |
+|--------|------|
+| **禁止临时编写新的元数据创建方法** | 严禁在任意工具、脚本、插件中直接调用 `CreateAttributeRequest`、`CreateEntityRequest`、`UpdateEntityRequest` 等 SDK 原生 API 创建元数据。 |
+| **禁止绕过公共方法** | 所有元数据操作必须通过 `D365ToolCommon`（`MetadataFieldService`、`PublishingService`、`WebResourceService` 等）或 `MetadataTool`（`EntityManager` 等）的封装方法完成。 |
+| **公共方法缺失须先申请** | 如现有公共方法不存在或不能满足需求，必须向负责人提出申请，获批准后方可修改或扩展公共方法。 |
+
 ---
 
 ## 三、防升级失效的核心实践

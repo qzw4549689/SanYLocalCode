@@ -1,0 +1,4 @@
+{
+  "name": "2026-07-22 发版：加入 McsPlugin（CustomerMasterDataCreditValidationPlugin + FcaProcCalculationPlugin 的 Step，来源 AllComponent_Peter_NoUAT 核对缺口）",
+  "pluginTypes": [ "CustomerMasterDataCreditValidationPlugin", "FcaProcCalculationPlugin" ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "2026-07-22 融资管理模块发版",
+  "entitySolution": "entity_20260722",
+  "entities": [ "mcs_fsm_data", "mcs_fsm_resource", "mcs_fsm_detail_data" ],
+  "webresources": [ "mcs_fsm_data.js" ],
+  "pluginTypes": [ "FsmDataBppIntegrationPlugin", "FsmDataBppCallbackPlugin" ],
+  "appActions": [ "mcs_fsm_data_submit_initiation", "mcs_fsm_data_submit_project" ]
+}

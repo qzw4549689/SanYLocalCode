@@ -1,0 +1,67 @@
+digraph G {
+  graph [rankdir=LR, splines=ortho, nodesep=0.35, ranksep=0.9, bgcolor="white", pad=0.2, fontname="Microsoft YaHei"];
+  node  [shape=box, style="rounded,filled", fillcolor="#EEF3FB", color="#7A93C0", fontname="Microsoft YaHei", fontsize=11, margin="0.12,0.08"];
+  edge  [color="#666666", fontname="Microsoft YaHei", fontsize=9, arrowsize=0.7];
+
+  subgraph cluster_1 {
+    label="① 主数据层（自定义实体，MDM/客户IT 维护）"; fontsize=12; style="filled"; fillcolor="#FBF6E3"; color="#D8C97E"; fontname="Microsoft YaHei";
+    ORG  [label="组织\n类型：10=事业部 / 20=大区\n自引用上级组织链\n（CRM 菜单未开放）"];
+    BU   [label="事业部\n（按产品线划分）"];
+    REG  [label="大区\n（两种类型：子公司 / 国区区域）"];
+    CTY  [label="国家\n（N:1 子公司，不参与权限层级）"];
+    RCR  [label="大区-国家关系\n（事业部×大区×国家×国区\n业务口径 n:n 交叉矩阵）", fillcolor="#FCE8D5", color="#D8A97E"];
+    NR   [label="国区\n（包含多个国家）"];
+    RBU  [label="大区事业部\n（区域×事业部交叉概念\n业务需要时参考）", style="rounded,filled,dashed", fillcolor="#F5F5F5"];
+  }
+
+  subgraph cluster_2 {
+    label="② 自动同步（系统既有逻辑）"; labelloc="b"; fontsize=12; style="filled"; fillcolor="#FBF6E3"; color="#D8C97E"; fontname="Microsoft YaHei";
+    PLUGIN [label="组织创建后自动执行\n1. 创建同名业务部门\n2. 创建事业部团队并配角色\n3. 回写主数据关联字段", fillcolor="#FCE8D5", color="#D8A97E"];
+    CFG    [label="团队角色配置\n（系统配置表）"];
+  }
+
+  subgraph cluster_3 {
+    label="③ 标准安全层（真正的权限边界）"; fontsize=12; style="filled"; fillcolor="#FBF6E3"; color="#D8C97E"; fontname="Microsoft YaHei";
+    BUTREE [label="业务部门树\n总部 → 事业部 → 大区/子公司\n（与组织一一同名镜像）", fillcolor="#E4F0E0", color="#8FBC82"];
+    TEAM   [label="事业部团队（BuTeam）\n挂在对应业务部门下"];
+    ROLE   [label="安全角色\n每个业务部门一条副本\n数据范围分级：本人/本部门/全集团"];
+    USER   [label="用户\n挂靠一个业务部门"];
+    UA     [label="人员账号\n关联用户与组织"];
+  }
+
+  subgraph cluster_4 {
+    label="④ 权限控制三套机制"; fontsize=12; style="filled"; fillcolor="#FBF6E3"; color="#D8C97E"; fontname="Microsoft YaHei";
+    P1 [label="机制1：角色数据范围\n按记录所属业务部门过滤"];
+    P2 [label="机制2：记录共享\n提交审批时共享给事业部团队"];
+    P3 [label="机制3：按钮/操作权限\n按角色名匹配，前后端双重校验"];
+  }
+
+  ORG -> BU   [label="类型10"];
+  ORG -> REG  [label="类型20"];
+  REG -> BU   [label="所属事业部\n（权限树单父级 1:n）"];
+  REG -> RCR  [dir=both, arrowtail=none, label="多对多"];
+  RCR -> CTY  [dir=both, arrowtail=none];
+  CTY -> NR   [style=dashed, label="映射"];
+  RBU -> RCR  [style=dashed, arrowhead=none];
+
+  ORG -> PLUGIN [label="创建后触发", penwidth=2, color="#C0504D"];
+  CFG -> PLUGIN [style=dashed, label="读取"];
+  PLUGIN -> BUTREE [label="按名创建/复用\n层级镜像", penwidth=2, color="#C0504D"];
+  PLUGIN -> TEAM   [label="创建并挂部门", penwidth=2, color="#C0504D"];
+
+  BU  -> BUTREE [dir=both, label="一一关联\n自动回写"];
+  REG -> BUTREE [dir=both, style=dashed, label="一一关联"];
+  BU  -> TEAM   [dir=both, label="一一关联\n自动回写"];
+
+  BUTREE -> ROLE [label="角色副本"];
+  BUTREE -> TEAM [label="下辖"];
+  BUTREE -> USER [label="挂部门"];
+  USER -> UA  [dir=both];
+  UA -> ORG   [style=dashed, label="反查组织链"];
+  USER -> ROLE [label="直接分配"];
+  TEAM -> ROLE [label="成员继承"];
+
+  BUTREE -> P1 [style=dashed];
+  TEAM -> P2   [style=dashed, label="共享对象"];
+  ROLE -> P3   [style=dashed, label="按名称匹配"];
+}

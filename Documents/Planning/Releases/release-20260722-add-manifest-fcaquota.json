@@ -1,0 +1,6 @@
+{
+  "name": "2026-07-22 厂端授信余额调整接口：加入主清单 AllComponent_Peter_NoUAT（Custom API mcs_AdjustFcaQuotaBalance 本体+参数+响应）",
+  "customApis": [
+    "mcs_AdjustFcaQuotaBalance"
+  ]
+}

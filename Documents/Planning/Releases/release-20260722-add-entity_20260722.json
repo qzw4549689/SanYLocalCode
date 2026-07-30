@@ -1,0 +1,37 @@
+{
+  "name": "2026-07-22 发版：加入 entity_20260722（20 实体 + 10 App Action，来源 AllComponent_Peter_NoUAT 核对缺口）",
+  "entities": [
+    "mcs_credit_items",
+    "mcs_credititem_value",
+    "mcs_credit_scoringcard",
+    "mcs_credit_record",
+    "mcs_customer_tag",
+    "mcs_coface_nace_mapping",
+    "mcs_coface_financial_indicator",
+    "mcs_coface_exchange_rate",
+    "mcs_trade_pttype",
+    "mcs_trade_ptgrouptype",
+    "mcs_trade_stpayterm",
+    "mcs_fca_mdlversion",
+    "mcs_fca_mdlconfig",
+    "mcs_fca_proc",
+    "mcs_fca_quota",
+    "mcs_fca_quotaapp",
+    "mcs_fca_records",
+    "mcs_fsm_resource",
+    "mcs_fsm_data",
+    "mcs_fsm_detail_data"
+  ],
+  "appActions": [
+    "mcs_credit_record_refresh_data",
+    "mcs_credit_record_restart",
+    "mcs_credit_record_search_coface",
+    "mcs_credit_scoringcard_clone",
+    "mcs_trade_stpayterm_clone",
+    "mcs_trade_stpayterm_apply",
+    "mcs_trade_stpayterm_approve",
+    "mcs_trade_stpayterm_reject",
+    "mcs_fsm_data_submit_initiation",
+    "mcs_fsm_data_submit_project"
+  ]
+}
