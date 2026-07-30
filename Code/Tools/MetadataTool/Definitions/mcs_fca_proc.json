@@ -1,0 +1,159 @@
+{
+  "entityName": "mcs_fca_proc",
+  "displayName": "厂端授信模型计算表",
+  "displayNameZh": "厂端授信模型计算表",
+  "displayNameEn": "Factory Credit Model Calculation",
+  "primaryAttribute": "mcs_doid",
+  "primaryAttributeDisplayName": "模型计算序列号",
+  "primaryAttributeDisplayNameZh": "模型计算序列号",
+  "primaryAttributeDisplayNameEn": "Model Calculation Serial No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_accountid",
+      "displayName": "客户编码",
+      "displayNameZh": "客户编码",
+      "displayNameEn": "Customer Code",
+      "description": "关联客户主数据 AccountMaster",
+      "type": "lookup",
+      "targetEntity": "mcs_customermasterdata",
+      "targetEntityDisplayName": "客户主数据"
+    },
+    {
+      "schemaName": "mcs_custname",
+      "displayName": "客户名称",
+      "displayNameZh": "客户名称",
+      "displayNameEn": "Customer Name",
+      "description": "客户名称",
+      "type": "string",
+      "maxLength": 500,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_creditreject",
+      "displayName": "不予授信客户",
+      "displayNameZh": "不予授信客户",
+      "displayNameEn": "Credit Rejected Customer",
+      "description": "不予授信场景 1/2/3/4",
+      "type": "multiselectpicklist",
+      "options": {
+        "客户被列入征信黑名单": 1,
+        "近3年与我司产生≥100万元人民币实质性坏账": 2,
+        "实际逾期账账龄≥6个月且（逾期金额/在外货款余额）>50%": 3,
+        "集团黑名单客户": 4
+      }
+    },
+    {
+      "schemaName": "mcs_modelgrant",
+      "displayName": "模型计算额度USD",
+      "displayNameZh": "模型计算额度USD",
+      "displayNameEn": "Model Calculated Quota USD",
+      "description": "初始计算额度",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_initigrant",
+      "displayName": "调整模型额度USD",
+      "displayNameZh": "调整模型额度USD",
+      "displayNameEn": "Adjusted Model Quota USD",
+      "description": "逾期调整后额度",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_validfrom",
+      "displayName": "计算日期",
+      "displayNameZh": "计算日期",
+      "displayNameEn": "Calculation Date",
+      "description": "计算日期",
+      "type": "datetime",
+      "dateOnly": false
+    },
+    {
+      "schemaName": "mcs_status",
+      "displayName": "计算状态",
+      "displayNameZh": "计算状态",
+      "displayNameEn": "Calculation Status",
+      "description": "1授信校验/2模型计算/3生效启用/4退回计算",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "授信校验": 1,
+        "模型计算": 2,
+        "生效启用": 3,
+        "退回计算": 4
+      }
+    },
+    {
+      "schemaName": "mcs_versionid",
+      "displayName": "模型版本",
+      "displayNameZh": "模型版本",
+      "displayNameEn": "Model Version",
+      "description": "关联模型版本表",
+      "type": "lookup",
+      "targetEntity": "mcs_fca_mdlversion",
+      "targetEntityDisplayName": "厂端授信模型版本表"
+    },
+    {
+      "schemaName": "mcs_modeldesc",
+      "displayName": "模型描述",
+      "displayNameZh": "模型描述",
+      "displayNameEn": "Model Description",
+      "description": "从模型版本带入",
+      "type": "memo",
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_doproc",
+      "displayName": "计算日志",
+      "displayNameZh": "计算日志",
+      "displayNameEn": "Calculation Log",
+      "description": "记录计算过程",
+      "type": "memo",
+      "maxLength": 3000
+    },
+    {
+      "schemaName": "mcs_orgid",
+      "displayName": "归属组织",
+      "displayNameZh": "归属组织",
+      "displayNameEn": "Owning Organization",
+      "description": "归属组织ID，不显示",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_orgname",
+      "displayName": "归属组织名称",
+      "displayNameZh": "归属组织名称",
+      "displayNameEn": "Owning Organization Name",
+      "description": "归属组织名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_buid",
+      "displayName": "事业部",
+      "displayNameZh": "事业部",
+      "displayNameEn": "Business Unit",
+      "description": "事业部ID，不显示",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_buname",
+      "displayName": "事业部名称",
+      "displayNameZh": "事业部名称",
+      "displayNameEn": "Business Unit Name",
+      "description": "事业部名称",
+      "type": "string",
+      "maxLength": 100
+    }
+  ]
+}

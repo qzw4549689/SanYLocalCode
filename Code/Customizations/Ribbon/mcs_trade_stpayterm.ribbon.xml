@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  mcs_trade_stpayterm 列表命令栏批量按钮（RibbonDiffXml 片段，2026-07-27）
+  用途：替代原 appaction 经典按钮（mcs_trade_stpayterm_apply/approve/reject），
+        将「勾选>=1 条才显示」的 SelectionCountRule 内联在 XML 中，随实体包跨环境（生产零手动步骤）。
+  背景：appaction 的经典显隐规则靠 N:N 关联 appactionrule，IsCustomizable=False 不随 Solution 导入；
+        KB 4481268（勾选后非 item-specific 按钮隐藏）官方解法即内联 SelectionCountRule。
+  合并方式：将本文件根节点的内容合并进实体包 customizations.xml 中 mcs_trade_stpayterm 实体的 Ribbon 节点。
+  JS 零改动：apply/approve/reject(selectedIds, selectedControl) 与 CrmParameter 一一对应。
+-->
+<RibbonDiffXml>
+  <CustomActions>
+    <CustomAction Id="mcs.mcs_trade_stpayterm.GridApply.CustomAction"
+                  Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children"
+                  Sequence="10">
+      <CommandUIDefinition>
+        <Button Id="mcs.mcs_trade_stpayterm.GridApply.Button"
+                Command="mcs.mcs_trade_stpayterm.GridApply.Command"
+                ModernImage="Activate"
+                LabelText="$LocLabels:mcs.mcs_trade_stpayterm.GridApply.LabelText"
+                ToolTipTitle="$LocLabels:mcs.mcs_trade_stpayterm.GridApply.ToolTipTitle"
+                TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <CustomAction Id="mcs.mcs_trade_stpayterm.GridApprove.CustomAction"
+                  Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children"
+                  Sequence="11">
+      <CommandUIDefinition>
+        <Button Id="mcs.mcs_trade_stpayterm.GridApprove.Button"
+                Command="mcs.mcs_trade_stpayterm.GridApprove.Command"
+                ModernImage="Accept"
+                LabelText="$LocLabels:mcs.mcs_trade_stpayterm.GridApprove.LabelText"
+                ToolTipTitle="$LocLabels:mcs.mcs_trade_stpayterm.GridApprove.ToolTipTitle"
+                TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <CustomAction Id="mcs.mcs_trade_stpayterm.GridReject.CustomAction"
+                  Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children"
+                  Sequence="12">
+      <CommandUIDefinition>
+        <Button Id="mcs.mcs_trade_stpayterm.GridReject.Button"
+                Command="mcs.mcs_trade_stpayterm.GridReject.Command"
+                ModernImage="Cancel"
+                LabelText="$LocLabels:mcs.mcs_trade_stpayterm.GridReject.LabelText"
+                ToolTipTitle="$LocLabels:mcs.mcs_trade_stpayterm.GridReject.ToolTipTitle"
+                TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+  </CustomActions>
+  <Templates>
+    <RibbonTemplates Id="Mscrm.Templates"></RibbonTemplates>
+  </Templates>
+  <CommandDefinitions>
+    <CommandDefinition Id="mcs.mcs_trade_stpayterm.GridApply.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.mcs_trade_stpayterm.SelectionCountAtLeastOne" />
+      </EnableRules>
+      <DisplayRules />
+      <Actions>
+        <JavaScriptFunction FunctionName="TradeStPayTermGrid.apply" Library="$webresource:mcs_trade_stpayterm.js">
+          <CrmParameter Value="SelectedControlSelectedItemIds" />
+          <CrmParameter Value="SelectedControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <CommandDefinition Id="mcs.mcs_trade_stpayterm.GridApprove.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.mcs_trade_stpayterm.SelectionCountAtLeastOne" />
+      </EnableRules>
+      <DisplayRules />
+      <Actions>
+        <JavaScriptFunction FunctionName="TradeStPayTermGrid.approve" Library="$webresource:mcs_trade_stpayterm.js">
+          <CrmParameter Value="SelectedControlSelectedItemIds" />
+          <CrmParameter Value="SelectedControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <CommandDefinition Id="mcs.mcs_trade_stpayterm.GridReject.Command">
+      <EnableRules>
+        <EnableRule Id="mcs.mcs_trade_stpayterm.SelectionCountAtLeastOne" />
+      </EnableRules>
+      <DisplayRules />
+      <Actions>
+        <JavaScriptFunction FunctionName="TradeStPayTermGrid.reject" Library="$webresource:mcs_trade_stpayterm.js">
+          <CrmParameter Value="SelectedControlSelectedItemIds" />
+          <CrmParameter Value="SelectedControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+  </CommandDefinitions>
+  <RuleDefinitions>
+    <TabDisplayRules />
+    <DisplayRules />
+    <EnableRules>
+      <EnableRule Id="mcs.mcs_trade_stpayterm.SelectionCountAtLeastOne">
+        <SelectionCountRule AppliesTo="SelectedEntity" Minimum="1" Default="0" />
+      </EnableRule>
+    </EnableRules>
+  </RuleDefinitions>
+  <LocLabels>
+    <LocLabel Id="mcs.mcs_trade_stpayterm.GridApply.LabelText">
+      <Titles>
+        <Title description="批量申请" languagecode="2052" />
+        <Title description="Batch Apply" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_trade_stpayterm.GridApply.ToolTipTitle">
+      <Titles>
+        <Title description="将选中的未生效成交条件样板提交为待审批" languagecode="2052" />
+        <Title description="Submit selected inactive trade term templates for pending approval" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_trade_stpayterm.GridApprove.LabelText">
+      <Titles>
+        <Title description="批量审批" languagecode="2052" />
+        <Title description="Batch Approve" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_trade_stpayterm.GridApprove.ToolTipTitle">
+      <Titles>
+        <Title description="将选中的待审批成交条件样板审批通过并生效" languagecode="2052" />
+        <Title description="Approve selected pending trade term templates and activate them" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_trade_stpayterm.GridReject.LabelText">
+      <Titles>
+        <Title description="批量拒绝" languagecode="2052" />
+        <Title description="Batch Reject" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_trade_stpayterm.GridReject.ToolTipTitle">
+      <Titles>
+        <Title description="将选中的待审批成交条件样板拒绝并退回未生效" languagecode="2052" />
+        <Title description="Reject selected pending trade term templates and return them to inactive" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+  </LocLabels>
+</RibbonDiffXml>

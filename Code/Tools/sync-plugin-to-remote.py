@@ -7,14 +7,14 @@ D365 本地测试项目 → 远程主项目同步脚本
     python3 sync-plugin-to-remote.py
 
 功能：
-    1. 按 FILE_MAP 读取本地源文件
+    1. 按 FILE_MAP / FILE_MAP_API 读取本地源文件
     2. 按 NAMESPACE_MAP 替换命名空间前缀
-    3. 通过 scp 写入远程服务器目标路径
-    4. 更新远程 SanyD365.D365Extension.Sales.csproj 的 Compile 引用
-    5. 触发远程单独编译验证
+    3. 通过 scp 写入远程服务器目标路径（业务插件 → D365Extension.Sales，Custom API 插件 → D365ExtensionApi.Sales）
+    4. 更新远程两个项目 csproj 的 Compile 引用
+    5. 触发远程分别编译验证
 
 配置：
-    修改本文件顶部的 REMOTE_HOST / REMOTE_BASE_DIR / FILE_MAP 即可复用。
+    修改本文件顶部的 REMOTE_HOST / REMOTE_BASE_DIR / FILE_MAP / FILE_MAP_API 即可复用。
 """
 
 import os
@@ -32,6 +32,9 @@ REMOTE_HOST = "tx-windows"
 # 远程主项目根目录（Windows 路径）
 REMOTE_PROJECT_DIR = r"C:\Projects\D365\D365\SanyD365.D365Extension.Sales"
 
+# 远程 Custom API 项目根目录（Custom API 实现插件归属项目，如 TradeStPayTerm.Api）
+REMOTE_PROJECT_DIR_API = r"C:\Projects\D365\D365\SanyD365.D365ExtensionApi.Sales"
+
 # 本地项目根目录（相对于本脚本所在位置）
 LOCAL_ROOT = Path(__file__).resolve().parent.parent.parent / "Code" / "Customizations" / "Plugins"
 
@@ -45,6 +48,12 @@ NAMESPACE_MAP = {
     "SanyD365.Plugins.BppIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditRecord",
     "SanyD365.Plugins.Account": "SanyD365.D365Extension.Sales.Plugins.Account",
     "SanyD365.Plugins.CustomerMasterData.Validation": "SanyD365.D365Extension.Sales.Plugins.Account",
+    "SanyD365.Plugins.TradeStPayTerm.Api": "SanyD365.D365ExtensionApi.Sales.Apis.TradeStPayTerm",
+    "SanyD365.Plugins.FactoryCredit.Api": "SanyD365.D365ExtensionApi.Sales.Apis.FactoryCredit",
+    "SanyD365.Plugins.TradeStPayTerm": "SanyD365.D365Extension.Sales.Plugins.TradeStPayTerm",
+    "SanyD365.Plugins.CustomerTag": "SanyD365.D365Extension.Sales.Plugins.CustomerTag",
+    "SanyD365.Plugins.FactoryCredit": "SanyD365.D365Extension.Sales.Plugins.FactoryCredit",
+    "SanyD365.Plugins.FinancingManagement": "SanyD365.D365Extension.Sales.Plugins.FinancingManagement",
 }
 
 # 文件映射表：本地相对路径 -> 远程相对路径
@@ -76,11 +85,68 @@ FILE_MAP = {
 
     # 客户主数据字段校验 Plugin（新增）
     "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs": r"Plugins\Account\CustomerMasterDataCreditValidationPlugin.cs",
+
+    # 成交条件样板库 Plugin
+    "TradeStPayTerm/AutoNumber/TradeStPayTermAutoNumberPlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermAutoNumberPlugin.cs",
+    "TradeStPayTerm/Validation/TradeStPayTermValidationPlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermValidationPlugin.cs",
+    "TradeStPayTerm/Sharing/TradeStPayTermSharePlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermSharePlugin.cs",
+
+    # 客户信用标签 Plugin
+    "CustomerTag/AutoNumber/CustomerTagInitPlugin.cs": r"Plugins\CustomerTag\CustomerTagInitPlugin.cs",
+
+    # 厂端授信 Plugin
+    "FactoryCredit/ProcActivation/FcaProcActivationPlugin.cs": r"Plugins\FactoryCredit\FcaProcActivationPlugin.cs",
+    "FactoryCredit/Calculation/FcaProcCalculationPlugin.cs": r"Plugins\FactoryCredit\FcaProcCalculationPlugin.cs",
+    "FactoryCredit/Bpp/FcaQuotaAppBppIntegrationPlugin.cs": r"Plugins\FactoryCredit\Bpp\FcaQuotaAppBppIntegrationPlugin.cs",
+    "FactoryCredit/Bpp/FcaQuotaAppBppCallbackPlugin.cs": r"Plugins\FactoryCredit\Bpp\FcaQuotaAppBppCallbackPlugin.cs",
+    # FinancingManagement BPP
+    "FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs": r"Plugins\FinancingManagement\Bpp\FsmDataBppIntegrationPlugin.cs",
+    "FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs": r"Plugins\FinancingManagement\Bpp\FsmDataBppCallbackPlugin.cs",
+    "FactoryCredit/Bpp/Services/QuotaActivationService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaActivationService.cs",
+    "FactoryCredit/Bpp/Services/QuotaRecordService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaRecordService.cs",
+    "FactoryCredit/Calculation/Services/CalculationLogService.cs": r"Plugins\FactoryCredit\Calculation\Services\CalculationLogService.cs",
+    "FactoryCredit/Calculation/Services/CreditRejectCheckService.cs": r"Plugins\FactoryCredit\Calculation\Services\CreditRejectCheckService.cs",
+    "FactoryCredit/Calculation/Services/CurrencyConversionHelper.cs": r"Plugins\FactoryCredit\Calculation\Services\CurrencyConversionHelper.cs",
+    "FactoryCredit/Calculation/Services/CustomerAccountResolver.cs": r"Plugins\FactoryCredit\Calculation\Services\CustomerAccountResolver.cs",
+    "FactoryCredit/Calculation/Services/CustomerCategoryService.cs": r"Plugins\FactoryCredit\Calculation\Services\CustomerCategoryService.cs",
+    "FactoryCredit/Calculation/Services/ModelParameterInfo.cs": r"Plugins\FactoryCredit\Calculation\Services\ModelParameterInfo.cs",
+    "FactoryCredit/Calculation/Services/ModelParameterService.cs": r"Plugins\FactoryCredit\Calculation\Services\ModelParameterService.cs",
+    "FactoryCredit/Calculation/Services/ModelVersionService.cs": r"Plugins\FactoryCredit\Calculation\Services\ModelVersionService.cs",
+    "FactoryCredit/Calculation/Services/OverdueAdjustmentService.cs": r"Plugins\FactoryCredit\Calculation\Services\OverdueAdjustmentService.cs",
+    "FactoryCredit/Calculation/Services/ThreeFactorCalculationService.cs": r"Plugins\FactoryCredit\Calculation\Services\ThreeFactorCalculationService.cs",
+}
+
+# Custom API 文件映射表：本地相对路径 -> D365ExtensionApi.Sales 项目相对路径
+# Custom API 实现插件归属 D365ExtensionApi.Sales 项目（McsCustomAPI 解决方案），
+# 与业务插件（D365Extension.Sales / McsPlugin 解决方案）分开同步，避免跨解决方案依赖。
+FILE_MAP_API = {
+    # 成交条件样板库查询 Custom API
+    "TradeStPayTerm.Api/QueryTradeStPayTermPlugin.cs": r"Apis\TradeStPayTerm\QueryTradeStPayTermPlugin.cs",
+    "TradeStPayTerm.Api/TradeStPayTermQueryService.cs": r"Apis\TradeStPayTerm\TradeStPayTermQueryService.cs",
+    # 厂端授信余额调整 Custom API
+    "FactoryCredit.Api/AdjustFcaQuotaBalancePlugin.cs": r"Apis\FactoryCredit\AdjustFcaQuotaBalancePlugin.cs",
+    "FactoryCredit.Api/FcaQuotaAdjustService.cs": r"Apis\FactoryCredit\FcaQuotaAdjustService.cs",
 }
 
 # csproj 中 Compile 引用的排序分组（可选，保持 csproj 可读性）
 # 键：远程相对路径前缀；值：该组在 csproj 中的插入位置描述
 # 实际脚本使用简单追加 + 去重
+
+# 插件类名重命名映射：本地类名 -> 远程类名（仅远程命名规范要求改名的类）
+PLUGIN_RENAME_MAP = {
+    "CofaceDataSyncPlugin": "CofaceIntegrationDataSyncPlugin",
+    "AccountValidationPlugin": "AccountCreditValidationPlugin",
+    "CustomerMasterDataValidationPlugin": "CustomerMasterDataCreditValidationPlugin",
+}
+
+# 远程保持原生 IPlugin 运行的插件（不做 PluginBase 转换）
+# 这些 BPP 框架相关插件已以 IPlugin 形态随 uat 发布并运行正常，未经 PluginBase 化验证，保持现状
+PLUGINBASE_SKIP_FILES = {
+    "FactoryCredit/Bpp/FcaQuotaAppBppIntegrationPlugin.cs",
+    "FactoryCredit/Bpp/FcaQuotaAppBppCallbackPlugin.cs",
+    "FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs",
+    "FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs",
+}
 
 # ==================== 工具函数 ====================
 
@@ -153,7 +219,59 @@ def transform_iplugin_to_pluginbase(content: str, local_class_name: str, remote_
 """
     content = pattern1.sub(replacement, content)
 
+    # 5. 系统身份服务获取方式转换（2026-07-20 新增）
+    # 本地 IPlugin 风格用 factory 变量，远程 PluginBase 风格从 ContextContainer 取 OrgServiceFactory
+    content = content.replace(
+        "IOrganizationService systemService = factory.CreateOrganizationService(null);",
+        "IOrganizationService systemService = ContextContainer.GetValue<IOrganizationServiceFactory>(ContextTypes.OrgServiceFactory).CreateOrganizationService(null);"
+    )
+
     return content
+
+
+def assert_pluginbase_transform(local_rel: str, content: str):
+    """
+    PluginBase 转换结果 fail-fast 校验（2026-07-20 新增）。
+    转换静默失效是历史主要踩坑点（写法略变导致正则不命中，远程编译才暴露），
+    此处本地立即报错并指出残留行，不再等远程编译。
+    """
+    problems = []
+    if re.search(r":\s*IPlugin\b", content):
+        problems.append("类声明未转换为 PluginBase")
+    for i, line in enumerate(content.splitlines(), 1):
+        if "serviceProvider" in line:
+            problems.append(f"第 {i} 行残留 serviceProvider: {line.strip()}")
+        if re.search(r"\bfactory\.CreateOrganizationService", line):
+            problems.append(f"第 {i} 行残留 factory.CreateOrganizationService: {line.strip()}")
+    if "ContextContainer.GetValue<IOrganizationService>(ContextTypes.OrgService)" not in content:
+        problems.append(
+            "入口初始化代码未转换为 ContextContainer（入口正则不命中）："
+            "请检查入口是否为固定连续 4 行（context/factory/service/tracer，显式类型、变量名固定），"
+            "其他初始化代码必须放在这 4 行之后"
+        )
+    if problems:
+        msg = "\n  - ".join(problems)
+        raise SystemExit(f"❌ PluginBase 转换校验失败: {local_rel}\n  - {msg}")
+
+
+def maybe_transform_plugin(content: str, local_rel: str, project_dir: str) -> str:
+    """
+    自动识别 Plugin 文件并做 IPlugin → PluginBase 框架转换（2026-07-20 新增，替代原 if/elif 硬编码清单）。
+    判定规则：同步目标是 Sales 主项目、本地类声明为 ": IPlugin"、且不在 PLUGINBASE_SKIP_FILES 中。
+    类名重命名集中在 PLUGIN_RENAME_MAP，默认类名不变。
+    """
+    if project_dir != REMOTE_PROJECT_DIR or local_rel in PLUGINBASE_SKIP_FILES:
+        return content
+
+    m = re.search(r"public\s+class\s+(\w+)\s*:\s*IPlugin\b", content)
+    if not m:
+        return content
+
+    local_class = m.group(1)
+    remote_class = PLUGIN_RENAME_MAP.get(local_class, local_class)
+    transformed = transform_iplugin_to_pluginbase(content, local_class, remote_class)
+    assert_pluginbase_transform(local_rel, transformed)
+    return transformed
 
 
 def to_unix_path(win_path: str) -> str:
@@ -181,14 +299,14 @@ def upload_file(local_path: Path, host: str, remote_path: str):
     run(["scp", str(local_path), f"{host}:{unix_path}"])
 
 
-def update_csproj(host: str, remote_dir: str, file_entries: list):
+def update_csproj(host: str, remote_dir: str, file_entries: list, csproj_name: str = "SanyD365.D365Extension.Sales.csproj"):
     """
     更新远程 csproj，确保 FILE_MAP 中的文件都有 <Compile Include="..." /> 引用。
     使用 PowerShell 在远程执行，避免本地解析 XML 出错。
     """
     entries_xml = ",".join([f'"{e}"' for e in file_entries])
     ps_script = f"""
-$csproj = Join-Path "{remote_dir}" "SanyD365.D365Extension.Sales.csproj"
+$csproj = Join-Path "{remote_dir}" "{csproj_name}"
 $entries = @({entries_xml})
 $xml = [xml](Get-Content $csproj -Encoding UTF8)
 $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
@@ -227,12 +345,12 @@ Write-Host "csproj updated."
         os.unlink(tmp_ps1)
 
 
-def build_remote(host: str, remote_dir: str) -> bool:
+def build_remote(host: str, remote_dir: str, csproj_name: str = "SanyD365.D365Extension.Sales.csproj") -> bool:
     """触发远程单独编译。"""
     print("\n=== 远程编译验证 ===")
     result = subprocess.run(
         ["ssh", host,
-         f"cd /d \"{remote_dir}\" && msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal"],
+         f"cd /d \"{remote_dir}\" && msbuild {csproj_name} /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal"],
         capture_output=True, text=True
     )
     print(result.stdout)
@@ -245,11 +363,22 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
     """执行同步主流程。"""
     print(f"本地根目录: {LOCAL_ROOT}")
     print(f"远程主机: {REMOTE_HOST}")
-    print(f"远程项目目录: {REMOTE_PROJECT_DIR}\n")
+    print(f"远程项目目录: {REMOTE_PROJECT_DIR}")
+    print(f"远程 Custom API 项目目录: {REMOTE_PROJECT_DIR_API}\n")
 
-    csproj_entries = []
+    # 任务清单：(本地相对路径, 远程相对路径, 目标项目目录, csproj 文件名)
+    tasks = [
+        (l, r, REMOTE_PROJECT_DIR, "SanyD365.D365Extension.Sales.csproj")
+        for l, r in FILE_MAP.items()
+    ] + [
+        (l, r, REMOTE_PROJECT_DIR_API, "SanyD365.D365ExtensionApi.Sales.csproj")
+        for l, r in FILE_MAP_API.items()
+    ]
 
-    for local_rel, remote_rel in FILE_MAP.items():
+    # 按项目分组收集 csproj 条目
+    csproj_entries_by_project = {}
+
+    for local_rel, remote_rel, project_dir, csproj_name in tasks:
         local_path = LOCAL_ROOT / local_rel
         if not local_path.exists():
             print(f"⚠️ 本地文件不存在，跳过: {local_path}")
@@ -258,21 +387,12 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
         content = local_path.read_text(encoding="utf-8")
         transformed = transform_content(content)
 
-        # Plugin 文件需要额外做 IPlugin → PluginBase 框架转换
-        if local_rel == "BppIntegration/Plugin/BppCallbackPlugin.cs":
-            transformed = transform_iplugin_to_pluginbase(transformed, "CreditRecordBppCallbackPlugin")
-        elif local_rel == "CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs":
-            transformed = transform_iplugin_to_pluginbase(transformed, "CofaceDataSyncPlugin", "CofaceIntegrationDataSyncPlugin")
-        elif local_rel == "CofaceIntegration/Plugin/CofaceSearchCompanyPlugin.cs":
-            transformed = transform_iplugin_to_pluginbase(transformed, "CofaceSearchCompanyPlugin")
-        elif local_rel == "Account/AutoNumber/AccountValidationPlugin.cs":
-            transformed = transform_iplugin_to_pluginbase(transformed, "AccountValidationPlugin", "AccountCreditValidationPlugin")
-        elif local_rel == "CustomerMasterData/Validation/CustomerMasterDataValidationPlugin.cs":
-            transformed = transform_iplugin_to_pluginbase(transformed, "CustomerMasterDataValidationPlugin", "CustomerMasterDataCreditValidationPlugin")
+        # Plugin 文件自动识别并做 IPlugin → PluginBase 框架转换
+        transformed = maybe_transform_plugin(transformed, local_rel, project_dir)
 
         if dry_run:
-            print(f"[DRY-RUN] {local_rel} -> {remote_rel}")
-            csproj_entries.append(remote_rel)
+            print(f"[DRY-RUN] {local_rel} -> {project_dir}\\{remote_rel}")
+            csproj_entries_by_project.setdefault((project_dir, csproj_name), []).append(remote_rel)
             continue
 
         if output_to_local:
@@ -283,7 +403,7 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
             print(f"✅ {local_rel} -> {out_path}")
         else:
             # 上传到远程
-            remote_path = f"{REMOTE_PROJECT_DIR}\\{remote_rel}"
+            remote_path = f"{project_dir}\\{remote_rel}"
             with tempfile.NamedTemporaryFile(mode="w", suffix=".cs", delete=False) as f:
                 f.write(transformed)
                 tmp_cs = f.name
@@ -293,29 +413,34 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
             finally:
                 os.unlink(tmp_cs)
 
-        csproj_entries.append(remote_rel)
+        csproj_entries_by_project.setdefault((project_dir, csproj_name), []).append(remote_rel)
 
     if dry_run:
         print("\n[DRY-RUN] csproj 待添加条目：")
-        for e in csproj_entries:
-            print(f"  <Compile Include=\"{e}\" />")
+        for (project_dir, csproj_name), entries in csproj_entries_by_project.items():
+            print(f"  [{csproj_name}]")
+            for e in entries:
+                print(f"    <Compile Include=\"{e}\" />")
         return
 
     if output_to_local:
         print("\n已输出到本地目录，跳过 csproj 更新和远程编译。")
         return
 
-    # 更新远程 csproj
+    # 更新远程 csproj（按项目分别处理）
     print("\n=== 更新远程 csproj ===")
-    update_csproj(REMOTE_HOST, REMOTE_PROJECT_DIR, csproj_entries)
+    for (project_dir, csproj_name), entries in csproj_entries_by_project.items():
+        update_csproj(REMOTE_HOST, project_dir, entries, csproj_name)
 
-    # 远程编译
-    if not build_remote(REMOTE_HOST, REMOTE_PROJECT_DIR):
-        print("\n❌ 远程编译失败，请查看上方日志。")
-        sys.exit(1)
+    # 远程编译（按项目分别验证）
+    for (project_dir, csproj_name) in csproj_entries_by_project.keys():
+        if not build_remote(REMOTE_HOST, project_dir, csproj_name):
+            print(f"\n❌ 远程编译失败: {csproj_name}，请查看上方日志。")
+            sys.exit(1)
 
     print("\n🎉 同步并编译成功。")
     print(f"远程 DLL: {REMOTE_PROJECT_DIR}\\bin\\Release\\SanyD365.D365Extension.Sales.dll")
+    print(f"远程 DLL: {REMOTE_PROJECT_DIR_API}\\bin\\Release\\SanyD365.D365ExtensionApi.Sales.dll")
 
 
 def pull_dll(local_dll_path: Path):

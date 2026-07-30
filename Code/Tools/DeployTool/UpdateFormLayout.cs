@@ -40,13 +40,15 @@ namespace DeployTool
                     
                     bool hasWorkflowId = formXml.Contains("mcs_workflowid");
                     bool hasNextApprover = formXml.Contains("mcs_nextapprover");
+                    bool hasBppLink = formXml.Contains("mcs_bpplink");
                     
                     Console.WriteLine($"    有mcs_workflowid: {hasWorkflowId}");
                     Console.WriteLine($"    有mcs_nextapprover: {hasNextApprover}");
+                    Console.WriteLine($"    有mcs_bpplink: {hasBppLink}");
                     
-                    if (!hasWorkflowId || !hasNextApprover)
+                    if (!hasWorkflowId || !hasNextApprover || !hasBppLink)
                     {
-                        string updatedXml = AddFieldsToFormXml(formXml, hasWorkflowId, hasNextApprover);
+                        string updatedXml = AddFieldsToFormXml(formXml, hasWorkflowId, hasNextApprover, hasBppLink);
                         if (updatedXml != formXml)
                         {
                             var updateForm = new Entity("systemform") { Id = formId };
@@ -67,9 +69,9 @@ namespace DeployTool
             }
         }
         
-        private static string AddFieldsToFormXml(string formXml, bool hasWorkflowId, bool hasNextApprover)
+        private static string AddFieldsToFormXml(string formXml, bool hasWorkflowId, bool hasNextApprover, bool hasBppLink)
         {
-            if (hasWorkflowId && hasNextApprover) return formXml;
+            if (hasWorkflowId && hasNextApprover && hasBppLink) return formXml;
             
             string newRows = "";
             
@@ -95,6 +97,20 @@ namespace DeployTool
                           <label description=""当前审批人"" languagecode=""2052"" />
                         </labels>
                         <control id=""mcs_nextapprover"" classid=""{{4273EDBD-AC1D-40d3-9FB2-095C621B552D}}"" datafieldname=""mcs_nextapprover"" disabled=""true"" />
+                      </cell>
+                    </row>";
+            }
+            
+            if (!hasBppLink)
+            {
+                newRows += $@"
+                    <row>
+                      <cell id=""{{{Guid.NewGuid()}}}"" showlabel=""true"" locklevel=""0"">
+                        <labels>
+                          <label description=""BPP link"" languagecode=""1033"" />
+                          <label description=""BPP审批链接"" languagecode=""2052"" />
+                        </labels>
+                        <control id=""mcs_bpplink"" classid=""{{4273EDBD-AC1D-40d3-9FB2-095C621B552D}}"" datafieldname=""mcs_bpplink"" disabled=""true"" />
                       </cell>
                     </row>";
             }

@@ -127,6 +127,18 @@ class TestCofaceSync
 
         // 3. 触发 Plugin：将状态更新为 11
         Console.WriteLine("\n>>> 更新状态为 11，触发 CofaceDataSyncPlugin...");
+
+        // 如果当前状态为 9，需要先经过 10 再到 11（状态流转 Plugin 会校验）
+        if (currentStatus == 9)
+        {
+            Console.WriteLine("  当前状态为 9，先更新到 10...");
+            var update10 = new Entity("mcs_credit_record") { Id = recordId };
+            update10["mcs_status"] = new OptionSetValue(10);
+            service.Update(update10);
+            Console.WriteLine("✅ 已更新到 10，等待 5 秒...");
+            Thread.Sleep(5000);
+        }
+
         var update = new Entity("mcs_credit_record") { Id = recordId };
         update["mcs_status"] = new OptionSetValue(11);
         service.Update(update);

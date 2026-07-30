@@ -4,7 +4,8 @@ using Microsoft.PowerPlatform.Dataverse.Client;
 namespace D365ToolCommon.Publishing
 {
     /// <summary>
-    /// 发布实体、WebResource 等元数据变更的通用服务。
+    /// 发布实体等元数据变更的通用服务。
+    /// WebResource 发布请统一使用 <see cref="WebResource.WebResourceService.PublishWebResources"/>。
     /// </summary>
     public class PublishingService
     {
@@ -18,7 +19,9 @@ namespace D365ToolCommon.Publishing
         /// <summary>
         /// 发布指定实体。
         /// </summary>
-        public void PublishEntities(params string[] entityNames)
+        /// <param name="entityNames">实体逻辑名列表</param>
+        /// <param name="maxRetries">最大重试次数</param>
+        public void PublishEntities(int maxRetries, params string[] entityNames)
         {
             if (entityNames.Length == 0) return;
 
@@ -26,25 +29,34 @@ namespace D365ToolCommon.Publishing
             var parameterXml = $"<importexportxml><entities>{entitiesXml}</entities><nodes/><securityroles/><settings/><workflows/></importexportxml>";
 
             var request = new PublishXmlRequest { ParameterXml = parameterXml };
-            _service.Execute(request);
+
+            for (int i = 1; i <= maxRetries; i++)
+            {
+                try
+                {
+                    _service.Execute(request);
+                    return;
+                }
+                catch (Exception ex) when (i < maxRetries)
+                {
+                    Console.WriteLine($"  ⚠️ 第 {i} 次发布实体失败: {ex.Message}，2秒后重试...");
+                    Thread.Sleep(2000);
+                }
+            }
         }
 
         /// <summary>
-        /// 发布指定 WebResource。
+        /// 发布指定实体（默认重试 3 次）。
         /// </summary>
-        public void PublishWebResources(params string[] webResourceNames)
+        public void PublishEntities(params string[] entityNames)
         {
-            if (webResourceNames.Length == 0) return;
-
-            var resourcesXml = string.Join("", webResourceNames.Select(n => $"<webresource>{n}</webresource>"));
-            var parameterXml = $"<importexportxml><webresources>{resourcesXml}</webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>";
-
-            var request = new PublishXmlRequest { ParameterXml = parameterXml };
-            _service.Execute(request);
+            PublishEntities(3, entityNames);
         }
 
         /// <summary>
         /// 发布所有元数据变更。
+        /// ⚠️ 警告：AI 禁止调用此方法。全局 PublishAll 会阻塞整个 D365 环境，必须由用户手动执行。
+        /// 如需发布，请使用 PublishEntities 等指定范围的发布方法。
         /// </summary>
         public void PublishAll()
         {

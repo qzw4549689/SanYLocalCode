@@ -14,11 +14,23 @@ namespace D365MetadataTool
         [JsonPropertyName("displayName")]
         public string DisplayName { get; set; } = "";
 
+        [JsonPropertyName("displayNameZh")]
+        public string DisplayNameZh { get; set; } = "";
+
+        [JsonPropertyName("displayNameEn")]
+        public string DisplayNameEn { get; set; } = "";
+
         [JsonPropertyName("primaryAttribute")]
         public string PrimaryAttribute { get; set; } = "";
 
         [JsonPropertyName("primaryAttributeDisplayName")]
         public string PrimaryAttributeDisplayName { get; set; } = "";
+
+        [JsonPropertyName("primaryAttributeDisplayNameZh")]
+        public string PrimaryAttributeDisplayNameZh { get; set; } = "";
+
+        [JsonPropertyName("primaryAttributeDisplayNameEn")]
+        public string PrimaryAttributeDisplayNameEn { get; set; } = "";
 
         [JsonPropertyName("primaryAttributeLength")]
         public int PrimaryAttributeLength { get; set; } = 100;
@@ -68,8 +80,20 @@ namespace D365MetadataTool
         [JsonPropertyName("displayName")]
         public string DisplayName { get; set; } = "";
 
+        [JsonPropertyName("displayNameZh")]
+        public string DisplayNameZh { get; set; } = "";
+
+        [JsonPropertyName("displayNameEn")]
+        public string DisplayNameEn { get; set; } = "";
+
         [JsonPropertyName("description")]
         public string Description { get; set; } = "";
+
+        [JsonPropertyName("descriptionZh")]
+        public string DescriptionZh { get; set; } = "";
+
+        [JsonPropertyName("descriptionEn")]
+        public string DescriptionEn { get; set; } = "";
 
         [JsonPropertyName("type")]
         public string Type { get; set; } = "string";

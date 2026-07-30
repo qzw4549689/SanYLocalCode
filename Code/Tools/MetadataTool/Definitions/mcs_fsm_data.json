@@ -1,0 +1,530 @@
+{
+  "entityName": "mcs_fsm_data",
+  "displayName": "融资管理",
+  "displayNameZh": "融资管理",
+  "displayNameEn": "Financing Management",
+  "primaryAttribute": "mcs_fsm_no",
+  "primaryAttributeDisplayName": "融资管理编号",
+  "primaryAttributeDisplayNameZh": "融资管理编号",
+  "primaryAttributeDisplayNameEn": "Financing Management No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260713",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_no",
+      "displayName": "融资管理编号",
+      "displayNameZh": "融资管理编号",
+      "displayNameEn": "Financing Management No.",
+      "description": "业务编码，FSM + YYYYMMDD + 4位序号",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_fsm_status",
+      "displayName": "状态",
+      "displayNameZh": "状态",
+      "displayNameEn": "Status",
+      "description": "融资阶段状态：1融资需求/2融资立项/3融资解决方案/4融资落实",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "融资需求": 1,
+        "融资立项": 2,
+        "融资解决方案": 3,
+        "融资落实": 4
+      }
+    },
+    {
+      "schemaName": "mcs_lead_id",
+      "displayName": "线索编号",
+      "displayNameZh": "线索编号",
+      "displayNameEn": "Lead",
+      "description": "关联线索，线索/报价单/合同至少填一个",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "lead",
+      "targetEntityDisplayName": "线索"
+    },
+    {
+      "schemaName": "mcs_leadmain_id",
+      "displayName": "线索编号",
+      "displayNameZh": "线索编号",
+      "displayNameEn": "Lead",
+      "description": "关联线索主表（LTC线索体系），与报价单/合同同体系可互相代入；2026-07-24 新建替代错关联标准lead的 mcs_lead_id（旧字段保留不删）",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_leadmain",
+      "targetEntityDisplayName": "线索"
+    },
+    {
+      "schemaName": "mcs_quoter_id",
+      "displayName": "报价单编号",
+      "displayNameZh": "报价单编号",
+      "displayNameEn": "Quote No.",
+      "description": "关联配置报价报价单（mcs_quoter），2026-07-24 新建替代错关联标准quote的 mcs_quote_id（旧字段保留不删）",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_quoter",
+      "targetEntityDisplayName": "报价单"
+    },
+    {
+      "schemaName": "mcs_quote_id",
+      "displayName": "报价单编号",
+      "displayNameZh": "报价单编号",
+      "displayNameEn": "Quote",
+      "description": "关联报价单，按线索过滤",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "quote",
+      "targetEntityDisplayName": "报价单"
+    },
+    {
+      "schemaName": "mcs_contract_id",
+      "displayName": "合同编号",
+      "displayNameZh": "合同编号",
+      "displayNameEn": "Contract",
+      "description": "关联合同，按线索/报价单过滤",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_contract",
+      "targetEntityDisplayName": "合同"
+    },
+    {
+      "schemaName": "mcs_big_area",
+      "displayName": "大区",
+      "displayNameZh": "大区",
+      "displayNameEn": "Big Area",
+      "description": "关联大区主数据，选线索后自动带出",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_region",
+      "targetEntityDisplayName": "大区"
+    },
+    {
+      "schemaName": "mcs_country_area",
+      "displayName": "国区",
+      "displayNameZh": "国区",
+      "displayNameEn": "National Region",
+      "description": "关联国区主数据，选合同后自动带出",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_nationalregion",
+      "targetEntityDisplayName": "国区"
+    },
+    {
+      "schemaName": "mcs_country_id",
+      "displayName": "国家",
+      "displayNameZh": "国家",
+      "displayNameEn": "Country",
+      "description": "关联国家主数据，选线索后自动带出",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_country",
+      "targetEntityDisplayName": "国家"
+    },
+    {
+      "schemaName": "mcs_division_id",
+      "displayName": "事业部",
+      "displayNameZh": "事业部",
+      "displayNameEn": "Division",
+      "description": "关联事业部主数据，选线索后自动带出",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_bu",
+      "targetEntityDisplayName": "事业部"
+    },
+    {
+      "schemaName": "mcs_sub_company",
+      "displayName": "子公司",
+      "displayNameZh": "子公司",
+      "displayNameEn": "Subsidiary",
+      "description": "子公司名称，选线索后自动带出",
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_customer_id",
+      "displayName": "客户编码",
+      "displayNameZh": "客户编码",
+      "displayNameEn": "Customer Code",
+      "description": "客户SAP编码，选线索后自动带出",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_customer_name",
+      "displayName": "客户名称",
+      "displayNameZh": "客户名称",
+      "displayNameEn": "Customer Name",
+      "description": "关联客户主数据",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "mcs_customermasterdata",
+      "targetEntityDisplayName": "客户主数据"
+    },
+    {
+      "schemaName": "mcs_fsm_amount",
+      "displayName": "融资金额",
+      "displayNameZh": "融资金额",
+      "displayNameEn": "Financing Amount",
+      "description": "业务币种融资金额，币种为融资币种",
+      "type": "money",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_currency",
+      "displayName": "融资币种",
+      "displayNameZh": "融资币种",
+      "displayNameEn": "Currency",
+      "description": "关联D365交易货币",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "transactioncurrency",
+      "targetEntityDisplayName": "货币"
+    },
+    {
+      "schemaName": "mcs_fsm_period",
+      "displayName": "融资期限（月）",
+      "displayNameZh": "融资期限（月）",
+      "displayNameEn": "Financing Period (Months)",
+      "description": "融资期限，单位：月",
+      "type": "integer",
+      "required": false,
+      "minValue": 0,
+      "maxValue": 9999
+    },
+    {
+      "schemaName": "mcs_fsm_payment_ratio",
+      "displayName": "首付比例",
+      "displayNameZh": "首付比例",
+      "displayNameEn": "Down Payment Ratio",
+      "description": "首付比例，0-1之间，显示为百分比",
+      "type": "decimal",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 1,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_interest_rate",
+      "displayName": "融资利率",
+      "displayNameZh": "融资利率",
+      "displayNameEn": "Financing Interest Rate",
+      "description": "融资利率",
+      "type": "decimal",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_product_desc",
+      "displayName": "融资产品",
+      "displayNameZh": "融资产品",
+      "displayNameEn": "Financing Product",
+      "description": "融资产品描述",
+      "type": "string",
+      "required": false,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_fsm_device_count",
+      "displayName": "设备台数",
+      "displayNameZh": "设备台数",
+      "displayNameEn": "Device Count",
+      "description": "设备台数，选线索后自动带出",
+      "type": "integer",
+      "required": false,
+      "minValue": 0,
+      "maxValue": 999999
+    },
+    {
+      "schemaName": "mcs_fsm_device_name",
+      "displayName": "产品名称",
+      "displayNameZh": "产品名称",
+      "displayNameEn": "Product Name",
+      "description": "产品名称，选线索后自动带出",
+      "type": "string",
+      "required": false,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_fsm_manager",
+      "displayName": "融资经理",
+      "displayNameZh": "融资经理",
+      "displayNameEn": "Financing Manager",
+      "description": "融资经理，系统用户",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "systemuser",
+      "targetEntityDisplayName": "用户"
+    },
+    {
+      "schemaName": "mcs_fsm_is_initiated",
+      "displayName": "是否立项",
+      "displayNameZh": "是否立项",
+      "displayNameEn": "Is Initiated",
+      "description": "是否立项",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "schemaName": "mcs_can_initiated",
+      "displayName": "是否可以提交立项审批",
+      "displayNameZh": "是否可以提交立项审批",
+      "displayNameEn": "Can Submit Initiation Approval",
+      "description": "系统默认：是",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "schemaName": "mcs_fsm_resource_id",
+      "displayName": "融资机构编号",
+      "displayNameZh": "融资机构编号",
+      "displayNameEn": "Financing Resource",
+      "description": "关联融资资源管理表",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_fsm_resource",
+      "targetEntityDisplayName": "融资资源管理"
+    },
+    {
+      "schemaName": "mcs_fsm_resource_name",
+      "displayName": "融资机构名称",
+      "displayNameZh": "融资机构名称",
+      "displayNameEn": "Resource Name",
+      "description": "选机构后自动带出",
+      "type": "string",
+      "required": false,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_fsm_resource_product",
+      "displayName": "金融产品名称",
+      "displayNameZh": "金融产品名称",
+      "displayNameEn": "Financial Product",
+      "description": "金融产品多选，存逗号分隔代码",
+      "type": "memo",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_fsm_credit_amount",
+      "displayName": "授信金额",
+      "displayNameZh": "授信金额",
+      "displayNameEn": "Credit Amount",
+      "description": "业务币种授信金额，默认等于融资金额",
+      "type": "money",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_credit_amount_usd",
+      "displayName": "授信金额 USD",
+      "displayNameZh": "授信金额 USD",
+      "displayNameEn": "Credit Amount (USD)",
+      "description": "固定USD数值，根据授信金额自动汇率折算",
+      "type": "decimal",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 99999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_interest_discount",
+      "displayName": "贴息",
+      "displayNameZh": "贴息",
+      "displayNameEn": "Interest Discount",
+      "description": "业务币种贴息金额",
+      "type": "money",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_fee",
+      "displayName": "融资费用",
+      "displayNameZh": "融资费用",
+      "displayNameEn": "Financing Fee",
+      "description": "业务币种融资费用",
+      "type": "money",
+      "required": false,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_fsm_repurchase_conditions",
+      "displayName": "回购条件",
+      "displayNameZh": "回购条件",
+      "displayNameEn": "Repurchase Conditions",
+      "description": "回购条件",
+      "type": "string",
+      "required": false,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_fsm_other_conditions",
+      "displayName": "其它条件",
+      "displayNameZh": "其它条件",
+      "displayNameEn": "Other Conditions",
+      "description": "其它条件",
+      "type": "string",
+      "required": false,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_can_project",
+      "displayName": "是否可以提交融资方案审批",
+      "displayNameZh": "是否可以提交融资方案审批",
+      "displayNameEn": "Can Submit Project Approval",
+      "description": "系统默认：是",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "schemaName": "mcs_is_valid",
+      "displayName": "是否有效",
+      "displayNameZh": "是否有效",
+      "displayNameEn": "Is Valid",
+      "description": "系统默认：否；融资方案审批通过后改为是",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "schemaName": "mcs_approve_type",
+      "displayName": "审批类型",
+      "displayNameZh": "审批类型",
+      "displayNameEn": "Approval Type",
+      "description": "标识当前提交的BPP审批类型：1立项审批/2融资方案审批",
+      "type": "picklist",
+      "required": false,
+      "options": {
+        "立项审批": 1,
+        "融资方案审批": 2
+      }
+    },
+    {
+      "schemaName": "mcs_bppstatus",
+      "displayName": "审批状态",
+      "displayNameZh": "审批状态",
+      "displayNameEn": "Approval Status",
+      "description": "1申请/2审批中/3通过/4驳回",
+      "type": "picklist",
+      "required": false,
+      "options": {
+        "申请": 1,
+        "审批中": 2,
+        "通过": 3,
+        "驳回": 4
+      }
+    },
+    {
+      "schemaName": "mcs_bppstatuscode",
+      "displayName": "BPP审批状态",
+      "displayNameZh": "BPP审批状态",
+      "displayNameEn": "BPP Approval Status",
+      "description": "BPP回调状态码",
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    {
+      "schemaName": "mcs_bppapprover",
+      "displayName": "当前审批人",
+      "displayNameZh": "当前审批人",
+      "displayNameEn": "Current Approver",
+      "description": "BPP当前审批人",
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_bppid",
+      "displayName": "BPP工作流ID",
+      "displayNameZh": "BPP工作流ID",
+      "displayNameEn": "BPP Workflow ID",
+      "description": "BPP工作流ID",
+      "type": "string",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_bpperrormsg",
+      "displayName": "BPP错误信息",
+      "displayNameZh": "BPP错误信息",
+      "displayNameEn": "BPP Error Message",
+      "description": "BPP错误信息",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_bpprejectreason",
+      "displayName": "BPP驳回原因",
+      "displayNameZh": "BPP驳回原因",
+      "displayNameEn": "BPP Reject Reason",
+      "description": "BPP驳回原因",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_approvedate",
+      "displayName": "BPP审批完成日期",
+      "displayNameZh": "BPP审批完成日期",
+      "displayNameEn": "BPP Approval Completion Date",
+      "description": "BPP审批完成日期",
+      "type": "datetime",
+      "required": false,
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_fsm_data_url",
+      "displayName": "审批链接",
+      "displayNameZh": "审批链接",
+      "displayNameEn": "Approval Link",
+      "description": "BPP审批链接",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_nextapprover",
+      "displayName": "当前审批人",
+      "displayNameZh": "当前审批人",
+      "displayNameEn": "当前审批人",
+      "description": "BPP当前审批人，由BPP框架统一回写（对齐mcs_credit_record模板）",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_workflowid",
+      "displayName": "BPP流程实例ID",
+      "displayNameZh": "BPP流程实例ID",
+      "displayNameEn": "BPP工作流ID",
+      "description": "BPP流程实例ID，由BPP框架统一回写（对齐mcs_credit_record模板）",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_bpplink",
+      "displayName": "BPP审批链接",
+      "displayNameZh": "BPP审批链接",
+      "displayNameEn": "BPP link",
+      "description": "BPP审批链接（对齐mcs_credit_record模板）",
+      "type": "string",
+      "maxLength": 500
+    }
+  ]
+}

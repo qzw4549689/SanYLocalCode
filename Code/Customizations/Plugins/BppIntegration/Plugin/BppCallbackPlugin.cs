@@ -65,10 +65,13 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                     return;
                 }
 
-                // 中间状态不处理（由BPP框架或BppIntegrationPlugin写入）
+                // BPP流程实例ID一旦生成，立即拼接并更新BPP审批链接
+                UpdateBppLinkIfAvailable(service, tracer, target.Id);
+
+                // 中间状态不处理业务状态流转（由BPP框架或BppIntegrationPlugin写入）
                 if (IsIntermediateStatus(bppStatus))
                 {
-                    tracer.Trace($"BPP中间状态: {bppStatus}，跳过处理");
+                    tracer.Trace($"BPP中间状态: {bppStatus}，跳过业务状态流转");
                     return;
                 }
 
@@ -125,6 +128,48 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                 tracer.Trace($"异常堆栈: {ex.StackTrace}");
                 // 回调处理异常不应阻断主流程，记录后抛出以便D365记录
                 throw new InvalidPluginExecutionException($"BPP回调处理失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 如果记录已有BPP流程实例ID，则拼接BPP审批链接并更新到mcs_bpplink字段
+        /// </summary>
+        private void UpdateBppLinkIfAvailable(IOrganizationService service, ITracingService tracer, Guid creditRecordId)
+        {
+            try
+            {
+                var creditRecord = service.Retrieve("mcs_credit_record", creditRecordId,
+                    new ColumnSet("mcs_bppid", "mcs_workflowid", "mcs_bpplink"));
+
+                string workflowId = creditRecord.GetAttributeValue<string>("mcs_bppid")
+                    ?? creditRecord.GetAttributeValue<string>("mcs_workflowid");
+
+                if (string.IsNullOrWhiteSpace(workflowId))
+                {
+                    tracer.Trace("BPP流程实例ID为空，无法生成BPP链接");
+                    return;
+                }
+
+                // 与限额申请保持一致：orgId=3（UAT/生产均为3）
+                string bppLink = $"https://sanybpp-portal-uat.sany.com.cn/approval-form?orgId=3&instanceId={workflowId}";
+
+                var existingLink = creditRecord.GetAttributeValue<string>("mcs_bpplink");
+                if (!string.Equals(existingLink, bppLink, StringComparison.OrdinalIgnoreCase))
+                {
+                    var updateRecord = new Entity("mcs_credit_record") { Id = creditRecordId };
+                    updateRecord["mcs_bpplink"] = bppLink;
+                    service.Update(updateRecord);
+                    tracer.Trace($"已更新BPP链接: {bppLink}");
+                }
+                else
+                {
+                    tracer.Trace("BPP链接未变化，跳过更新");
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"更新BPP链接失败: {ex.Message}");
+                // 不影响主流程
             }
         }
 

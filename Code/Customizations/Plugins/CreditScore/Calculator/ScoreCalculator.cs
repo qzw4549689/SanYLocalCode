@@ -8,12 +8,20 @@ namespace SanyD365.Plugins.CreditScore.Calculator
 {
     public class ScoreCalculator
     {
-        private readonly IOrganizationService _service;
+        private readonly IOrganizationService _readService;
+        private readonly IOrganizationService _writeService;
         private readonly ITracingService _tracer;
 
-        public ScoreCalculator(IOrganizationService service, ITracingService tracer)
+        /// <summary>
+        /// 信用分计算器
+        /// </summary>
+        /// <param name="readService">读取服务（评分卡/评分项目/枚举值/客户标签），调用方应传系统上下文服务，避免依赖操作员记录级权限</param>
+        /// <param name="writeService">写回服务（标签得分回写），保留调用用户上下文</param>
+        /// <param name="tracer"></param>
+        public ScoreCalculator(IOrganizationService readService, IOrganizationService writeService, ITracingService tracer)
         {
-            _service = service;
+            _readService = readService;
+            _writeService = writeService;
             _tracer = tracer;
         }
 
@@ -70,6 +78,14 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 {
                     _tracer.Trace($"→ 定量评分: value={tag.DecimalValue}, Min={config.MinValue}, Max={config.MaxValue}");
                     itemScore = CalculateQuantitativeScore(config, tag.DecimalValue);
+
+                    // OverdueModel 特殊处理：按模型分比例计算，公式 = weight * value / 100
+                    if (itemCode == "OverdueModel" && itemScore > 0 && tag.DecimalValue >= 0)
+                    {
+                        int originalScore = itemScore;
+                        itemScore = (int)Math.Round(config.Weight * tag.DecimalValue / 100m);
+                        _tracer.Trace($"OverdueModel 按比例计算: weight={config.Weight}, value={tag.DecimalValue}, 原固定分={originalScore}, 比例分={itemScore}");
+                    }
                 }
                 else // 定性
                 {
@@ -127,7 +143,7 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 query.LinkEntities.Add(link);
 
                 _tracer.Trace("执行评分卡配置查询...");
-                var records = _service.RetrieveMultiple(query);
+                var records = _readService.RetrieveMultiple(query);
                 _tracer.Trace($"评分卡配置查询返回: {records.Entities.Count}条");
 
                 foreach (var record in records.Entities)
@@ -155,7 +171,7 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                             if (itemObj is EntityReference itemRef)
                             {
                                 _tracer.Trace($"通过EntityReference获取编码, ID={itemRef.Id}");
-                                var item = _service.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_credit_itemsno"));
+                                var item = _readService.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_credit_itemsno"));
                                 if (item != null)
                                 {
                                     var itemsNoObj = item["mcs_credit_itemsno"];
@@ -181,8 +197,18 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                             var lvObj = record["mcs_listvalue"];
                             if (lvObj is EntityReference lvRef)
                             {
-                                listValue = lvRef.Name ?? "";
-                                _tracer.Trace($"mcs_listvalue 是EntityReference, Name={listValue}");
+                                // 从 mcs_credititem_value 读取 mcs_listvalue 字段（三一编码 L/M/H/O）
+                                try
+                                {
+                                    var lvEnt = _readService.Retrieve("mcs_credititem_value", lvRef.Id, new ColumnSet("mcs_listvalue", "mcs_listname"));
+                                    listValue = lvEnt.GetAttributeValue<string>("mcs_listvalue") ?? lvRef.Name ?? "";
+                                    _tracer.Trace($"mcs_listvalue 是EntityReference, 读取listvalue={listValue}, name={lvRef.Name}");
+                                }
+                                catch (Exception lvEx)
+                                {
+                                    _tracer.Trace($"读取mcs_credititem_value异常: {lvEx.Message}, fallback到Name");
+                                    listValue = lvRef.Name ?? "";
+                                }
                             }
                             else if (lvObj != null)
                             {
@@ -231,7 +257,7 @@ namespace SanyD365.Plugins.CreditScore.Calculator
             {
                 var query = new QueryExpression("mcs_customer_tag")
                 {
-                    ColumnSet = new ColumnSet("mcs_customer_tagid", "mcs_credit_item", "mcs_datatype", "mcs_itemintvalue2", "mcs_itemtxtvalue2", "mcs_itemvalue2", "mcs_itemintvalue1", "mcs_itemtxtvalue1", "mcs_itemvalue1"),
+                    ColumnSet = new ColumnSet("mcs_customer_tagid", "mcs_credit_item", "mcs_datatype", "mcs_itemintvalue2", "mcs_itemtxtvalue2", "mcs_itemvalue2", "mcs_itemintvalue1", "mcs_itemtxtvalue1", "mcs_itemvalue1", "mcs_credititem_value"),
                     Criteria = new FilterExpression
                     {
                         Conditions =
@@ -251,7 +277,7 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 query.LinkEntities.Add(link);
 
                 _tracer.Trace("执行标签查询...");
-                var records = _service.RetrieveMultiple(query);
+                var records = _readService.RetrieveMultiple(query);
                 _tracer.Trace($"标签查询返回: {records.Entities.Count}条");
 
                 foreach (var record in records.Entities)
@@ -278,7 +304,7 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                             _tracer.Trace($"标签ID={record.Id}, mcs_credit_item类型={itemObj?.GetType()?.Name ?? "null"}");
                             if (itemObj is EntityReference itemRef)
                             {
-                                var item = _service.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_credit_itemsno"));
+                                var item = _readService.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_credit_itemsno"));
                                 if (item != null && item.Contains("mcs_credit_itemsno"))
                                 {
                                     itemCode = item.GetAttributeValue<string>("mcs_credit_itemsno") ?? "";
@@ -303,15 +329,26 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                         
                         if (isQuantitative)
                         {
+                            // 辅助：判断字符串是否为有效数字（排除 N/A、空字符串等）
+                            bool IsValidDecimalString(string s) => !string.IsNullOrWhiteSpace(s)
+                                && !string.Equals(s.Trim(), "N/A", StringComparison.OrdinalIgnoreCase)
+                                && decimal.TryParse(s.Trim(), out _);
+
+                            // 判断是否有真实数据（value2 或 value1 任一字段有有效数值）
+                            bool hasValue2 = (record.Contains("mcs_itemintvalue2") && record["mcs_itemintvalue2"] != null)
+                                          || (record.Contains("mcs_itemvalue2") && IsValidDecimalString(record.GetAttributeValue<string>("mcs_itemvalue2")));
+                            bool hasValue1 = (record.Contains("mcs_itemintvalue1") && record["mcs_itemintvalue1"] != null)
+                                          || (record.Contains("mcs_itemvalue1") && IsValidDecimalString(record.GetAttributeValue<string>("mcs_itemvalue1")));
+
                             // 优先读复核值(value2)，空则回退读原始值(value1)
                             if (record.Contains("mcs_itemintvalue2") && record["mcs_itemintvalue2"] != null)
                             {
                                 decimalValue = record.GetAttributeValue<decimal>("mcs_itemintvalue2");
                                 rawValue = decimalValue.ToString("F2");
                             }
-                            else if (record.Contains("mcs_itemvalue2") && record["mcs_itemvalue2"] != null)
+                            else if (record.Contains("mcs_itemvalue2") && IsValidDecimalString(record.GetAttributeValue<string>("mcs_itemvalue2")))
                             {
-                                decimal.TryParse(record.GetAttributeValue<string>("mcs_itemvalue2"), out decimalValue);
+                                decimal.TryParse(record.GetAttributeValue<string>("mcs_itemvalue2").Trim(), out decimalValue);
                                 rawValue = decimalValue.ToString("F2");
                             }
                             else if (record.Contains("mcs_itemintvalue1") && record["mcs_itemintvalue1"] != null)
@@ -320,37 +357,64 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                                 rawValue = decimalValue.ToString("F2");
                                 _tracer.Trace($"标签{itemCode}: value2为空，回退读取value1={decimalValue}");
                             }
-                            else if (record.Contains("mcs_itemvalue1") && record["mcs_itemvalue1"] != null)
+                            else if (record.Contains("mcs_itemvalue1") && IsValidDecimalString(record.GetAttributeValue<string>("mcs_itemvalue1")))
                             {
-                                decimal.TryParse(record.GetAttributeValue<string>("mcs_itemvalue1"), out decimalValue);
+                                decimal.TryParse(record.GetAttributeValue<string>("mcs_itemvalue1").Trim(), out decimalValue);
                                 rawValue = decimalValue.ToString("F2");
                                 _tracer.Trace($"标签{itemCode}: value2为空，回退读取value1={decimalValue}");
+                            }
+                            else
+                            {
+                                // 字符串解析失败（如 N/A）或无真实数据时，统一按缺失处理
+                                decimalValue = -1;
+                                _tracer.Trace($"标签{itemCode}: value1/value2 无有效数值数据，按缺失处理");
                             }
                         }
                         else // 定性
                         {
-                            // 优先读复核值(value2)，空则回退读原始值(value1)
-                            if (record.Contains("mcs_itemtxtvalue2") && record["mcs_itemtxtvalue2"] != null)
+                            // 优先读复核定性指标(Lookup)的显示名
+                            if (record.Contains("mcs_credititem_value") && record["mcs_credititem_value"] != null)
                             {
-                                stringValue = record.GetAttributeValue<string>("mcs_itemtxtvalue2") ?? "O";
-                                rawValue = stringValue;
+                                var lookupValue = record["mcs_credititem_value"] as EntityReference;
+                                if (lookupValue != null && !string.IsNullOrEmpty(lookupValue.Name))
+                                {
+                                    stringValue = lookupValue.Name;
+                                    rawValue = stringValue;
+                                    _tracer.Trace($"标签{itemCode}: 从复核定性指标(Lookup)读取值={stringValue}");
+                                }
                             }
-                            else if (record.Contains("mcs_itemvalue2") && record["mcs_itemvalue2"] != null)
+
+                            // Lookup 为空再读旧文本复核定性指标
+                            if (string.IsNullOrEmpty(stringValue) || stringValue == "O")
                             {
-                                stringValue = record.GetAttributeValue<string>("mcs_itemvalue2") ?? "O";
-                                rawValue = stringValue;
+                                if (record.Contains("mcs_itemtxtvalue2") && record["mcs_itemtxtvalue2"] != null)
+                                {
+                                    stringValue = record.GetAttributeValue<string>("mcs_itemtxtvalue2") ?? "O";
+                                    rawValue = stringValue;
+                                    _tracer.Trace($"标签{itemCode}: 从旧文本复核定性指标读取值={stringValue}");
+                                }
+                                else if (record.Contains("mcs_itemvalue2") && record["mcs_itemvalue2"] != null)
+                                {
+                                    stringValue = record.GetAttributeValue<string>("mcs_itemvalue2") ?? "O";
+                                    rawValue = stringValue;
+                                }
                             }
-                            else if (record.Contains("mcs_itemtxtvalue1") && record["mcs_itemtxtvalue1"] != null)
+
+                            // value2 都为空则回退读原始值(value1)
+                            if (string.IsNullOrEmpty(stringValue) || stringValue == "O")
                             {
-                                stringValue = record.GetAttributeValue<string>("mcs_itemtxtvalue1") ?? "O";
-                                rawValue = stringValue;
-                                _tracer.Trace($"标签{itemCode}: value2为空，回退读取value1={stringValue}");
-                            }
-                            else if (record.Contains("mcs_itemvalue1") && record["mcs_itemvalue1"] != null)
-                            {
-                                stringValue = record.GetAttributeValue<string>("mcs_itemvalue1") ?? "O";
-                                rawValue = stringValue;
-                                _tracer.Trace($"标签{itemCode}: value2为空，回退读取value1={stringValue}");
+                                if (record.Contains("mcs_itemtxtvalue1") && record["mcs_itemtxtvalue1"] != null)
+                                {
+                                    stringValue = record.GetAttributeValue<string>("mcs_itemtxtvalue1") ?? "O";
+                                    rawValue = stringValue;
+                                    _tracer.Trace($"标签{itemCode}: value2为空，回退读取value1={stringValue}");
+                                }
+                                else if (record.Contains("mcs_itemvalue1") && record["mcs_itemvalue1"] != null)
+                                {
+                                    stringValue = record.GetAttributeValue<string>("mcs_itemvalue1") ?? "O";
+                                    rawValue = stringValue;
+                                    _tracer.Trace($"标签{itemCode}: value2为空，回退读取value1={stringValue}");
+                                }
                             }
                         }
 
@@ -410,14 +474,18 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 return 0;
             }
 
-            if (!string.IsNullOrEmpty(config.ListValue))
+            // 归一化：把中文显示名统一转换为三一编码 L/M/H/O
+            string normalizedValue = NormalizeQualitativeValue(value);
+            string normalizedConfigValue = NormalizeQualitativeValue(config.ListValue);
+
+            if (!string.IsNullOrEmpty(normalizedConfigValue))
             {
-                if (value.Equals(config.ListValue, StringComparison.OrdinalIgnoreCase))
+                if (normalizedValue.Equals(normalizedConfigValue, StringComparison.OrdinalIgnoreCase))
                 {
                     return config.Weight;
                 }
                 // listvalue有配置但值不匹配 → 0分
-                _tracer.Trace($"定性指标 {config.ItemCode}: 值 {value} 不匹配 listvalue={config.ListValue}，得0分");
+                _tracer.Trace($"定性指标 {config.ItemCode}: 值 {value}(归一化={normalizedValue}) 不匹配 listvalue={config.ListValue}(归一化={normalizedConfigValue})，得0分");
                 return 0;
             }
             else
@@ -425,6 +493,35 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 // 无listvalue配置，按缺失值处理（文档要求取平均分，当前简化处理为0分）
                 _tracer.Trace($"定性指标 {config.ItemCode}: 值 {value} 无匹配配置（listvalue为空），按缺失值处理，得0分");
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// 把定性指标的中文显示名归一化为三一标准编码
+        /// 用于兼容 mcs_itemvalue2 可能存中文的场景
+        /// </summary>
+        private string NormalizeQualitativeValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+
+            switch (value.Trim())
+            {
+                case "低风险":
+                case "低":
+                    return "L";
+                case "中风险":
+                case "中":
+                    return "M";
+                case "高风险":
+                case "高":
+                    return "H";
+                case "缺失": return "O";
+                case "S级": return "S";
+                case "A级": return "A";
+                case "B级": return "B";
+                case "C级": return "C";
+                default: return value.Trim();
             }
         }
 
@@ -441,31 +538,40 @@ namespace SanyD365.Plugins.CreditScore.Calculator
 
         /// <summary>
         /// 将计算出的得分回写到客户信用标签表
+        /// 同一个标签可能对应评分卡多行区间配置，按 TagId 合并后取最高分回写
         /// </summary>
         private void SaveTagScores(List<ScoreDetail> scoreDetails)
         {
             if (scoreDetails == null || scoreDetails.Count == 0) return;
 
-            foreach (var detail in scoreDetails)
-            {
-                if (detail.TagId == Guid.Empty)
+            // 按 TagId 分组，取该标签在所有区间配置中的最高得分
+            var mergedScores = scoreDetails
+                .Where(d => d.TagId != Guid.Empty)
+                .GroupBy(d => d.TagId)
+                .Select(g => new
                 {
-                    _tracer.Trace($"指标 {detail.ItemCode} 缺少标签ID，跳过得分回写");
-                    continue;
-                }
+                    TagId = g.Key,
+                    ItemCode = g.First().ItemCode,
+                    Score = g.Max(d => d.Score)
+                })
+                .ToList();
 
+            foreach (var detail in mergedScores)
+            {
                 try
                 {
                     var updateTag = new Entity("mcs_customer_tag", detail.TagId);
                     updateTag["mcs_scorevalue"] = detail.Score;
                     updateTag["mcs_isscore"] = true;
-                    _service.Update(updateTag);
+                    _writeService.Update(updateTag);
                     _tracer.Trace($"回写标签得分: TagId={detail.TagId}, ItemCode={detail.ItemCode}, Score={detail.Score}");
                 }
                 catch (Exception ex)
                 {
                     _tracer.Trace($"回写标签得分失败: TagId={detail.TagId}, ItemCode={detail.ItemCode}, Error={ex.Message}");
-                    // 不回抛，避免影响信用分计算主流程
+                    throw new InvalidPluginExecutionException(
+                        $"回写指标 {detail.ItemCode} 的得分值失败，导致明细得分与总分不一致。请联系管理员检查标签表更新权限或校验Plugin。",
+                        ex);
                 }
             }
         }

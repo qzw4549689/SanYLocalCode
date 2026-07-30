@@ -1,0 +1,6 @@
+{
+  "TradePtType_SaveSuccess": "保存成功",
+  "TradePtType_ConfirmDelete": "确定要删除此产品分类吗？",
+  "TradePtType_DuplicateCode": "产品分类编码已存在",
+  "TradePtType_InvalidCode": "产品分类编码必填"
+}

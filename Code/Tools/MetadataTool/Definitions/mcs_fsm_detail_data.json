@@ -1,0 +1,89 @@
+{
+  "entityName": "mcs_fsm_detail_data",
+  "displayName": "融资落实",
+  "displayNameZh": "融资落实",
+  "displayNameEn": "Financing Implementation",
+  "primaryAttribute": "mcs_fsm_detail_no",
+  "primaryAttributeDisplayName": "融资落实编号",
+  "primaryAttributeDisplayNameZh": "融资落实编号",
+  "primaryAttributeDisplayNameEn": "Implementation No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260713",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_detail_no",
+      "displayName": "融资落实编号",
+      "displayNameZh": "融资落实编号",
+      "displayNameEn": "Implementation No.",
+      "description": "业务编码，FSMD + YYYYMMDD + 4位序号",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_fsm_data_id",
+      "displayName": "融资管理编号",
+      "displayNameZh": "融资管理编号",
+      "displayNameEn": "Financing Management",
+      "description": "关联融资管理主表",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "mcs_fsm_data",
+      "targetEntityDisplayName": "融资管理"
+    },
+    {
+      "schemaName": "mcs_order_id",
+      "displayName": "订单编号",
+      "displayNameZh": "订单编号",
+      "displayNameEn": "Order",
+      "description": "关联销售订单，按主表合同号过滤",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "salesorder",
+      "targetEntityDisplayName": "订单"
+    },
+    {
+      "schemaName": "mcs_device_no",
+      "displayName": "融资设备编号",
+      "displayNameZh": "融资设备编号",
+      "displayNameEn": "Device No.",
+      "description": "取合同项下执行订单设备编号",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_disbursement_amount",
+      "displayName": "放款金额",
+      "displayNameZh": "放款金额",
+      "displayNameEn": "Disbursement Amount",
+      "description": "业务币种放款金额，币种同主表融资币种",
+      "type": "money",
+      "required": true,
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_disbursement_conditions",
+      "displayName": "放款条件",
+      "displayNameZh": "放款条件",
+      "displayNameEn": "Disbursement Conditions",
+      "description": "取融资解决方案，可修改",
+      "type": "memo",
+      "required": true,
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_disbursement_date",
+      "displayName": "收到融资款时间",
+      "displayNameZh": "收到融资款时间",
+      "displayNameEn": "Disbursement Date",
+      "description": "收到融资款时间",
+      "type": "datetime",
+      "required": true,
+      "dateOnly": true
+    }
+  ]
+}

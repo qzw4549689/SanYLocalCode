@@ -53,6 +53,48 @@ namespace D365MetadataTool
         }
 
         /// <summary>
+        /// 创建中英文双语 Label（2052 简体中文 + 1033 英文）
+        /// 注意：D365 组织基础语言为中文，Label 第一个 LocalizedLabel 需与基础语言一致
+        /// </summary>
+        public static Label Create(string zhCN, string enUS)
+        {
+            return Create(new Dictionary<int, string>
+            {
+                [2052] = zhCN,
+                [1033] = enUS
+            });
+        }
+
+        /// <summary>
+        /// 从语言代码字典创建多语言 Label
+        /// </summary>
+        public static Label Create(Dictionary<int, string> translations)
+        {
+            if (translations == null || translations.Count == 0)
+            {
+                return new Label();
+            }
+
+            var localizedLabels = translations
+                .Where(t => !string.IsNullOrWhiteSpace(t.Value))
+                .Select(t => new LocalizedLabel(t.Value, t.Key))
+                .ToArray();
+
+            if (localizedLabels.Length == 0)
+            {
+                return new Label();
+            }
+
+            // Label 构造函数：第一个为当前用户语言标签，第二个为其他语言标签数组
+            var userLabel = localizedLabels[0];
+            var otherLabels = localizedLabels.Length > 1
+                ? localizedLabels.Skip(1).ToArray()
+                : System.Array.Empty<LocalizedLabel>();
+
+            return new Label(userLabel, otherLabels);
+        }
+
+        /// <summary>
         /// 创建单语言 Label（仅用于明确只需要一种语言的场景）
         /// </summary>
         public static Label CreateSingle(string text, int languageCode)

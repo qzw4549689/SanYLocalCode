@@ -5,14 +5,54 @@
  * 影响范围: 仅限mcs_customer_tag实体
  */
 
+// 同步加载多语言帮助类（实验阶段，验证通过后可改为窗体依赖库）
+(function () {
+    if (typeof LanguageHelper !== "undefined") return;
+    try {
+        var req = new XMLHttpRequest();
+        req.open("GET", Xrm.Utility.getGlobalContext().getClientUrl() + "/WebResources/mcs_language_helper.js", false);
+        req.send();
+        if (req.status === 200) {
+            // 通过 script 标签注入，确保 LanguageHelper 定义在全局作用域
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = req.responseText;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        } else {
+            console.warn("mcs_language_helper.js 加载失败，状态码:", req.status);
+        }
+    } catch (e) {
+        console.error("加载 mcs_language_helper.js 异常:", e);
+    }
+})();
+
 var CustomerTagForm = CustomerTagForm || {};
+
+/**
+ * 多语言取词（带中文兜底）
+ * 语言包已加载时返回对应语言文本；未加载/未找到时返回原中文，保证中文用户不受影响
+ */
+CustomerTagForm.L = function (key, defaultText) {
+    if (typeof LanguageHelper !== "undefined") {
+        var v = LanguageHelper.getLabel(key);
+        if (v && v !== key) return v;
+    }
+    return defaultText;
+};
 
 /**
  * 表单加载事件
  */
 CustomerTagForm.onLoad = function (executionContext) {
+    console.log("CustomerTagForm.onLoad start");
     var formContext = executionContext.getFormContext();
+
+    // 预加载语言包（异步，不阻塞后续逻辑）
+    if (typeof LanguageHelper !== "undefined") {
+        LanguageHelper.loadLanguagePack();
+    }
     var formType = formContext.ui.getFormType();
+    console.log("CustomerTagForm.onLoad formType=", formType);
     
     // 设置字段只读
     CustomerTagForm.setFieldsReadOnly(formContext);
@@ -25,6 +65,12 @@ CustomerTagForm.onLoad = function (executionContext) {
     
     // 根据评估状态控制可编辑性
     CustomerTagForm.toggleEditableByStatus(formContext);
+    
+    // 兼容过渡期：如果新Lookup为空但旧文本字段有值，把旧值显示到合并展示字段
+    CustomerTagForm.syncDisplayFromLegacyFields(formContext);
+
+    // 新建时从关联的信用评估记录带出客户编码
+    CustomerTagForm.populateAccountFromCreditRecord(formContext);
 };
 
 /**
@@ -32,11 +78,11 @@ CustomerTagForm.onLoad = function (executionContext) {
  * 集成值、计算字段、关联字段只读
  */
 CustomerTagForm.setFieldsReadOnly = function (formContext) {
-    // 关联字段始终只读
+    // 关联字段和展示字段始终只读
     var readOnlyFields = [
         "mcs_scoreid",        // 信用评估编码
         "mcs_credit_record",  // 信用评估（Lookup）
-        "mcs_credit_item",    // 评分项目（Lookup）
+        "mcs_credit_item",    // 评分项目（Lookup）- 默认锁定，复核新建时动态解锁
         "mcs_accountid",    // 客户编码
         "mcs_group",        // 评分项目分类
         "mcs_itemid",       // 指标编码
@@ -47,6 +93,7 @@ CustomerTagForm.setFieldsReadOnly = function (formContext) {
         "mcs_itemtxtvalue1", // 集成定性指标
         "mcs_itemvalue1",    // 集成指标（合并展示）
         "mcs_itemvalue2",    // 复核指标（合并展示）
+        "mcs_itemtxtvalue2", // 复核定性指标（旧文本字段，过渡期保留）
         "mcs_scorevalue",    // 得分值
         "mcs_isscore",       // 是否评分
         "mcs_active"         // 有效状态
@@ -70,10 +117,22 @@ CustomerTagForm.registerEvents = function (formContext) {
         intValue2Field.addOnChange(CustomerTagForm.onReviewValueChange);
     }
     
-    // 复核定性指标变更 - 更新合并展示值
-    var txtValue2Field = formContext.getAttribute("mcs_itemtxtvalue2");
-    if (txtValue2Field) {
-        txtValue2Field.addOnChange(CustomerTagForm.onReviewValueChange);
+    // 复核定性指标(Lookup)变更 - 更新合并展示值
+    var credititemValueField = formContext.getAttribute("mcs_credititem_value");
+    if (credititemValueField) {
+        credititemValueField.addOnChange(CustomerTagForm.onReviewValueChange);
+    }
+    
+    // 评分项目变更 - 新建时带出信息并更新过滤
+    var creditItemField = formContext.getAttribute("mcs_credit_item");
+    if (creditItemField) {
+        creditItemField.addOnChange(CustomerTagForm.onCreditItemChange);
+    }
+
+    // 信用评估变更 - 补带客户编码
+    var creditRecordField = formContext.getAttribute("mcs_credit_record");
+    if (creditRecordField) {
+        creditRecordField.addOnChange(CustomerTagForm.populateAccountFromCreditRecord);
     }
 };
 
@@ -84,7 +143,8 @@ CustomerTagForm.registerEvents = function (formContext) {
 CustomerTagForm.onReviewValueChange = function (executionContext) {
     var formContext = executionContext.getFormContext();
     var dataTypeField = formContext.getAttribute("mcs_datatype");
-    var dataType = dataTypeField ? dataTypeField.getValue() : null;
+    var rawDataType = dataTypeField ? dataTypeField.getValue() : null;
+    var dataType = rawDataType != null ? parseInt(rawDataType, 10) : null;
     
     var reviewValue = "";
     
@@ -96,10 +156,21 @@ CustomerTagForm.onReviewValueChange = function (executionContext) {
             reviewValue = val !== null ? val.toString() : "";
         }
     } else if (dataType === 2) {
-        // 定性：取复核定性指标
-        var txtValue2 = formContext.getAttribute("mcs_itemtxtvalue2");
-        if (txtValue2) {
-            reviewValue = txtValue2.getValue() || "";
+        // 定性：取复核定性指标Lookup的显示名
+        var lookupField = formContext.getAttribute("mcs_credititem_value");
+        if (lookupField) {
+            var lookupValue = lookupField.getValue();
+            if (lookupValue && lookupValue.length > 0) {
+                reviewValue = lookupValue[0].name || "";
+            }
+        }
+        
+        // 兼容过渡期：新Lookup为空则回退旧文本字段
+        if (!reviewValue) {
+            var txtValue2 = formContext.getAttribute("mcs_itemtxtvalue2");
+            if (txtValue2) {
+                reviewValue = txtValue2.getValue() || "";
+            }
         }
     }
     
@@ -113,11 +184,15 @@ CustomerTagForm.onReviewValueChange = function (executionContext) {
 /**
  * 根据数据类型控制字段显隐
  * 定量：显示集成/复核定量指标，隐藏集成/复核定性指标
- * 定性：显示集成/复核定性指标，隐藏集成/复核定量指标
+ * 定性：显示集成/复核定性指标(Lookup)，隐藏集成/复核定量指标
  */
 CustomerTagForm.toggleReviewFields = function (formContext) {
     var dataTypeField = formContext.getAttribute("mcs_datatype");
-    var dataType = dataTypeField ? dataTypeField.getValue() : null;
+    var rawDataType = dataTypeField ? dataTypeField.getValue() : null;
+    // 兼容数字和字符串返回值
+    var dataType = rawDataType != null ? parseInt(rawDataType, 10) : null;
+    
+    console.log("CustomerTagForm.toggleReviewFields: dataType=", dataType);
     
     // 集成字段显隐控制
     var intValue1Control = formContext.getControl("mcs_itemintvalue1");
@@ -125,25 +200,34 @@ CustomerTagForm.toggleReviewFields = function (formContext) {
     
     // 复核字段显隐控制
     var intReviewControl = formContext.getControl("mcs_itemintvalue2");
+    var lookupReviewControl = formContext.getControl("mcs_credititem_value");
+    // 旧文本字段在过渡期不显示
     var txtReviewControl = formContext.getControl("mcs_itemtxtvalue2");
+    
+    console.log("Controls: intValue1=", !!intValue1Control, "txtValue1=", !!txtValue1Control,
+                "intReview=", !!intReviewControl, "lookupReview=", !!lookupReviewControl,
+                "txtReview=", !!txtReviewControl);
     
     if (dataType === 1) {
         // 定量：显示定量字段，隐藏定性字段
         if (intValue1Control) intValue1Control.setVisible(true);
         if (txtValue1Control) txtValue1Control.setVisible(false);
         if (intReviewControl) intReviewControl.setVisible(true);
+        if (lookupReviewControl) lookupReviewControl.setVisible(false);
         if (txtReviewControl) txtReviewControl.setVisible(false);
     } else if (dataType === 2) {
         // 定性：显示定性字段，隐藏定量字段
         if (intValue1Control) intValue1Control.setVisible(false);
         if (txtValue1Control) txtValue1Control.setVisible(true);
         if (intReviewControl) intReviewControl.setVisible(false);
-        if (txtReviewControl) txtReviewControl.setVisible(true);
+        if (lookupReviewControl) lookupReviewControl.setVisible(true);
+        if (txtReviewControl) txtReviewControl.setVisible(false);
     } else {
         // 未选择：都隐藏
         if (intValue1Control) intValue1Control.setVisible(false);
         if (txtValue1Control) txtValue1Control.setVisible(false);
         if (intReviewControl) intReviewControl.setVisible(false);
+        if (lookupReviewControl) lookupReviewControl.setVisible(false);
         if (txtReviewControl) txtReviewControl.setVisible(false);
     }
 };
@@ -153,38 +237,139 @@ CustomerTagForm.toggleReviewFields = function (formContext) {
  * 只有在【人工复核】状态才允许编辑复核字段
  */
 CustomerTagForm.toggleEditableByStatus = function (formContext) {
-    // 获取关联的评估记录状态（通过mcs_scoreid查找）
-    var scoreIdField = formContext.getAttribute("mcs_scoreid");
-    if (!scoreIdField || !scoreIdField.getValue()) return;
+    // 优先通过关联的信用评估记录（mcs_credit_record）获取状态，
+    // 该字段在表单上可直接取到 ID，比 mcs_scoreid 更可靠。
+    var creditRecordField = formContext.getAttribute("mcs_credit_record");
+    var creditRecordId = null;
     
-    var scoreId = scoreIdField.getValue();
+    if (creditRecordField && creditRecordField.getValue()) {
+        var lookupValue = creditRecordField.getValue();
+        if (Array.isArray(lookupValue) && lookupValue.length > 0) {
+            creditRecordId = lookupValue[0].id;
+        } else if (lookupValue.id) {
+            creditRecordId = lookupValue.id;
+        }
+    }
     
-    // 查询评估记录状态
-    var fetchXml = [
-        "<fetch top='1'>",
-        "  <entity name='mcs_credit_record'>",
-        "    <attribute name='mcs_status' />",
-        "    <filter>",
-        "      <condition attribute='mcs_scoreid' operator='eq' value='" + scoreId + "' />",
-        "    </filter>",
-        "  </entity>",
-        "</fetch>"
-    ].join("");
+    // 若表单上未加载信用评估 lookup，则回退到 mcs_scoreid 查询（兼容旧数据）
+    if (!creditRecordId) {
+        var scoreIdField = formContext.getAttribute("mcs_scoreid");
+        if (!scoreIdField || !scoreIdField.getValue()) {
+            CustomerTagForm.setReviewFieldsEditable(formContext, false);
+            return;
+        }
+        
+        var scoreId = scoreIdField.getValue();
+        var fetchXml = [
+            "<fetch top='1'>",
+            "  <entity name='mcs_credit_record'>",
+            "    <attribute name='mcs_status' />",
+            "    <filter>",
+            "      <condition attribute='mcs_scoreid' operator='eq' value='" + scoreId + "' />",
+            "    </filter>",
+            "  </entity>",
+            "</fetch>"
+        ].join("");
+        
+        Xrm.WebApi.retrieveMultipleRecords("mcs_credit_record", "?fetchXml=" + encodeURIComponent(fetchXml))
+            .then(function (result) {
+                if (result.entities.length > 0) {
+                    var status = result.entities[0].mcs_status;
+                    CustomerTagForm.setReviewFieldsEditable(formContext, status === 12);
+                } else {
+                    CustomerTagForm.setReviewFieldsEditable(formContext, false);
+                }
+            })
+            .catch(function (error) {
+                console.error("查询评估记录状态失败:", error);
+                CustomerTagForm.setReviewFieldsEditable(formContext, false);
+            });
+        return;
+    }
     
-    Xrm.WebApi.retrieveMultipleRecords("mcs_credit_record", "?fetchXml=" + encodeURIComponent(fetchXml))
+    // 通过 lookup ID 直接查询单条记录状态
+    Xrm.WebApi.retrieveRecord("mcs_credit_record", creditRecordId, "?$select=mcs_status")
         .then(function (result) {
-            if (result.entities.length > 0) {
-                var status = result.entities[0].mcs_status;
-                // 12 = 人工复核状态，才允许编辑复核字段
-                var isReviewStatus = (status === 12);
-                
-                // 同时需要校验评分项目是否允许人工补录
-                CustomerTagForm.setReviewFieldsEditable(formContext, isReviewStatus);
-            }
+            // 12 = 人工复核状态，才允许编辑复核字段
+            CustomerTagForm.setReviewFieldsEditable(formContext, result.mcs_status === 12);
         })
         .catch(function (error) {
             console.error("查询评估记录状态失败:", error);
+            CustomerTagForm.setReviewFieldsEditable(formContext, false);
         });
+};
+
+/**
+ * 从信用评估记录带出客户编码（mcs_accountid）
+ * 新建标签时，子网格不会自动带客户编码，需手动从父记录读取
+ */
+CustomerTagForm.populateAccountFromCreditRecord = function (executionContext) {
+    var formContext = executionContext.getFormContext ? executionContext.getFormContext() : executionContext;
+    var accountField = formContext.getAttribute("mcs_accountid");
+    if (!accountField) {
+        console.log("populateAccountFromCreditRecord: mcs_accountid 字段不存在");
+        return;
+    }
+    if (accountField.getValue()) {
+        console.log("populateAccountFromCreditRecord: mcs_accountid 已有值");
+        return;
+    }
+
+    var creditRecordField = formContext.getAttribute("mcs_credit_record");
+    if (!creditRecordField) {
+        console.log("populateAccountFromCreditRecord: mcs_credit_record 字段不存在");
+        return;
+    }
+
+    var creditRecordValue = creditRecordField.getValue();
+    if (!creditRecordValue) {
+        console.log("populateAccountFromCreditRecord: mcs_credit_record 为空");
+        return;
+    }
+
+    var creditRecordId = null;
+    if (Array.isArray(creditRecordValue) && creditRecordValue.length > 0) {
+        creditRecordId = creditRecordValue[0].id;
+    } else if (creditRecordValue.id) {
+        creditRecordId = creditRecordValue.id;
+    }
+
+    if (!creditRecordId) {
+        console.log("populateAccountFromCreditRecord: 无法获取信用评估记录 ID");
+        return;
+    }
+
+    // 去掉花括号，避免 Web API 不识别
+    creditRecordId = creditRecordId.replace("{", "").replace("}", "");
+
+    console.log("populateAccountFromCreditRecord: 准备查询信用评估记录", creditRecordId);
+    try {
+        // Web API 中 lookup 字段以 _mcs_accountid_value 形式返回
+        Xrm.WebApi.retrieveRecord("mcs_credit_record", creditRecordId, "?$select=_mcs_accountid_value")
+            .then(function (result) {
+                if (result && result["_mcs_accountid_value"]) {
+                    var accountId = result["_mcs_accountid_value"];
+                    var accountName = result["_mcs_accountid_value@OData.Community.Display.V1.FormattedValue"] || "";
+                    var accountEntityType = result["_mcs_accountid_value@Microsoft.Dynamics.CRM.lookuplogicalname"] || "account";
+
+                    // setValue 需要数组，且 id 建议带上花括号
+                    var accountValue = [{
+                        id: accountId.indexOf("{") === 0 ? accountId : "{" + accountId + "}",
+                        name: accountName,
+                        entityType: accountEntityType
+                    }];
+                    accountField.setValue(accountValue);
+                    console.log("从信用评估记录带出客户编码:", JSON.stringify(accountValue));
+                } else {
+                    console.log("信用评估记录没有 _mcs_accountid_value, result=", JSON.stringify(result));
+                }
+            })
+            .catch(function (error) {
+                console.error("从信用评估记录带出客户编码失败:", error);
+            });
+    } catch (ex) {
+        console.error("retrieveRecord 调用异常:", ex);
+    }
 };
 
 /**
@@ -192,7 +377,9 @@ CustomerTagForm.toggleEditableByStatus = function (formContext) {
  */
 CustomerTagForm.setReviewFieldsEditable = function (formContext, isReviewStatus) {
     var dataTypeField = formContext.getAttribute("mcs_datatype");
-    var dataType = dataTypeField ? dataTypeField.getValue() : null;
+    var rawDataType = dataTypeField ? dataTypeField.getValue() : null;
+    var dataType = rawDataType != null ? parseInt(rawDataType, 10) : null;
+    var formType = formContext.ui.getFormType();
     
     var editable = false;
     
@@ -209,8 +396,144 @@ CustomerTagForm.setReviewFieldsEditable = function (formContext, isReviewStatus)
         if (intReviewControl) intReviewControl.setDisabled(!editable);
     } else if (dataType === 2) {
         // 定性
-        var txtReviewControl = formContext.getControl("mcs_itemtxtvalue2");
-        if (txtReviewControl) txtReviewControl.setDisabled(!editable);
+        var lookupReviewControl = formContext.getControl("mcs_credititem_value");
+        if (lookupReviewControl) lookupReviewControl.setDisabled(!editable);
+    }
+    
+    // 新建记录且在复核状态，允许选择评分项目
+    if (isReviewStatus && formType === 1) {
+        var creditItemControl = formContext.getControl("mcs_credit_item");
+        if (creditItemControl) creditItemControl.setDisabled(false);
+    }
+};
+
+/**
+ * 评分项目变更事件
+ * 仅新建模式下有效：带出评分项目信息并更新Lookup过滤
+ */
+CustomerTagForm.onCreditItemChange = function (executionContext) {
+    var formContext = executionContext.getFormContext();
+    var formType = formContext.ui.getFormType();
+    
+    // 仅新建记录需要处理
+    if (formType !== 1) return;
+    
+    var creditItemField = formContext.getAttribute("mcs_credit_item");
+    if (!creditItemField) return;
+    
+    var lookupValue = creditItemField.getValue();
+    if (!lookupValue || lookupValue.length === 0) {
+        // 清空时重置数据类型和字段
+        CustomerTagForm.clearItemDerivedFields(formContext);
+        return;
+    }
+    
+    var itemId = lookupValue[0].id;
+    var itemName = lookupValue[0].name || "";
+    
+    // 查询评分项目信息
+    Xrm.WebApi.retrieveRecord("mcs_credit_items", itemId, "?$select=mcs_credit_itemsno,mcs_itemname,mcs_itemdesc,mcs_datatype,mcs_group")
+        .then(function (result) {
+            // 设置数据类型
+            // 评分项目表的选项集值（100000000/100000001）与标签表（1/2）不一致，需要转换
+            if (result.mcs_datatype !== undefined && result.mcs_datatype !== null) {
+                formContext.getAttribute("mcs_datatype").setValue(CustomerTagForm.mapDataType(result.mcs_datatype));
+            }
+            
+            // 设置评分项目名称、说明、分类、编码
+            if (result.mcs_itemname) {
+                var itemNameAttr = formContext.getAttribute("mcs_itemname");
+                if (itemNameAttr) itemNameAttr.setValue(result.mcs_itemname);
+            }
+            if (result.mcs_itemdesc) {
+                var itemDescAttr = formContext.getAttribute("mcs_itemdesc");
+                if (itemDescAttr) itemDescAttr.setValue(result.mcs_itemdesc);
+            }
+            if (result.mcs_group !== undefined && result.mcs_group !== null) {
+                formContext.getAttribute("mcs_group").setValue(CustomerTagForm.mapGroup(result.mcs_group));
+            }
+            if (result.mcs_credit_itemsno) {
+                var itemCodeAttr = formContext.getAttribute("mcs_itemcode");
+                if (itemCodeAttr) itemCodeAttr.setValue(result.mcs_credit_itemsno);
+                // 兼容旧字段 mcs_itemid
+                var itemIdAttr = formContext.getAttribute("mcs_itemid");
+                if (itemIdAttr) itemIdAttr.setValue(result.mcs_credit_itemsno);
+            }
+            
+            // 清空已有的复核值（因为评分项目变了）
+            var lookupReviewAttr = formContext.getAttribute("mcs_credititem_value");
+            if (lookupReviewAttr) lookupReviewAttr.setValue(null);
+            var intReviewAttr = formContext.getAttribute("mcs_itemintvalue2");
+            if (intReviewAttr) intReviewAttr.setValue(null);
+            var itemValue2Attr = formContext.getAttribute("mcs_itemvalue2");
+            if (itemValue2Attr) itemValue2Attr.setValue(null);
+            
+            // 重新控制字段显隐
+            CustomerTagForm.toggleReviewFields(formContext);
+        })
+        .catch(function (error) {
+            console.error("查询评分项目信息失败:", error);
+            Xrm.Utility.alertDialog(CustomerTagForm.L("CustomerTag_ItemInfoFailed", "评分项目信息带出失败：") + error.message);
+        });
+};
+
+/**
+ * 转换数据类型选项集值
+ * 评分项目表: 100000000=定量, 100000001=定性
+ * 标签表: 1=定量, 2=定性
+ */
+CustomerTagForm.mapDataType = function (rawDataType) {
+    return rawDataType === 100000000 ? 1 : 2;
+};
+
+/**
+ * 转换评分项目分类选项集值
+ * 评分项目表: 100000000=客户实力, 100000001=客户财务, 100000002=宏观市场, 100000003=历史交易, 100000004=综合指标
+ * 标签表: 1=客户实力, 2=客户财务, 3=宏观市场, 4=历史交易, 5=综合指标
+ */
+CustomerTagForm.mapGroup = function (rawGroup) {
+    var mapping = {
+        100000000: 1,
+        100000001: 2,
+        100000002: 3,
+        100000003: 4,
+        100000004: 5
+    };
+    return mapping[rawGroup] || (rawGroup <= 5 ? rawGroup : 1);
+};
+
+/**
+ * 清空评分项目带出字段
+ */
+CustomerTagForm.clearItemDerivedFields = function (formContext) {
+    var fields = ["mcs_datatype", "mcs_itemname", "mcs_itemdesc", "mcs_group", "mcs_itemcode", "mcs_itemid"];
+    fields.forEach(function (fieldName) {
+        var attr = formContext.getAttribute(fieldName);
+        if (attr) attr.setValue(null);
+    });
+    CustomerTagForm.toggleReviewFields(formContext);
+};
+
+/**
+ * 兼容过渡期：新Lookup为空但旧文本字段有值时，回退显示旧值
+ */
+CustomerTagForm.syncDisplayFromLegacyFields = function (formContext) {
+    var dataTypeField = formContext.getAttribute("mcs_datatype");
+    var rawDataType = dataTypeField ? dataTypeField.getValue() : null;
+    var dataType = rawDataType != null ? parseInt(rawDataType, 10) : null;
+    
+    if (dataType !== 2) return;
+    
+    var lookupField = formContext.getAttribute("mcs_credititem_value");
+    var hasLookupValue = lookupField && lookupField.getValue() && lookupField.getValue().length > 0;
+    if (hasLookupValue) return;
+    
+    var txtValue2 = formContext.getAttribute("mcs_itemtxtvalue2");
+    if (!txtValue2 || !txtValue2.getValue()) return;
+    
+    var itemValue2Field = formContext.getAttribute("mcs_itemvalue2");
+    if (itemValue2Field && !itemValue2Field.getValue()) {
+        itemValue2Field.setValue(txtValue2.getValue());
     }
 };
 
@@ -222,9 +545,9 @@ CustomerTagForm.onSave = function (executionContext) {
     
     // 校验必填字段
     var requiredFields = [
-        { name: "mcs_credit_record", label: "信用评估" },
-        { name: "mcs_accountid", label: "客户编码" },
-        { name: "mcs_credit_item", label: "评分项目" }
+        { name: "mcs_credit_record", label: CustomerTagForm.L("CustomerTag_Field_CreditRecord", "信用评估") },
+        { name: "mcs_accountid", label: CustomerTagForm.L("CustomerTag_Field_Account", "客户编码") },
+        { name: "mcs_credit_item", label: CustomerTagForm.L("CustomerTag_Field_Item", "评分项目") }
     ];
     
     var missingFields = [];
@@ -236,8 +559,22 @@ CustomerTagForm.onSave = function (executionContext) {
     });
     
     if (missingFields.length > 0) {
-        Xrm.Utility.alertDialog("以下字段不能为空：" + missingFields.join("、"));
+        Xrm.Utility.alertDialog(CustomerTagForm.L("CreditForm_MissingFieldsPrefix", "以下字段不能为空：") + missingFields.join(CustomerTagForm.L("CreditForm_ListSeparator", "、")));
         executionContext.getEventArgs().preventDefault();
         return;
+    }
+    
+    // 定性项目必须选择定性项目值
+    var dataTypeField = formContext.getAttribute("mcs_datatype");
+    var rawDataType = dataTypeField ? dataTypeField.getValue() : null;
+    var dataType = rawDataType != null ? parseInt(rawDataType, 10) : null;
+    if (dataType === 2) {
+        var lookupField = formContext.getAttribute("mcs_credititem_value");
+        var hasLookupValue = lookupField && lookupField.getValue() && lookupField.getValue().length > 0;
+        if (!hasLookupValue) {
+            Xrm.Utility.alertDialog(CustomerTagForm.L("CustomerTag_QualReviewRequired", "定性评分项目必须选择复核定性指标。"));
+            executionContext.getEventArgs().preventDefault();
+            return;
+        }
     }
 };

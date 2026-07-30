@@ -16,6 +16,7 @@ namespace SanyD365.Plugins.CofaceIntegration
         public const string ItemNoField = "mcs_credititemno";
         public const string ListValueField = "mcs_listvalue";
         public const string ListNameField = "mcs_listname";
+        public const string CofaceValueField = "mcs_cofacevalue";
 
         /// <summary>
         /// 根据评分项目编码和 Coface 原始值获取中文显示文本
@@ -105,6 +106,102 @@ namespace SanyD365.Plugins.CofaceIntegration
             {
                 tracer.Trace($"查询定性指标映射异常 [{itemCode}/{value}]: {ex.Message}");
                 return value;
+            }
+        }
+
+        /// <summary>
+        /// 根据评分项目编码 + Coface 原始值，查询对应的三一标准编码（mcs_listvalue）
+        /// 用于把 Coface API 返回的原始值映射到三一标准 L/M/H/O
+        /// </summary>
+        /// <param name="service">组织服务</param>
+        /// <param name="tracer">跟踪服务</param>
+        /// <param name="itemCode">评分项目编码，如 CountryRisk / SectorRisk</param>
+        /// <param name="cofaceValue">Coface 原始值，如 A1 / A3 / B / 1 / 3</param>
+        /// <returns>三一标准编码 L/M/H/O；未配置时返回原值</returns>
+        public static string GetSanyValueByCofaceValue(
+            IOrganizationService service,
+            ITracingService tracer,
+            string itemCode,
+            string cofaceValue)
+        {
+            if (string.IsNullOrWhiteSpace(cofaceValue))
+            {
+                tracer.Trace($"定性指标 {itemCode} 的 Coface 原始值为空，返回缺失");
+                return "O";
+            }
+
+            if (string.IsNullOrWhiteSpace(itemCode))
+            {
+                tracer.Trace("评分项目编码为空，无法查询三一映射，返回原值");
+                return cofaceValue;
+            }
+
+            if (service == null)
+            {
+                tracer.Trace("IOrganizationService 为空，无法查询三一映射配置");
+                return cofaceValue;
+            }
+
+            try
+            {
+                // 1. 根据评分项目编码查找 mcs_credit_items 的 ID
+                var itemQuery = new QueryExpression("mcs_credit_items")
+                {
+                    ColumnSet = new ColumnSet("mcs_credit_itemsid"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_credit_itemsno", ConditionOperator.Equal, itemCode)
+                        }
+                    },
+                    TopCount = 1
+                };
+
+                var itemResults = service.RetrieveMultiple(itemQuery);
+                var item = itemResults.Entities.FirstOrDefault();
+                if (item == null)
+                {
+                    tracer.Trace($"未找到评分项目: {itemCode}，返回原值");
+                    return cofaceValue;
+                }
+
+                // 2. 查询该评分项目下所有枚举值，按 mcs_cofacevalue 内存匹配
+                var query = new QueryExpression(EntityName)
+                {
+                    ColumnSet = new ColumnSet(ListValueField, CofaceValueField),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression(ItemNoField, ConditionOperator.Equal, item.Id)
+                        }
+                    }
+                };
+
+                var records = service.RetrieveMultiple(query);
+                foreach (var record in records.Entities)
+                {
+                    var mappingValue = record.GetAttributeValue<string>(CofaceValueField) ?? "";
+                    var mappedValues = mappingValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                                   .Select(v => v.Trim())
+                                                   .ToList();
+
+                    if (mappedValues.Contains(cofaceValue, StringComparer.OrdinalIgnoreCase))
+                    {
+                        var sanyValue = record.GetAttributeValue<string>(ListValueField) ?? cofaceValue;
+                        tracer.Trace($"三一映射: {itemCode}/{cofaceValue} => {sanyValue}");
+                        return sanyValue;
+                    }
+                }
+
+                tracer.Trace($"未找到三一映射: {itemCode}/{cofaceValue}，返回原值");
+                return cofaceValue;
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"查询三一映射异常 [{itemCode}/{cofaceValue}]: {ex.Message}");
+                return cofaceValue;
             }
         }
 

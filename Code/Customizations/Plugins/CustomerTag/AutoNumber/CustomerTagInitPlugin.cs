@@ -3,15 +3,15 @@ using Microsoft.Xrm.Sdk.Query;
 using System;
 using System.Linq;
 
-namespace SanyD365.Plugins.CustomerTag
+namespace SanyD365.D365Extension.Sales.Plugins.CustomerTag
 {
     /// <summary>
-    /// 客户信用标签表 - 创建初始化Plugin
-    /// 触发时机：Create后
+    /// 客户信用标签表 - 创建初始化 / 更新同步 Plugin
+    /// 触发时机：Create后、Update后
     /// 功能：
-    /// 1. 将集成指标值复制到复核指标值（初始化复核字段）
-    /// 2. 更新合并展示值
-    /// 3. 带出评分项目相关信息（名称、说明、数据类型等）
+    /// 1. Create：将集成指标值复制到复核指标值（初始化复核字段），更新合并展示值，带出评分项目相关信息
+    /// 2. Update：当用户在可编辑列表等场景直接修改复核字段（mcs_itemintvalue2 / mcs_credititem_value / mcs_itemtxtvalue2）时，
+    ///            同步更新复核合并展示值 mcs_itemvalue2，解决表单 onChange 事件未触发导致复核指标为空的问题
     /// 影响范围：仅限mcs_customer_tag实体
     /// </summary>
     public class CustomerTagInitPlugin : IPlugin
@@ -25,10 +25,10 @@ namespace SanyD365.Plugins.CustomerTag
 
             tracer.Trace("CustomerTagInitPlugin 开始执行");
 
-            // 只处理Create后事件
-            if (context.MessageName != "Create" || context.Stage != 40)
+            // 处理 Create后 / Update后事件
+            if (context.Stage != 40 || (context.MessageName != "Create" && context.MessageName != "Update"))
             {
-                tracer.Trace("非Create后事件，跳过");
+                tracer.Trace($"非目标事件: Message={context.MessageName}, Stage={context.Stage}，跳过");
                 return;
             }
 
@@ -48,18 +48,26 @@ namespace SanyD365.Plugins.CustomerTag
 
             try
             {
-                // 获取评分项目信息并更新标签记录
-                UpdateTagWithItemInfo(target, service, tracer);
-                
-                // 复制集成值到复核值
-                CopyIntegrationToReview(target, service, tracer);
+                if (context.MessageName == "Create")
+                {
+                    // 获取评分项目信息并更新标签记录
+                    UpdateTagWithItemInfo(target, service, tracer);
+                    
+                    // 复制集成值到复核值
+                    CopyIntegrationToReview(target, service, tracer);
+                }
+                else if (context.MessageName == "Update")
+                {
+                    // 同步复核字段到合并展示值（主要解决可编辑列表修改不触发表单 onChange 的问题）
+                    SyncReviewToDisplayValue(target, service, tracer);
+                }
 
                 tracer.Trace("CustomerTagInitPlugin 执行完成");
             }
             catch (Exception ex)
             {
-                tracer.Trace($"初始化失败: {ex.Message}");
-                // 初始化失败不阻断流程，记录日志即可
+                tracer.Trace($"初始化/同步失败: {ex.Message}");
+                // 失败不阻断流程，记录日志即可
                 // 因为标签数据可以在后续环节补充
             }
         }
@@ -69,8 +77,9 @@ namespace SanyD365.Plugins.CustomerTag
         /// </summary>
         private void UpdateTagWithItemInfo(Entity target, IOrganizationService service, ITracingService tracer)
         {
-            // 获取评分项目编码
+            // 获取评分项目编码或引用
             string itemCode = null;
+            EntityReference creditItemRef = null;
             
             if (target.Contains("mcs_itemid"))
             {
@@ -81,18 +90,29 @@ namespace SanyD365.Plugins.CustomerTag
                 }
                 else if (itemAttr is EntityReference)
                 {
-                    var itemRef = (EntityReference)itemAttr;
-                    var itemEntity = service.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_itemid"));
-                    if (itemEntity != null)
-                    {
-                        itemCode = itemEntity.GetAttributeValue<string>("mcs_itemid");
-                    }
+                    creditItemRef = (EntityReference)itemAttr;
+                }
+            }
+            
+            // 若表单上直接传了评分项目Lookup（如人工复核新建标签），优先使用
+            if (creditItemRef == null && target.Contains("mcs_credit_item"))
+            {
+                creditItemRef = target.GetAttributeValue<EntityReference>("mcs_credit_item");
+            }
+
+            // 有引用但无编码时，反查编码
+            if (creditItemRef != null && string.IsNullOrEmpty(itemCode))
+            {
+                var itemEntity = service.Retrieve("mcs_credit_items", creditItemRef.Id, new ColumnSet("mcs_credit_itemsno"));
+                if (itemEntity != null)
+                {
+                    itemCode = itemEntity.GetAttributeValue<string>("mcs_credit_itemsno");
                 }
             }
 
-            if (string.IsNullOrEmpty(itemCode))
+            if (string.IsNullOrEmpty(itemCode) && creditItemRef == null)
             {
-                tracer.Trace("评分项目编码为空，跳过信息带出");
+                tracer.Trace("评分项目编码/引用为空，跳过信息带出");
                 return;
             }
 
@@ -100,15 +120,18 @@ namespace SanyD365.Plugins.CustomerTag
             var query = new QueryExpression("mcs_credit_items")
             {
                 ColumnSet = new ColumnSet("mcs_itemname", "mcs_itemdesc", "mcs_datatype", "mcs_group"),
-                Criteria = new FilterExpression
-                {
-                    Conditions =
-                    {
-                        new ConditionExpression("mcs_itemid", ConditionOperator.Equal, itemCode)
-                    }
-                },
+                Criteria = new FilterExpression(),
                 TopCount = 1
             };
+            
+            if (!string.IsNullOrEmpty(itemCode))
+            {
+                query.Criteria.Conditions.Add(new ConditionExpression("mcs_credit_itemsno", ConditionOperator.Equal, itemCode));
+            }
+            else
+            {
+                query.Criteria.Conditions.Add(new ConditionExpression("mcs_credit_itemsid", ConditionOperator.Equal, creditItemRef.Id));
+            }
 
             var result = service.RetrieveMultiple(query);
             
@@ -145,7 +168,7 @@ namespace SanyD365.Plugins.CustomerTag
             // 带出数据类型
             if (item.Contains("mcs_datatype"))
             {
-                int dataType = item.GetAttributeValue<int>("mcs_datatype");
+                int dataType = item.GetAttributeValue<OptionSetValue>("mcs_datatype")?.Value ?? 0;
                 updateEntity["mcs_datatype"] = dataType;
                 tracer.Trace($"带出数据类型: {dataType}");
             }
@@ -153,7 +176,7 @@ namespace SanyD365.Plugins.CustomerTag
             // 带出评分项目分类
             if (item.Contains("mcs_group"))
             {
-                int group = item.GetAttributeValue<int>("mcs_group");
+                int group = item.GetAttributeValue<OptionSetValue>("mcs_group")?.Value ?? 0;
                 updateEntity["mcs_group"] = group;
                 tracer.Trace($"带出评分项目分类: {group}");
             }
@@ -165,12 +188,17 @@ namespace SanyD365.Plugins.CustomerTag
 
         /// <summary>
         /// 复制集成值到复核值
+        /// 定量：decimal → mcs_itemintvalue2
+        /// 定性：
+        ///   - 若表单已选 mcs_credititem_value Lookup（人工新建），用Lookup的mcs_listname回写展示值
+        ///   - 否则按 mcs_itemvalue1(原始值)/mcs_itemtxtvalue1(显示名) 反查 mcs_credititem_value 并设置Lookup
+        /// 仅当复核字段当前无值时才复制，避免覆盖已有人工复核结果或CofaceDataSyncPlugin已写入的值
         /// </summary>
         private void CopyIntegrationToReview(Entity target, IOrganizationService service, ITracingService tracer)
         {
             // 重新读取当前记录（可能已更新）
-            var currentRecord = service.Retrieve("mcs_customer_tag", target.Id, 
-                new ColumnSet("mcs_datatype", "mcs_itemintvalue1", "mcs_itemtxtvalue1"));
+            var currentRecord = service.Retrieve("mcs_customer_tag", target.Id,
+                new ColumnSet("mcs_datatype", "mcs_credit_item", "mcs_itemintvalue1", "mcs_itemtxtvalue1", "mcs_itemvalue1", "mcs_itemintvalue2", "mcs_itemtxtvalue2", "mcs_itemvalue2", "mcs_credititem_value"));
             
             if (currentRecord == null)
             {
@@ -178,7 +206,29 @@ namespace SanyD365.Plugins.CustomerTag
                 return;
             }
 
-            int dataType = currentRecord.GetAttributeValue<int>("mcs_datatype");
+            int dataType = currentRecord.GetAttributeValue<OptionSetValue>("mcs_datatype")?.Value ?? 0;
+            var creditItemRef = currentRecord.GetAttributeValue<EntityReference>("mcs_credit_item");
+            var lookupRef = currentRecord.GetAttributeValue<EntityReference>("mcs_credititem_value");
+
+            // 复核字段已有值时，不再覆盖
+            if (dataType == 1)
+            {
+                if (currentRecord.Contains("mcs_itemintvalue2") && currentRecord["mcs_itemintvalue2"] != null
+                    && currentRecord.Contains("mcs_itemvalue2") && currentRecord.GetAttributeValue<string>("mcs_itemvalue2") != "N/A")
+                {
+                    tracer.Trace("复核定量指标已有值，跳过复制");
+                    return;
+                }
+            }
+            else if (dataType == 2)
+            {
+                if (currentRecord.Contains("mcs_itemtxtvalue2") && currentRecord["mcs_itemtxtvalue2"] != null
+                    && currentRecord.Contains("mcs_credititem_value") && currentRecord["mcs_credititem_value"] != null)
+                {
+                    tracer.Trace("复核定性指标已有值，跳过复制");
+                    return;
+                }
+            }
             
             var updateEntity = new Entity("mcs_customer_tag")
             {
@@ -189,8 +239,8 @@ namespace SanyD365.Plugins.CustomerTag
 
             if (dataType == 1)
             {
-                // 定量：复制集成定量指标到复核定量指标
-                if (currentRecord.Contains("mcs_itemintvalue1"))
+                // 定量：复制集成定量指标到复核定量指标（仅集成值非空时）
+                if (currentRecord.Contains("mcs_itemintvalue1") && currentRecord["mcs_itemintvalue1"] != null)
                 {
                     decimal intValue = currentRecord.GetAttributeValue<decimal>("mcs_itemintvalue1");
                     updateEntity["mcs_itemintvalue2"] = intValue;
@@ -200,18 +250,48 @@ namespace SanyD365.Plugins.CustomerTag
             }
             else if (dataType == 2)
             {
-                // 定性：复制集成定性指标到复核定性指标
-                if (currentRecord.Contains("mcs_itemtxtvalue1"))
+                if (lookupRef != null)
                 {
-                    string txtValue = currentRecord.GetAttributeValue<string>("mcs_itemtxtvalue1");
+                    // 人工新建时已选择Lookup：用Lookup名称回写展示字段
+                    var enumRecord = service.Retrieve("mcs_credititem_value", lookupRef.Id,
+                        new ColumnSet("mcs_listvalue", "mcs_listname"));
+                    string listName = enumRecord.GetAttributeValue<string>("mcs_listname") ?? "";
+                    string listValue = enumRecord.GetAttributeValue<string>("mcs_listvalue") ?? "";
+                    
+                    updateEntity["mcs_itemtxtvalue2"] = listName;
+                    updateEntity["mcs_itemvalue2"] = listName;
+                    if (!string.IsNullOrEmpty(listValue))
+                    {
+                        updateEntity["mcs_itemvalue1"] = listValue;
+                    }
+                    displayValue = listName;
+                    tracer.Trace($"人工选择Lookup: name={listName}, value={listValue}");
+                }
+                else if (currentRecord.Contains("mcs_itemtxtvalue1") || currentRecord.Contains("mcs_itemvalue1"))
+                {
+                    // Coface集成：按原始值/显示名反查枚举值表
+                    string txtValue = currentRecord.GetAttributeValue<string>("mcs_itemtxtvalue1") ?? "";
+                    string rawValue = currentRecord.GetAttributeValue<string>("mcs_itemvalue1") ?? "";
+                    
+                    var enumId = ResolveCreditItemValue(service, tracer, creditItemRef, rawValue, txtValue);
+                    if (enumId.HasValue)
+                    {
+                        updateEntity["mcs_credititem_value"] = new EntityReference("mcs_credititem_value", enumId.Value);
+                        tracer.Trace($"反查定性枚举Lookup: {enumId.Value}");
+                    }
+                    else
+                    {
+                        tracer.Trace($"未找到定性枚举映射: item={creditItemRef?.Id}, raw={rawValue}, txt={txtValue}");
+                    }
+                    
                     updateEntity["mcs_itemtxtvalue2"] = txtValue;
-                    displayValue = txtValue ?? "";
+                    displayValue = txtValue;
                     tracer.Trace($"复制定性值: {txtValue}");
                 }
             }
 
-            // 更新集成合并展示值
-            if (currentRecord.Contains("mcs_itemintvalue1") || currentRecord.Contains("mcs_itemtxtvalue1"))
+            // 更新集成合并展示值（仅在未手动设置时兜底）
+            if (!updateEntity.Contains("mcs_itemvalue1") && (currentRecord.Contains("mcs_itemintvalue1") || currentRecord.Contains("mcs_itemtxtvalue1")))
             {
                 string intDisplay = "";
                 string txtDisplay = "";
@@ -244,6 +324,169 @@ namespace SanyD365.Plugins.CustomerTag
 
             service.Update(updateEntity);
             tracer.Trace("复制集成值到复核值完成");
+        }
+
+        /// <summary>
+        /// 根据评分项目和值反查 mcs_credititem_value 记录
+        /// 优先按 mcs_listvalue（原始值）匹配，其次按 mcs_listname（显示名）匹配
+        /// </summary>
+        private Guid? ResolveCreditItemValue(IOrganizationService service, ITracingService tracer,
+            EntityReference creditItemRef, string rawValue, string displayValue)
+        {
+            if (creditItemRef == null)
+            {
+                tracer.Trace("ResolveCreditItemValue: 评分项目引用为空");
+                return null;
+            }
+
+            var query = new QueryExpression("mcs_credititem_value")
+            {
+                ColumnSet = new ColumnSet("mcs_credititem_valueid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("mcs_credititemno", ConditionOperator.Equal, creditItemRef.Id),
+                        new ConditionExpression("statecode", ConditionOperator.Equal, 0)
+                    }
+                },
+                TopCount = 1
+            };
+
+            var orFilter = new FilterExpression(LogicalOperator.Or);
+            if (!string.IsNullOrEmpty(rawValue))
+            {
+                orFilter.Conditions.Add(new ConditionExpression("mcs_listvalue", ConditionOperator.Equal, rawValue));
+                orFilter.Conditions.Add(new ConditionExpression("mcs_listname", ConditionOperator.Equal, rawValue));
+            }
+            if (!string.IsNullOrEmpty(displayValue))
+            {
+                orFilter.Conditions.Add(new ConditionExpression("mcs_listvalue", ConditionOperator.Equal, displayValue));
+                orFilter.Conditions.Add(new ConditionExpression("mcs_listname", ConditionOperator.Equal, displayValue));
+            }
+            
+            if (orFilter.Conditions.Count == 0)
+            {
+                tracer.Trace("ResolveCreditItemValue: 无可用匹配值");
+                return null;
+            }
+            
+            query.Criteria.AddFilter(orFilter);
+
+            var result = service.RetrieveMultiple(query);
+            if (result.Entities.Count > 0)
+            {
+                return result.Entities[0].Id;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Update后同步复核字段到合并展示值
+        /// 解决可编辑列表(Editable Grid)修改复核字段时不触发表单 onChange 事件的问题
+        /// </summary>
+        private void SyncReviewToDisplayValue(Entity target, IOrganizationService service, ITracingService tracer)
+        {
+            // 只处理复核相关字段的变更
+            var reviewFields = new[] { "mcs_itemintvalue2", "mcs_credititem_value", "mcs_itemtxtvalue2" };
+            if (!reviewFields.Any(f => target.Contains(f)))
+            {
+                tracer.Trace("Update 未涉及复核字段，跳过同步");
+                return;
+            }
+
+            // 读取当前记录获取数据类型
+            var currentRecord = service.Retrieve("mcs_customer_tag", target.Id,
+                new ColumnSet("mcs_datatype", "mcs_itemintvalue2", "mcs_credititem_value", "mcs_itemtxtvalue2", "mcs_itemvalue2"));
+
+            if (currentRecord == null)
+            {
+                tracer.Trace("无法读取当前记录");
+                return;
+            }
+
+            int dataType = currentRecord.GetAttributeValue<OptionSetValue>("mcs_datatype")?.Value ?? 0;
+            var updateEntity = new Entity("mcs_customer_tag")
+            {
+                Id = target.Id
+            };
+
+            string displayValue = null;
+
+            if (dataType == 1)
+            {
+                // 定量：优先使用 Target 中传入的新值，否则读当前记录
+                decimal? intValue2 = null;
+                if (target.Contains("mcs_itemintvalue2"))
+                {
+                    intValue2 = target.GetAttributeValue<decimal>("mcs_itemintvalue2");
+                }
+                else if (currentRecord.Contains("mcs_itemintvalue2") && currentRecord["mcs_itemintvalue2"] != null)
+                {
+                    intValue2 = currentRecord.GetAttributeValue<decimal>("mcs_itemintvalue2");
+                }
+
+                if (intValue2.HasValue)
+                {
+                    displayValue = intValue2.Value.ToString("F2");
+                    tracer.Trace($"同步定量复核展示值: {displayValue}");
+                }
+                else
+                {
+                    displayValue = "";
+                    tracer.Trace("定量复核值为空，清空展示值");
+                }
+            }
+            else if (dataType == 2)
+            {
+                // 定性：优先从 Target 中的 Lookup 获取显示名
+                EntityReference lookupRef = null;
+                if (target.Contains("mcs_credititem_value"))
+                {
+                    lookupRef = target.GetAttributeValue<EntityReference>("mcs_credititem_value");
+                }
+                else if (currentRecord.Contains("mcs_credititem_value"))
+                {
+                    lookupRef = currentRecord.GetAttributeValue<EntityReference>("mcs_credititem_value");
+                }
+
+                if (lookupRef != null)
+                {
+                    var enumRecord = service.Retrieve("mcs_credititem_value", lookupRef.Id,
+                        new ColumnSet("mcs_listname"));
+                    displayValue = enumRecord.GetAttributeValue<string>("mcs_listname") ?? lookupRef.Name ?? "";
+                    tracer.Trace($"同步定性复核展示值(Lookup): {displayValue}");
+                }
+                else if (target.Contains("mcs_itemtxtvalue2"))
+                {
+                    displayValue = target.GetAttributeValue<string>("mcs_itemtxtvalue2") ?? "";
+                    tracer.Trace($"同步定性复核展示值(文本): {displayValue}");
+                }
+                else if (currentRecord.Contains("mcs_itemtxtvalue2"))
+                {
+                    displayValue = currentRecord.GetAttributeValue<string>("mcs_itemtxtvalue2") ?? "";
+                    tracer.Trace($"同步定性复核展示值(当前文本): {displayValue}");
+                }
+                else
+                {
+                    displayValue = "";
+                    tracer.Trace("定性复核值为空，清空展示值");
+                }
+            }
+
+            // 仅当需要更新时才执行 Update
+            string currentDisplay = currentRecord.GetAttributeValue<string>("mcs_itemvalue2") ?? "";
+            if (displayValue != null && displayValue != currentDisplay)
+            {
+                updateEntity["mcs_itemvalue2"] = displayValue;
+                service.Update(updateEntity);
+                tracer.Trace($"已更新 mcs_itemvalue2 = {displayValue}");
+            }
+            else
+            {
+                tracer.Trace($"mcs_itemvalue2 无需更新: current={currentDisplay}, new={displayValue}");
+            }
         }
     }
 }

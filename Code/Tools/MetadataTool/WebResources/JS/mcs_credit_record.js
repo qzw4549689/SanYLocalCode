@@ -19,6 +19,10 @@ CreditRecordForm.STATUS = {
     REJECTED: 16           // 审批未通过
 };
 
+// BPF 状态变更标记 — 用于区分是按钮触发还是 BPF 直接修改
+CreditRecordForm._bpfNavigating = false;
+CreditRecordForm._lastButtonStatus = null;
+
 // 状态名称映射（用于提示信息）
 CreditRecordForm.STATUS_NAMES = {
     9: "发起信用评估",
@@ -53,6 +57,88 @@ CreditRecordForm.onLoad = function (executionContext) {
     
     // 根据状态控制按钮/字段/通知
     CreditRecordForm.toggleByStatus(formContext);
+    
+    // 初始化状态记录
+    var statusField = formContext.getAttribute("mcs_status");
+    if (statusField) {
+        CreditRecordForm._lastButtonStatus = statusField.getValue();
+    }
+    
+    // 初始化附件页签（通用上传组件）
+    CreditRecordForm.initAttachmentTab(formContext);
+    
+    // 阻止 BPF 流程条回退（官方 Client API）
+    CreditRecordForm.preventBpfGoBack(formContext);
+    
+    // 将 BPF 侧窗格字段设为只读
+    CreditRecordForm.lockBpfFields(formContext);
+};
+
+/**
+ * 阻止 BPF 流程条回退
+ * 使用官方 Client API addOnPreStageChange，在阶段变化前拦截
+ */
+CreditRecordForm.preventBpfGoBack = function (formContext) {
+    if (!formContext || !formContext.data || !formContext.data.process) {
+        return;
+    }
+    
+    try {
+        formContext.data.process.addOnPreStageChange(function (stageChangeContext) {
+            var args = stageChangeContext.getEventArgs();
+            if (!args) return;
+            
+            var direction = args.getDirection();
+            
+            if (direction === "Previous") {
+                // 阻止回退
+                args.preventDefault();
+                Xrm.Navigation.openAlertDialog({
+                    text: "不允许通过流程条回退阶段，请使用上方工具栏的按钮操作。",
+                    title: "提示"
+                });
+                return;
+            }
+            
+            if (direction === "Next") {
+                // 阻止 BPF 默认前进，改为走自定义按钮的下一步逻辑
+                // 这样会和上方工具栏《进入下一阶段》按钮效果完全一致
+                args.preventDefault();
+                CreditRecordForm.nextStep(formContext);
+            }
+        });
+        
+        // 阶段变化后重新锁定 BPF 字段（BPF 侧窗格会重新渲染）
+        formContext.data.process.addOnStageChange(function () {
+            CreditRecordForm.lockBpfFields(formContext);
+        });
+    } catch (ex) {
+        console.error("[CreditRecordForm] 注册 BPF PreStageChange 事件失败:", ex);
+    }
+};
+
+/**
+ * 将 BPF 侧窗格中的字段设为只读
+ * BPF 设计器本身没有 Read-only 选项，通过官方 Client API 在运行时锁定
+ */
+CreditRecordForm.lockBpfFields = function (formContext) {
+    if (!formContext || !formContext.ui || !formContext.ui.controls) {
+        return;
+    }
+    
+    try {
+        // BPF 字段控件通常以 header_process_ 开头
+        formContext.ui.controls.forEach(function (control) {
+            if (!control || !control.getName) return;
+            
+            var name = control.getName();
+            if (name.indexOf("header_process_") === 0 && control.setDisabled) {
+                control.setDisabled(true);
+            }
+        });
+    } catch (ex) {
+        console.error("[CreditRecordForm] 设置 BPF 字段只读失败:", ex);
+    }
 };
 
 /**
@@ -89,7 +175,7 @@ CreditRecordForm.setDefaults = function (formContext) {
  * 设置字段只读
  */
 CreditRecordForm.setFieldsReadOnly = function (formContext) {
-    // 评估状态始终只读（由BPF/工作流控制，不允许手动修改）
+    // 评估状态始终只读（由按钮控制流转，不允许手动修改）
     var statusControl = formContext.getControl("mcs_status");
     if (statusControl) statusControl.setDisabled(true);
     
@@ -113,7 +199,8 @@ CreditRecordForm.setFieldsReadOnly = function (formContext) {
         "mcs_publicationid", "mcs_api_status", "mcs_api_name", "mcs_api_msg",
         "mcs_urbajson", "mcs_reportjson", "mcs_bppstatus", "mcs_bppappriver",
         "mcs_bppid", "mcs_bpperrormsg", "mcs_bpprejectreason", "mcs_approvedate",
-        "mcs_abidate", "mcs_checkdate", "mcs_scoredate"
+        "mcs_abidate", "mcs_checkdate", "mcs_scoredate",
+        "mcs_workflowid", "mcs_nextapprover"  // BPP字段只读
     ];
     apiFields.forEach(function (fieldName) {
         var control = formContext.getControl(fieldName);
@@ -140,9 +227,28 @@ CreditRecordForm.registerEvents = function (formContext) {
 
 /**
  * 状态变更事件
+ * 拦截 BPF 直接修改状态（用户点击 BPF 阶段或面板里的下拉框）
  */
 CreditRecordForm.onStatusChange = function (executionContext) {
     var formContext = executionContext.getFormContext();
+    var statusField = formContext.getAttribute("mcs_status");
+    var newStatus = statusField.getValue();
+    var oldStatus = CreditRecordForm._lastButtonStatus;
+    
+    // 如果状态被改回更小值（往回跳），且不是通过我们的按钮触发的 → 阻断
+    if (newStatus !== null && oldStatus !== null && newStatus < oldStatus && !CreditRecordForm._bpfNavigating) {
+        // 恢复原来的状态值
+        statusField.setValue(oldStatus);
+        
+        // 提示用户必须通过按钮操作
+        Xrm.Utility.alertDialog("请使用上方工具栏的按钮进行状态流转，不要直接修改进度条中的状态。");
+        return;
+    }
+    
+    // 记录当前状态（用于下次比较）
+    CreditRecordForm._lastButtonStatus = newStatus;
+    
+    // 正常处理状态变更
     CreditRecordForm.toggleByStatus(formContext);
 };
 
@@ -168,40 +274,45 @@ CreditRecordForm.onAccountChange = function (executionContext) {
     
     var accountGuid = accountValue[0].id.replace(/[{}]/g, "");
     
-    // 查询Account信息
-    // 注意：客户表字段说明
-    // - accountnumber: 客户编码（标准字段）
-    // - mcs_englishname: 客户英文名称（新增字段）
-    // - mcs_country: 注册国家/地区（Lookup），需展开取国家代码
-    // - mcs_cofaceid: 科法斯客户代码（新增字段）
-    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=accountnumber,mcs_englishname,mcs_cofaceid&$expand=mcs_country($select=mcs_countrycode)")
-        .then(function (result) {
-            // 客户编码（从accountnumber带出）
+    // 业务规则：客户（account）只是导航入口，客户数据统一从关联的 mcs_customermasterdata 读取。
+    // 先查 account 找到关联的客户主数据，再从主数据读取客户编码/英文名称/国家编码/科法斯ID。
+    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=_mcs_customermasterdata_value")
+        .then(function (accountResult) {
+            var customerMasterDataId = accountResult._mcs_customermasterdata_value;
+            
+            if (!customerMasterDataId) {
+                throw new Error("该客户未关联客户主数据，请先维护客户主数据");
+            }
+            
+            var plainCustomerMasterDataId = customerMasterDataId.replace(/[{}]/g, "");
+            return Xrm.WebApi.retrieveRecord("mcs_customermasterdata", plainCustomerMasterDataId,
+                "?$select=mcs_accountnumber,mcs_englishname,mcs_countrycode,mcs_cofaceid");
+        })
+        .then(function (cm) {
+            cm = cm || {};
+            
+            // 客户编码
             var custNameField = formContext.getAttribute("mcs_custname");
             if (custNameField) {
-                custNameField.setValue(result.accountnumber || "");
+                custNameField.setValue(cm.mcs_accountnumber || "");
             }
             
             // 客户英文名称
             var custNameEnField = formContext.getAttribute("mcs_custnameen");
             if (custNameEnField) {
-                custNameEnField.setValue(result.mcs_englishname || "");
+                custNameEnField.setValue(cm.mcs_englishname || "");
             }
             
-            // 国家编码（从mcs_country Lookup展开获取）
+            // 国家编码
             var countryCodeField = formContext.getAttribute("mcs_countrycode");
             if (countryCodeField) {
-                var countryCode = "";
-                if (result.mcs_country && result.mcs_country.mcs_countrycode) {
-                    countryCode = result.mcs_country.mcs_countrycode;
-                }
-                countryCodeField.setValue(countryCode);
+                countryCodeField.setValue(cm.mcs_countrycode || "");
             }
             
             // 科法斯ID
             var cofaceField = formContext.getAttribute("mcs_cofaceid");
             if (cofaceField) {
-                cofaceField.setValue(result.mcs_cofaceid || "");
+                cofaceField.setValue(cm.mcs_cofaceid || "");
             }
             
             // 校验提示
@@ -209,7 +320,7 @@ CreditRecordForm.onAccountChange = function (executionContext) {
         })
         .catch(function (error) {
             console.error("查询客户信息失败:", error);
-            Xrm.Utility.alertDialog("查询客户信息失败，请重试。错误：" + (error.message || JSON.stringify(error)));
+            Xrm.Utility.alertDialog("查询客户信息失败：" + (error.message || JSON.stringify(error)));
         });
 };
 
@@ -262,7 +373,7 @@ CreditRecordForm.validateAccountFields = function (formContext) {
 // ==================== 状态控制与按钮逻辑 ====================
 
 /**
- * 根据状态控制字段可编辑性、按钮显隐和表单通知
+ * 根据状态控制字段可编辑性和按钮显隐
  */
 CreditRecordForm.toggleByStatus = function (formContext) {
     var statusField = formContext.getAttribute("mcs_status");
@@ -273,48 +384,37 @@ CreditRecordForm.toggleByStatus = function (formContext) {
     // 状态值可能为null（表单加载时数据尚未就绪），此时不做处理
     if (status === null) return;
     
-    // 清除之前的状态通知
-    formContext.ui.clearFormNotification("status_hint");
+    // 默认：逾期未回收率模型分始终只读，仅在人工复核阶段开放编辑
+    CreditRecordForm.setControlEditable(formContext, "mcs_overduerate", false);
     
-    var statusName = CreditRecordForm.STATUS_NAMES[status] || "未知状态";
+    // 默认：信用标签子网格锁定，仅在人工复核阶段开放编辑
+    CreditRecordForm.setGridEditable(formContext, "Subgrid_new_1", false);
     
-    // 不同状态控制不同字段的可编辑性和按钮（选项集实际值）
+    // 不同状态控制不同字段的可编辑性（选项集实际值）
     switch (status) {
         case CreditRecordForm.STATUS.INIT: // 9 - 发起信用评估
             // 允许编辑客户
             CreditRecordForm.setControlEditable(formContext, "mcs_accountid", true);
-            // 显示操作提示
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 请选择客户后点击【下一步】",
-                "INFO", "status_hint"
-            );
             break;
             
         case CreditRecordForm.STATUS.LINK_ACCOUNT: // 10 - 关联客户代码
             // 客户锁定
             CreditRecordForm.setControlEditable(formContext, "mcs_accountid", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 确认客户信息无误后点击【下一步】进入数据集成",
-                "INFO", "status_hint"
-            );
             break;
+            
+        // 注意：【搜索 Coface 企业】按钮通过 Modern Command Bar (App Action) 部署，
+        // 当前 AppActionDeployer 创建的按钮不设置 EnableRule，由 JS 函数内部校验控制
             
         case CreditRecordForm.STATUS.DATA_INTEGRATION: // 11 - 内外部数据集成
             // 数据集成中，关键字段锁定
             CreditRecordForm.setControlEditable(formContext, "mcs_accountid", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 数据集成完成后点击【下一步】进入人工复核",
-                "INFO", "status_hint"
-            );
             break;
             
         case CreditRecordForm.STATUS.MANUAL_REVIEW: // 12 - 人工复核
-            // 复核阶段，允许编辑标签子网格（客户锁定）
+            // 复核阶段，允许编辑标签子网格和逾期未回收率模型分（客户锁定）
             CreditRecordForm.setControlEditable(formContext, "mcs_accountid", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 可编辑标签子网格进行人工复核，完成后点击【下一步】| 如需刷新数据可点击【数据集成刷新】",
-                "INFO", "status_hint"
-            );
+            CreditRecordForm.setControlEditable(formContext, "mcs_overduerate", true);
+            CreditRecordForm.setGridEditable(formContext, "Subgrid_new_1", true);
             break;
             
         case CreditRecordForm.STATUS.SCORE_CALC: // 13 - 信用分计算
@@ -322,39 +422,25 @@ CreditRecordForm.toggleByStatus = function (formContext) {
             CreditRecordForm.lockAllFields(formContext);
             // 重新锁定状态字段（lockAllFields会解锁所有，需要重新锁定）
             CreditRecordForm.setControlEditable(formContext, "mcs_status", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 系统正在计算信用分，计算完成后自动进入审核申请",
-                "WARNING", "status_hint"
-            );
             break;
             
         case CreditRecordForm.STATUS.AUDIT_APPLY: // 14 - 审核申请
             // 等待BPP审批，所有字段锁定
             CreditRecordForm.lockAllFields(formContext);
             CreditRecordForm.setControlEditable(formContext, "mcs_status", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 已提交BPP审批，请等待审批结果",
-                "WARNING", "status_hint"
-            );
+            // 显示BPP审批信息
+            CreditRecordForm.showBppInfo(formContext);
             break;
             
         case CreditRecordForm.STATUS.APPROVED: // 15 - 审批通过
             // 所有字段锁定
             CreditRecordForm.lockAllFields(formContext);
             CreditRecordForm.setControlEditable(formContext, "mcs_status", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 信用评估已完成，所有字段已锁定",
-                "SUCCESS", "status_hint"
-            );
             break;
             
         case CreditRecordForm.STATUS.REJECTED: // 16 - 审批未通过
             // 客户锁定，但允许点击【重新发起】
             CreditRecordForm.setControlEditable(formContext, "mcs_accountid", false);
-            formContext.ui.setFormNotification(
-                "当前阶段：" + statusName + " | 审批未通过，可点击【重新发起】回到数据集成阶段重新评估",
-                "ERROR", "status_hint"
-            );
             break;
     }
 };
@@ -368,6 +454,38 @@ CreditRecordForm.setControlEditable = function (formContext, fieldName, editable
         control.setDisabled(!editable);
     }
 };
+
+/**
+ * 设置子网格可编辑性
+ * 控制可编辑子网格（Editable Grid）的编辑状态
+ */
+CreditRecordForm.setGridEditable = function (formContext, gridName, editable) {
+    var gridControl = formContext.getControl(gridName);
+    if (gridControl) {
+        try {
+            // 标准子网格控制方式
+            gridControl.setDisabled(!editable);
+            
+            // 如果子网格已加载，同时控制内部的编辑按钮
+            var grid = gridControl.getGrid();
+            if (grid) {
+                var rows = grid.getRows();
+                if (rows) {
+                    rows.forEach(function (row) {
+                        var cells = row.getData().getEntity().getAttributes();
+                        cells.forEach(function (attr) {
+                            attr.setDisabled(!editable);
+                        });
+                    });
+                }
+            }
+        } catch (e) {
+            // 子网格可能尚未完全加载，忽略错误
+            console.log("子网格控制失败（可能尚未加载）: " + e.message);
+        }
+    }
+};
+
 
 /**
  * 锁定所有字段
@@ -422,7 +540,8 @@ CreditRecordForm.nextStep = function (primaryControl) {
             break;
             
         case CreditRecordForm.STATUS.SCORE_CALC: // 13 → 14
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.AUDIT_APPLY, "提交审核申请");
+            // 提交审核申请，触发BPP Plugin
+            CreditRecordForm.submitBppApproval(formContext, recordId);
             break;
             
         default:
@@ -448,31 +567,8 @@ CreditRecordForm.refreshDataIntegration = function (primaryControl) {
     Xrm.Utility.confirmDialog(
         "确定要重新执行数据集成吗？这将刷新所有指标数据。",
         function () {
-            // 调用自定义Action触发数据集成刷新
-            var req = {
-                getMetadata: function () {
-                    return {
-                        boundParameter: "entity",
-                        parameterTypes: {},
-                        operationType: 0,
-                        operationName: "mcs_RefreshDataIntegration"
-                    };
-                }
-            };
-            
-            Xrm.WebApi.online.execute(req)
-                .then(function (result) {
-                    if (result.ok) {
-                        Xrm.Utility.alertDialog("数据集成刷新已触发，请稍后查看结果");
-                        formContext.data.refresh(true);
-                    } else {
-                        Xrm.Utility.alertDialog("数据集成刷新失败");
-                    }
-                })
-                .catch(function (error) {
-                    console.error("数据集成刷新失败:", error);
-                    Xrm.Utility.alertDialog("数据集成刷新失败：" + (error.message || JSON.stringify(error)));
-                });
+            // 方式：将状态改回11（数据集成），触发 CofaceDataSyncPlugin 重新执行
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, "数据集成刷新已触发");
         },
         function () {
             // 用户取消，不做操作
@@ -480,17 +576,325 @@ CreditRecordForm.refreshDataIntegration = function (primaryControl) {
     );
 };
 
+// ==================== BPP审批功能 ====================
+
+/**
+ * 调用 CommonExtensionApi 通用方法
+ * 通过 mcs_commonextensionapi 转发到 SanyD365.D365ExtensionApi
+ */
+CreditRecordForm.callCommonExtensionApi = function (path, params, hasAuth) {
+    var requestBody = {
+        Method: "post",
+        Path: path,
+        HasAuth: hasAuth === true
+    };
+    if (params) {
+        requestBody.Params = params;
+    }
+
+    var request = {
+        getMetadata: function () {
+            return {
+                boundParameter: null,
+                parameterTypes: {},
+                operationType: 0,
+                operationName: "mcs_commonextensionapi"
+            };
+        },
+        RequestBody: JSON.stringify(requestBody)
+    };
+
+    return Xrm.WebApi.online.execute(request).then(function (response) {
+        return response.json();
+    }).then(function (result) {
+        if (result.Result) {
+            return JSON.parse(result.Result);
+        }
+        return result;
+    });
+};
+
+/**
+ * 获取当前用户的 mcs_domainaccount（BPP用户账号）
+ */
+CreditRecordForm.getCurrentUserDomainAccount = function () {
+    var userId = Xrm.Utility.getGlobalContext().userSettings.userId.replace(/[{}]/g, "");
+    var fetchXml = [
+        "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>",
+        "  <entity name='mcs_personnel'>",
+        "    <attribute name='mcs_domainaccount' />",
+        "    <link-entity name='mcs_useraccount' from='mcs_useraccountid' to='mcs_systemuseraccount' link-type='inner' alias='aa'>",
+        "      <link-entity name='systemuser' from='systemuserid' to='mcs_systemuserid' link-type='inner' alias='ab'>",
+        "        <filter type='and'>",
+        "          <condition attribute='systemuserid' operator='eq' value='" + userId + "' />",
+        "        </filter>",
+        "      </link-entity>",
+        "    </link-entity>",
+        "  </entity>",
+        "</fetch>"
+    ].join("");
+
+    return Xrm.WebApi.online.retrieveMultipleRecords("mcs_personnel", "?fetchXml=" + encodeURIComponent(fetchXml))
+        .then(function (result) {
+            if (result.entities.length > 0 && result.entities[0].mcs_domainaccount) {
+                return result.entities[0].mcs_domainaccount;
+            }
+            throw new Error("当前用户未配置mcs_personnel.domainaccount");
+        });
+};
+
+/**
+ * 【提交审批】按钮命令
+ * 状态13（信用分计算）→ 14（审核申请），前端直接调 mcs_bppstartapi 发起 BPP
+ * 与限额申请保持一致：DynaHx.Da.invokeAction("mcs_bppstartapi", ...)
+ * 这里用 Xrm.WebApi.online.execute 等价的 Custom API 调用
+ */
+CreditRecordForm.submitBppApproval = function (formContext, recordId) {
+    // 校验信用分已计算
+    var creditScore = formContext.getAttribute("mcs_creditscore").getValue();
+    if (creditScore === null || creditScore === undefined) {
+        Xrm.Utility.alertDialog("信用分尚未计算，请先完成信用分计算");
+        return;
+    }
+
+    // 防重复提交：已有 workflowid 时跳过
+    var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
+    if (workflowId) {
+        Xrm.Utility.alertDialog("当前记录已存在BPP审批流程，请勿重复提交");
+        return;
+    }
+
+    // 确认提交
+    Xrm.Utility.confirmDialog(
+        "确定要提交BPP审批吗？提交后将锁定所有字段并进入审批流程。",
+        function () {
+            CreditRecordForm.showLoading(formContext, "正在提交BPP审批...");
+
+            // 1. 先保存状态到 14
+            var entity = { mcs_status: CreditRecordForm.STATUS.AUDIT_APPLY };
+            Xrm.WebApi.online.updateRecord("mcs_credit_record", recordId, entity)
+                .then(function () {
+                    // 2. 调 Custom API mcs_bppstartapi（与限额申请一致）
+                    var userId = Xrm.Utility.getGlobalContext().userSettings.userId.replace(/[{}]/g, "");
+                    var request = {
+                        getMetadata: function () {
+                            return {
+                                boundParameter: null,
+                                parameterTypes: {
+                                    "EntityId": { typeName: "Edm.String", structuralProperty: 1 },
+                                    "EntityName": { typeName: "Edm.String", structuralProperty: 1 },
+                                    "UserId": { typeName: "Edm.String", structuralProperty: 1 }
+                                },
+                                operationType: 0,
+                                operationName: "mcs_bppstartapi"
+                            };
+                        },
+                        EntityId: recordId,
+                        EntityName: "mcs_credit_record",
+                        UserId: userId
+                    };
+
+                    return Xrm.WebApi.online.execute(request);
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    CreditRecordForm.hideLoading(formContext);
+                    if (data && data.Result) {
+                        var result = JSON.parse(data.Result);
+                        if (result.Result === true || result.Result === "true") {
+                            formContext.ui.setFormNotification("BPP审批提交成功", "INFO", "bpp_start");
+                            formContext.data.refresh(true);
+                            setTimeout(function () {
+                                formContext.ui.clearFormNotification("bpp_start");
+                            }, 3000);
+                        } else {
+                            Xrm.Utility.alertDialog(result.Description || "BPP审批提交失败");
+                        }
+                    } else {
+                        Xrm.Utility.alertDialog("BPP审批提交返回异常");
+                    }
+                })
+                .catch(function (error) {
+                    CreditRecordForm.hideLoading(formContext);
+                    console.error("提交BPP审批失败:", error);
+                    Xrm.Utility.alertDialog("提交BPP审批失败：" + (error.message || JSON.stringify(error)));
+                });
+        }
+    );
+};
+
+/**
+ * 【查看审批】按钮命令
+ * 有workflowid时可用，打开BPP审批页面
+ */
+CreditRecordForm.viewBppApproval = function (primaryControl) {
+    var formContext = primaryControl;
+    var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
+    
+    if (!workflowId) {
+        Xrm.Utility.alertDialog("暂无BPP审批信息");
+        return;
+    }
+    
+    // BPP审批页面地址（测试环境orgId=3，生产环境orgId=3）
+    var bppUrl = "https://sanybpp-portal-uat.sany.com.cn/approval-form?instanceId=" + workflowId + "&orgId=3";
+    window.open(bppUrl, "_blank");
+};
+
+/**
+ * 【废弃审批】按钮命令
+ * 状态14且有workflowid时可用，调用BPP废弃API
+ */
+CreditRecordForm.abandonBppApproval = function (primaryControl) {
+    var formContext = primaryControl;
+    var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
+    var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
+    
+    if (!workflowId) {
+        Xrm.Utility.alertDialog("当前没有进行中的BPP审批流程");
+        return;
+    }
+    
+    Xrm.Utility.confirmDialog(
+        "确定要废弃当前BPP审批流程吗？废弃后将回到人工复核阶段。",
+        function () {
+            CreditRecordForm.showLoading(formContext, "正在废弃BPP审批流程...");
+            
+            // 调用mcs_bppabandonapi废弃审批
+            var request = {
+                EntityId: recordId,
+                EntityName: "mcs_credit_record"
+            };
+            
+            Xrm.WebApi.online.execute(request)
+                .then(function (response) {
+                    CreditRecordForm.hideLoading(formContext);
+                    if (response.ok) {
+                        formContext.ui.setFormNotification("BPP审批已废弃", "INFO", "bpp_abandon");
+                        formContext.data.refresh(true);
+                        setTimeout(function () {
+                            formContext.ui.clearFormNotification("bpp_abandon");
+                        }, 3000);
+                    } else {
+                        response.json().then(function (data) {
+                            Xrm.Utility.alertDialog("废弃失败：" + (data.error?.message || "未知错误"));
+                        });
+                    }
+                })
+                .catch(function (error) {
+                    CreditRecordForm.hideLoading(formContext);
+                    console.error("废弃BPP审批失败:", error);
+                    Xrm.Utility.alertDialog("废弃失败：" + (error.message || JSON.stringify(error)));
+                });
+        }
+    );
+};
+
+/**
+ * 显示BPP审批信息
+ * 状态14时显示审批链接和当前审批人
+ */
+CreditRecordForm.showBppInfo = function (formContext) {
+    var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
+    var nextApprover = formContext.getAttribute("mcs_nextapprover").getValue();
+    var bppStatus = formContext.getAttribute("mcs_bppstatus").getValue();
+    
+    if (workflowId) {
+        var msg = "BPP审批中 | 流程ID: " + workflowId;
+        if (nextApprover) {
+            msg += " | 当前审批人: " + nextApprover;
+        }
+        if (bppStatus) {
+            msg += " | 状态: " + bppStatus;
+        }
+        formContext.ui.setFormNotification(msg, "INFO", "bpp_info");
+    } else {
+        formContext.ui.setFormNotification("BPP审批流程发起中，请稍后...", "INFO", "bpp_info");
+    }
+};
+
+/**
+ * 【搜索 Coface 企业】按钮命令
+ * 状态9（发起）或状态10（关联客户）且 mcs_cofaceid 为空时可用
+ */
+CreditRecordForm.searchCofaceCompany = function (primaryControl) {
+    var formContext = primaryControl;
+    
+    // 未保存记录时禁止搜索
+    var recordId = formContext.data.entity.getId();
+    if (!recordId) {
+        Xrm.Utility.alertDialog("请先保存记录");
+        return;
+    }
+    
+    var status = formContext.getAttribute("mcs_status").getValue();
+    var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
+    var accountId = formContext.getAttribute("mcs_accountid").getValue();
+    
+    if (status !== CreditRecordForm.STATUS.INIT && status !== CreditRecordForm.STATUS.LINK_ACCOUNT) {
+        Xrm.Utility.alertDialog("【搜索 Coface 企业】仅在发起或关联客户阶段可用");
+        return;
+    }
+    
+    if (!accountId) {
+        Xrm.Utility.alertDialog("请先选择客户");
+        return;
+    }
+    
+    if (cofaceId) {
+        Xrm.Utility.alertDialog("当前记录已绑定 Coface ID，无需重新搜索");
+        return;
+    }
+    
+    // 打开企业搜索弹窗，通过 data 传递上下文（Modern UI 中弹窗无法直接访问 parent.Xrm.Page）
+    recordId = recordId.replace(/[{}]/g, "");
+    var accountRef = formContext.getAttribute("mcs_accountid").getValue();
+    var pageInput = {
+        pageType: "webresource",
+        webresourceName: "mcs_coface_company_search.html",
+        data: JSON.stringify({
+            creditRecordId: recordId,
+            accountId: accountRef && accountRef.length > 0 ? accountRef[0].id.replace(/[{}]/g, "") : null,
+            accountName: accountRef && accountRef.length > 0 ? accountRef[0].name : "",
+            companyName: formContext.getAttribute("mcs_custnameen").getValue() || "",
+            countryCode: formContext.getAttribute("mcs_countrycode").getValue() || ""
+        })
+    };
+    var navigationOptions = {
+        target: 2, // 弹窗
+        width: 900,
+        height: 600,
+        position: 1 // 居中
+    };
+    
+    Xrm.Navigation.navigateTo(pageInput, navigationOptions)
+        .then(function () {
+            // 弹窗关闭后刷新表单，并重新校验字段/清除旧提示
+            return formContext.data.refresh(true);
+        })
+        .then(function () {
+            CreditRecordForm.validateAccountFields(formContext);
+        })
+        .catch(function (error) {
+            console.error("打开企业搜索弹窗失败:", error);
+            Xrm.Utility.alertDialog("打开搜索弹窗失败：" + (error.message || JSON.stringify(error)));
+        });
+};
+
 /**
  * 【重新发起】按钮命令
- * 仅状态16（审批未通过）可用，回到数据集成阶段重新评估
+ * 状态12（人工复核）或状态16（审批未通过）可用，回到数据集成阶段重新评估
  */
 CreditRecordForm.restartEvaluation = function (primaryControl) {
     var formContext = primaryControl;
     var status = formContext.getAttribute("mcs_status").getValue();
     var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
     
-    if (status !== CreditRecordForm.STATUS.REJECTED) {
-        Xrm.Utility.alertDialog("【重新发起】仅在审批未通过状态可用");
+    // 仅在人工复核(12)或审批未通过(16)时可用
+    if (status !== CreditRecordForm.STATUS.MANUAL_REVIEW && status !== CreditRecordForm.STATUS.REJECTED) {
+        Xrm.Utility.alertDialog("【重新发起】仅在人工复核或审批未通过状态可用");
         return;
     }
     
@@ -507,23 +911,71 @@ CreditRecordForm.restartEvaluation = function (primaryControl) {
 };
 
 /**
- * 更新状态通用方法
+ * 显示等待遮罩
+ */
+CreditRecordForm.showLoading = function (formContext, message) {
+    formContext.ui.setFormNotification(message || "正在处理，请稍候...", "INFO", "loading_indicator");
+};
+
+/**
+ * 隐藏等待遮罩
+ */
+CreditRecordForm.hideLoading = function (formContext) {
+    formContext.ui.clearFormNotification("loading_indicator");
+};
+
+/**
+ * 更新状态通用方法（带等待画面）
  */
 CreditRecordForm.updateStatus = function (formContext, recordId, newStatus, successMsg) {
+    // 标记为按钮触发，允许状态变更
+    CreditRecordForm._bpfNavigating = true;
+    CreditRecordForm._lastButtonStatus = newStatus;
+    
+    // 显示等待画面
+    CreditRecordForm.showLoading(formContext, "正在更新状态，请稍候...");
+    
     var entity = {};
     entity.mcs_status = newStatus;
     
     Xrm.WebApi.online.updateRecord("mcs_credit_record", recordId, entity)
         .then(function () {
+            // 隐藏等待画面
+            CreditRecordForm.hideLoading(formContext);
+            
+            // 显示成功通知（INFO级别，SUCCESS不被支持）
             formContext.ui.setFormNotification(
                 successMsg + "，状态已更新为：" + CreditRecordForm.STATUS_NAMES[newStatus],
-                "SUCCESS", "status_update"
+                "INFO", "status_update"
             );
-            // 刷新表单以反映状态变更
-            formContext.data.refresh(true);
+            
+            // 刷新表单以反映状态变更，刷新完成后再清除标记
+            return formContext.data.refresh(true);
+        })
+        .then(function () {
+            // 3秒后清除成功通知
+            setTimeout(function () {
+                formContext.ui.clearFormNotification("status_update");
+            }, 3000);
+            
+            // 清除按钮触发标记
+            CreditRecordForm._bpfNavigating = false;
         })
         .catch(function (error) {
+            // 隐藏等待画面
+            CreditRecordForm.hideLoading(formContext);
+            
+            // 清除按钮触发标记
+            CreditRecordForm._bpfNavigating = false;
+            
             console.error("状态更新失败:", error);
+            
+            // 显示错误通知
+            formContext.ui.setFormNotification(
+                "状态更新失败：" + (error.message || JSON.stringify(error)),
+                "ERROR", "status_update_error"
+            );
+            
             Xrm.Utility.alertDialog("状态更新失败：" + (error.message || JSON.stringify(error)));
         });
 };
@@ -554,11 +1006,87 @@ CreditRecordForm.canRefreshData = function () {
 /**
  * 【重新发起】按钮是否可用
  * 供Ribbon EnableRule调用
+ * 人工复核(12)或审批未通过(16)时可用
  */
 CreditRecordForm.canRestart = function () {
     var formContext = Xrm.Page;
     var status = formContext.getAttribute("mcs_status").getValue();
-    return status === CreditRecordForm.STATUS.REJECTED;
+    return status === CreditRecordForm.STATUS.MANUAL_REVIEW || status === CreditRecordForm.STATUS.REJECTED;
+};
+
+/**
+ * 【查看审批】按钮是否可用
+ * 供Ribbon EnableRule调用
+ * 有workflowid时可用
+ */
+CreditRecordForm.canViewBpp = function () {
+    var formContext = Xrm.Page;
+    var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
+    return !!workflowId;
+};
+
+/**
+ * 【废弃审批】按钮是否可用
+ * 供Ribbon EnableRule调用
+ * 状态14且已有workflowid时可用
+ */
+CreditRecordForm.canAbandonBpp = function () {
+    var formContext = Xrm.Page;
+    var status = formContext.getAttribute("mcs_status").getValue();
+    var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
+    return status === CreditRecordForm.STATUS.AUDIT_APPLY && !!workflowId;
+};
+
+/**
+ * 【搜索 Coface 企业】按钮是否可用
+ * 供Ribbon EnableRule调用
+ * 状态9或10，且 mcs_cofaceid 为空，且已选择客户
+ */
+CreditRecordForm.canSearchCofaceCompany = function () {
+    var formContext = Xrm.Page;
+    var status = formContext.getAttribute("mcs_status").getValue();
+    var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
+    var accountId = formContext.getAttribute("mcs_accountid").getValue();
+    
+    return (status === CreditRecordForm.STATUS.INIT || status === CreditRecordForm.STATUS.LINK_ACCOUNT) &&
+           !cofaceId && !!accountId;
+};
+
+// ==================== 附件页签初始化 ====================
+
+/**
+ * 初始化附件页签
+ * 评估记录表单嵌入通用上传组件 Uploader.html，用于管理客户资信附件
+ */
+CreditRecordForm.initAttachmentTab = function (formContext) {
+    try {
+        var accountField = formContext.getAttribute("mcs_accountid");
+        if (!accountField || !accountField.getValue()) {
+            // 未选择客户时，附件页签不初始化
+            return;
+        }
+        
+        var accountValue = accountField.getValue()[0];
+        var accountId = accountValue.id.replace(/[{}]/g, "");
+        
+        // 尝试获取 Uploader WebResource 控件，动态补充当前客户上下文
+        var uploaderControl = formContext.getControl("mcs_credit_record_uploader");
+        if (uploaderControl && uploaderControl.getObject) {
+            var uploaderObj = uploaderControl.getObject();
+            if (uploaderObj && uploaderObj.contentWindow && uploaderObj.contentWindow.initUploaderContext) {
+                uploaderObj.contentWindow.initUploaderContext({
+                    entityName: "mcs_customer_file",
+                    relatedEntityName: "account",
+                    relatedEntityId: accountId,
+                    relatedEntityDisplayName: accountValue.name || ""
+                });
+            }
+        }
+        
+        console.log("附件页签已初始化，关联客户: " + accountId);
+    } catch (ex) {
+        console.error("初始化附件页签失败:", ex);
+    }
 };
 
 // ==================== 保存前校验 ====================
@@ -566,12 +1094,24 @@ CreditRecordForm.canRestart = function () {
 /**
  * 保存前校验
  */
+// 重复客户在途评估校验状态标志
+CreditRecordForm._duplicateCheckInProgress = false;
+CreditRecordForm._duplicateCheckPassed = false;
+
 CreditRecordForm.onSave = function (executionContext) {
     var formContext = executionContext.getFormContext();
     var formType = formContext.ui.getFormType();
     
     // 新建时校验客户信息
     if (formType === 1) {
+        /* 临时禁用：重复客户在途评估校验（2026-06-28）
+        // 已通过重复客户校验，放行本次保存
+        if (CreditRecordForm._duplicateCheckPassed) {
+            CreditRecordForm._duplicateCheckPassed = false;
+            return;
+        }
+        */
+        
         var accountId = formContext.getAttribute("mcs_accountid").getValue();
         if (!accountId) {
             Xrm.Utility.alertDialog("请选择客户");
@@ -587,5 +1127,52 @@ CreditRecordForm.onSave = function (executionContext) {
             executionContext.getEventArgs().preventDefault();
             return;
         }
+        
+        /* 临时禁用：重复客户在途评估校验（2026-06-28）
+        // 防止重复点击保存导致多次查询
+        if (CreditRecordForm._duplicateCheckInProgress) {
+            executionContext.getEventArgs().preventDefault();
+            return;
+        }
+        
+        // 校验是否存在相同客户的在途评估记录（状态 9-14）
+        CreditRecordForm._duplicateCheckInProgress = true;
+        executionContext.getEventArgs().preventDefault();
+        
+        var accountGuid = accountId[0].id.replace(/[{}]/g, "");
+        var statusFilter = [
+            "mcs_status eq 9",
+            "mcs_status eq 10",
+            "mcs_status eq 11",
+            "mcs_status eq 12",
+            "mcs_status eq 13",
+            "mcs_status eq 14"
+        ].join(" or ");
+        var filter = "_mcs_accountid_value eq " + accountGuid + " and (" + statusFilter + ") and statecode eq 0";
+        
+        Xrm.WebApi.retrieveMultipleRecords("mcs_credit_record", "?$select=mcs_scoreid&$filter=" + encodeURIComponent(filter) + "&$top=1")
+            .then(function (result) {
+                CreditRecordForm._duplicateCheckInProgress = false;
+                if (result.entities.length > 0) {
+                    Xrm.Utility.alertDialog("存在有重复客户评估记录，需核查！");
+                } else {
+                    // 没有重复，标记通过后重新触发保存
+                    CreditRecordForm._duplicateCheckPassed = true;
+                    formContext.data.save().then(
+                        function () { CreditRecordForm._duplicateCheckPassed = false; },
+                        function (error) {
+                            CreditRecordForm._duplicateCheckPassed = false;
+                            console.error("保存失败:", error);
+                        }
+                    );
+                }
+            })
+            .catch(function (error) {
+                CreditRecordForm._duplicateCheckInProgress = false;
+                CreditRecordForm._duplicateCheckPassed = false;
+                console.error("查询重复评估记录失败:", error);
+                Xrm.Utility.alertDialog("校验重复评估记录失败：" + (error.message || JSON.stringify(error)));
+            });
+        */
     }
 };

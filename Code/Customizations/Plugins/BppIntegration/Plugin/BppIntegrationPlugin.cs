@@ -68,11 +68,11 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
 
                 tracer.Trace($"现有 workflowId: {existingWorkflowId}, bppStatus: {existingBppStatus}");
 
-                if (!string.IsNullOrEmpty(existingWorkflowId) &&
-                    !string.IsNullOrEmpty(existingBppStatus) &&
-                    existingBppStatus != "SubmitFailed")
+                // 只有当前BPP流程仍在进行中时才阻止重复提交；
+                // 已结束（Approved/Rejected/Withdrawn/Abandoned/SubmitFailed）或 numeric 终止态允许重新提交
+                if (!string.IsNullOrEmpty(existingWorkflowId) && IsBppInProgress(existingBppStatus))
                 {
-                    tracer.Trace("流程已在审批中或已完成，跳过重复提交");
+                    tracer.Trace("流程仍在审批中，跳过重复提交");
                     return;
                 }
 
@@ -117,6 +117,23 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                 tracer.Trace($"BppIntegrationPlugin异常: {ex.Message}");
                 throw new InvalidPluginExecutionException($"BPP集成处理失败: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// 判断BPP状态是否为"进行中"（需要阻止重复提交）
+        /// 结束态（Approved/Rejected/Withdrawn/Abandoned/SubmitFailed 及其 numeric 形式）返回 false
+        /// </summary>
+        private bool IsBppInProgress(string bppStatus)
+        {
+            if (string.IsNullOrWhiteSpace(bppStatus))
+                return false;
+
+            var status = bppStatus.Trim().ToLowerInvariant();
+            return status == "submitted" ||
+                   status == "inreview" ||
+                   status == "pending" ||
+                   status == "10" ||
+                   status == "20";
         }
     }
 }

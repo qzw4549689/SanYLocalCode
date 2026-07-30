@@ -1,0 +1,141 @@
+{
+  "entityName": "mcs_fca_records",
+  "displayName": "厂端授信额度动态调整管理台账表",
+  "displayNameZh": "厂端授信额度动态调整管理台账表",
+  "displayNameEn": "Factory Credit Quota Adjustment Ledger",
+  "primaryAttribute": "mcs_recordid",
+  "primaryAttributeDisplayName": "台账编号",
+  "primaryAttributeDisplayNameZh": "台账编号",
+  "primaryAttributeDisplayNameEn": "Ledger No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_accountid",
+      "displayName": "客户编码",
+      "displayNameZh": "客户编码",
+      "displayNameEn": "Customer Code",
+      "description": "关联客户主数据 AccountMaster",
+      "type": "lookup",
+      "targetEntity": "mcs_customermasterdata",
+      "targetEntityDisplayName": "客户主数据"
+    },
+    {
+      "schemaName": "mcs_custname",
+      "displayName": "客户名称",
+      "displayNameZh": "客户名称",
+      "displayNameEn": "Customer Name",
+      "description": "客户名称",
+      "type": "string",
+      "maxLength": 500,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_contractid",
+      "displayName": "合同编码",
+      "displayNameZh": "合同编码",
+      "displayNameEn": "Contract Code",
+      "description": "关联合同",
+      "type": "lookup",
+      "targetEntity": "mcs_contract",
+      "targetEntityDisplayName": "合同"
+    },
+    {
+      "schemaName": "mcs_orderid",
+      "displayName": "订单编码",
+      "displayNameZh": "订单编码",
+      "displayNameEn": "Order Code",
+      "description": "关联订单",
+      "type": "lookup",
+      "targetEntity": "mcs_order",
+      "targetEntityDisplayName": "订单"
+    },
+    {
+      "schemaName": "mcs_proccess",
+      "displayName": "流程环节",
+      "displayNameZh": "流程环节",
+      "displayNameEn": "Process Stage",
+      "description": "流程环节 1-12",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "环节1": 1,
+        "环节2": 2,
+        "环节3": 3,
+        "环节4": 4,
+        "环节5": 5,
+        "环节6": 6,
+        "环节7": 7,
+        "环节8": 8,
+        "环节9": 9,
+        "环节10": 10,
+        "环节11": 11,
+        "环节12": 12
+      }
+    },
+    {
+      "schemaName": "mcs_adjust",
+      "displayName": "额度调整动作",
+      "displayNameZh": "额度调整动作",
+      "displayNameEn": "Adjustment Action",
+      "description": "1初始化/2预占/3占用/4释放",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "初始化": 1,
+        "预占": 2,
+        "占用": 3,
+        "释放": 4
+      }
+    },
+    {
+      "schemaName": "mcs_sellergrant",
+      "displayName": "授信限额USD",
+      "displayNameZh": "授信限额USD",
+      "displayNameEn": "Credit Quota USD",
+      "description": "从额度表获取",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_asisbalance",
+      "displayName": "现有授信余额USD",
+      "displayNameZh": "现有授信余额USD",
+      "displayNameEn": "Current Credit Balance USD",
+      "description": "从额度表获取，允许负数表示超额",
+      "type": "money",
+      "minDecimalValue": -999999999999.99,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_adjustamt",
+      "displayName": "调整金额USD",
+      "displayNameZh": "调整金额USD",
+      "displayNameEn": "Adjustment Amount USD",
+      "description": "调整金额",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_tobebalance",
+      "displayName": "调整后授信余额USD",
+      "displayNameZh": "调整后授信余额USD",
+      "displayNameEn": "Adjusted Credit Balance USD",
+      "description": "计算字段，允许负数表示超额",
+      "type": "money",
+      "minDecimalValue": -999999999999.99,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    }
+  ]
+}

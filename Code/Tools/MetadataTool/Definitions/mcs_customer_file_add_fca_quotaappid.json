@@ -1,0 +1,25 @@
+{
+  "entityName": "mcs_customer_file",
+  "displayName": "客户资信附件表",
+  "displayNameZh": "客户资信附件表",
+  "displayNameEn": "Customer Credit File",
+  "primaryAttribute": "mcs_fileid",
+  "primaryAttributeDisplayName": "文件统一编号",
+  "primaryAttributeDisplayNameZh": "文件统一编号",
+  "primaryAttributeDisplayNameEn": "File ID",
+  "primaryAttributeLength": 100,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fca_quotaappid",
+      "displayName": "厂端授信额度申请单",
+      "displayNameZh": "厂端授信额度申请单",
+      "displayNameEn": "Factory Credit Quota Application",
+      "description": "关联额度调整申请单",
+      "type": "lookup",
+      "targetEntity": "mcs_fca_quotaapp",
+      "targetEntityDisplayName": "厂端授信额度申请单表"
+    }
+  ]
+}

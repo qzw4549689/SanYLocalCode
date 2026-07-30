@@ -4,34 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>客户信用画像</title>
+    <meta name="credit-profile-version" content="2026-07-07-fix-wheel-echarts">
     <script src="/WebResources/mcs_credit_wheel_echarts.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI Web (East Asian)", "Microsoft YaHei", "PingFang SC", sans-serif;
             font-size: 13px;
-            color: #333;
+            color: #323130;
             background: #fff;
             line-height: 1.4;
         }
         .profile-container {
             max-width: 100%;
             margin: 0;
-            padding: 12px 16px;
+            padding: 16px;
         }
         .main-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 16px;
-            align-items: start;
         }
         .left-panel {
             min-width: 0;
-        }
-        .right-panel {
-            min-width: 0;
-            position: sticky;
-            top: 12px;
+            width: 100%;
         }
 
         /* 右侧信用飞轮卡片 */
@@ -103,6 +99,148 @@
             border-radius: 50%;
         }
         .wheel-legend-score {
+            font-weight: 600;
+            color: #0078d4;
+        }
+
+        .wheel-summary {
+            margin: 10px 0;
+        }
+        .wheel-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            padding: 4px 0;
+            color: #333;
+        }
+        .wheel-open-hint {
+            text-align: center;
+            font-size: 12px;
+            color: #0078d4;
+            padding: 6px 0;
+            margin-top: 6px;
+            border-top: 1px dashed #e0e0e0;
+        }
+
+        /* 信用飞轮模态弹窗 */
+        .wheel-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .wheel-modal-backdrop {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.45);
+        }
+        .wheel-modal-content {
+            position: absolute;
+            left: 50%;
+            top: 40px;
+            transform: translateX(-50%);
+            width: 860px;
+            max-width: 94vw;
+            max-height: calc(100vh - 80px);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .wheel-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .wheel-modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .wheel-modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #666;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .wheel-modal-close:hover {
+            color: #333;
+        }
+        .wheel-modal-body {
+            padding: 16px 20px 20px;
+            overflow: auto;
+        }
+        .wheel-chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 520px;
+            margin-top: -12px;
+        }
+        .wheel-modal-chart {
+            width: 100%;
+            height: 100%;
+        }
+        .wheel-modal-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .wheel-modal-center .center-grade {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.2;
+        }
+        .wheel-modal-center .center-score {
+            font-size: 17px;
+            color: #1677FF;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .wheel-modal-legend {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .wheel-modal-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .wheel-modal-legend-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #333;
+        }
+        .wheel-modal-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .wheel-modal-legend-score {
             font-weight: 600;
             color: #0078d4;
         }
@@ -222,60 +360,136 @@
         /* 区域卡片 */
         .section-card {
             background: #fff;
-            border-radius: 6px;
+            border-radius: 2px;
             padding: 12px 16px;
-            margin-bottom: 10px;
-            border: 1px solid #e8e8e8;
+            margin-bottom: 12px;
+            border: 1px solid #e1dfdd;
         }
         .section-title {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #e8e8e8;
+            color: #201f1e;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1dfdd;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
         .section-title .icon {
-            width: 20px;
-            height: 20px;
+            display: none;
+        }
+
+        /* 信息网格（PRD 2.0：三行三列，标签在左值在右） */
+        .info-grid-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0 24px;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            min-height: 32px;
+            padding: 4px;
+        }
+        .section-wheel-trigger {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #605e5c;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 2px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .section-wheel-trigger:hover {
+            background: #f0f7ff;
+            color: #0078d4;
+        }
+        .section-wheel-trigger svg {
+            display: block;
+            flex-shrink: 0;
+        }
+        .info-row-label {
+            color: #605e5c;
+            font-size: 12px;
+            width: 160px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .info-help-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-
-        /* 信息网格 */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px 16px;
-        }
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .info-label {
-            font-size: 11px;
-            color: #666;
-        }
-        .info-value {
-            font-size: 12px;
-            color: #1a1a1a;
-            font-weight: 500;
-        }
-        .info-value.empty {
-            color: #999;
-            font-style: italic;
-        }
-        .info-value .hint {
-            font-size: 11px;
-            color: #666;
-            font-weight: normal;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #f3f2f1;
+            color: #a19f9d;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: default;
             margin-left: 4px;
+            vertical-align: middle;
+            position: relative;
         }
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            left: 50%;
+            bottom: 100%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: normal;
+            width: max-content;
+            max-width: 240px;
+            line-height: 1.5;
+            z-index: 100;
+            margin-bottom: 6px;
+            pointer-events: none;
+        }
+        .info-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.85);
+        }
+        .info-help-icon:hover .info-tooltip {
+            display: block;
+        }
+        .info-row-value {
+            flex: 1;
+            color: #323130;
+            font-size: 13px;
+            font-weight: 400;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .info-row-value.empty {
+            color: #a19f9d;
+        }
+        .info-row-value .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .tag-yes { background: #e6f4ea; color: #137333; }
+        .tag-no { background: #f3e8fd; color: #9334e6; }
+        .tag-danger { background: #fce8e6; color: #c5221f; }
+        .tag-warning { background: #fef7e0; color: #b06000; }
 
 
         /* 表格 */
@@ -285,24 +499,30 @@
             font-size: 12px;
         }
         .data-table th {
-            background: #f8f9fa;
-            padding: 6px 10px;
+            background: #f3f2f1;
+            padding: 8px 10px;
             text-align: left;
             font-weight: 600;
-            color: #444;
-            border-bottom: 1px solid #e8e8e8;
+            color: #201f1e;
+            border-bottom: 1px solid #e1dfdd;
         }
         .data-table td {
-            padding: 6px 10px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 8px 10px;
+            border-bottom: 1px solid #e1dfdd;
             vertical-align: top;
+            color: #323130;
         }
         .data-table tr:hover td {
-            background: #fafbfc;
+            background: #f3f2f1;
         }
         .data-table .score-cell {
             font-weight: 600;
             color: #0078d4;
+        }
+        /* 临时隐藏得分值列（PRD 要求保留代码，先不显示） */
+        .data-table th.score-value-col,
+        .data-table td.score-value-col {
+            display: none;
         }
         .data-table .group-label {
             display: inline-block;
@@ -347,13 +567,13 @@
         .empty-state {
             text-align: center;
             padding: 32px;
-            color: #999;
+            color: #605e5c;
         }
 
         /* 尽调区域 */
         .dd-content {
-            background: #f8f9fa;
-            border-radius: 6px;
+            background: #f3f2f1;
+            border-radius: 2px;
             padding: 16px;
         }
         .dd-score {
@@ -364,7 +584,7 @@
         }
         .dd-opinion {
             font-size: 13px;
-            color: #333;
+            color: #323130;
             line-height: 1.6;
         }
 
@@ -377,18 +597,48 @@
         .purchase-item {
             text-align: center;
             padding: 8px;
-            background: #f8f9fa;
-            border-radius: 4px;
+            background: #f3f2f1;
+            border-radius: 2px;
         }
         .purchase-value {
             font-size: 16px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #323130;
             margin-bottom: 2px;
         }
         .purchase-label {
             font-size: 11px;
-            color: #666;
+            color: #605e5c;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #605e5c;
+        }
+        .pagination button {
+            padding: 4px 10px;
+            border: 1px solid #8a8886;
+            background: #fff;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #323130;
+        }
+        .pagination button:hover:not(:disabled) {
+            border-color: #0078d4;
+            color: #0078d4;
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #c8c6c4;
+            color: #a19f9d;
         }
 
         .score-highlight {
@@ -410,13 +660,62 @@
     <div id="app" class="profile-container">
         <div class="loading">
             <div class="loading-spinner"></div>
-            <div>正在加载客户信用画像...</div>
+            <div id="loading-text">正在加载客户信用画像...</div>
         </div>
     </div>
 
     <script>
     (function() {
         'use strict';
+
+        // ==================== 多语言 ====================
+        var _langDict = null;
+
+        /**
+         * 多语言取词（带中文兜底）
+         * 语言包已加载时返回英文；未加载/未找到时返回原中文，中文用户零影响
+         */
+        function L(key, defaultText) {
+            if (_langDict && _langDict[key]) return _langDict[key];
+            return defaultText;
+        }
+
+        /**
+         * 选项映射取词：命中映射则按语言包翻译，未命中保持原兜底（返回原值字符串）
+         */
+        function T(prefix, value, map) {
+            if (value === null || value === undefined) return '';
+            var d = map[value] !== undefined ? map[value] : map[String(value)];
+            if (d === undefined) return String(value);
+            return L(prefix + value, d);
+        }
+
+        /**
+         * 加载语言包（仅英文用户需要请求；中文用户直接用代码内中文兜底，零请求）
+         */
+        function loadLanguagePack() {
+            return new Promise(function (resolve) {
+                var langId = 2052;
+                try {
+                    var x = getXrm();
+                    if (x && x.Utility && x.Utility.getGlobalContext) {
+                        langId = x.Utility.getGlobalContext().userSettings.languageId;
+                    }
+                } catch (e) {}
+                if (langId !== 1033) { resolve(); return; }
+                var req = new XMLHttpRequest();
+                req.open('GET', '/WebResources/ms_languagefile_1033', true);
+                req.onreadystatechange = function () {
+                    if (req.readyState === 4) {
+                        if (req.status === 200) {
+                            try { _langDict = JSON.parse(req.responseText); } catch (e) {}
+                        }
+                        resolve();
+                    }
+                };
+                req.send();
+            });
+        }
 
         // ==================== 常量 ====================
         var STATUS_NAMES = {
@@ -425,6 +724,28 @@
             3: '宏观市场',
             4: '历史交易',
             5: '综合指标'
+        };
+
+        // PRD 飞轮配色：每个分组使用同色系三层渐变
+        var GROUP_PALETTES = {
+            1: ['#1677FF', '#69B1FF', '#BAE0FF'], // 客户实力：蓝
+            2: ['#52C41A', '#95DE64', '#D9F7BE'], // 客户财务：绿
+            3: ['#FAAD14', '#FFD666', '#FFF1B8'], // 宏观市场：黄/橙
+            4: ['#F5222D', '#FF7875', '#FFCCC7'], // 历史交易：红
+            5: ['#722ED1', '#B37FEB', '#E4D4FC']  // 综合指标：紫
+        };
+
+        var GROUP_COLORS = {
+            1: GROUP_PALETTES[1][0],
+            2: GROUP_PALETTES[2][0],
+            3: GROUP_PALETTES[3][0],
+            4: GROUP_PALETTES[4][0],
+            5: GROUP_PALETTES[5][0]
+        };
+
+        var SOURCE_NAMES = {
+            100000000: '内部',
+            100000001: '外部'
         };
 
         var DEALER_RANK = {
@@ -437,12 +758,65 @@
             20: '三一终端客户'
         };
 
+        var CUSTOMER_CLASSIFICATION = {
+            1: 'First Time Buyer',
+            2: 'Small Fleet Owner',
+            3: 'Semi Corporate',
+            4: 'Key Account',
+            5: 'Government',
+            6: 'Existing Customer Relative',
+            7: 'Institutional Customer'
+        };
+
         var CREDIT_GRADE_MAP = {
             100000000: 'A0',
             100000001: 'A1',
             100000002: 'A2',
             100000003: 'A3',
             100000004: 'A4'
+        };
+
+        var ACCOUNT_LEVEL = {
+            1: 'Other',
+            2: 'Silver',
+            3: 'Gold',
+            4: 'Diamond'
+        };
+
+        var PAYMENT_TYPE = {
+            1: 'Full Payment',
+            20: 'Credit Sale',
+            10: 'Letter of Credit',
+            40: 'Internal Financing',
+            50: 'External Financing',
+            60: 'Financial Leasing',
+            21: 'Boleto',
+            70: 'Installment',
+            80: 'EDFS (Channel Funding)',
+            81: 'DCS (Dealer Credit Sales)',
+            82: 'DDNF',
+            83: 'Tender Billing'
+        };
+
+        var PAYMENT_TERM_UNIT = {
+            1: '天',
+            2: '月',
+            3: '日'
+        };
+
+        var FIELDS = {
+            CreditScore:    { labelKey: 'CreditProfile_Label_CreditScore',    labelZh: '客户信用分',   tipKey: 'CreditProfile_Tip_CreditScore',    tipZh: '100分制信用评分' },
+            ExternalRate:   { labelKey: 'CreditProfile_Label_ExternalRate',   labelZh: '外部评级',     tipKey: 'CreditProfile_Tip_ExternalRate',   tipZh: '科法斯外部评级1-10分（10分最高）' },
+            CreditGrade:    { labelKey: 'CreditProfile_Label_CreditGrade',    labelZh: '客户等级',     tipKey: 'CreditProfile_Tip_CreditGrade',    tipZh: '采用A0-A4（A0最高）' },
+            Category:       { labelKey: 'CreditProfile_Label_Category',       labelZh: '客户类别',     tipKey: 'CreditProfile_Tip_Category',       tipZh: '三一终端客户、经销商终端客户、正式经销商、意向经销商等' },
+            Level:          { labelKey: 'CreditProfile_Label_Level',          labelZh: '客户级别',     tipKey: 'CreditProfile_Tip_Level',          tipZh: '直销 S/A/B/C/I，经销商 钻石/铂金/白银/认证/意向' },
+            Whitelist:      { labelKey: 'CreditProfile_Label_Whitelist',      labelZh: '白名单客户',   tipKey: 'CreditProfile_Tip_Whitelist',      tipZh: 'True是 False否' },
+            IsDD:           { labelKey: 'CreditProfile_Label_IsDD',           labelZh: '重点尽调',     tipKey: 'CreditProfile_Tip_YesNo',          tipZh: '1是 0否' },
+            NoCredit:       { labelKey: 'CreditProfile_Label_NoCredit',       labelZh: '不予授信',     tipKey: 'CreditProfile_Tip_YesNo',          tipZh: '1是 0否' },
+            Blacklist:      { labelKey: 'CreditProfile_Label_Blacklist',      labelZh: '黑名单客户',   tipKey: 'CreditProfile_Tip_YesNo',          tipZh: '1是 0否' },
+            FcaQuota:       { labelKey: 'CreditProfile_Label_FcaQuota',       labelZh: '厂端授信额度', tipKey: 'CreditProfile_Tip_FcaQuota',       tipZh: '按客户主数据汇总的厂端授信总额（USD）' },
+            FcaBalance:     { labelKey: 'CreditProfile_Label_FcaBalance',     labelZh: '厂端授信余额', tipKey: 'CreditProfile_Tip_FcaBalance',     tipZh: '按客户主数据汇总的厂端授信剩余额度（USD）' },
+            SinosureQuota:  { labelKey: 'CreditProfile_Label_SinosureQuota',  labelZh: '信保额度',     tipKey: 'CreditProfile_Tip_SinosureQuota',  tipZh: '按中信保买方代码汇总的信用保险限额（USD）' }
         };
 
         // ==================== 工具函数 ====================
@@ -468,9 +842,26 @@
         }
 
         /**
-         * 获取当前 accountid
+         * XML 特殊字符转义（用于 FetchXml）
          */
-        function getAccountId() {
+        function escapeXml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        /**
+         * 解析当前 accountid
+         * 支持：
+         *   1. URL 参数 accountid / data
+         *   2. account 表单上下文
+         *   3. mcs_customermasterdata 表单上下文（通过客户编码反查 account）
+         */
+        async function resolveAccountId() {
             // 1. URL 参数
             var aid = getUrlParam('accountid') || getUrlParam('data');
             if (aid) {
@@ -485,13 +876,80 @@
             if (xrm && xrm.Page && xrm.Page.data && xrm.Page.data.entity) {
                 try {
                     var entity = xrm.Page.data.entity;
-                    if (entity.getEntityName() === 'account') {
-                        return entity.getId().replace(/[{}]/g, '').toLowerCase();
+                    var entityName = entity.getEntityName();
+                    var entityId = entity.getId().replace(/[{}]/g, '').toLowerCase();
+
+                    if (entityName === 'account') {
+                        return entityId;
                     }
-                } catch (e) {}
+
+                    if (entityName === 'mcs_customermasterdata') {
+                        // 优先通过 account.mcs_customermasterdata 反查客户主数据对应的 account
+                        var fetchXml = [
+                            '<fetch top="1">',
+                            '  <entity name="account">',
+                            '    <attribute name="accountid" />',
+                            '    <filter>',
+                            '      <condition attribute="mcs_customermasterdata" operator="eq" value="' + entityId + '" />',
+                            '    </filter>',
+                            '  </entity>',
+                            '</fetch>'
+                        ].join('');
+                        var result = await xrm.WebApi.retrieveMultipleRecords('account', '?fetchXml=' + encodeURIComponent(fetchXml));
+                        if (result.entities.length > 0) {
+                            return result.entities[0].accountid.replace(/[{}]/g, '').toLowerCase();
+                        }
+
+                        // 兜底：按客户主数据上的客户编码反查
+                        var accountNumber = '';
+                        try {
+                            var attr = entity.attributes.get('mcs_accountnumber');
+                            if (attr) accountNumber = attr.getValue();
+                        } catch (e) {}
+
+                        if (!accountNumber) {
+                            try {
+                                var record = await xrm.WebApi.retrieveRecord('mcs_customermasterdata', entityId, '?$select=mcs_accountnumber');
+                                accountNumber = record.mcs_accountnumber;
+                            } catch (e) {}
+                        }
+
+                        if (accountNumber) {
+                            fetchXml = [
+                                '<fetch top="1">',
+                                '  <entity name="account">',
+                                '    <attribute name="accountid" />',
+                                '    <filter>',
+                                '      <condition attribute="accountnumber" operator="eq" value="' + escapeXml(accountNumber) + '" />',
+                                '    </filter>',
+                                '  </entity>',
+                                '</fetch>'
+                            ].join('');
+                            result = await xrm.WebApi.retrieveMultipleRecords('account', '?fetchXml=' + encodeURIComponent(fetchXml));
+                            if (result.entities.length > 0) {
+                                return result.entities[0].accountid.replace(/[{}]/g, '').toLowerCase();
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('解析客户标识失败:', e);
+                }
             }
 
             return null;
+        }
+
+        /**
+         * 格式化日期
+         */
+        function formatDate(dateValue) {
+            if (!dateValue) return '';
+            var d = new Date(dateValue);
+            if (isNaN(d.getTime())) return String(dateValue);
+            var y = d.getFullYear();
+            var m = String(d.getMonth() + 1).padStart(2, '0');
+            var day = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + day;
         }
 
         /**
@@ -526,11 +984,46 @@
             return map[String(value)] || String(value);
         }
 
+        /**
+         * 飞轮分组名称取词（未命中映射时兜底“其他”）
+         */
+        function groupName(g) {
+            var d = STATUS_NAMES[g] !== undefined ? STATUS_NAMES[g] : STATUS_NAMES[String(g)];
+            // 数据翻译（CreditProfile_Group_*）暂时停用：与 D365 表单中文显示保持一致。
+            // 将来需要时恢复为：return d !== undefined ? L('CreditProfile_Group_' + g, d) : L('CreditProfile_Other', '其他');
+            return d !== undefined ? d : '其他';
+        }
+
+        /**
+         * 来源名称取词（未命中映射时兜底“其他”）
+         */
+        function sourceName(s) {
+            var d = SOURCE_NAMES[s] !== undefined ? SOURCE_NAMES[s] : SOURCE_NAMES[String(s)];
+            // 数据翻译（CreditProfile_Source_*）暂时停用，需要时恢复为：return d !== undefined ? L('CreditProfile_Source_' + s, d) : L('CreditProfile_Other', '其他');
+            return d !== undefined ? d : '其他';
+        }
+
+        /**
+         * 应用静态文本（HTML 标签内的中文）
+         */
+        function applyStaticTexts() {
+            document.title = L('CreditProfile_Title', '客户信用画像');
+            var loadingText = document.getElementById('loading-text');
+            if (loadingText) loadingText.textContent = L('CreditProfile_Loading', '正在加载客户信用画像...');
+            var wheelTitle = document.getElementById('wheel-modal-title');
+            if (wheelTitle) wheelTitle.innerHTML = '&#127744; ' + L('CreditProfile_WheelTitle', '客户信用飞轮');
+            var wheelClose = document.getElementById('wheel-modal-close');
+            if (wheelClose) wheelClose.setAttribute('aria-label', L('CreditProfile_Close', '关闭'));
+            var centerScore = document.getElementById('wheel-center-score');
+            if (centerScore && centerScore.textContent.trim() === '- 分') centerScore.textContent = L('CreditProfile_PointsNA', '- 分');
+        }
+
         // ==================== 数据获取 ====================
 
         /**
          * 查询客户基本信息
          * 信用评估相关8个字段从 mcs_customermasterdata 读取
+         * 支持在 account 表单和客户主数据表单上打开：先查 account，再显式查关联的客户主数据
          */
         function fetchAccount(accountId) {
             var xrm = getXrm();
@@ -538,10 +1031,139 @@
                 return Promise.reject('Xrm.WebApi 不可用');
             }
 
+            // 第一步：查询 account 基本信息及关联的客户主数据 lookup
             return xrm.WebApi.retrieveRecord('account', accountId,
-                '?$select=accountid,name,accountnumber,mcs_accountcategory,mcs_accountlevel&$expand=mcs_customermasterdata($select=mcs_creditscore,mcs_creditgrade,mcs_creditvalid,mcs_externalrate,mcs_dealerrank,mcs_isdd)')
+                '?$select=accountid,name,accountnumber,mcs_accountcategory,mcs_accountlevel,_mcs_customermasterdata_value')
+                .then(function(account) {
+                    var masterDataId = account._mcs_customermasterdata_value;
+                    if (!masterDataId) {
+                        console.warn('[credit_profile] 当前 account 未关联客户主数据，accountId=' + accountId);
+                        account.mcs_customermasterdata = {};
+                        return account;
+                    }
+
+                    // 第二步：使用 FetchXml 查询客户主数据的信用相关字段
+                    // 原 retrieveRecord 在部分环境对自定义实体查询异常，统一改为 FetchXml
+                    var fetchXml = [
+                        '<fetch top="1">',
+                        '  <entity name="mcs_customermasterdata">',
+                        '    <attribute name="mcs_creditscore" />',
+                        '    <attribute name="mcs_creditgrade" />',
+                        '    <attribute name="mcs_creditvalid" />',
+                        '    <attribute name="mcs_externalrate" />',
+                        '    <attribute name="mcs_dealerrank" />',
+                        '    <attribute name="mcs_isdd" />',
+                        '    <attribute name="mcs_whitelist" />',
+                        '    <attribute name="mcs_blacklist" />',
+                        '    <attribute name="mcs_creditgrant" />',
+                        '    <attribute name="mcs_customerclassification" />',
+                        '    <attribute name="mcs_sinosurecode" />',
+                        '    <filter>',
+                        '      <condition attribute="mcs_customermasterdataid" operator="eq" value="{' + masterDataId + '}" />',
+                        '    </filter>',
+                        '  </entity>',
+                        '</fetch>'
+                    ].join('');
+
+                    return xrm.WebApi.retrieveMultipleRecords('mcs_customermasterdata', '?fetchXml=' + encodeURIComponent(fetchXml))
+                        .then(function(result) {
+                            account.mcs_customermasterdata = (result && result.entities && result.entities.length > 0) ? result.entities[0] : {};
+                            return account;
+                        })
+                        .catch(function(error) {
+                            console.error('[credit_profile] 查询客户主数据失败:', error);
+                            account.mcs_customermasterdata = {};
+                            return account;
+                        });
+                });
+        }
+
+        /**
+         * 查询厂端授信额度（按客户主数据汇总）
+         */
+        function fetchFactoryCreditQuota(masterDataId) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi || !masterDataId) {
+                return Promise.resolve({ sellerGrant: 0, sellerBalance: 0 });
+            }
+
+            var fetchXml = [
+                '<fetch>',
+                '  <entity name="mcs_fca_quota">',
+                '    <attribute name="mcs_sellergrant" />',
+                '    <attribute name="mcs_sellerbalance" />',
+                '    <filter>',
+                '      <condition attribute="mcs_accountid" operator="eq" value="{' + masterDataId + '}" />',
+                '    </filter>',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_fca_quota', '?fetchXml=' + encodeURIComponent(fetchXml))
                 .then(function(result) {
-                    return result;
+                    var grant = 0, balance = 0;
+                    (result.entities || []).forEach(function(item) {
+                        grant += parseFloat(item.mcs_sellergrant || 0);
+                        balance += parseFloat(item.mcs_sellerbalance || 0);
+                    });
+                    return { sellerGrant: grant, sellerBalance: balance };
+                })
+                .catch(function(error) {
+                    console.error('[credit_profile] 查询厂端授信额度失败:', error);
+                    return { sellerGrant: 0, sellerBalance: 0 };
+                });
+        }
+
+        /**
+         * 查询中信保限额信息（按中信保买方代码汇总）
+         */
+        function fetchApprovedQuota(masterDataId, sinosureCode) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi) {
+                return Promise.resolve({ quotaSum: 0 });
+            }
+
+            var buyerNo = sinosureCode || '';
+            if (!buyerNo && masterDataId) {
+                return xrm.WebApi.retrieveRecord('mcs_customermasterdata', masterDataId, '?$select=mcs_sinosurecode')
+                    .then(function(master) {
+                        if (!master.mcs_sinosurecode) {
+                            return { quotaSum: 0 };
+                        }
+                        return fetchApprovedQuota(masterDataId, master.mcs_sinosurecode);
+                    })
+                    .catch(function(error) {
+                        console.error('[credit_profile] 查询客户主数据中信保代码失败:', error);
+                        return { quotaSum: 0 };
+                    });
+            }
+
+            if (!buyerNo) {
+                return Promise.resolve({ quotaSum: 0 });
+            }
+
+            var fetchXml = [
+                '<fetch>',
+                '  <entity name="mcs_approvedquota">',
+                '    <attribute name="mcs_quotasum" />',
+                '    <filter>',
+                '      <condition attribute="mcs_buyerno" operator="eq" value="' + escapeXml(buyerNo) + '" />',
+                '    </filter>',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_approvedquota', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    var sum = 0;
+                    (result.entities || []).forEach(function(item) {
+                        sum += parseFloat(item.mcs_quotasum || 0);
+                    });
+                    return { quotaSum: sum };
+                })
+                .catch(function(error) {
+                    console.error('[credit_profile] 查询中信保限额信息失败:', error);
+                    return { quotaSum: 0 };
                 });
         }
 
@@ -554,6 +1176,7 @@
                 return Promise.resolve(null);
             }
 
+            // 取最新一条【审批通过】且有效的信用评估记录
             var fetchXml = [
                 '<fetch top="1">',
                 '  <entity name="mcs_credit_record">',
@@ -567,6 +1190,7 @@
                 '    <filter>',
                 '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
                 '      <condition attribute="mcs_active" operator="eq" value="1" />',
+                '      <condition attribute="mcs_status" operator="eq" value="15" />',
                 '    </filter>',
                 '    <order attribute="modifiedon" descending="true" />',
                 '  </entity>',
@@ -583,11 +1207,13 @@
         }
 
         /**
-         * 查询客户信用标签（最新有效评估的）
+         * 查询客户信用标签
+         * 取值范围：评分项目分类 <> 综合指标 AND 是否评分 = 1 AND 有效状态 = 1
+         * 同一指标取更新日期最新的一条
          */
         function fetchCustomerTags(accountId) {
             var xrm = getXrm();
-            if (!xrm || !xrm.WebApi) {
+            if (!xrm || !xrm.WebApi || !accountId) {
                 return Promise.resolve([]);
             }
 
@@ -595,17 +1221,23 @@
                 '<fetch>',
                 '  <entity name="mcs_customer_tag">',
                 '    <attribute name="mcs_group" />',
+                '    <attribute name="mcs_credit_item" />',
                 '    <attribute name="mcs_itemname" />',
                 '    <attribute name="mcs_itemdesc" />',
+                '    <attribute name="mcs_itemcode" />',
                 '    <attribute name="mcs_itemtxtvalue1" />',
                 '    <attribute name="mcs_itemtxtvalue2" />',
                 '    <attribute name="mcs_itemvalue1" />',
                 '    <attribute name="mcs_itemvalue2" />',
                 '    <attribute name="mcs_scorevalue" />',
                 '    <attribute name="mcs_isscore" />',
+                '    <attribute name="mcs_active" />',
                 '    <attribute name="modifiedon" />',
                 '    <filter>',
-                '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
+                '      <condition attribute="mcs_accountid" operator="eq" value="{' + accountId + '}" />',
+                '      <condition attribute="mcs_group" operator="ne" value="5" />',
+                '      <condition attribute="mcs_isscore" operator="eq" value="1" />',
+                '      <condition attribute="mcs_active" operator="eq" value="1" />',
                 '    </filter>',
                 '    <order attribute="modifiedon" descending="true" />',
                 '  </entity>',
@@ -614,10 +1246,10 @@
 
             return xrm.WebApi.retrieveMultipleRecords('mcs_customer_tag', '?fetchXml=' + encodeURIComponent(fetchXml))
                 .then(function(result) {
-                    // 去重：同一指标取最新
+                    // 去重：同一指标取更新日期最新的一条
                     var seen = {};
                     var unique = [];
-                    result.entities.forEach(function(item) {
+                    (result.entities || []).forEach(function(item) {
                         var key = item.mcs_itemname || '';
                         if (!seen[key]) {
                             seen[key] = true;
@@ -626,14 +1258,266 @@
                     });
                     return unique;
                 })
-                .catch(function() {
+                .catch(function(error) {
+                    console.error('查询客户信用标签失败:', error);
                     return [];
                 });
         }
 
+        /**
+         * 查询最新有效的重点尽调专家意见
+         * 有效状态对应 mcs_dd_data.mcs_businessstep = 4（已完成）
+         * 取 modifiedon 最新的一条的 mcs_totalscore 和 mcs_evaluation_all
+         */
+        function fetchLatestDDOpinion(masterDataId) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi || !masterDataId) {
+                return Promise.resolve({ score: null, opinion: '' });
+            }
+
+            var fetchXml = [
+                '<fetch top="1">',
+                '  <entity name="mcs_dd_data">',
+                '    <attribute name="mcs_totalscore" />',
+                '    <attribute name="mcs_evaluation_all" />',
+                '    <attribute name="mcs_businessstep" />',
+                '    <attribute name="modifiedon" />',
+                '    <filter>',
+                '      <condition attribute="mcs_customermasterdataid" operator="eq" value="{' + masterDataId + '}" />',
+                '      <condition attribute="mcs_businessstep" operator="eq" value="4" />',
+                '    </filter>',
+                '    <order attribute="modifiedon" descending="true" />',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_dd_data', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    var entities = result.entities || [];
+                    if (entities.length === 0) {
+                        return { score: null, opinion: '' };
+                    }
+                    var entity = entities[0];
+                    return {
+                        score: entity.mcs_totalscore,
+                        opinion: entity.mcs_evaluation_all || ''
+                    };
+                })
+                .catch(function(error) {
+                    console.error('[credit_profile] 查询重点尽调专家意见失败:', error);
+                    return { score: null, opinion: '' };
+                });
+        }
+
+        /**
+         * 查询评分项目的来源（内部/外部），补充到标签上
+         */
+        function fetchCreditItemSources(tags) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi || !tags || tags.length === 0) {
+                return Promise.resolve({});
+            }
+
+            var ids = [];
+            tags.forEach(function(tag) {
+                var id = getLookupId(tag, 'mcs_credit_item');
+                if (id && ids.indexOf(id) < 0) {
+                    ids.push(id);
+                }
+            });
+
+            if (ids.length === 0) {
+                return Promise.resolve({});
+            }
+
+            var valueXml = ids.map(function(id) { return '        <value>' + id + '</value>'; }).join('\n');
+            var fetchXml = [
+                '<fetch>',
+                '  <entity name="mcs_credit_items">',
+                '    <attribute name="mcs_credit_itemsid" />',
+                '    <attribute name="mcs_source" />',
+                '    <filter>',
+                '      <condition attribute="mcs_credit_itemsid" operator="in">',
+                valueXml,
+                '      </condition>',
+                '    </filter>',
+                '  </entity>',
+                '</fetch>'
+            ].join('\n');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_credit_items', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    var map = {};
+                    (result.entities || []).forEach(function(item) {
+                        var id = item.mcs_credit_itemsid ? String(item.mcs_credit_itemsid).replace(/[{}]/g, '').toLowerCase() : '';
+                        if (id) {
+                            map[id] = item.mcs_source;
+                        }
+                    });
+                    return map;
+                })
+                .catch(function(error) {
+                    console.error('查询评分项目来源失败:', error);
+                    return {};
+                });
+        }
+
+        /**
+         * 查询已签待执行合同
+         * 条件：mcs_contractbuyer = accountId, mcs_contractstatus = 3, <> 9
+         */
+        function fetchSignedContracts(accountId) {
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi) {
+                return Promise.resolve([]);
+            }
+
+            var fetchXml = [
+                '<fetch top="50">',
+                '  <entity name="mcs_contract">',
+                '    <attribute name="mcs_contractid" />',
+                '    <attribute name="mcs_name" />',
+                '    <attribute name="mcs_contractnumber" />',
+                '    <attribute name="mcs_totalcontractamount_base" />',
+                '    <attribute name="mcs_paymenttype" />',
+                '    <attribute name="mcs_advanceratio" />',
+                '    <attribute name="mcs_remainingpaymentdays" />',
+                '    <attribute name="mcs_riskcovervalue" />',
+                '    <attribute name="mcs_customeracceptancedate" />',
+                '    <attribute name="mcs_contractcreateddate" />',
+                '    <filter>',
+                '      <condition attribute="mcs_contractbuyer" operator="eq" value="' + accountId + '" />',
+                '      <condition attribute="mcs_contractstatus" operator="eq" value="3" />',
+                '      <condition attribute="mcs_contractstatus" operator="ne" value="9" />',
+                '    </filter>',
+                '    <order attribute="mcs_customeracceptancedate" descending="true" />',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_contract', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    return result.entities || [];
+                })
+                .catch(function(error) {
+                    console.error('查询已签待执行合同失败:', error);
+                    return [];
+                });
+        }
+
+        /**
+         * 查询合同明细产品名称
+         */
+        function fetchContractProducts(contractIds) {
+            if (!contractIds || contractIds.length === 0) {
+                return Promise.resolve({});
+            }
+
+            var xrm = getXrm();
+            if (!xrm || !xrm.WebApi) {
+                return Promise.resolve({});
+            }
+
+            var conditions = contractIds.map(function(id) {
+                return '      <condition attribute="mcs_contract" operator="eq" value="' + id + '" />';
+            }).join('\n');
+
+            var fetchXml = [
+                '<fetch>',
+                '  <entity name="mcs_contractdetail">',
+                '    <attribute name="mcs_contract" />',
+                '    <attribute name="mcs_productnamecn" />',
+                '    <attribute name="mcs_productnamenew" />',
+                '    <attribute name="mcs_productmodel" />',
+                '    <filter type="or">',
+                conditions,
+                '    </filter>',
+                '  </entity>',
+                '</fetch>'
+            ].join('');
+
+            return xrm.WebApi.retrieveMultipleRecords('mcs_contractdetail', '?fetchXml=' + encodeURIComponent(fetchXml))
+                .then(function(result) {
+                    var map = {};
+                    (result.entities || []).forEach(function(d) {
+                        // Web API 中 lookup 字段返回对象，必须用 _mcs_contract_value 字符串或 .id 取值
+                        var cid = d._mcs_contract_value || (d.mcs_contract && d.mcs_contract.id) || '';
+                        if (!cid) return;
+                        if (!map[cid]) map[cid] = [];
+                        // 业务上“产品名称”实际存储在 mcs_productnamenew；mcs_productname 是关联产品的 lookup name，
+                        // 不是 mcs_contractdetail 的直接字段，在 FetchXML 中直接请求可能导致 Web API 报错。
+                        var name = d.mcs_productnamenew || d.mcs_productnamecn || d.mcs_productmodel || '';
+                        if (name && map[cid].indexOf(name) < 0) {
+                            map[cid].push(name);
+                        }
+                    });
+                    return map;
+                })
+                .catch(function(error) {
+                    console.error('查询合同产品明细失败:', error);
+                    return {};
+                });
+        }
+
+        /**
+         * 渲染PRD 2.0基本信息行（标签在左，值在右，问号图标即时提示）
+         */
+        function renderInfoRow(fieldId, valueHtml, valueClass) {
+            valueClass = valueClass || '';
+            var f = FIELDS[fieldId];
+            var label = L(f.labelKey, f.labelZh);
+            var tooltip = f.tipKey ? L(f.tipKey, f.tipZh) : '';
+            var labelHtml = tooltip
+                ? escapeHtml(label) + ' <span class="info-help-icon">?<span class="info-tooltip">' + escapeHtml(tooltip) + '</span></span>'
+                : escapeHtml(label);
+            return '<div class="info-row">' +
+                '  <div class="info-row-label">' + labelHtml + '</div>' +
+                '  <div class="info-row-value ' + valueClass + '">' + valueHtml + '</div>' +
+                '</div>';
+        }
+
+        /**
+         * 根据信用分推导等级（用于飞轮中心显示兜底）
+         */
+        function getGradeByScore(score) {
+            var s = parseFloat(score);
+            if (isNaN(s)) return '';
+            if (s >= 80) return 'A0';
+            if (s >= 70) return 'A1';
+            if (s >= 60) return 'A2';
+            if (s >= 50) return 'A3';
+            return 'A4';
+        }
+
+        /**
+         * 渲染客户信用飞轮图标（SVG 分段轮盘）
+         */
+        function renderWheelIcon(size) {
+            size = size || 20;
+            return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle cx="12" cy="12" r="10" fill="none" stroke="#9334e6" stroke-width="1.5"/>' +
+                '<path d="M12 12 L12 2 A10 10 0 0 1 22 12 Z" fill="#9334e6"/>' +
+                '<path d="M12 12 L22 12 A10 10 0 0 1 12 22 Z" fill="#a142f4"/>' +
+                '<path d="M12 12 L12 22 A10 10 0 0 1 2 12 Z" fill="#d7aefb"/>' +
+                '<path d="M12 12 L2 12 A10 10 0 0 1 12 2 Z" fill="#681da8"/>' +
+                '</svg>';
+        }
+
+        /**
+         * 布尔值渲染为标签
+         */
+        function formatBooleanTag(value, yesLabel, noLabel, yesClass, noClass) {
+            yesLabel = yesLabel || L('CreditProfile_Yes', '是');
+            noLabel = noLabel || L('CreditProfile_No', '否');
+            yesClass = yesClass || 'tag-yes';
+            noClass = noClass || 'tag-no';
+            var isTrue = (value === true || value === 1 || value === '1');
+            return '<span class="tag ' + (isTrue ? yesClass : noClass) + '">' + (isTrue ? yesLabel : noLabel) + '</span>';
+        }
+
         // ==================== 渲染 ====================
 
-        function render(app, account, creditRecord, tags) {
+        function render(app, account, creditRecord, tags, contracts, contractProducts, factoryQuota, approvedQuota, ddOpinion, ddScore) {
             var customerMasterData = account.mcs_customermasterdata || {};
             var creditScore = getValue(customerMasterData, 'mcs_creditscore');
             var creditGrade = getValue(customerMasterData, 'mcs_creditgrade');
@@ -648,46 +1532,101 @@
             var gradeDisplay = '';
             if (isDealer) {
                 var rank = getValue(customerMasterData, 'mcs_dealerrank');
+                // 数据翻译暂时停用，需要时恢复为：gradeDisplay = T('CreditProfile_DealerRank_', rank, DEALER_RANK);
                 gradeDisplay = getOptionText(rank, DEALER_RANK);
             } else {
                 // 直销客户分级：S/A/B/C/I
                 var levelMap = { 4: 'S级', 3: 'A级', 2: 'B级', 1: 'C级' };
+                // 数据翻译暂时停用，需要时恢复为：gradeDisplay = T('CreditProfile_DirectLevel_', levelVal, levelMap);
                 gradeDisplay = getOptionText(levelVal, levelMap);
                 if (!gradeDisplay && categoryVal === 20) {
+                    // 数据翻译暂时停用，需要时恢复为：gradeDisplay = L('CreditProfile_NormalCustomer', '普通客户');
                     gradeDisplay = '普通客户';
                 }
             }
 
             var leftHtml = '';
 
-            // 客户基本信息
+            // 客户基本信息（PRD 2.0：三行三列，标签在左值在右，9字段悬停提示）
+            var classificationVal = getValue(customerMasterData, 'mcs_customerclassification');
+            // 数据翻译暂时停用，需要时恢复为：T('CreditProfile_Category_', categoryVal, ACCOUNT_CATEGORY)
+            var categoryText = getOptionText(categoryVal, ACCOUNT_CATEGORY) || getOptionText(classificationVal, CUSTOMER_CLASSIFICATION) || '-';
+
+            // 客户级别：经销商取经销商分级，直销取accountlevel
+            var levelValue = '';
+            if (isDealer) {
+                var dealerRank = getValue(customerMasterData, 'mcs_dealerrank');
+                // 数据翻译暂时停用，需要时恢复为：levelValue = T('CreditProfile_DealerRank_', dealerRank, DEALER_RANK);
+                levelValue = getOptionText(dealerRank, DEALER_RANK);
+            }
+            if (!levelValue) {
+                levelValue = getOptionText(levelVal, ACCOUNT_LEVEL);
+            }
+
+            var creditScoreValue = (creditScore !== '' && creditScore !== null && creditScore !== undefined)
+                ? formatNumber(creditScore, 1)
+                : '<span class="empty">' + L('CreditProfile_NotEvaluated', '暂未评估') + '</span>';
+            if (isInvalid && creditScore !== '' && creditScore !== null && creditScore !== undefined) {
+                creditScoreValue += ' <span class="tag tag-danger" style="margin-left:4px;">' + L('CreditProfile_Invalidated', '评估已失效') + '</span>';
+            }
+
             leftHtml += '<div class="section-card">';
-            leftHtml += '  <div class="section-title"><span class="icon">&#128196;</span>客户基本信息</div>';
-            leftHtml += '  <div class="info-grid" style="grid-template-columns: repeat(5, 1fr);">';
-            leftHtml += '    <div class="info-item"><div class="info-label">客户类别</div><div class="info-value">' + escapeHtml(getOptionText(categoryVal, ACCOUNT_CATEGORY)) + '</div></div>';
-            leftHtml += '    <div class="info-item"><div class="info-label">客户等级</div><div class="info-value">' + escapeHtml(getOptionText(creditGrade, CREDIT_GRADE_MAP) || '-') + '</div></div>';
-            leftHtml += '    <div class="info-item"><div class="info-label">外部评级</div><div class="info-value">' + escapeHtml(getValue(customerMasterData, 'mcs_externalrate', '-')) + '<span class="hint">科法斯 1-10 分</span></div></div>';
-            leftHtml += '    <div class="info-item"><div class="info-label">客户分级</div><div class="info-value">' + escapeHtml(gradeDisplay || '-') + '</div></div>';
-            leftHtml += '    <div class="info-item"><div class="info-label">是否重点尽调</div><div class="info-value">' + (getValue(customerMasterData, 'mcs_isdd') ? '<span style="color:#a80000">&#10003; 是</span>' : '否') + '</div></div>';
+            leftHtml += '  <div class="section-title">' + L('CreditProfile_Section_BasicInfo', '客户基本信息') + '<span class="section-wheel-trigger" id="wheel-info-cell" title="' + L('CreditProfile_WheelClickHint', '点击查看客户信用飞轮') + '">' + renderWheelIcon(20) + '<span>' + L('CreditProfile_WheelTitle', '客户信用飞轮') + '</span></span></div>';
+            leftHtml += '  <div class="info-grid-3x3">';
+            // 第一行
+            leftHtml += renderInfoRow('CreditScore', creditScoreValue);
+            leftHtml += renderInfoRow('ExternalRate', escapeHtml(getValue(customerMasterData, 'mcs_externalrate', '-')));
+            var gradeValue = getOptionText(creditGrade, CREDIT_GRADE_MAP);
+            leftHtml += renderInfoRow('CreditGrade', gradeValue ? '<span class="grade-badge ' + escapeHtml(gradeValue) + '">' + escapeHtml(gradeValue) + '</span>' : '<span class="empty">' + L('CreditProfile_NotEvaluated', '暂未评估') + '</span>');
+            // 第二行
+            leftHtml += renderInfoRow('Category', escapeHtml(categoryText));
+            leftHtml += renderInfoRow('Level', levelValue ? escapeHtml(levelValue) : '<span class="empty">' + L('CreditProfile_NotEvaluated', '暂未评估') + '</span>');
+            leftHtml += renderInfoRow('Whitelist', formatBooleanTag(getValue(customerMasterData, 'mcs_whitelist'), L('CreditProfile_Yes', '是'), L('CreditProfile_No', '否'), 'tag-yes', 'tag-no'));
+            // 第三行
+            leftHtml += renderInfoRow('IsDD', formatBooleanTag(getValue(customerMasterData, 'mcs_isdd'), L('CreditProfile_Yes', '是'), L('CreditProfile_No', '否'), 'tag-danger', 'tag-no'));
+            leftHtml += renderInfoRow('NoCredit', formatBooleanTag(getValue(customerMasterData, 'mcs_creditgrant'), L('CreditProfile_Yes', '是'), L('CreditProfile_No', '否'), 'tag-danger', 'tag-no'));
+            leftHtml += renderInfoRow('Blacklist', formatBooleanTag(getValue(customerMasterData, 'mcs_blacklist'), L('CreditProfile_Yes', '是'), L('CreditProfile_No', '否'), 'tag-danger', 'tag-no'));
             leftHtml += '  </div>';
             leftHtml += '</div>';
 
-            // 信用基础标签和评分
+            // 信用额度信息（厂端授信额度、厂端授信余额、信保额度）
             leftHtml += '<div class="section-card">';
-            leftHtml += '  <div class="section-title"><span class="icon">&#128202;</span>信用基础标签和评分</div>';
+            leftHtml += '  <div class="section-title">' + L('CreditProfile_Section_QuotaInfo', '信用额度信息') + '</div>';
+            leftHtml += '  <div class="info-grid-3x3">';
+            var sellerGrant = (factoryQuota && factoryQuota.sellerGrant) || 0;
+            var sellerBalance = (factoryQuota && factoryQuota.sellerBalance) || 0;
+            var quotaSum = (approvedQuota && approvedQuota.quotaSum) || 0;
+            leftHtml += renderInfoRow('FcaQuota', sellerGrant ? formatNumber(sellerGrant, 2) + ' USD' : '<span class="empty">-</span>');
+            leftHtml += renderInfoRow('FcaBalance', sellerBalance ? formatNumber(sellerBalance, 2) + ' USD' : '<span class="empty">-</span>');
+            leftHtml += renderInfoRow('SinosureQuota', quotaSum ? formatNumber(quotaSum, 2) + ' USD' : '<span class="empty">-</span>');
+            leftHtml += '  </div>';
+            leftHtml += '</div>';
 
+            // 信用基础标签
+            leftHtml += '<div class="section-card">';
+            leftHtml += '  <div class="section-title">' + L('CreditProfile_Section_Tags', '信用基础标签') + '</div>';
+
+            leftHtml += '  <table class="data-table">';
+            leftHtml += '    <thead><tr><th>' + L('CreditProfile_Col_Group', '信用分类') + '</th><th>' + L('CreditProfile_Col_ItemName', '指标名称') + '</th><th>' + L('CreditProfile_Col_ItemDesc', '指标说明') + '</th><th>' + L('CreditProfile_Col_ReviewValue', '复核指标值') + '</th><th>' + L('CreditProfile_Col_UpdateDate', '更新日期') + '</th><th class="score-value-col">' + L('CreditProfile_Col_Score', '得分值') + '</th></tr></thead>';
+            leftHtml += '    <tbody>';
             if (tags.length === 0) {
-                leftHtml += '  <div class="empty-state">暂无信用标签数据</div>';
+                leftHtml += '      <tr class="empty-row"><td colspan="5" class="empty-state">' + L('CreditProfile_NoTags', '暂无信用标签数据') + '</td></tr>';
             } else {
-                leftHtml += '  <table class="data-table">';
-                leftHtml += '    <thead><tr><th>信用分类</th><th>指标名称</th><th>指标说明</th><th>指标值</th><th>评分值</th></tr></thead>';
-                leftHtml += '    <tbody>';
                 tags.forEach(function(tag) {
                     var group = getValue(tag, 'mcs_group');
                     var groupClass = 'group-' + group;
+                    // 数据翻译暂时停用，需要时恢复为：var groupName = T('CreditProfile_Group_', group, STATUS_NAMES);
                     var groupName = getOptionText(group, STATUS_NAMES);
                     leftHtml += '      <tr>';
                     leftHtml += '        <td><span class="group-label ' + groupClass + '">' + escapeHtml(groupName) + '</span></td>';
+                    // 数据翻译（方案B：按 mcs_itemcode 映射语言包 Data_Item_*/Data_ItemDesc_*）暂时停用：
+                    // 与 D365 表单/子网格的中文显示不一致反而造成困扰。将来需要时取消下面 5 行注释、
+                    // 并删除其下 2 行直接取值代码即可恢复（语言包 key 已保留）。
+                    // var tagItemId = getValue(tag, 'mcs_itemcode');
+                    // var tagItemName = getValue(tag, 'mcs_itemname', '-');
+                    // var tagItemDesc = getValue(tag, 'mcs_itemdesc', '-');
+                    // leftHtml += '        <td>' + escapeHtml(tagItemId ? L('Data_Item_' + tagItemId, tagItemName) : tagItemName) + '</td>';
+                    // leftHtml += '        <td>' + escapeHtml(tagItemId ? L('Data_ItemDesc_' + tagItemId, tagItemDesc) : tagItemDesc) + '</td>';
                     leftHtml += '        <td>' + escapeHtml(getValue(tag, 'mcs_itemname', '-')) + '</td>';
                     leftHtml += '        <td>' + escapeHtml(getValue(tag, 'mcs_itemdesc', '-')) + '</td>';
                     var itemValue = getValue(tag, 'mcs_itemtxtvalue2')
@@ -695,169 +1634,351 @@
                         || getValue(tag, 'mcs_itemvalue2')
                         || getValue(tag, 'mcs_itemvalue1');
                     leftHtml += '        <td>' + escapeHtml(itemValue || '-') + '</td>';
+                    var updateDate = getValue(tag, 'modifiedon');
+                    leftHtml += '        <td>' + escapeHtml(updateDate ? formatDate(updateDate) : '-') + '</td>';
                     var scoreVal = getValue(tag, 'mcs_scorevalue');
-                    leftHtml += '        <td class="score-cell">' + (scoreVal !== '' ? formatNumber(scoreVal, 1) : '<span class="empty">-</span>') + '</td>';
+                    leftHtml += '        <td class="score-cell score-value-col">' + (scoreVal !== '' ? formatNumber(scoreVal, 1) : '<span class="empty">-</span>') + '</td>';
                     leftHtml += '      </tr>';
                 });
-                leftHtml += '    </tbody>';
-                leftHtml += '  </table>';
             }
+            leftHtml += '    </tbody>';
+            leftHtml += '  </table>';
             leftHtml += '</div>';
 
-            // 当前采购要求
+            // 已签待执行合同
             leftHtml += '<div class="section-card">';
-            leftHtml += '  <div class="section-title"><span class="icon">&#128176;</span>当前采购要求</div>';
-            leftHtml += '  <div class="purchase-grid">';
-            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">在手订单金额 (USD)</div></div>';
-            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">首付款比例</div></div>';
-            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">账期 (天)</div></div>';
-            leftHtml += '    <div class="purchase-item"><div class="purchase-value">-</div><div class="purchase-label">授信额度 (USD)</div></div>';
-            leftHtml += '  </div>';
-            leftHtml += '  <div style="margin-top:12px;font-size:11px;color:#999;text-align:center;">依赖 LTC 合同模块数据，待接入</div>';
+            leftHtml += '  <div class="section-title">' + L('CreditProfile_Section_Contracts', '已签待执行合同') + '</div>';
+            leftHtml += '  <table class="data-table">';
+            leftHtml += '    <thead><tr><th>' + L('CreditProfile_Col_ContractNo', '合同号码') + '</th><th>' + L('CreditProfile_Col_Product', '产品名称') + '</th><th>' + L('CreditProfile_Col_AmountUsd', '合同金额（美元）') + '</th><th>' + L('CreditProfile_Col_PaymentType', '付款类型') + '</th><th>' + L('CreditProfile_Col_AdvanceRatio', '首付款比例') + '</th><th>' + L('CreditProfile_Col_TermDays', '账期（天）') + '</th><th>' + L('CreditProfile_Col_Risk', '风险敞口率%') + '</th></tr></thead>';
+            leftHtml += '    <tbody id="contract-tbody"></tbody>';
+            leftHtml += '  </table>';
+            leftHtml += '  <div id="contract-pagination" class="pagination"></div>';
             leftHtml += '</div>';
 
-            // 重点尽调专家意见
+            // 重点尽调专家意见（mcs_isdd 从主数据表读取）
             var isDD = getValue(customerMasterData, 'mcs_isdd');
-            if (isDD) {
+            if (isDD === true || isDD === 1 || isDD === '1') {
+                var opinionText = ddOpinion ? escapeHtml(ddOpinion) : '<span class="empty">' + L('CreditProfile_NoDDOpinion', '暂无重点尽调专家意见') + '</span>';
+                var scoreText = (ddScore !== null && ddScore !== undefined && ddScore !== '')
+                    ? formatNumber(ddScore, 1)
+                    : '<span class="empty">-</span>';
                 leftHtml += '<div class="section-card">';
-                leftHtml += '  <div class="section-title"><span class="icon">&#128221;</span>重点尽调专家意见</div>';
+                leftHtml += '  <div class="section-title">' + L('CreditProfile_Section_DDOpinion', '重点尽调专家意见') + '</div>';
                 leftHtml += '  <div class="dd-content">';
-                leftHtml += '    <div class="dd-score">-</div>';
-                leftHtml += '    <div class="dd-opinion">重点尽调模块数据待接入</div>';
+                leftHtml += '    <div class="dd-score">' + scoreText + '<span style="font-size:12px;color:#666;font-weight:normal;margin-left:4px;">' + L('CreditProfile_OutOf100', '/ 100分') + '</span></div>';
+                leftHtml += '    <div class="dd-opinion">' + opinionText + '</div>';
                 leftHtml += '  </div>';
                 leftHtml += '</div>';
             }
 
-            // 右侧信用飞轮
-            var rightHtml = '';
-            rightHtml += '<div class="wheel-card">';
-            rightHtml += '  <div class="wheel-header">';
-            rightHtml += '    <div class="wheel-title">&#127744; 客户信用飞轮</div>';
-            rightHtml += '    <div class="wheel-score">';
-            rightHtml += '      <div class="wheel-score-value">' + (creditScore !== '' ? formatNumber(creditScore, 1) : '-') + '</div>';
-            rightHtml += '      <div class="wheel-score-label">信用总分</div>';
-            rightHtml += '    </div>';
-            rightHtml += '  </div>';
-            rightHtml += '  <div id="wheel-chart" class="wheel-chart"></div>';
-            rightHtml += '  <div id="wheel-legend" class="wheel-legend"></div>';
-            rightHtml += '</div>';
+            app.innerHTML = '<div class="main-layout"><div class="left-panel">' + leftHtml + '</div></div>';
 
-            app.innerHTML = '<div class="main-layout"><div class="left-panel">' + leftHtml + '</div><div class="right-panel">' + rightHtml + '</div></div>';
+            // 缓存飞轮数据并绑定点击事件（客户信息栏里的飞轮图标）
+            _wheelTags = tags;
+            _wheelScore = creditScore;
+            _wheelGrade = gradeValue || '';
+            var wheelCell = document.getElementById('wheel-info-cell');
+            if (wheelCell) {
+                wheelCell.onclick = openWheelModal;
+            }
 
-            // 渲染飞轮图表
-            renderWheel(tags, creditScore);
+            // 渲染已签待执行合同分页表格
+            _contractsCache = contracts;
+            _contractProductsCache = contractProducts;
+            renderContractsPage(1);
+        }
+
+        // 飞轮模态弹窗缓存
+        var _wheelTags = [];
+        var _wheelScore = '';
+        var _wheelGrade = '';
+        var _wheelChartInstance = null;
+
+        /**
+         * 读取 link-entity 字段（兼容 Web API 返回的多种别名格式）
+         */
+        function getLinkedValue(entity, alias, attribute) {
+            if (!entity) return null;
+            var keys = [
+                alias + '.' + attribute,
+                alias + '_' + attribute,
+                attribute
+            ];
+            for (var i = 0; i < keys.length; i++) {
+                if (entity[keys[i]] !== undefined && entity[keys[i]] !== null) {
+                    return entity[keys[i]];
+                }
+            }
+            return null;
         }
 
         /**
-         * 渲染右侧信用飞轮（ECharts 旭日图）
+         * 从 Web API 返回的 lookup 字段中提取 GUID
+         * Web API FetchXML 中 lookup 可能返回 {id,name} 对象、原始字符串或 _field_value
          */
-        function renderWheel(tags, totalScore) {
-            var chartDom = document.getElementById('wheel-chart');
-            var legendDom = document.getElementById('wheel-legend');
+        function getLookupId(entity, fieldName) {
+            if (!entity) return '';
+            var ref = entity[fieldName];
+            if (typeof ref === 'string') {
+                return ref.replace(/[{}]/g, '').toLowerCase();
+            }
+            if (ref && typeof ref === 'object') {
+                if (ref.id) return ref.id.replace(/[{}]/g, '').toLowerCase();
+                if (ref.value) return String(ref.value).replace(/[{}]/g, '').toLowerCase();
+            }
+            // Web API 标准返回：_field_value
+            var altKey = '_' + fieldName + '_value';
+            if (entity[altKey]) {
+                return String(entity[altKey]).replace(/[{}]/g, '').toLowerCase();
+            }
+            return '';
+        }
+
+        /**
+         * 打开信用飞轮模态弹窗
+         */
+        window.openWheelModal = function() {
+            var modal = document.getElementById('wheel-modal');
+            if (!modal) return;
+            modal.style.display = 'block';
+            renderWheelModal(_wheelTags, _wheelScore, _wheelGrade);
+        };
+
+        /**
+         * 关闭信用飞轮模态弹窗
+         */
+        window.closeWheelModal = function() {
+            var modal = document.getElementById('wheel-modal');
+            if (modal) modal.style.display = 'none';
+            if (_wheelChartInstance) {
+                _wheelChartInstance.dispose();
+                _wheelChartInstance = null;
+            }
+        };
+
+        // ESC 和点击遮罩关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeWheelModal();
+        });
+
+        /**
+         * 渲染模态弹窗中的三层旭日图
+         */
+        function renderWheelModal(tags, totalScore, creditGrade) {
+            var chartDom = document.getElementById('wheel-modal-chart');
+            var legendDom = document.getElementById('wheel-modal-legend');
+            var gradeDom = document.getElementById('wheel-center-grade');
+            var scoreDom = document.getElementById('wheel-center-score');
             if (!chartDom || typeof echarts === 'undefined') return;
 
-            var GROUP_MAP = {
-                1: { name: '客户实力', color: '#137333' },
-                2: { name: '客户财务', color: '#1967d2' },
-                3: { name: '宏观市场', color: '#b06000' },
-                4: { name: '历史交易', color: '#c5221f' },
-                5: { name: '综合指标', color: '#9334e6' }
-            };
-            var SUB_COLORS = {
-                1: ['#34a853', '#81c995', '#137333', '#0d652d'],
-                2: ['#4285f4', '#8ab4f8', '#1967d2', '#174ea6'],
-                3: ['#f9ab00', '#fde293', '#b06000', '#e37400'],
-                4: ['#ea4335', '#f6aea9', '#c5221f', '#9e1a16'],
-                5: ['#a142f4', '#d7aefb', '#9334e6', '#681da8']
-            };
+            // 计算有效总分（标签得分合计兜底）
+            var totalFromTags = 0;
+            tags.forEach(function(t) { totalFromTags += (t.mcs_scorevalue || 0); });
+            var displayScore = parseFloat(totalScore);
+            if (isNaN(displayScore) || displayScore === 0) {
+                displayScore = totalFromTags;
+            }
+            var displayGrade = creditGrade || (displayScore > 0 ? getGradeByScore(displayScore) : '');
+
+            // 中心文字
+            if (gradeDom) gradeDom.textContent = displayGrade || '-';
+            if (scoreDom) scoreDom.textContent = displayScore > 0 ? (formatNumber(displayScore, 1) + L('CreditProfile_PointsSuffix', ' 分')) : L('CreditProfile_PointsNA', '- 分');
 
             if (!tags || tags.length === 0) {
-                chartDom.innerHTML = '<div class="wheel-empty">暂无信用标签数据</div>';
+                chartDom.innerHTML = '<div class="wheel-empty">' + L('CreditProfile_NoTags', '暂无信用标签数据') + '</div>';
                 if (legendDom) legendDom.innerHTML = '';
                 return;
             }
 
-            // 按分组聚合（无评分值时用占位值，保证图表有形状）
+            // 构建三层数据：分组 -> 内外部来源 -> 指标项
             var hasAnyScore = tags.some(function(t) { return (t.mcs_scorevalue || 0) > 0; });
             var groupData = {};
             tags.forEach(function(tag) {
                 var group = tag.mcs_group || 5;
                 if (!groupData[group]) {
-                    groupData[group] = { items: [], total: 0 };
+                    groupData[group] = { sources: {}, total: 0, name: groupName(group) };
+                }
+                var sourceVal = getLinkedValue(tag, 'item', 'mcs_source') || 'other';
+                if (!groupData[group].sources[sourceVal]) {
+                    groupData[group].sources[sourceVal] = { items: [], total: 0 };
                 }
                 var score = hasAnyScore ? (tag.mcs_scorevalue || 0) : 1;
-                groupData[group].items.push({
+                groupData[group].sources[sourceVal].items.push({
+                    // 数据翻译（方案B）暂时停用，需要时恢复为：name: tag.mcs_itemcode ? L('Data_Item_' + tag.mcs_itemcode, tag.mcs_itemname || '-') : (tag.mcs_itemname || '-'),
                     name: tag.mcs_itemname || '-',
                     score: score
                 });
+                groupData[group].sources[sourceVal].total += score;
                 groupData[group].total += score;
             });
 
             var sunburstData = [];
             var legendHtml = '';
             var allGroups = Object.keys(groupData).sort();
-            var total = parseFloat(totalScore) || 0;
+            var total = displayScore > 0 ? displayScore : 0;
 
             allGroups.forEach(function(groupId) {
-                var gInfo = GROUP_MAP[groupId] || { name: '其他', color: '#666' };
-                var items = groupData[groupId].items;
-                var colors = SUB_COLORS[groupId] || ['#666'];
+                var palette = GROUP_PALETTES[groupId] || ['#9aa0a6', '#bdc1c6', '#e8eaed'];
+                var gInfo = { name: groupName(groupId), color: palette[0] };
+                var sources = groupData[groupId].sources;
+                var groupTotal = groupData[groupId].total;
 
-                var children = items.map(function(item, i) {
+                var children = Object.keys(sources).map(function(sourceVal) {
+                    var srcName = sourceName(sourceVal);
+                    var items = sources[sourceVal].items;
+
+                    var itemChildren = items.map(function(item) {
+                        return {
+                            name: item.name,
+                            value: item.score,
+                            itemStyle: { color: palette[2] }
+                        };
+                    });
+
                     return {
-                        name: item.name,
-                        value: item.score,
-                        itemStyle: { color: colors[i % colors.length] }
+                        name: srcName,
+                        value: sources[sourceVal].total,
+                        itemStyle: { color: palette[1] },
+                        children: itemChildren
                     };
                 });
 
                 sunburstData.push({
                     name: gInfo.name,
-                    value: groupData[groupId].total,
+                    value: groupTotal,
                     itemStyle: { color: gInfo.color },
                     children: children
                 });
 
-                var percent = total > 0 ? Math.round((groupData[groupId].total / total) * 100) : 0;
-                legendHtml += '<div class="wheel-legend-item">';
-                legendHtml += '  <div class="wheel-legend-name"><span class="wheel-legend-dot" style="background:' + gInfo.color + '"></span>' + escapeHtml(gInfo.name) + '</div>';
-                legendHtml += '  <div class="wheel-legend-score">' + groupData[groupId].total + ' (' + percent + '%)</div>';
+                var percent = total > 0 ? Math.round((groupTotal / total) * 100) : 0;
+                legendHtml += '<div class="wheel-modal-legend-item">';
+                legendHtml += '  <div class="wheel-modal-legend-name"><span class="wheel-modal-legend-dot" style="background:' + gInfo.color + '"></span>' + escapeHtml(gInfo.name) + '</div>';
+                legendHtml += '  <div class="wheel-modal-legend-score">' + groupTotal + ' (' + percent + '%)</div>';
                 legendHtml += '</div>';
             });
 
             if (legendDom) legendDom.innerHTML = legendHtml;
 
-            var chartInstance = echarts.init(chartDom);
-            chartInstance.setOption({
+            if (_wheelChartInstance) {
+                _wheelChartInstance.dispose();
+            }
+            _wheelChartInstance = echarts.init(chartDom);
+            _wheelChartInstance.setOption({
                 tooltip: {
                     trigger: 'item',
                     formatter: function(params) {
-                        return '<b>' + escapeHtml(params.name) + '</b><br/>得分: ' + params.value + '<br/>占比: ' + params.percent + '%';
+                        var pct = params.percent;
+                        if (pct === undefined || pct === null || isNaN(pct)) {
+                            pct = total > 0 ? ((params.value / total) * 100).toFixed(1) : '0.0';
+                        } else {
+                            pct = parseFloat(pct).toFixed(1);
+                        }
+                        return '<b>' + escapeHtml(params.name) + '</b><br/>' + L('CreditProfile_TooltipScore', '得分: ') + params.value + '<br/>' + L('CreditProfile_TooltipPercent', '占比: ') + pct + '%';
                     }
                 },
                 series: {
                     type: 'sunburst',
                     data: sunburstData,
-                    radius: [0, '90%'],
-                    label: { rotate: 'radial', fontSize: 10 },
+                    radius: ['24%', '90%'],
+                    label: {
+                        rotate: 'radial',
+                        fontSize: 12
+                    },
                     itemStyle: {
-                        borderRadius: 3,
+                        borderRadius: 4,
                         borderWidth: 1,
                         borderColor: '#fff'
                     },
-                    emphasis: { focus: 'ancestor' },
+                    emphasis: {
+                        focus: 'ancestor'
+                    },
                     levels: [
                         {},
-                        { r0: '0%', r: '45%', label: { rotate: 0, fontSize: 11, fontWeight: 'bold' } },
-                        { r0: '45%', r: '80%', label: { align: 'right', fontSize: 9 } }
+                        {
+                            r0: '24%',
+                            r: '43%',
+                            label: { rotate: 0, fontSize: 12, fontWeight: 'bold', color: '#fff' }
+                        },
+                        {
+                            r0: '43%',
+                            r: '66%',
+                            label: { rotate: 'radial', fontSize: 12, color: '#333' }
+                        },
+                        {
+                            r0: '66%',
+                            r: '90%',
+                            label: { rotate: 'radial', fontSize: 12, color: '#333' }
+                        }
                     ]
                 }
             });
 
             window.addEventListener('resize', function() {
-                chartInstance && chartInstance.resize();
+                if (_wheelChartInstance) _wheelChartInstance.resize();
             });
         }
+
+        // 已签待执行合同分页缓存
+        var _contractsCache = [];
+        var _contractProductsCache = {};
+
+        /**
+         * 渲染已签待执行合同分页表格
+         */
+        function renderContractsPage(page) {
+            page = page || 1;
+            var pageSize = 5;
+            var total = _contractsCache.length;
+            var totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            var start = (page - 1) * pageSize;
+            var end = Math.min(start + pageSize, total);
+            var pageContracts = _contractsCache.slice(start, end);
+
+            var tbodyHtml = '';
+            if (pageContracts.length === 0) {
+                tbodyHtml += '<tr class="empty-row"><td colspan="7" class="empty-state">' + L('CreditProfile_NoContracts', '暂无已签待执行合同') + '</td></tr>';
+            }
+            pageContracts.forEach(function(c) {
+                var contractId = c.mcs_contractid;
+                var productNames = (_contractProductsCache[contractId] || []).join(', ');
+                var contractNo = c.mcs_contractnumber || c.mcs_name || '-';
+                var amount = c.mcs_totalcontractamount_base ? formatNumber(c.mcs_totalcontractamount_base, 2) : '-';
+                var paymentType = getOptionText(c.mcs_paymenttype, PAYMENT_TYPE);
+                // mcs_advanceratio 已按百分比数值存储（如 54 表示 54%），不再乘 100
+                var advanceRatio = c.mcs_advanceratio !== null && c.mcs_advanceratio !== undefined ? formatNumber(parseFloat(c.mcs_advanceratio), 1) + '%' : '-';
+                var termDays = c.mcs_remainingpaymentdays !== null && c.mcs_remainingpaymentdays !== undefined ? formatNumber(c.mcs_remainingpaymentdays, 0) : '-';
+                var risk = c.mcs_riskcovervalue !== null && c.mcs_riskcovervalue !== undefined ? formatNumber(c.mcs_riskcovervalue, 1) + '%' : '-';
+                // 合同记录链接，新标签页打开
+                var recordUrl = window.location.origin + '/main.aspx?etn=mcs_contract&pagetype=entityrecord&id=' + encodeURIComponent(contractId);
+                var contractLink = '<a href="' + recordUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(contractNo) + '</a>';
+
+                tbodyHtml += '<tr>';
+                tbodyHtml += '  <td>' + contractLink + '</td>';
+                tbodyHtml += '  <td>' + escapeHtml(productNames || '-') + '</td>';
+                tbodyHtml += '  <td>' + escapeHtml(amount) + '</td>';
+                tbodyHtml += '  <td>' + escapeHtml(paymentType || '-') + '</td>';
+                tbodyHtml += '  <td>' + escapeHtml(advanceRatio) + '</td>';
+                tbodyHtml += '  <td>' + escapeHtml(termDays) + '</td>';
+                tbodyHtml += '  <td>' + escapeHtml(risk) + '</td>';
+                tbodyHtml += '</tr>';
+            });
+
+            var tbody = document.getElementById('contract-tbody');
+            if (tbody) tbody.innerHTML = tbodyHtml;
+
+            var paginationHtml = '';
+            paginationHtml += '<span>' + L('CreditProfile_PageInfo', '共 {0} 条，第 {1}/{2} 页').replace('{0}', total).replace('{1}', page).replace('{2}', totalPages) + '</span>';
+            paginationHtml += '<button ' + (page <= 1 ? 'disabled' : '') + ' onclick="window._creditProfileGoPage(' + (page - 1) + ')">' + L('CreditProfile_PrevPage', '上一页') + '</button>';
+            paginationHtml += '<button ' + (page >= totalPages ? 'disabled' : '') + ' onclick="window._creditProfileGoPage(' + (page + 1) + ')">' + L('CreditProfile_NextPage', '下一页') + '</button>';
+            var pagination = document.getElementById('contract-pagination');
+            if (pagination) pagination.innerHTML = paginationHtml;
+        }
+
+        window._creditProfileGoPage = function(page) {
+            renderContractsPage(page);
+        };
 
         function renderError(app, message) {
             app.innerHTML = '<div class="error-box">&#9888; ' + escapeHtml(message) + '</div>';
@@ -872,48 +1993,81 @@
 
         // ==================== 初始化 ====================
 
-        function init() {
+        async function init() {
             var app = document.getElementById('app');
+            await loadLanguagePack();
+            applyStaticTexts();
             var xrm = getXrm();
 
             if (!xrm) {
                 app.innerHTML = [
                     '<div style="padding:40px 20px;text-align:center;">',
                     '  <div style="font-size:48px;margin-bottom:16px;">&#128270;</div>',
-                    '  <div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">需要在 D365 环境中打开</div>',
+                    '  <div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">' + L('CreditProfile_NeedD365_Title', '需要在 D365 环境中打开') + '</div>',
                     '  <div style="font-size:13px;color:#666;max-width:400px;margin:0 auto;line-height:1.6;">',
-                    '    <p>客户信用画像页面需要在 D365 客户管理模块的<strong>"信用画像"页签</strong>中打开，</p>',
-                    '    <p>或通过带有 Xrm 上下文的 iframe 嵌入方式访问。</p>',
-                    '    <p style="margin-top:12px;color:#999;font-size:12px;">直接通过 URL 打开无法获取 D365 数据上下文。</p>',
+                    '    <p>' + L('CreditProfile_NeedD365_Line1', '客户信用画像页面需要在 D365 客户管理/客户主数据模块的"信用画像"页签中打开，') + '</p>',
+                    '    <p>' + L('CreditProfile_NeedD365_Line2', '或通过带有 Xrm 上下文的 iframe 嵌入方式访问。') + '</p>',
+                    '    <p style="margin-top:12px;color:#999;font-size:12px;">' + L('CreditProfile_NeedD365_Line3', '直接通过 URL 打开无法获取 D365 数据上下文。') + '</p>',
                     '  </div>',
                     '</div>'
                 ].join('');
                 return;
             }
 
-            var accountId = getAccountId();
+            try {
+                var accountId = await resolveAccountId();
 
-            if (!accountId) {
-                renderError(app, '无法获取客户标识。请通过 Account 表单页签打开，或通过 URL 传入 accountid 参数。');
-                return;
-            }
+                if (!accountId) {
+                    renderError(app, L('CreditProfile_NoAccountId', '无法获取客户标识。请通过 Account 表单或客户主数据表单页签打开，或通过 URL 传入 accountid 参数。'));
+                    return;
+                }
 
-            // 并行查询数据
-            Promise.all([
-                fetchAccount(accountId),
-                fetchLatestCreditRecord(accountId),
-                fetchCustomerTags(accountId)
-            ])
-            .then(function(results) {
+                // 先并行查询账户、最新审批通过的评估记录、合同
+                var results = await Promise.all([
+                    fetchAccount(accountId),
+                    fetchLatestCreditRecord(accountId),
+                    fetchSignedContracts(accountId)
+                ]);
+
                 var account = results[0];
                 var creditRecord = results[1];
-                var tags = results[2];
-                render(app, account, creditRecord, tags);
-            })
-            .catch(function(error) {
-                console.error('加载画像失败:', error);
-                renderError(app, '加载客户信用画像失败: ' + (error.message || error));
-            });
+                var contracts = results[2];
+
+                // 查询客户信用标签（按统一取值范围）
+                var tags = await fetchCustomerTags(accountId);
+
+                // 查询最新有效的重点尽调专家意见（依赖客户主数据）
+                var masterDataId = account._mcs_customermasterdata_value;
+                var ddResult = masterDataId ? await fetchLatestDDOpinion(masterDataId) : { score: null, opinion: '' };
+                var ddOpinion = ddResult.opinion;
+                var ddScore = ddResult.score;
+
+                // 查询厂端授信额度与中信保额度（依赖客户主数据）
+                var sinosureCode = (account.mcs_customermasterdata || {}).mcs_sinosurecode;
+                var quotaResults = await Promise.all([
+                    fetchFactoryCreditQuota(masterDataId),
+                    fetchApprovedQuota(masterDataId, sinosureCode)
+                ]);
+                var factoryQuota = quotaResults[0];
+                var approvedQuota = quotaResults[1];
+
+                // 补充标签关联评分项目的来源（内部/外部）
+                var sourceMap = await fetchCreditItemSources(tags);
+                tags.forEach(function(tag) {
+                    var id = getLookupId(tag, 'mcs_credit_item');
+                    if (id && sourceMap[id] !== undefined) {
+                        tag['item.mcs_source'] = sourceMap[id];
+                    }
+                });
+
+                // 查询合同产品明细
+                var contractIds = contracts.map(function(c) { return c.mcs_contractid; });
+                var contractProducts = await fetchContractProducts(contractIds);
+
+                render(app, account, creditRecord, tags, contracts, contractProducts, factoryQuota, approvedQuota, ddOpinion, ddScore);
+            } catch (error) {
+                renderError(app, L('CreditProfile_LoadFailed', '加载客户信用画像失败: ') + (error.message || error));
+            }
         }
 
         // DOM 加载完成后初始化
@@ -924,5 +2078,26 @@
         }
     })();
     </script>
+
+    <!-- 信用飞轮模态弹窗 -->
+    <div id="wheel-modal" class="wheel-modal" style="display:none;">
+        <div class="wheel-modal-backdrop" onclick="closeWheelModal()"></div>
+        <div class="wheel-modal-content">
+            <div class="wheel-modal-header">
+                <div class="wheel-modal-title" id="wheel-modal-title">&#127744; 客户信用飞轮</div>
+                <button class="wheel-modal-close" id="wheel-modal-close" onclick="closeWheelModal()" aria-label="关闭">&times;</button>
+            </div>
+            <div class="wheel-modal-body">
+                <div class="wheel-chart-wrap">
+                    <div id="wheel-modal-chart" class="wheel-modal-chart"></div>
+                    <div id="wheel-modal-center" class="wheel-modal-center">
+                        <div class="center-grade" id="wheel-center-grade">-</div>
+                        <div class="center-score" id="wheel-center-score">- 分</div>
+                    </div>
+                </div>
+                <div id="wheel-modal-legend" class="wheel-modal-legend"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

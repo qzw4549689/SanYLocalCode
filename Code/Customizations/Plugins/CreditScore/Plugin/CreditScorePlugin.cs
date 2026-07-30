@@ -22,6 +22,9 @@ namespace SanyD365.Plugins.CreditScore.Plugin
             IPluginExecutionContext context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
             IOrganizationServiceFactory factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
+            // 系统上下文：计算所需的关联数据读取（account/客户主数据/销售订单/评分卡/评分项目/客户标签）
+            // 不依赖操作员的记录级权限，避免事业部风控计算非本部门客户评估单时被安全模型拦截
+            IOrganizationService systemService = factory.CreateOrganizationService(null);
             ITracingService tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
             tracer.Trace("===== CreditScoreCalculationPlugin 开始执行 =====");
@@ -73,11 +76,12 @@ namespace SanyD365.Plugins.CreditScore.Plugin
                 string scoreId = creditRecord.GetAttributeValue<string>("mcs_scoreid");
 
                 // 获取评分卡类型（实时从Account查询客户属性匹配）
-                int categoryId = GetCategoryId(service, tracer, creditRecord);
+                // 读取 account/客户主数据/销售订单使用系统上下文，不依赖操作员对客户的记录级权限
+                int categoryId = GetCategoryId(systemService, tracer, creditRecord);
                 tracer.Trace($"评分卡类型: {categoryId}");
 
-                // 计算信用分
-                var calculator = new ScoreCalculator(service, tracer);
+                // 计算信用分（评分卡/评分项目/客户标签读取走系统上下文，标签得分回写保留用户上下文）
+                var calculator = new ScoreCalculator(systemService, service, tracer);
                 int totalScore = calculator.CalculateScore(target.Id, categoryId);
 
                 tracer.Trace($"信用分计算结果: {totalScore}");

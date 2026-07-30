@@ -51,6 +51,17 @@
             font-size: 12px;
             color: #666;
         }
+        .invalid-tag {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fff;
+            background: #d93025;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
 
         .main-content {
             display: grid;
@@ -173,7 +184,7 @@
     <div id="app">
         <div v-if="loading" class="loading">
             <div class="loading-spinner"></div>
-            <div>正在加载客户信用飞轮...</div>
+            <div>{{ texts.loading }}</div>
         </div>
 
         <div v-else-if="error" class="error-box">
@@ -183,23 +194,26 @@
         <template v-else>
             <div class="header">
                 <div>
-                    <h1>客户信用飞轮</h1>
+                    <h1>{{ texts.title }}</h1>
                     <div class="subtitle">{{ customerName }} ({{ buyercode }})</div>
                 </div>
                 <div class="header-right">
-                    <div class="total-score">{{ totalScore }}</div>
-                    <div class="total-label">信用总分</div>
+                    <div class="total-score">
+                        {{ totalScore }}
+                        <span v-if="isInvalid" class="invalid-tag">{{ texts.invalidated }}</span>
+                    </div>
+                    <div class="total-label">{{ texts.totalScoreLabel }}</div>
                 </div>
             </div>
 
             <div class="main-content">
                 <div class="chart-card">
-                    <div class="chart-title">信用分层旭日图</div>
+                    <div class="chart-title">{{ texts.chartTitle }}</div>
                     <div id="sunburst-chart"></div>
                 </div>
 
                 <div class="summary-card">
-                    <div class="summary-title">分类得分概览</div>
+                    <div class="summary-title">{{ texts.summaryTitle }}</div>
                     <div v-for="cat in categories" :key="cat.id" class="category-item">
                         <div class="category-header">
                             <div class="category-name">
@@ -226,6 +240,43 @@
     <script>
     const { createApp, ref, onMounted, nextTick } = Vue;
 
+    // ==================== 多语言 ====================
+    var _langDict = null;
+
+    function L(key, defaultText) {
+        if (_langDict && _langDict[key]) return _langDict[key];
+        return defaultText;
+    }
+
+    function loadLanguagePack() {
+        return new Promise(function (resolve) {
+            var langId = 2052;
+            try {
+                var x = (typeof Xrm !== 'undefined' && Xrm.Utility) ? Xrm
+                    : (window.parent && window.parent.Xrm ? window.parent.Xrm
+                    : (window.opener && window.opener.Xrm ? window.opener.Xrm
+                    : (window.top && window.top.Xrm ? window.top.Xrm : null)));
+                if (x && x.Utility && x.Utility.getGlobalContext) {
+                    langId = x.Utility.getGlobalContext().userSettings.languageId;
+                }
+            } catch (e) {}
+            if (langId !== 1033) { resolve(); return; }
+            var req = new XMLHttpRequest();
+            req.open('GET', '/WebResources/ms_languagefile_1033', true);
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        try { _langDict = JSON.parse(req.responseText); } catch (e) {}
+                    }
+                    resolve();
+                }
+            };
+            req.send();
+        });
+    }
+
+    loadLanguagePack().then(function () {
+        document.title = L('CreditWheel_Title', '客户信用飞轮');
     createApp({
         setup() {
             const loading = ref(true);
@@ -233,6 +284,7 @@
             const customerName = ref('');
             const buyercode = ref('');
             const totalScore = ref(0);
+            const isInvalid = ref(false);
             const categories = ref([]);
             let chartInstance = null;
 
@@ -310,7 +362,7 @@
                     const res = await fetch(url, { method: 'GET', headers: headers, credentials: 'same-origin' });
                     if (!res.ok) {
                         const text = await res.text().catch(function() { return ''; });
-                        throw new Error('Web API 请求失败 (' + res.status + '): ' + text);
+                        throw new Error(L('CreditWheel_ApiFailedPrefix', 'Web API 请求失败') + ' (' + res.status + '): ' + text);
                     }
                     return res.json();
                 }
@@ -340,14 +392,20 @@
                 let accountId = null;
                 let accountName = '';
 
+                let masterData = null;
+
                 if (bc) {
                     const fetchXml = [
                         '<fetch top="1">',
                         '  <entity name="account">',
                         '    <attribute name="accountid" />',
                         '    <attribute name="name" />',
+                        '    <link-entity name="mcs_customermasterdata" from="mcs_customermasterdataid" to="mcs_customermasterdata" link-type="outer" alias="md">',
+                        '      <attribute name="mcs_creditscore" />',
+                        '      <attribute name="mcs_creditvalid" />',
+                        '    </link-entity>',
                         '    <filter>',
-                        '      <condition attribute="accountnumber" operator="eq" value="' + bc + '" />',
+                        '      <condition attribute="accountnumber" operator="eq" value="' + escapeXml(bc) + '" />',
                         '    </filter>',
                         '  </entity>',
                         '</fetch>'
@@ -356,6 +414,7 @@
                     if (accResult.entities.length > 0) {
                         accountId = accResult.entities[0].accountid.replace(/[{}]/g, '').toLowerCase();
                         accountName = accResult.entities[0].name || '';
+                        masterData = accResult.entities[0];
                     }
                 }
 
@@ -365,80 +424,66 @@
                     if (aid) {
                         accountId = aid.replace(/[{}]/g, '').toLowerCase();
                         try {
-                            const acc = await api.retrieveRecord('account', accountId, '?$select=name');
-                            accountName = acc.name || '';
+                            const fetchXml = [
+                                '<fetch top="1">',
+                                '  <entity name="account">',
+                                '    <attribute name="accountid" />',
+                                '    <attribute name="name" />',
+                                '    <link-entity name="mcs_customermasterdata" from="mcs_customermasterdataid" to="mcs_customermasterdata" link-type="outer" alias="md">',
+                                '      <attribute name="mcs_creditscore" />',
+                                '      <attribute name="mcs_creditvalid" />',
+                                '    </link-entity>',
+                                '    <filter>',
+                                '      <condition attribute="accountid" operator="eq" value="{' + accountId + '}" />',
+                                '    </filter>',
+                                '  </entity>',
+                                '</fetch>'
+                            ].join('');
+                            const accResult = await api.retrieveMultipleRecords('account', '?fetchXml=' + encodeURIComponent(fetchXml));
+                            if (accResult.entities.length > 0) {
+                                accountName = accResult.entities[0].name || '';
+                                masterData = accResult.entities[0];
+                            }
                         } catch (e) {}
                     }
                 }
 
                 if (!accountId) {
-                    throw new Error('无法获取客户标识，请传入 buyercode 或 accountid 参数');
+                    throw new Error(L('CreditWheel_NoAccountId', '无法获取客户标识，请传入 buyercode 或 accountid 参数'));
                 }
 
                 customerName.value = accountName;
 
-                // 2. 查询最新有效评估记录
-                const recordFetch = [
-                    '<fetch top="1">',
-                    '  <entity name="mcs_credit_record">',
-                    '    <attribute name="mcs_credit_recordid" />',
-                    '    <attribute name="mcs_creditscore" />',
+                // 2. 信用总分取自客户主数据，并按 PRD 提示失效状态
+                const mdScore = masterData ? masterData['md.mcs_creditscore'] : null;
+                const mdValid = masterData ? masterData['md.mcs_creditvalid'] : null;
+                totalScore.value = (mdScore !== null && mdScore !== undefined) ? mdScore : 0;
+                isInvalid.value = (mdValid !== true && mdValid !== 1 && mdValid !== 'true');
+
+                // 3. 查询标签数据
+                // 取值范围：评分项目分类 <> 综合指标 AND 是否评分 = 1 AND 有效状态 = 1
+                // 同一指标取更新日期最新的一条
+                const tagFetch = [
+                    '<fetch>',
+                    '  <entity name="mcs_customer_tag">',
+                    '    <attribute name="mcs_group" />',
+                    '    <attribute name="mcs_itemname" />',
+                    '    <attribute name="mcs_itemdesc" />',
+                    '    <attribute name="mcs_itemcode" />',
+                    '    <attribute name="mcs_scorevalue" />',
+                    '    <attribute name="mcs_isscore" />',
+                    '    <attribute name="mcs_active" />',
+                    '    <attribute name="modifiedon" />',
                     '    <filter>',
-                    '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
+                    '      <condition attribute="mcs_accountid" operator="eq" value="{' + accountId + '}" />',
+                    '      <condition attribute="mcs_group" operator="ne" value="5" />',
+                    '      <condition attribute="mcs_isscore" operator="eq" value="1" />',
                     '      <condition attribute="mcs_active" operator="eq" value="1" />',
                     '    </filter>',
                     '    <order attribute="modifiedon" descending="true" />',
                     '  </entity>',
                     '</fetch>'
                 ].join('');
-
-                const recordResult = await api.retrieveMultipleRecords('mcs_credit_record', '?fetchXml=' + encodeURIComponent(recordFetch));
-                const creditRecord = recordResult.entities.length > 0 ? recordResult.entities[0] : null;
-                totalScore.value = creditRecord ? (creditRecord.mcs_creditscore || 0) : 0;
-
-                // 3. 查询标签数据（取最新有效评估的标签，或该客户所有评分标签）
-                let recordId = creditRecord ? creditRecord.mcs_credit_recordid : null;
-                let tagFetch;
-
-                if (recordId) {
-                    // 有评估记录，查关联标签
-                    tagFetch = [
-                        '<fetch>',
-                        '  <entity name="mcs_customer_tag">',
-                        '    <attribute name="mcs_group" />',
-                        '    <attribute name="mcs_itemname" />',
-                        '    <attribute name="mcs_itemdesc" />',
-                        '    <attribute name="mcs_scorevalue" />',
-                        '    <attribute name="mcs_isscore" />',
-                        '    <attribute name="modifiedon" />',
-                        '    <filter>',
-                        '      <condition attribute="mcs_credit_record" operator="eq" value="' + recordId + '" />',
-                        '      <condition attribute="mcs_isscore" operator="eq" value="1" />',
-                        '    </filter>',
-                        '    <order attribute="modifiedon" descending="true" />',
-                        '  </entity>',
-                        '</fetch>'
-                    ].join('');
-                } else {
-                    // 无评估记录，查该客户所有评分标签（取最新）
-                    tagFetch = [
-                        '<fetch>',
-                        '  <entity name="mcs_customer_tag">',
-                        '    <attribute name="mcs_group" />',
-                        '    <attribute name="mcs_itemname" />',
-                        '    <attribute name="mcs_itemdesc" />',
-                        '    <attribute name="mcs_scorevalue" />',
-                        '    <attribute name="mcs_isscore" />',
-                        '    <attribute name="modifiedon" />',
-                        '    <filter>',
-                        '      <condition attribute="mcs_accountid" operator="eq" value="' + accountId + '" />',
-                        '      <condition attribute="mcs_isscore" operator="eq" value="1" />',
-                        '    </filter>',
-                        '    <order attribute="modifiedon" descending="true" />',
-                        '  </entity>',
-                        '</fetch>'
-                    ].join('');
-                }
 
                 const tagResult = await api.retrieveMultipleRecords('mcs_customer_tag', '?fetchXml=' + encodeURIComponent(tagFetch));
 
@@ -466,6 +511,7 @@
                         groupData[group] = { items: [], total: 0 };
                     }
                     groupData[group].items.push({
+                        // 数据翻译（方案B）暂时停用，需要时恢复为：name: tag.mcs_itemcode ? L('Data_Item_' + tag.mcs_itemcode, tag.mcs_itemname || '-') : (tag.mcs_itemname || '-'),
                         name: tag.mcs_itemname || '-',
                         desc: tag.mcs_itemdesc || '',
                         score: tag.mcs_scorevalue || 0
@@ -479,7 +525,9 @@
                 const allGroups = Object.keys(groupData).sort();
 
                 allGroups.forEach(function(groupId, idx) {
-                    const gInfo = GROUP_MAP[groupId] || { name: '其他', color: '#666' };
+                    const gInfoRaw = GROUP_MAP[groupId] || { name: '其他', color: '#666' };
+                    // 数据翻译暂时停用，需要时恢复为：const gInfo = { name: groupId in GROUP_MAP ? L('CreditProfile_Group_' + groupId, gInfoRaw.name) : L('CreditProfile_Other', '其他'), color: gInfoRaw.color };
+                    const gInfo = gInfoRaw;
                     const items = groupData[groupId].items;
                     const total = groupData[groupId].total;
                     const colors = SUB_COLORS[groupId] || ['#666'];
@@ -528,8 +576,8 @@
                         trigger: 'item',
                         formatter: function(params) {
                             return '<b>' + escapeHtml(params.name) + '</b><br/>' +
-                                   '得分: ' + params.value + '<br/>' +
-                                   '占比: ' + params.percent + '%';
+                                   L('CreditProfile_TooltipScore', '得分: ') + params.value + '<br/>' +
+                                   L('CreditProfile_TooltipPercent', '占比: ') + params.percent + '%';
                         }
                     },
                     series: {
@@ -583,14 +631,23 @@
                     loading.value = false;
                 } catch (err) {
                     console.error('加载失败:', err);
-                    var msg = err.message || '加载客户信用飞轮失败';
+                    var msg = err.message || L('CreditWheel_LoadFailed', '加载客户信用飞轮失败');
                     if (msg.indexOf('401') >= 0 || msg.indexOf('Unauthorized') >= 0) {
-                        msg = '未获取到 D365 认证上下文。请在 D365 客户表单的"信用画像"页签中打开此页面，不要直接通过 URL 访问。';
+                        msg = L('CreditWheel_NoAuth', '未获取到 D365 认证上下文。请在 D365 客户表单的"信用画像"页签中打开此页面，不要直接通过 URL 访问。');
                     }
                     error.value = msg;
                     loading.value = false;
                 }
             });
+
+            const texts = {
+                loading: L('CreditWheel_Loading', '正在加载客户信用飞轮...'),
+                title: L('CreditWheel_Title', '客户信用飞轮'),
+                invalidated: L('CreditWheel_Invalidated', '评估已失效'),
+                totalScoreLabel: L('CreditWheel_TotalScore', '信用总分'),
+                chartTitle: L('CreditWheel_ChartTitle', '信用分层旭日图'),
+                summaryTitle: L('CreditWheel_SummaryTitle', '分类得分概览')
+            };
 
             return {
                 loading,
@@ -598,10 +655,13 @@
                 customerName,
                 buyercode,
                 totalScore,
-                categories
+                isInvalid,
+                categories,
+                texts
             };
         }
     }).mount('#app');
+    });
     </script>
 </body>
 </html>

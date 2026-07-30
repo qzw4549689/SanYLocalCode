@@ -35,6 +35,23 @@ namespace D365ToolCommon.WebResource
         }
 
         /// <summary>
+        /// 根据名称前缀查询 WebResource 列表（只读）。
+        /// </summary>
+        public List<Entity> ListByPrefix(string prefix)
+        {
+            var query = new QueryExpression("webresource")
+            {
+                ColumnSet = new ColumnSet("webresourceid", "name", "displayname", "webresourcetype", "ismanaged"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("name", ConditionOperator.BeginsWith, prefix) }
+                },
+                Orders = { new OrderExpression("name", OrderType.Ascending) }
+            };
+            return _service.RetrieveMultiple(query).Entities.ToList();
+        }
+
+        /// <summary>
         /// 更新 WebResource 内容（从字符串）。
         /// </summary>
         public void UpdateContent(string name, string content)
@@ -94,30 +111,53 @@ namespace D365ToolCommon.WebResource
 
         /// <summary>
         /// 发布指定的 WebResource。
+        /// 实现说明：D365 PublishXmlRequest 对 WebResource 使用 GUID 比使用名称更稳定，
+        /// 因此本方法先按名称查询 webresourceid，再用 GUID 构造发布请求。
         /// </summary>
-        public void PublishWebResources(params string[] names)
+        /// <param name="names">WebResource 名称列表</param>
+        /// <param name="maxRetries">最大重试次数</param>
+        public void PublishWebResources(int maxRetries, params string[] names)
         {
             if (names.Length == 0) return;
 
-            var webResourcesXml = string.Join("", names.Select(n => $"<webresource>{n}</webresource>"));
-            var parameterXml = $"<importexportxml><webresources>{webResourcesXml}</webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>";
+            // 查询所有 WebResource ID
+            var resourceIds = new List<string>();
+            foreach (var name in names)
+            {
+                var webResource = QueryByName(name);
+                if (webResource == null)
+                    throw new InvalidOperationException($"未找到 WebResource: {name}");
+
+                resourceIds.Add(webResource.Id.ToString("B").ToLowerInvariant());
+            }
+
+            var resourcesXml = string.Join("", resourceIds.Select(id => $"<webresource>{id}</webresource>"));
+            var parameterXml = $"<importexportxml><webresources>{resourcesXml}</webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>";
 
             var request = new PublishXmlRequest { ParameterXml = parameterXml };
-            _service.Execute(request);
+
+            // 带重试执行
+            for (int i = 1; i <= maxRetries; i++)
+            {
+                try
+                {
+                    _service.Execute(request);
+                    return;
+                }
+                catch (Exception ex) when (i < maxRetries)
+                {
+                    Console.WriteLine($"  ⚠️ 第 {i} 次发布 WebResource 失败: {ex.Message}，2秒后重试...");
+                    Thread.Sleep(2000);
+                }
+            }
         }
 
         /// <summary>
-        /// 发布指定的实体。
+        /// 发布指定的 WebResource（默认重试 3 次）。
         /// </summary>
-        public void PublishEntities(params string[] entityNames)
+        public void PublishWebResources(params string[] names)
         {
-            if (entityNames.Length == 0) return;
-
-            var entitiesXml = string.Join("", entityNames.Select(n => $"<entity>{n}</entity>"));
-            var parameterXml = $"<importexportxml><entities>{entitiesXml}</entities><nodes/><securityroles/><settings/><workflows/></importexportxml>";
-
-            var request = new PublishXmlRequest { ParameterXml = parameterXml };
-            _service.Execute(request);
+            PublishWebResources(3, names);
         }
     }
 }

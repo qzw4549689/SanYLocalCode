@@ -23,10 +23,11 @@
 ### 1.2 代码同步流程（强制顺序）
 
 ```
-本地开发 → DEV 注册测试 → 测试人确认通过 → 同步到远程服务器 → 远程编译通过 → Git 提交/PR → 合并到 uat → 更新 DEV Assembly → UAT 发布
+本地开发 → 单元测试验证功能 → DEV 集成测试 → 测试人确认通过 → 同步到远程服务器 → 远程编译通过 → Git 提交/PR → 合并到 uat → 更新 DEV Assembly → UAT 发布
 ```
 
-- **阶段三（DEV 测试通过）是强制卡点**，未经测试人确认，严禁进入阶段四。
+- **阶段三（DEV 集成测试通过）是强制卡点**，未经测试人确认，严禁进入阶段四。
+- 功能正确性优先通过**本地单元测试**验证，再进入 DEV 环境做集成测试。
 - 同步到远程时只修编译问题（命名空间、引用、语法兼容），**严禁修改业务逻辑**。
 
 ---
@@ -44,12 +45,26 @@
 - 使用字段逻辑名，禁止硬编码 GUID 或 ID
 - 复制窗体时必须同步修改 `functionName`、JS 对象名、文件名
 - `cell id` 必须使用 `Guid.NewGuid().ToString("B")`
+- **🚨 绝对禁止覆盖公共语言包等通用 WebResource（2026-06-27 新增）**：`ms_languagefile_1033/2052` 等被多模块共用的通用文件，AI 严禁直接覆盖其全部内容。新增 key 时必须在原文件基础上追加，避免冲掉其他模块 key。
 
 ### 2.3 实体/字段
 
 - 实体前缀统一使用 `mcs_`
 - 修改选项集相关代码前，必须先查询实际选项集值
 - 禁止直接修改原生系统实体或字段
+
+### 2.4 元数据创建红线（2026-06-29 新增）
+
+**所有实体、字段、表单、视图、关系、WebResource 等元数据的创建与更新，必须使用 `D365ToolCommon` 或 `MetadataTool` 中已有的公共方法。**
+
+- **严禁**在任意工具、脚本、插件中直接调用 `CreateAttributeRequest`、`CreateEntityRequest`、`UpdateEntityRequest` 等 SDK 原生 API 创建元数据
+- **严禁**临时编写新的元数据创建方法
+- 如现有公共方法不存在或不能满足需求，**必须向负责人提出申请，获批准后方可修改或扩展公共方法**
+- 常用公共方法位置：
+  - 字段检查/创建 → `D365ToolCommon.Metadata.MetadataFieldService`
+  - 实体/字段/表单/视图综合管理 → `MetadataTool.Services.EntityManager`
+  - WebResource 部署 → `D365ToolCommon.WebResource.WebResourceService`
+  - 发布实体/WebResource → `D365ToolCommon.Publishing.PublishingService`
 
 ---
 
@@ -93,6 +108,7 @@
 - 主集成分支是 `uat`
 - 个人分支命名：`uat-日期-姓名缩写-功能简述`
 - **不要直接 push `uat` 分支，必须走 PR**
+- **所有针对 Azure DevOps D365 项目仓库（`https://dev.azure.com/SanyGlobalCRM/D365/_git/D365`）的 push、PR 分支创建、合并操作，必须在远程服务器 `tx-windows`（`122.51.232.70`，`C:\Projects\D365`）上进行**。本地 Mac 上的 SanYi 目录禁止推送至该项目仓库。
 - 远程编译通过后尽快推分支、建 PR，避免代码积压
 
 ---
@@ -130,7 +146,7 @@
 | Plugin 吞异常 | 事务被破坏，出现 "ISV code reduced the open transaction count" | catch 后必须 rethrow |
 | 用 Solution 导入更新单个 WebResource | 阻塞环境 5-60 分钟 | 用 C# DeployTool |
 | 只看 Assembly version 判断同步 | 误以为 UAT/DEV 一致 | 查 `pluginassembly.modifiedon` |
-| 用 RibbonDiff.xml 创建按钮 | 生成只读 Legacy Ribbon | 用 C# AppActionDeployer 创建 Modern Command Bar |
+| 用 RibbonDiff.xml 创建按钮（2026-07-27 修订） | 生成只读 Legacy Ribbon；但 appaction 显隐规则不随包 | 默认用 C# AppActionDeployer；需显隐规则随包（SelectionCountRule 等）时改用 RibbonDiffXml（案例：成交条件批量按钮） |
 
 ---
 

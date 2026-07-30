@@ -1,0 +1,395 @@
+{
+  "entityName": "mcs_fca_quotaapp",
+  "displayName": "厂端授信额度申请单表",
+  "displayNameZh": "厂端授信额度申请单表",
+  "displayNameEn": "Factory Credit Quota Application",
+  "primaryAttribute": "mcs_grantid",
+  "primaryAttributeDisplayName": "申请编号",
+  "primaryAttributeDisplayNameZh": "申请编号",
+  "primaryAttributeDisplayNameEn": "Application No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_accountid",
+      "displayName": "客户编码",
+      "displayNameZh": "客户编码",
+      "displayNameEn": "Customer Code",
+      "description": "关联客户主数据 AccountMaster",
+      "type": "lookup",
+      "targetEntity": "mcs_customermasterdata",
+      "targetEntityDisplayName": "客户主数据"
+    },
+    {
+      "schemaName": "mcs_custname",
+      "displayName": "客户名称",
+      "displayNameZh": "客户名称",
+      "displayNameEn": "Customer Name",
+      "description": "客户名称",
+      "type": "string",
+      "maxLength": 500,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_creditgrade",
+      "displayName": "客户等级",
+      "displayNameZh": "客户等级",
+      "displayNameEn": "Customer Credit Grade",
+      "description": "客户等级 A0-A4",
+      "type": "string",
+      "maxLength": 2
+    },
+    {
+      "schemaName": "mcs_doid",
+      "displayName": "模型计算序列号",
+      "displayNameZh": "模型计算序列号",
+      "displayNameEn": "Model Calculation Serial No.",
+      "description": "关联计算表",
+      "type": "lookup",
+      "targetEntity": "mcs_fca_proc",
+      "targetEntityDisplayName": "厂端授信模型计算表"
+    },
+    {
+      "schemaName": "mcs_initigrant",
+      "displayName": "模型计算额度USD",
+      "displayNameZh": "模型计算额度USD",
+      "displayNameEn": "Model Calculated Quota USD",
+      "description": "从计算表带入",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_applygenre",
+      "displayName": "信保额度类型",
+      "displayNameZh": "信保额度类型",
+      "displayNameEn": "Sinosure Quota Type",
+      "description": "从 mcs_approvedquota 汇总，非信用证/信用证，可同时存在用逗号组合",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_quotasum",
+      "displayName": "信保额度USD",
+      "displayNameZh": "信保额度USD",
+      "displayNameEn": "Sinosure Quota USD",
+      "description": "从中信保限额信息表汇总",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_quotabalance",
+      "displayName": "信保余额USD",
+      "displayNameZh": "信保余额USD",
+      "displayNameEn": "Sinosure Balance USD",
+      "description": "从中信保限额信息表汇总",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_sellergrant",
+      "displayName": "厂端授信额度USD",
+      "displayNameZh": "厂端授信额度USD",
+      "displayNameEn": "Factory Credit Quota USD",
+      "description": "从额度表带入",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_sellerbalance",
+      "displayName": "厂端授信余额USD",
+      "displayNameZh": "厂端授信余额USD",
+      "displayNameEn": "Factory Credit Balance USD",
+      "description": "从额度表带入",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_typename",
+      "displayName": "产品类型",
+      "displayNameZh": "产品类型",
+      "displayNameEn": "Product Type",
+      "description": "关联成交条件产品分类",
+      "type": "lookup",
+      "targetEntity": "mcs_trade_pttype",
+      "targetEntityDisplayName": "成交条件产品分类"
+    },
+    {
+      "schemaName": "mcs_contractamt",
+      "displayName": "意向合同金额",
+      "displayNameZh": "意向合同金额",
+      "displayNameEn": "Intended Contract Amount",
+      "description": "人工录入",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2
+    },
+    {
+      "schemaName": "mcs_paymode",
+      "displayName": "支付方式",
+      "displayNameZh": "支付方式",
+      "displayNameEn": "Payment Method",
+      "description": "同合同支付类型字典",
+      "type": "picklist",
+      "options": {
+        "全款": 1,
+        "赊销": 20,
+        "信用证": 10,
+        "内部融资": 40,
+        "外部融资": 50,
+        "融资租赁": 60,
+        "票据": 21,
+        "分期": 70,
+        "渠道融资": 80,
+        "经销商赊销": 81,
+        "经销商直售": 82,
+        "招标结算": 83
+      }
+    },
+    {
+      "schemaName": "mcs_payterm",
+      "displayName": "账期（天）",
+      "displayNameZh": "账期（天）",
+      "displayNameEn": "Payment Term (Days)",
+      "description": "30的倍数",
+      "type": "integer",
+      "minValue": 0,
+      "maxValue": 9999
+    },
+    {
+      "schemaName": "mcs_tobegrant",
+      "displayName": "调整厂端授信额度",
+      "displayNameZh": "调整厂端授信额度",
+      "displayNameEn": "Adjusted Factory Credit Quota",
+      "description": "人工申请调整额度",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_tobebalance",
+      "displayName": "调整后厂端授信余额",
+      "displayNameZh": "调整后厂端授信余额",
+      "displayNameEn": "Adjusted Factory Credit Balance",
+      "description": "公式计算",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_remark",
+      "displayName": "调整原因",
+      "displayNameZh": "调整原因",
+      "displayNameEn": "Adjustment Reason",
+      "description": "调整原因",
+      "type": "string",
+      "maxLength": 1000,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_orgid",
+      "displayName": "申请组织",
+      "displayNameZh": "申请组织",
+      "displayNameEn": "Applying Organization",
+      "description": "申请组织ID",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_orgname",
+      "displayName": "申请组织名称",
+      "displayNameZh": "申请组织名称",
+      "displayNameEn": "Applying Organization Name",
+      "description": "申请组织名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_buid",
+      "displayName": "事业部",
+      "displayNameZh": "事业部",
+      "displayNameEn": "Business Unit",
+      "description": "事业部ID",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_buname",
+      "displayName": "事业部名称",
+      "displayNameZh": "事业部名称",
+      "displayNameEn": "Business Unit Name",
+      "description": "事业部名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_regionid",
+      "displayName": "大区",
+      "displayNameZh": "大区",
+      "displayNameEn": "Region",
+      "description": "大区ID",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_regionname",
+      "displayName": "大区名称",
+      "displayNameZh": "大区名称",
+      "displayNameEn": "Region Name",
+      "description": "大区名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_countryregionid",
+      "displayName": "国区",
+      "displayNameZh": "国区",
+      "displayNameEn": "National Region",
+      "description": "国区ID",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_countryregionname",
+      "displayName": "国区名称",
+      "displayNameZh": "国区名称",
+      "displayNameEn": "National Region Name",
+      "description": "国区名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_countrycode",
+      "displayName": "国家",
+      "displayNameZh": "国家",
+      "displayNameEn": "Country",
+      "description": "国家代码",
+      "type": "string",
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_countryname",
+      "displayName": "国家名称",
+      "displayNameZh": "国家名称",
+      "displayNameEn": "Country Name",
+      "description": "国家名称",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_bppstatus",
+      "displayName": "审批状态",
+      "displayNameZh": "审批状态",
+      "displayNameEn": "Approval Status",
+      "description": "1申请/2审批中/3通过/4驳回",
+      "type": "picklist",
+      "options": {
+        "申请": 1,
+        "审批中": 2,
+        "通过": 3,
+        "驳回": 4
+      }
+    },
+    {
+      "schemaName": "mcs_bppstatuscode",
+      "displayName": "BPP审批状态",
+      "displayNameZh": "BPP审批状态",
+      "displayNameEn": "BPP Approval Status",
+      "description": "BPP回调状态码",
+      "type": "string",
+      "maxLength": 30
+    },
+    {
+      "schemaName": "mcs_bppapprover",
+      "displayName": "当前审批人",
+      "displayNameZh": "当前审批人",
+      "displayNameEn": "Current Approver",
+      "description": "BPP当前审批人",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_bppid",
+      "displayName": "BPP工作流ID",
+      "displayNameZh": "BPP工作流ID",
+      "displayNameEn": "BPP Workflow ID",
+      "description": "BPP工作流ID",
+      "type": "string",
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_bpperrormsg",
+      "displayName": "BPP错误信息",
+      "displayNameZh": "BPP错误信息",
+      "displayNameEn": "BPP Error Message",
+      "description": "BPP错误信息",
+      "type": "string",
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_bpprejectreason",
+      "displayName": "BPP驳回原因",
+      "displayNameZh": "BPP驳回原因",
+      "displayNameEn": "BPP Reject Reason",
+      "description": "BPP驳回原因",
+      "type": "string",
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_approvedate",
+      "displayName": "BPP审批完成日期",
+      "displayNameZh": "BPP审批完成日期",
+      "displayNameEn": "BPP Approval Completion Date",
+      "description": "BPP审批完成日期",
+      "type": "datetime",
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_nextapprover",
+      "displayName": "当前审批人",
+      "displayNameZh": "当前审批人",
+      "displayNameEn": "当前审批人",
+      "description": "BPP当前审批人，由BPP框架统一回写（对齐mcs_credit_record模板）",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_workflowid",
+      "displayName": "BPP流程实例ID",
+      "displayNameZh": "BPP流程实例ID",
+      "displayNameEn": "BPP工作流ID",
+      "description": "BPP流程实例ID，由BPP框架统一回写（对齐mcs_credit_record模板）",
+      "type": "string",
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_bpplink",
+      "displayName": "BPP审批链接",
+      "displayNameZh": "BPP审批链接",
+      "displayNameEn": "BPP link",
+      "description": "BPP审批链接（对齐mcs_credit_record模板）",
+      "type": "string",
+      "maxLength": 500
+    }
+  ]
+}

@@ -87,10 +87,15 @@ namespace D365ToolCommon.Connection
         }
 
         /// <summary>
-        /// 使用 Device Code Flow 创建 ServiceClient，支持持久化 token 缓存。
+        /// 使用 Device Code Flow 获取 access token，支持持久化 token 缓存。
+        /// 供 Web API 调用或需要显式 token 的场景使用。
         /// </summary>
-        public static async Task<ServiceClient> CreateWithDeviceCodeAsync(string url, string appId, string? tenantId)
+        public static async Task<string> GetAccessTokenAsync(string? url = null, string? appId = null, string? tenantId = null)
         {
+            url ??= DefaultUrl;
+            appId ??= DefaultAppId;
+            tenantId ??= Environment.GetEnvironmentVariable("D365_TENANTID");
+
             var authority = string.IsNullOrEmpty(tenantId)
                 ? "https://login.microsoftonline.com/common"
                 : $"https://login.microsoftonline.com/{tenantId}";
@@ -136,12 +141,21 @@ namespace D365ToolCommon.Connection
                 Console.WriteLine("✅ Device Code 登录成功");
             }
 
+            return result.AccessToken;
+        }
+
+        /// <summary>
+        /// 使用 Device Code Flow 创建 ServiceClient，支持持久化 token 缓存。
+        /// </summary>
+        public static async Task<ServiceClient> CreateWithDeviceCodeAsync(string url, string appId, string? tenantId)
+        {
+            var accessToken = await GetAccessTokenAsync(url, appId, tenantId);
             var serviceUri = new Uri(url);
-            // Device Code Flow 创建的 ServiceClient 默认超时较短，上传大 Assembly 时需要延长
-            ServiceClient.MaxConnectionTimeout = TimeSpan.FromMinutes(10);
+            // Device Code Flow 创建的 ServiceClient 默认超时较短，上传大 Assembly / 导出大 Solution 时需要延长
+            ServiceClient.MaxConnectionTimeout = TimeSpan.FromMinutes(30);
             return new ServiceClient(
                 serviceUri,
-                _ => Task.FromResult(result.AccessToken),
+                _ => Task.FromResult(accessToken),
                 true,
                 null);
         }

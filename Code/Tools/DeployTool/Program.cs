@@ -49,12 +49,75 @@ namespace DeployTool
                     case "wr":
                         UpdateWebResource(serviceClient);
                         break;
+                    case "scoringcard-wr":
+                        UpdateScoringCardWebResource(serviceClient);
+                        break;
+                    case "tradestpayterm-wr":
+                        UpdateTradeStPayTermWebResource(serviceClient);
+                        break;
                     case "profile":
                         UpdateProfileWebResources(serviceClient);
+                        break;
+                    case "tradestpayterm":
+                        DeployPlugin.DeployTradeStPayTermPlugin(serviceClient);
                         break;
                     case "appactions":
                     case "buttons":
                         new AppActionDeployer(serviceClient).DeployButtons();
+                        break;
+                    case "update-appaction-params":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run update-appaction-params <按钮uniquename或前缀> <参数JSON>");
+                            Console.WriteLine("  示例: dotnet run update-appaction-params cr0c0__mcs_trade_stpayterm_apply \"[{\\\"type\\\":23},{\\\"type\\\":12}]\"");
+                            return;
+                        }
+                        new AppActionDeployer(serviceClient).UpdateButtonParameters(args[1], args[2]);
+                        break;
+                    case "set-appaction-disabled":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run set-appaction-disabled <按钮uniquename或前缀> <true|false>");
+                            Console.WriteLine("  现代按钮禁用后回退显示经典 Ribbon 按钮（可逆）");
+                            return;
+                        }
+                        new AppActionDeployer(serviceClient).SetButtonDisabled(args[1], bool.Parse(args[2]));
+                        break;
+                    case "stpayterm-display-rules":
+                        // 为 3 个列表批量按钮挂 SelectionCount Display Rule（修复勾选后按钮消失，KB 4481268）
+                        // 用法: dotnet run stpayterm-display-rules [规则入包的Solution唯一名，默认 entity_20260726_peter]
+                        new AppActionDeployer(serviceClient).SetTradeStPayTermBatchDisplayRules(args.Length >= 2 ? args[1] : "entity_20260726_peter");
+                        break;
+                    case "set-appaction-visibility":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run set-appaction-visibility <按钮uniquename或前缀> <0|1> [PowerFx公式]");
+                            Console.WriteLine("  0=始终显示  1=Power Fx 公式（需传公式，如 CountRows(Self.Selected.AllItems) > 0）");
+                            Console.WriteLine("  用途: 修复勾选记录后按钮消失（KB 4481268），公式存 appaction 字段可随包发布");
+                            return;
+                        }
+                        new AppActionDeployer(serviceClient).SetButtonVisibility(args[1], int.Parse(args[2]), args.Length >= 4 ? args[3] : null);
+                        break;
+                    case "attach-selection-rule":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run attach-selection-rule <按钮uniquename或前缀>");
+                            Console.WriteLine("  关联第一方规则 Mscrm.SelectionCountAtLeastOne（选中≥1条显示），修复勾选后按钮消失（KB 4481268）");
+                            return;
+                        }
+                        new AppActionDeployer(serviceClient).AttachFirstPartySelectionCountRule(args[1]);
+                        break;
+                    case "delete-appaction":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run delete-appaction <按钮uniquename或前缀>");
+                            Console.WriteLine("  删除指定 App Action 按钮记录（不从 Solution 移除组件引用）");
+                            return;
+                        }
+                        new AppActionDeployer(serviceClient).DeleteAppAction(args[1]);
+                        break;
+                    case "fsmbuttons":
+                        new AppActionDeployer(serviceClient).DeployFsmDataButtons();
                         break;
                     case "coface":
                         DeployPlugin.DeployCofacePlugin(serviceClient);
@@ -73,6 +136,9 @@ namespace DeployTool
                         break;
                     case "bpp":
                         DeployPlugin.DeployBppPlugin(serviceClient);
+                        break;
+                    case "main-assembly":
+                        DeployPlugin.UpdateMainSalesAssembly(serviceClient);
                         break;
                     case "probe":
                         ProbeBppAssembly.Probe(serviceClient);
@@ -102,8 +168,26 @@ namespace DeployTool
                     case "publish-webresource":
                         PublishWebResourceOnly(serviceClient);
                         break;
+                    case "query-user-org":
+                        QueryUserAccount.Query(serviceClient);
+                        break;
+                    case "fill-user-org":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run fill-user-org <mcs_orgid GUID>");
+                            return;
+                        }
+                        QueryUserAccount.Fill(serviceClient, args[1]);
+                        break;
+                    case "setup-ltc-overdue":
+                        QueryUserAccount.SetupLtcOverdue(serviceClient);
+                        break;
+                    case "setup-ltc-blacklist":
+                        QueryUserAccount.SetupLtcBlacklist(serviceClient);
+                        break;
                     case "all":
                         UpdateWebResource(serviceClient);
+                        UpdateScoringCardWebResource(serviceClient);
                         UpdateProfileWebResources(serviceClient);
                         DeployCofaceHtmlWebResource(serviceClient);
                         new CofaceCustomActionDeployer(serviceClient).Deploy();
@@ -139,8 +223,11 @@ namespace DeployTool
             Console.WriteLine();
             Console.WriteLine("可用命令:");
             Console.WriteLine("  webresource          更新 mcs_credit_record.js WebResource");
+            Console.WriteLine("  scoringcard-wr       更新 mcs_credit_scoringcard.js WebResource");
+            Console.WriteLine("  tradestpayterm-wr    更新 mcs_trade_stpayterm.js WebResource");
             Console.WriteLine("  profile              更新信用画像 WebResource");
             Console.WriteLine("  appactions           部署 Modern Command Bar 按钮");
+            Console.WriteLine("  tradestpayterm       部署 TradeStPayTerm Plugin（自动编号 + 保存校验）");
             Console.WriteLine("  coface               部署 CofaceDataSyncPlugin");
             Console.WriteLine("  coface-search        创建 Custom Action 并部署 CofaceSearchCompanyPlugin");
             Console.WriteLine("  coface-config        部署 CofaceCountryConfig 及内部评分项目标记");
@@ -153,6 +240,10 @@ namespace DeployTool
             Console.WriteLine("  formlayout           更新表单布局（添加BPP字段）");
             Console.WriteLine("  publish              发布 mcs_credit_record 实体");
             Console.WriteLine("  publish-webresource  发布画像 WebResource");
+            Console.WriteLine("  query-user-org       查询当前用户（邱正卫）的组织/事业部信息");
+            Console.WriteLine("  fill-user-org <guid> 为当前用户（邱正卫）补 mcs_useraccount.mcs_orgid");
+            Console.WriteLine("  setup-ltc-overdue    为 LTC客户-1 设置逾期数据（触发场景 3）");
+            Console.WriteLine("  setup-ltc-blacklist  为 LTC客户-1 设置黑名单并清除逾期数据（触发场景 4）");
             Console.WriteLine("  all                  执行上述所有操作");
             Console.WriteLine();
             Console.WriteLine("示例:");
@@ -190,6 +281,69 @@ namespace DeployTool
 
             service.Update(webResource);
             Console.WriteLine($"  ✅ WebResource已更新");
+
+            // 更新后使用通用发布服务发布单个 WebResource
+            Console.WriteLine($">>> 发布 WebResource: mcs_credit_record.js...");
+            new WebResourceService(service).PublishWebResources("mcs_credit_record.js");
+            Console.WriteLine($"  ✅ mcs_credit_record.js 发布成功");
+        }
+
+        static void UpdateScoringCardWebResource(ServiceClient service)
+        {
+            Console.WriteLine(">>> 更新 WebResource: mcs_credit_scoringcard.js");
+
+            var jsPath = "/Users/peterqiu/Work/AIWorkSpace/SanYi/Code/Customizations/WebResources/JS/mcs_credit_scoringcard.js";
+            var jsContent = File.ReadAllText(jsPath);
+
+            var query = new QueryExpression("webresource")
+            {
+                ColumnSet = new ColumnSet("webresourceid", "name", "content"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("name", ConditionOperator.Equal, "mcs_credit_scoringcard.js") }
+                }
+            };
+
+            var results = service.RetrieveMultiple(query);
+            if (results.Entities.Count == 0)
+            {
+                Console.WriteLine("  未找到Web资源，跳过");
+                return;
+            }
+
+            var webResource = results.Entities[0];
+            var bytes = Encoding.UTF8.GetBytes(jsContent);
+            webResource["content"] = Convert.ToBase64String(bytes);
+
+            service.Update(webResource);
+            Console.WriteLine($"  ✅ WebResource已更新");
+        }
+
+        static void UpdateTradeStPayTermWebResource(ServiceClient service)
+        {
+            Console.WriteLine(">>> 更新 WebResource: mcs_trade_stpayterm.js");
+
+            var jsPath = "/Users/peterqiu/Work/AIWorkSpace/SanYi/Code/Customizations/WebResources/JS/mcs_trade_stpayterm.js";
+            var webResourceService = new WebResourceService(service);
+
+            try
+            {
+                webResourceService.UpdateFromFile("mcs_trade_stpayterm.js", jsPath);
+                Console.WriteLine($"  ✅ WebResource已更新");
+
+                // 更新后使用通用发布服务发布单个 WebResource
+                Console.WriteLine($">>> 发布 WebResource: mcs_trade_stpayterm.js...");
+                webResourceService.PublishWebResources("mcs_trade_stpayterm.js");
+                Console.WriteLine($"  ✅ mcs_trade_stpayterm.js 发布成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ❌ 更新或发布失败: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"    内部异常: {ex.InnerException.Message}");
+                }
+            }
         }
 
         static void DeployCofaceHtmlWebResource(ServiceClient service)
@@ -228,11 +382,7 @@ namespace DeployTool
             Console.WriteLine(">>> 发布实体: mcs_credit_record...");
             try
             {
-                var request = new PublishXmlRequest
-                {
-                    ParameterXml = @"<importexportxml><entities><entity>mcs_credit_record</entity></entities><nodes/><securityroles/><settings/><workflows/></importexportxml>"
-                };
-                service.Execute(request);
+                new D365ToolCommon.Publishing.PublishingService(service).PublishEntities("mcs_credit_record");
                 Console.WriteLine("  ✅ 实体发布成功");
             }
             catch (Exception ex)
@@ -245,29 +395,32 @@ namespace DeployTool
         static void PublishWebResourceOnly(ServiceClient service)
         {
             Console.WriteLine(">>> 尝试只发布WebResource...");
+            var webResourceService = new WebResourceService(service);
+            var resourceNames = new[]
+            {
+                "mcs_credit_profile.html",
+                "mcs_credit_wheel.html",
+                "mcs_credit_record.js",
+                "mcs_credit_scoringcard.js",
+                "mcs_coface_company_search.html",
+                "mcs_trade_stpayterm.js"
+            };
+
             try
             {
-                // 先尝试发布所有相关 WebResource
-                var request1 = new PublishXmlRequest
-                {
-                    ParameterXml = @"<importexportxml><webresources><webresource>mcs_credit_profile.html</webresource><webresource>mcs_credit_wheel.html</webresource><webresource>mcs_credit_record.js</webresource><webresource>mcs_coface_company_search.html</webresource></webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>"
-                };
-                service.Execute(request1);
+                // 使用通用 WebResource 发布服务
+                webResourceService.PublishWebResources(resourceNames);
                 Console.WriteLine("  ✅ WebResource 发布成功");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"  ❌ 画像 WebResource 发布失败: {ex.Message}");
-                
+                Console.WriteLine($"  ❌ WebResource 发布失败: {ex.Message}");
+
                 // 降级：尝试只发布已有的 JS WebResource，验证发布机制本身是否正常
                 try
                 {
                     Console.WriteLine(">>> 降级尝试：只发布 JS WebResource...");
-                    var request2 = new PublishXmlRequest
-                    {
-                        ParameterXml = @"<importexportxml><webresources><webresource>mcs_credit_record.js</webresource></webresources><nodes/><securityroles/><settings/><workflows/></importexportxml>"
-                    };
-                    service.Execute(request2);
+                    webResourceService.PublishWebResources("mcs_trade_stpayterm.js");
                     Console.WriteLine("  ✅ JS WebResource 发布成功（HTML 可能需手动发布）");
                 }
                 catch (Exception ex2)

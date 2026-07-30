@@ -339,7 +339,6 @@
   <tab name="Attachments" id="{0b150750-3a87-4bbd-9f3b-38491b56fa56}" IsUserDefined="1" locklevel="0" showlabel="true"><labels><label description="附件" languagecode="2052" /><label description="Attachments" languagecode="1033" /></labels><columns><column width="100%"><sections><section name="tab_attachments_section_1" id="{9fe05013-9895-4844-a037-707fa580e5f7}" IsUserDefined="1" locklevel="0" showlabel="false" showbar="false" layout="varwidth" celllabelalignment="Left" celllabelposition="Left" columns="1" labelwidth="115"><labels><label description="附件上传" languagecode="2052" /><label description="Attachment Upload" languagecode="1033" /></labels><rows><row><cell locklevel="0" id="{4e6eb809-dce3-4978-b602-a20a68f4c94f}" rowspan="12" colspan="1" auto="false" showlabel="false"><labels><label description="Uploader" languagecode="1033" /></labels><control id="mcs_credit_record_uploader" classid="{9FDF5F91-88E1-47cd-9CAE-4C7186A64CBD}"><parameters><Url>mcs_/CommonCore/Html/Uploader.html</Url><PassParameters>true</PassParameters></parameters></control></cell></row></rows></section></sections></column></columns></tab></tabs>
   <formLibraries>
     <Library name="mcs_credit_record.js" libraryUniqueId="{b69f5d4b-fb11-496f-834f-f9294504431a}" />
-    <Library name="mcs_credit_record.js" libraryUniqueId="{38a083e7-6faf-4aff-9bce-5c44200a4f6e}" />
   </formLibraries>
   <events>
     <event name="onload" application="false" active="true">
@@ -350,16 +349,6 @@
     <event name="onsave" application="false" active="true">
       <Handlers>
         <Handler handlerUniqueId="{60579dff-769c-4d03-a596-686693e2c9af}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onSave" enabled="true" parameters="" passExecutionContext="true" />
-      </Handlers>
-    </event>
-    <event name="onload" application="false" active="true">
-      <Handlers>
-        <Handler handlerUniqueId="{e5ece3d0-200b-4af0-960b-853df2bfcc26}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onLoad" enabled="true" parameters="" passExecutionContext="true" />
-      </Handlers>
-    </event>
-    <event name="onsave" application="false" active="true">
-      <Handlers>
-        <Handler handlerUniqueId="{d7f58236-8cad-46b9-9c42-ee128d25e89f}" libraryName="mcs_credit_record.js" functionName="CreditRecordForm.onSave" enabled="true" parameters="" passExecutionContext="true" />
       </Handlers>
     </event>
   </events>

@@ -1,0 +1,5 @@
+{
+  "CreditScoringCard_CloneNew": "Clone New",
+  "CreditScoringCard_CloneTooltip": "Clone the current scoring card tier record, retaining scoring item information, with editable tier range and score.",
+  "CreditScoringCard_AmountCurrencyHint": "For amount-based quantitative indicators, scoring criteria are uniformly configured in USD, with the unit being yuan (1 yuan = 1 USD). During scoring calculation, the system will automatically convert the local currency returned by Coface to USD using the annual budget exchange rate before comparison."
+}

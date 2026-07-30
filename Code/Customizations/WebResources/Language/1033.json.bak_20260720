@@ -1,0 +1,6 @@
+{
+  "TradePtType_SaveSuccess": "Saved successfully.",
+  "TradePtType_ConfirmDelete": "Are you sure you want to delete this product category?",
+  "TradePtType_DuplicateCode": "Product category code already exists.",
+  "TradePtType_InvalidCode": "Product category code is required."
+}

@@ -1,10 +1,13 @@
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using SanyD365.Plugins.CofaceIntegration;
 using SanyD365.Plugins.CofaceIntegration.Api;
 using SanyD365.Plugins.CofaceIntegration.Parser;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 
 namespace SanyD365.Plugins.CofaceIntegration.Plugin
@@ -27,6 +30,9 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             IPluginExecutionContext context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
             IOrganizationServiceFactory factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
+            // 系统上下文：Coface 基础配置数据读取（NACE 行业映射/财务指标对照/标准汇率）
+            // 不依赖操作员权限，这 3 类基础数据实体计划对业务用户收回 Read 权限
+            IOrganizationService systemService = factory.CreateOrganizationService(null);
             ITracingService tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
             tracer.Trace("===== CofaceDataSyncPlugin 开始执行 =====");
@@ -73,7 +79,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             {
                 // 获取完整记录信息
                 Entity creditRecord = service.Retrieve("mcs_credit_record", target.Id,
-                    new ColumnSet("mcs_scoreid", "mcs_accountid", "mcs_custnameen", "mcs_countrycode", "mcs_cofaceid"));
+                    new ColumnSet("mcs_scoreid", "mcs_accountid", "mcs_custnameen", "mcs_countrycode", "mcs_cofaceid", "ownerid"));
 
                 string scoreId = creditRecord.GetAttributeValue<string>("mcs_scoreid");
                 string cofaceId = creditRecord.GetAttributeValue<string>("mcs_cofaceid");
@@ -94,9 +100,11 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 }
 
                 // 初始化API服务
+                // Parser 内部仅读取基础配置数据（financial_indicator/nace_mapping/transactioncurrency），
+                // 统一使用系统上下文，不依赖操作员对基础数据实体的权限
                 var apiService = new CofaceApiService(service, tracer);
-                var urbaParser = new Urba360Parser(tracer, service, countryCode);
-                var reportParser = new FullReportParser(tracer, service);
+                var urbaParser = new Urba360Parser(tracer, systemService, countryCode);
+                var reportParser = new FullReportParser(tracer, systemService);
 
                 // ========== 步骤1: 获取URBA360数据 ==========
                 tracer.Trace("步骤1: 获取URBA360数据");
@@ -111,7 +119,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 string publicationId = null;
                 string reportJson = null;
                 ReportOrderStatus reportStatus;
-                var reportData = GetFullReportData(apiService, reportParser, cofaceId, countryCode, tracer, out reportOrderId, out publicationId, out reportJson, out reportStatus);
+                var reportData = GetFullReportData(service, apiService, reportParser, cofaceId, countryCode, tracer, out reportOrderId, out publicationId, out reportJson, out reportStatus);
 
                 // 检查订单状态，如果有订单未就绪，记录警告信息
                 string statusWarning = "";
@@ -125,11 +133,17 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 else if (reportStatus == ReportOrderStatus.NotReady)
                     statusWarning += "Report:订单未就绪;";
 
+                // ========== 步骤2.5: 获取内部历史交易数据 ==========
+                tracer.Trace("步骤2.5: 获取内部历史交易数据");
+                var internalData = GetInternalTransactionData(service, systemService, tracer, creditRecord);
+                tracer.Trace($"内部历史交易指标: {internalData.Count}个");
+
                 // ========== 步骤3: 合并数据并写入标签表 ==========
                 tracer.Trace("步骤3: 写入客户信用标签表");
                 var allData = new Dictionary<string, object>();
                 foreach (var kvp in urbaData) allData[kvp.Key] = kvp.Value;
                 foreach (var kvp in reportData) allData[kvp.Key] = kvp.Value;
+                foreach (var kvp in internalData) allData[kvp.Key] = kvp.Value;
 
                 // 先查询评分卡配置（读操作，不会触发事务问题）
                 var scoringCardItems = GetScoringCardItems(service, tracer, creditRecord);
@@ -139,6 +153,28 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
 
                 // 反写外部评级到客户主数据
                 UpdateCustomerMasterDataExternalRate(service, tracer, creditRecord, allData);
+
+                // ========== 步骤3.5: 下载并保存 Coface Report PDF 附件 ==========
+                tracer.Trace("步骤3.5: 保存 Coface Report 附件");
+                string attachmentMsg = "";
+                try
+                {
+                    if (reportStatus == ReportOrderStatus.Ready && !string.IsNullOrEmpty(publicationId))
+                    {
+                        SaveCofaceReportAttachment(service, tracer, apiService, creditRecord, publicationId, scoreId);
+                        attachmentMsg = "Report附件已保存";
+                    }
+                    else
+                    {
+                        attachmentMsg = $"Report附件未保存(状态:{reportStatus})";
+                    }
+                }
+                catch (Exception attachEx)
+                {
+                    attachmentMsg = $"Report附件保存失败:{attachEx.Message}";
+                    tracer.Trace(attachmentMsg);
+                    // 不中断主流程，错误信息记录到评估记录 API 消息中
+                }
 
                 // ========== 步骤4: 一次性更新评估记录（合并所有字段更新） ==========
                 tracer.Trace("步骤4: 记录数据集成结果");
@@ -175,11 +211,15 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 updateRecord["mcs_api_status"] = "SUCCESS";
                 updateRecord["mcs_api_name"] = "CofaceDataSync";
                 
-                // 构建API消息：包含订单状态警告
+                // 构建API消息：包含订单状态警告和附件状态
                 string apiMsg = $"URBA360+Full Report数据集成完成，共{allData.Count}个指标，标签{scoringCardItems.Count}项";
                 if (!string.IsNullOrEmpty(statusWarning))
                 {
                     apiMsg += $" [警告:{statusWarning}]";
+                }
+                if (!string.IsNullOrEmpty(attachmentMsg))
+                {
+                    apiMsg += $" [{attachmentMsg}]";
                 }
                 updateRecord["mcs_api_msg"] = apiMsg;
 
@@ -457,6 +497,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
         /// 获取Full Report数据
         /// </summary>
         private Dictionary<string, object> GetFullReportData(
+            IOrganizationService service,
             CofaceApiService apiService,
             FullReportParser parser,
             string cofaceId,
@@ -475,9 +516,14 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
 
             try
             {
+                // 根据国家选择对应的 Report 产品
+                var countryConfig = CofaceCountryConfigHelper.GetConfig(service);
+                var reportProduct = countryConfig.GetReportProduct(countryCode);
+                tracer.Trace($"国家{countryCode}对应的Report产品: slug={reportProduct.Slug}, productCode={reportProduct.ProductCode ?? "(null)"}");
+
                 // 1. 查询Report订单
                 tracer.Trace("查询Full Report订单...");
-                using (var ordersDoc = apiService.GetReportOrders(cofaceId, countryCode))
+                using (var ordersDoc = apiService.GetReportOrders(cofaceId, countryCode, reportProduct.Slug, reportProduct.ProductCode))
                 {
                     // 保存订单查询的原始JSON
                     try
@@ -490,7 +536,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                         tracer.Trace($"获取Report订单查询JSON失败: {jsonEx.Message}");
                     }
                     
-                    var orderInfo = ExtractReportOrderInfo(ordersDoc, tracer);
+                    var orderInfo = ExtractReportOrderInfo(ordersDoc, tracer, reportProduct.Slug, reportProduct.ProductCode);
                     reportOrderId = orderInfo.OrderId;
                     publicationId = orderInfo.PublicationId;
                     orderStatus = orderInfo.Status;
@@ -551,9 +597,243 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
         }
 
         /// <summary>
-        /// 从订单列表中提取Full Report订单信息（包含状态判断）
+        /// 下载并保存 Coface Full Report PDF 到 mcs_customer_file
+        /// 文件类型固定为 2（客户资信报告），同时关联 account 和 mcs_credit_record
+        /// 通过平台通用上传 API 写入 Blob，不再直接保存 Base64 到 mcs_filebyte，避免 Memo 字段 4000 字符限制
         /// </summary>
-        private ReportOrderInfo ExtractReportOrderInfo(JsonDocument ordersDoc, ITracingService tracer)
+        private void SaveCofaceReportAttachment(
+            IOrganizationService service,
+            ITracingService tracer,
+            CofaceApiService apiService,
+            Entity creditRecord,
+            string publicationId,
+            string scoreId)
+        {
+            tracer.Trace($"SaveCofaceReportAttachment: publicationId={publicationId}, scoreId={scoreId}");
+
+            // 1. 准备附件记录基础信息
+            var accountRef = creditRecord.GetAttributeValue<EntityReference>("mcs_accountid");
+            if (accountRef == null)
+            {
+                throw new InvalidPluginExecutionException("评估记录未关联客户，无法保存 Coface Report 附件");
+            }
+
+            string fileName = $"Coface_Report_{scoreId}_{DateTime.Now:yyyyMMdd}.pdf";
+
+            // 2. 防重复：同一评估记录 + 同一文件名 已存在则不重复创建
+            var existingQuery = new QueryExpression("mcs_customer_file")
+            {
+                ColumnSet = new ColumnSet("mcs_customer_fileid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("mcs_credit_recordid", ConditionOperator.Equal, creditRecord.Id),
+                        new ConditionExpression("mcs_filename", ConditionOperator.Equal, fileName)
+                    }
+                },
+                TopCount = 1
+            };
+
+            var existing = service.RetrieveMultiple(existingQuery);
+            if (existing.Entities.Count > 0)
+            {
+                tracer.Trace("Coface Report 附件已存在，跳过创建");
+                return;
+            }
+
+            // 3. 下载 PDF
+            byte[] pdfBytes = apiService.GetReportPdf(publicationId);
+            if (pdfBytes == null || pdfBytes.Length == 0)
+            {
+                throw new InvalidPluginExecutionException("Coface PDF 下载结果为空");
+            }
+
+            tracer.Trace($"Coface PDF 下载完成: {pdfBytes.Length} bytes");
+
+            // 4. 通过平台通用上传 API 上传到 Blob
+            string uploadId = UploadFileToMcsPlatform(service, tracer, creditRecord.Id, fileName, pdfBytes);
+
+            // 5. 创建 mcs_customer_file 记录（不保存 Base64 到 mcs_filebyte，避免 Memo 字段长度限制）
+            var attachment = new Entity("mcs_customer_file");
+            attachment["mcs_accountid"] = accountRef;
+            attachment["mcs_credit_recordid"] = new EntityReference("mcs_credit_record", creditRecord.Id);
+            attachment["mcs_filename"] = fileName;
+            attachment["mcs_filetype"] = new OptionSetValue(2); // 2 = 客户资信报告
+            attachment["mcs_api_fileid"] = uploadId;
+            attachment["mcs_api_status"] = "SUCCESS";
+            attachment["mcs_api_msg"] = $"Coface Full Report PDF uploaded via platform API, publicationId={publicationId}, originalSize={pdfBytes.Length} bytes, uploadId={uploadId}";
+
+            var fileId = service.Create(attachment);
+            tracer.Trace($"Coface Report 附件创建成功: ID={fileId}, filename={fileName}, uploadId={uploadId}");
+        }
+
+        /// <summary>
+        /// 通过平台通用上传 Custom API 上传文件到 Blob
+        /// 流程：mcs_InitUploadFile -> HTTP PUT -> mcs_CommitUploadFile
+        /// </summary>
+        private string UploadFileToMcsPlatform(
+            IOrganizationService service,
+            ITracingService tracer,
+            Guid creditRecordId,
+            string fileName,
+            byte[] fileBytes)
+        {
+            // 4.1 InitUploadFile
+            var initRequest = new OrganizationRequest("mcs_InitUploadFile");
+            initRequest["EntityName"] = "mcs_credit_record";
+            initRequest["EntityID"] = creditRecordId.ToString();
+            initRequest["FileName"] = fileName;
+            initRequest["Type"] = "002"; // 客户资信报告
+
+            var initResponse = service.Execute(initRequest);
+            string initResult = initResponse.Results.ContainsKey("Result")
+                ? initResponse.Results["Result"]?.ToString()
+                : null;
+
+            if (string.IsNullOrEmpty(initResult))
+            {
+                throw new InvalidPluginExecutionException("mcs_InitUploadFile 未返回 Result");
+            }
+
+            string uploadId = ParseUploadIdFromInitResult(initResult);
+            string uploadUrl = ExtractFileUrlFromInitResult(initResult);
+
+            if (string.IsNullOrEmpty(uploadId))
+            {
+                throw new InvalidPluginExecutionException($"未能从 mcs_InitUploadFile 结果解析上传 ID: {initResult}");
+            }
+            if (string.IsNullOrEmpty(uploadUrl))
+            {
+                throw new InvalidPluginExecutionException($"未能从 mcs_InitUploadFile 结果解析上传 URL: {initResult}");
+            }
+
+            tracer.Trace($"mcs_InitUploadFile 成功: uploadId={uploadId}, uploadUrl={uploadUrl}");
+
+            // 4.2 HTTP PUT 上传文件内容到 Blob
+            UploadBytesToBlobUrl(tracer, uploadUrl, fileBytes);
+
+            // 4.3 CommitUploadFile
+            var commitRequest = new OrganizationRequest("mcs_CommitUploadFile");
+            commitRequest["EntityName"] = "mcs_credit_record";
+            commitRequest["EntityID"] = creditRecordId.ToString();
+            commitRequest["ID"] = uploadId;
+
+            service.Execute(commitRequest);
+            tracer.Trace($"mcs_CommitUploadFile 成功: uploadId={uploadId}");
+
+            return uploadId;
+        }
+
+        /// <summary>
+        /// 通过 HTTP PUT 上传字节数组到 Blob URL
+        /// </summary>
+        private void UploadBytesToBlobUrl(ITracingService tracer, string uploadUrl, byte[] fileBytes)
+        {
+            // URL 通常已包含 comp=appendblock；若未包含再追加
+            string appendUrl = uploadUrl.IndexOf("comp=appendblock", StringComparison.OrdinalIgnoreCase) >= 0
+                ? uploadUrl
+                : (uploadUrl.Contains("?") ? $"{uploadUrl}&comp=appendblock" : $"{uploadUrl}?comp=appendblock");
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(appendUrl);
+            request.Method = "PUT";
+            request.ContentType = "application/pdf";
+            request.Headers.Add("x-ms-blob-type", "AppendBlob");
+            request.ContentLength = fileBytes.Length;
+            request.Timeout = 120000; // Blob 上传 120 秒超时
+
+            using (Stream requestStream = request.GetRequestStream())
+            {
+                requestStream.Write(fileBytes, 0, fileBytes.Length);
+            }
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                tracer.Trace($"Blob 上传响应: Status={response.StatusCode}, Length={response.ContentLength}");
+                if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new InvalidPluginExecutionException($"Blob 上传失败: Status={response.StatusCode}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 从 mcs_InitUploadFile 返回结果中解析上传 ID
+        /// 兼容纯 GUID 或 JSON 格式
+        /// </summary>
+        private string ParseUploadIdFromInitResult(string result)
+        {
+            if (string.IsNullOrEmpty(result))
+            {
+                return null;
+            }
+
+            // 直接是 GUID
+            if (Guid.TryParse(result, out _))
+            {
+                return result;
+            }
+
+            // 尝试 JSON 解析
+            try
+            {
+                using (var doc = JsonDocument.Parse(result))
+                {
+                    var root = doc.RootElement;
+                    foreach (var propName in new[] { "id", "ID", "Id", "fileId", "UploadId", "uploadId" })
+                    {
+                        if (root.TryGetProperty(propName, out var prop) && prop.ValueKind == JsonValueKind.String)
+                        {
+                            string value = prop.GetString();
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 不是 JSON，按无法解析处理
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 从 mcs_InitUploadFile 返回结果中解析 Blob 上传 URL
+        /// </summary>
+        private string ExtractFileUrlFromInitResult(string result)
+        {
+            if (string.IsNullOrEmpty(result))
+            {
+                return null;
+            }
+
+            try
+            {
+                using (var doc = JsonDocument.Parse(result))
+                {
+                    if (doc.RootElement.TryGetProperty("FileUrl", out var prop) && prop.ValueKind == JsonValueKind.String)
+                    {
+                        return prop.GetString();
+                    }
+                }
+            }
+            catch
+            {
+                // 不是 JSON
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 从订单列表中提取Full Report订单信息（包含状态判断）
+        /// 只匹配指定 reportSlug 和 customReportId 的 publication
+        /// </summary>
+        private ReportOrderInfo ExtractReportOrderInfo(JsonDocument ordersDoc, ITracingService tracer, string expectedSlug, string expectedProductCode)
         {
             var result = new ReportOrderInfo { Status = ReportOrderStatus.NotFound };
 
@@ -587,12 +867,15 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     return result;
                 }
 
+                string normalizedExpectedSlug = expectedSlug?.ToUpperInvariant();
+                string normalizedExpectedProductCode = expectedProductCode?.ToUpperInvariant();
+
                 // 检查每个订单的状态
                 foreach (var order in orders)
                 {
                     string statusStr = null;
                     string orderId = null;
-                    string pubId = null;
+                    string matchedPubId = null;
 
                     if (order.TryGetProperty("status", out var status))
                         statusStr = status.GetString();
@@ -603,32 +886,75 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                         orderId = idProp.GetString();
                     }
 
-                    // 从publications数组中提取Publication ID
+                    // 从publications数组中匹配符合 expectedSlug + expectedProductCode 的 Publication
                     if (order.TryGetProperty("publications", out var publications))
                     {
                         foreach (var pub in publications.EnumerateArray())
                         {
-                            if (pub.TryGetProperty("id", out var pubIdProp))
+                            string pubSlug = null;
+                            if (pub.TryGetProperty("reportSlug", out var slugProp))
+                                pubSlug = slugProp.GetString();
+
+                            string pubProductCode = null;
+                            if (pub.TryGetProperty("customReportId", out var codeProp))
+                                pubProductCode = codeProp.ToString();
+
+                            // 匹配规则：slug 必须一致；如果期望 productCode 不为空，则 productCode 也必须一致
+                            bool slugMatch = !string.IsNullOrEmpty(pubSlug) &&
+                                             pubSlug.ToUpperInvariant() == normalizedExpectedSlug;
+                            bool codeMatch = string.IsNullOrEmpty(normalizedExpectedProductCode) ||
+                                             (!string.IsNullOrEmpty(pubProductCode) &&
+                                              pubProductCode.ToUpperInvariant() == normalizedExpectedProductCode);
+
+                            if (slugMatch && codeMatch)
                             {
-                                pubId = pubIdProp.GetString();
-                                break;
+                                if (pub.TryGetProperty("id", out var pubIdProp))
+                                {
+                                    matchedPubId = pubIdProp.GetString();
+                                    tracer.Trace($"匹配到Publication: slug={pubSlug}, customReportId={pubProductCode}, pubId={matchedPubId}");
+                                    break;
+                                }
                             }
                         }
                     }
 
-                    // 如果publications没有id，尝试直接用order的id作为pubId
-                    if (string.IsNullOrEmpty(pubId) && !string.IsNullOrEmpty(orderId))
+                    // 兼容旧格式：如果订单本身没有 publications，但 reportSlug / customReportId 在 order 层级
+                    if (string.IsNullOrEmpty(matchedPubId))
                     {
-                        pubId = orderId;
+                        string orderSlug = null;
+                        string orderProductCode = null;
+                        if (order.TryGetProperty("reportSlug", out var orderSlugProp))
+                            orderSlug = orderSlugProp.GetString();
+                        if (order.TryGetProperty("customReportId", out var orderCodeProp))
+                            orderProductCode = orderCodeProp.ToString();
+
+                        bool slugMatch = !string.IsNullOrEmpty(orderSlug) &&
+                                         orderSlug.ToUpperInvariant() == normalizedExpectedSlug;
+                        bool codeMatch = string.IsNullOrEmpty(normalizedExpectedProductCode) ||
+                                         (!string.IsNullOrEmpty(orderProductCode) &&
+                                          orderProductCode.ToUpperInvariant() == normalizedExpectedProductCode);
+
+                        if (slugMatch && codeMatch && !string.IsNullOrEmpty(orderId))
+                        {
+                            matchedPubId = orderId;
+                            tracer.Trace($"订单层级匹配到产品: slug={orderSlug}, customReportId={orderProductCode}, pubId={matchedPubId}");
+                        }
                     }
 
-                    tracer.Trace($"检查订单: orderId={orderId}, pubId={pubId}, status={statusStr}");
+                    // 如果都没匹配到，跳过该订单
+                    if (string.IsNullOrEmpty(matchedPubId))
+                    {
+                        tracer.Trace($"订单 {orderId} 未匹配到指定产品，跳过");
+                        continue;
+                    }
+
+                    tracer.Trace($"检查订单: orderId={orderId}, pubId={matchedPubId}, status={statusStr}");
 
                     // 状态为ready或delivered → 订单就绪
                     if (statusStr == "ready" || statusStr == "delivered")
                     {
                         result.OrderId = orderId;
-                        result.PublicationId = pubId;
+                        result.PublicationId = matchedPubId;
                         result.Status = ReportOrderStatus.Ready;
                         result.StatusDetail = statusStr;
                         return result;
@@ -638,7 +964,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     {
                         tracer.Trace($"订单status为空，按兼容逻辑视为就绪");
                         result.OrderId = orderId;
-                        result.PublicationId = pubId;
+                        result.PublicationId = matchedPubId;
                         result.Status = ReportOrderStatus.Ready;
                         result.StatusDetail = "empty_status";
                         return result;
@@ -647,16 +973,20 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     else if (!string.IsNullOrEmpty(orderId))
                     {
                         result.OrderId = orderId;
-                        result.PublicationId = pubId;
+                        result.PublicationId = matchedPubId;
                         result.Status = ReportOrderStatus.NotReady;
                         result.StatusDetail = statusStr ?? "unknown";
                     }
                 }
 
-                // 有订单但都不是就绪状态
+                // 有订单但都不是就绪状态，或没有匹配产品的订单
                 if (result.Status == ReportOrderStatus.NotReady)
                 {
                     tracer.Trace($"找到{orders.Count}个订单，但状态均未就绪");
+                }
+                else
+                {
+                    tracer.Trace($"找到{orders.Count}个订单，但没有匹配指定产品的就绪订单");
                 }
             }
             catch (Exception ex)
@@ -665,6 +995,202 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             }
 
             return result;
+        }
+
+        #endregion
+
+        #region 内部历史交易数据获取
+
+        /// <summary>
+        /// 获取CRM内部历史交易数据
+        /// - SalesAmount: 汇总销售订单 totalamount_base（基础货币，已折算为USD）
+        /// - ARAmount: 最近24个月内 mcs_outstanding 逾期记录的最大逾期金额（人民币→USD）
+        /// - ARAge: 最近24个月内 mcs_outstanding 逾期记录的最大逾期天数
+        /// </summary>
+        private Dictionary<string, object> GetInternalTransactionData(
+            IOrganizationService service,
+            IOrganizationService systemService,
+            ITracingService tracer,
+            Entity creditRecord)
+        {
+            var result = new Dictionary<string, object>();
+
+            try
+            {
+                // 获取客户ID
+                Guid? accountId = null;
+                if (creditRecord.Contains("mcs_accountid") && creditRecord["mcs_accountid"] is EntityReference accountRef)
+                {
+                    accountId = accountRef.Id;
+                }
+
+                if (!accountId.HasValue)
+                {
+                    tracer.Trace("评估记录未关联客户，跳过内部历史交易数据获取");
+                    return result;
+                }
+
+                // SalesAmount: 销售订单总金额（基础货币USD）
+                decimal salesAmount = GetSalesAmount(service, tracer, accountId.Value);
+                if (salesAmount > 0)
+                {
+                    result["SalesAmount"] = salesAmount;
+                    tracer.Trace($"SalesAmount={salesAmount:F2}");
+                }
+                else
+                {
+                    tracer.Trace("SalesAmount=0或无效，不写入");
+                }
+
+                // ARAmount & ARAge: 从 mcs_outstanding 获取
+                var (arAmount, arAge) = GetOutstandingData(service, systemService, tracer, accountId.Value);
+                if (arAmount > 0)
+                {
+                    result["ARAmount"] = arAmount;
+                    tracer.Trace($"ARAmount={arAmount:F2}");
+                }
+                else
+                {
+                    tracer.Trace("ARAmount=0或无效，不写入");
+                }
+
+                if (arAge > 0)
+                {
+                    result["ARAge"] = arAge;
+                    tracer.Trace($"ARAge={arAge}");
+                }
+                else
+                {
+                    tracer.Trace("ARAge=0或无效，不写入");
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"获取内部历史交易数据异常: {ex.Message}");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 汇总客户销售订单总金额（按基础货币，组织基础货币为USD）
+        /// </summary>
+        private decimal GetSalesAmount(IOrganizationService service, ITracingService tracer, Guid accountId)
+        {
+            try
+            {
+                // 统计非取消状态的销售订单
+                var query = new QueryExpression("salesorder")
+                {
+                    ColumnSet = new ColumnSet("totalamount_base"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("customerid", ConditionOperator.Equal, accountId),
+                            new ConditionExpression("statecode", ConditionOperator.NotEqual, 2) // 排除Canceled
+                        }
+                    }
+                };
+
+                var orders = service.RetrieveMultiple(query);
+                decimal total = 0;
+                foreach (var order in orders.Entities)
+                {
+                    var amount = order.GetAttributeValue<Money>("totalamount_base")?.Value ?? 0;
+                    total += amount;
+                }
+
+                tracer.Trace($"销售订单汇总: 客户={accountId}, 订单数={orders.Entities.Count}, 总金额(USD)={total:F2}");
+                return total;
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"汇总销售订单金额异常: {ex.Message}");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 从 mcs_outstanding 获取最近24个月内的最大逾期金额（USD）和最大逾期天数
+        /// </summary>
+        private (decimal arAmount, int arAge) GetOutstandingData(IOrganizationService service, IOrganizationService systemService, ITracingService tracer, Guid accountId)
+        {
+            decimal maxOverdueAmount = 0;
+            int maxOverdueDays = 0;
+
+            try
+            {
+                var cutoffDate = DateTime.UtcNow.AddMonths(-24);
+
+                var query = new QueryExpression("mcs_outstanding")
+                {
+                    ColumnSet = new ColumnSet("mcs_overdueamount", "mcs_overdurationdays", "createdon", "mcs_createon"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_account", ConditionOperator.Equal, accountId),
+                            new ConditionExpression("mcs_overdue", ConditionOperator.Equal, true)
+                        }
+                    }
+                };
+
+                var records = service.RetrieveMultiple(query);
+                int counted = 0;
+                foreach (var record in records.Entities)
+                {
+                    // 判断生成版本时间：优先 mcs_createon，fallback createdon
+                    DateTime? createdOn = record.GetAttributeValue<DateTime?>("mcs_createon");
+                    if (!createdOn.HasValue)
+                    {
+                        createdOn = record.GetAttributeValue<DateTime?>("createdon");
+                    }
+
+                    if (!createdOn.HasValue || createdOn.Value < cutoffDate)
+                    {
+                        continue;
+                    }
+
+                    counted++;
+                    var overdueAmount = record.GetAttributeValue<decimal?>("mcs_overdueamount") ?? 0;
+                    var overdueDays = record.GetAttributeValue<int?>("mcs_overdurationdays") ?? 0;
+
+                    if (overdueAmount > maxOverdueAmount)
+                    {
+                        maxOverdueAmount = overdueAmount;
+                    }
+
+                    if (overdueDays > maxOverdueDays)
+                    {
+                        maxOverdueDays = overdueDays;
+                    }
+                }
+
+                tracer.Trace($"mcs_outstanding 逾期统计: 客户={accountId}, 24个月内记录数={counted}, 最大逾期金额(CNY)={maxOverdueAmount:F2}, 最大逾期天数={maxOverdueDays}");
+
+                // 逾期金额人民币 → USD
+                if (maxOverdueAmount > 0)
+                {
+                    // 汇率读取走系统上下文（transactioncurrency 标准汇率）
+                    var rate = CofaceExchangeRateHelper.GetRateToUsd(systemService, tracer, "CNY");
+                    if (rate > 0)
+                    {
+                        maxOverdueAmount = Math.Round(maxOverdueAmount * rate, 2);
+                        tracer.Trace($"逾期金额汇率转换: CNY→USD, rate={rate}, 转换后={maxOverdueAmount:F2}");
+                    }
+                    else
+                    {
+                        tracer.Trace("CNY→USD 汇率获取失败，逾期金额保持人民币");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"获取 mcs_outstanding 逾期数据异常: {ex.Message}");
+            }
+
+            return (maxOverdueAmount, maxOverdueDays);
         }
 
         #endregion
@@ -688,7 +1214,11 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             ["NetProfitMargin"] = "NetProfit",
             ["RegisteredCapital"] = "RegisteredCapital",
             ["EstablishedYear"] = "RegistrationDate",
-            ["LitigationCount"] = "LegalEvents"
+            ["LitigationCount"] = "LegalEvents",
+            // 内部历史交易指标（CRM内部数据）
+            ["SalesAmount"] = "SalesAmount",
+            ["ARAmount"] = "ARAmount",
+            ["ARAge"] = "ARAge"
         };
 
         /// <summary>
@@ -720,16 +1250,47 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
 
                 try
                 {
-                    // 查找Coface数据中是否有该指标的值
-                    object value = GetCofaceValue(itemCode, data);
+                    object value;
+                    EntityReference creditItemValueRef = null;
+
+                    if (itemCode == "BigAccount")
+                    {
+                        // 客户评级：从客户主数据自动取值，不依赖 Coface
+                        var bigAccountValue = GetBigAccountValue(service, tracer, creditRecord);
+                        value = bigAccountValue.ListValue;
+                        creditItemValueRef = bigAccountValue.EnumRef;
+                    }
+                    else
+                    {
+                        // 查找Coface数据中是否有该指标的值
+                        value = GetCofaceValue(itemCode, data);
+                    }
 
                     // 查找或创建标签记录
                     Guid? tagId = FindOrCreateTag(service, tracer, creditRecordId, scoreId, creditRecord, itemCode, dataType);
 
                     if (tagId.HasValue)
                     {
+                        // 评分说明中包含"采用小数两位"的定量指标，取值后除以100并保留两位小数
+                        // 原始数据为百分比形式（如2表示2%），业务上需要小数形式（0.02）参与评分
+                        if (dataType == 1 && !string.IsNullOrEmpty(item.ItemDesc)
+                            && item.ItemDesc.Contains("采用小数两位")
+                            && value != null)
+                        {
+                            try
+                            {
+                                decimal decimalValue = Convert.ToDecimal(value);
+                                value = Math.Round(decimalValue / 100m, 2);
+                                tracer.Trace($"指标 {itemCode} 采用小数两位，原始值 {decimalValue} 转换后 {value}");
+                            }
+                            catch (Exception ex)
+                            {
+                                tracer.Trace($"指标 {itemCode} 小数两位转换失败: {ex.Message}");
+                            }
+                        }
+
                         // 更新指标值
-                        UpdateTagValue(service, tracer, tagId.Value, dataType, value, itemCode);
+                        UpdateTagValue(service, tracer, tagId.Value, dataType, value, itemCode, creditItemValueRef);
                         createdCount++;
                     }
                 }
@@ -838,14 +1399,26 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     string itemCode = "";
                     // 优先从 mcs_itemid 字符串字段获取（安全访问，避免 KeyNotFoundException）
                     itemCode = record.GetAttributeValue<string>("mcs_itemid") ?? "";
+                    string itemDesc = "";
                     if (string.IsNullOrEmpty(itemCode))
                     {
                         // fallback: 从 mcs_credititem Lookup 获取
                         var itemRef = record.GetAttributeValue<EntityReference>("mcs_credititem");
                         if (itemRef != null)
                         {
-                            var item = service.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_credit_itemsno", "mcs_group"));
+                            var item = service.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_credit_itemsno", "mcs_group", "mcs_itemdesc"));
                             itemCode = item?.GetAttributeValue<string>("mcs_credit_itemsno") ?? "";
+                            itemDesc = item?.GetAttributeValue<string>("mcs_itemdesc") ?? "";
+                        }
+                    }
+                    else
+                    {
+                        // 已获取项目编码时，补充读取项目说明
+                        var itemRef = record.GetAttributeValue<EntityReference>("mcs_credititem");
+                        if (itemRef != null)
+                        {
+                            var item = service.Retrieve("mcs_credit_items", itemRef.Id, new ColumnSet("mcs_itemdesc"));
+                            itemDesc = item?.GetAttributeValue<string>("mcs_itemdesc") ?? "";
                         }
                     }
 
@@ -862,6 +1435,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                     {
                         ItemCode = itemCode,
                         ItemName = itemName,
+                        ItemDesc = itemDesc,
                         DataType = tagDataType
                     });
                 }
@@ -994,6 +1568,12 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             var newTag = new Entity("mcs_customer_tag");
             newTag["mcs_credit_record"] = new EntityReference("mcs_credit_record", creditRecordId);
             newTag["mcs_scoreid"] = scoreId;
+            // 标签负责人跟随评估记录负责人，避免业务员看不到由系统/管理员上下文生成的标签
+            if (creditRecord.Contains("ownerid") && creditRecord["ownerid"] is EntityReference recordOwner)
+            {
+                newTag["ownerid"] = recordOwner;
+                tracer.Trace($"设置标签负责人为评估记录负责人: {recordOwner.Id}");
+            }
             // mcs_accountid是Lookup字段，需要获取EntityReference
             if (creditRecord.Contains("mcs_accountid") && creditRecord["mcs_accountid"] is EntityReference accountRef)
             {
@@ -1026,9 +1606,28 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
         /// 根据数据类型写入对应字段：
         /// - 定量(dataType=1): 写入mcs_itemintvalue1(数值)和mcs_itemvalue1(格式化字符串)，不写入mcs_itemtxtvalue1
         /// - 定性(dataType=2): 写入mcs_itemtxtvalue1(中文显示文本)和mcs_itemvalue1(原始值用于计算)，不写入mcs_itemintvalue1
+        /// 复核字段默认与集成字段保持一致，但仅当复核字段当前无值时写入（首次赋值），避免覆盖人工复核结果
         /// </summary>
-        private void UpdateTagValue(IOrganizationService service, ITracingService tracer, Guid tagId, int dataType, object value, string itemCode)
+        private void UpdateTagValue(IOrganizationService service, ITracingService tracer, Guid tagId, int dataType, object value, string itemCode, EntityReference creditItemValueRef = null)
         {
+            // 查询当前标签复核字段，判断是否已经存在复核值
+            var currentTag = service.Retrieve("mcs_customer_tag", tagId,
+                new ColumnSet("mcs_itemintvalue2", "mcs_itemtxtvalue2", "mcs_itemvalue2", "mcs_credititem_value", "mcs_credit_item"));
+
+            bool reviewValueExists = false;
+            if (dataType == 1) // 定量：int2 与 value2 同时有有效值才算已赋值
+            {
+                reviewValueExists = currentTag.Contains("mcs_itemintvalue2") && currentTag["mcs_itemintvalue2"] != null
+                    && currentTag.Contains("mcs_itemvalue2") && currentTag.GetAttributeValue<string>("mcs_itemvalue2") != "N/A";
+            }
+            else // 定性：txt2 与 lookup 同时有有效值才算已赋值
+            {
+                reviewValueExists = currentTag.Contains("mcs_itemtxtvalue2") && currentTag["mcs_itemtxtvalue2"] != null
+                    && currentTag.Contains("mcs_credititem_value") && currentTag["mcs_credititem_value"] != null;
+            }
+
+            tracer.Trace($"UpdateTagValue: tagId={tagId}, dataType={dataType}, reviewValueExists={reviewValueExists}");
+
             var updateTag = new Entity("mcs_customer_tag") { Id = tagId };
 
             if (dataType == 1) // 定量
@@ -1063,18 +1662,85 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                         tracer.Trace($"更新定量值: {decimalValue:F2}");
                     }
                 }
+
+                // 复核定量指标为空时，默认赋上集成值（只有第一次）
+                if (!reviewValueExists)
+                {
+                    if (value == null)
+                    {
+                        updateTag["mcs_itemintvalue2"] = null;
+                        updateTag["mcs_itemvalue2"] = "N/A";
+                        tracer.Trace("首次赋值复核定量指标: N/A");
+                    }
+                    else
+                    {
+                        decimal decimalValue = Convert.ToDecimal(value);
+                        if (decimalValue < 0)
+                        {
+                            updateTag["mcs_itemintvalue2"] = null;
+                            updateTag["mcs_itemvalue2"] = "N/A";
+                            tracer.Trace("首次赋值复核定量指标: N/A (小于0)");
+                        }
+                        else if (decimalValue > 99999999999m)
+                        {
+                            updateTag["mcs_itemintvalue2"] = 99999999999m;
+                            updateTag["mcs_itemvalue2"] = "99999999999.00";
+                            tracer.Trace("首次赋值复核定量指标: 99999999999.00 (超出范围截断)");
+                        }
+                        else
+                        {
+                            updateTag["mcs_itemintvalue2"] = decimalValue;
+                            updateTag["mcs_itemvalue2"] = decimalValue.ToString("F2");
+                            tracer.Trace($"首次赋值复核定量指标: {decimalValue:F2}");
+                        }
+                    }
+                }
             }
             else // 定性
             {
-                string stringValue = value?.ToString() ?? "O";
-                // value1保持原始值（用于算分匹配）
-                updateTag["mcs_itemvalue1"] = stringValue;
+                string rawValue = value?.ToString() ?? "O";
+                // 将 Coface 原始值映射为三一标准编码 L/M/H/O
+                string sanyValue = CofaceQualitativeMappingHelper.GetSanyValueByCofaceValue(service, tracer, itemCode, rawValue);
+                // value1保存三一编码（用于算分匹配）
+                updateTag["mcs_itemvalue1"] = sanyValue;
                 // txtvalue1显示中文映射（用于界面展示）
-                string displayValue = MapValueToDisplayName(itemCode, stringValue);
+                string displayValue = CofaceQualitativeMappingHelper.GetDisplayName(service, tracer, itemCode, sanyValue);
                 updateTag["mcs_itemtxtvalue1"] = displayValue;
                 // 确保定量字段为空（避免之前定量数据残留）
                 updateTag["mcs_itemintvalue1"] = null;
-                tracer.Trace($"更新定性值: 原始={stringValue}, 显示={displayValue}");
+
+                // 若未传入 Lookup，按评分项目+三一编码/显示名反查定性枚举值
+                if (creditItemValueRef == null)
+                {
+                    var creditItemRef = currentTag.GetAttributeValue<EntityReference>("mcs_credit_item");
+                    if (creditItemRef != null)
+                    {
+                        creditItemValueRef = ResolveCreditItemValue(service, tracer, creditItemRef, sanyValue, displayValue);
+                        if (creditItemValueRef != null)
+                        {
+                            tracer.Trace($"反查定性枚举Lookup: {creditItemValueRef.Id}");
+                        }
+                    }
+                }
+
+                // 设置定性枚举 Lookup（如客户评级）
+                if (creditItemValueRef != null)
+                {
+                    updateTag["mcs_credititem_value"] = creditItemValueRef;
+                }
+                tracer.Trace($"更新定性值: Coface原始={rawValue}, 三一编码={sanyValue}, 显示={displayValue}");
+
+                // 复核定性指标为空时，默认赋上集成值（只有第一次）
+                if (!reviewValueExists)
+                {
+                    updateTag["mcs_itemtxtvalue2"] = displayValue;
+                    updateTag["mcs_itemvalue2"] = sanyValue;
+                    if (creditItemValueRef != null)
+                    {
+                        updateTag["mcs_credititem_value"] = creditItemValueRef;
+                    }
+                    tracer.Trace($"首次赋值复核定性指标: Coface原始={rawValue}, 三一编码={sanyValue}, 显示={displayValue}");
+                }
             }
 
             service.Update(updateTag);
@@ -1134,9 +1800,148 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                         default: return value;
                     }
 
+                case "BigAccount": // 客户评级
+                    switch (value?.ToUpper())
+                    {
+                        case "S": return "S级";
+                        case "A": return "A级";
+                        case "S_JV": return "S级控股/参股公司";
+                        case "A_JV": return "A级控股/参股公司";
+                        case "O": return "缺失";
+                        default: return value;
+                    }
+
                 default:
                     return value;
             }
+        }
+
+        /// <summary>
+        /// 获取客户评级(BigAccount)的定性值
+        /// 根据 mcs_customermasterdata.mcs_accountlevel 和 account.new_is_joint_venture 自动判断
+        /// </summary>
+        private (string ListValue, string DisplayName, EntityReference EnumRef) GetBigAccountValue(
+            IOrganizationService service,
+            ITracingService tracer,
+            Entity creditRecord)
+        {
+            string listValue = "O";
+            string displayName = "缺失";
+            EntityReference enumRef = null;
+
+            try
+            {
+                var accountRef = creditRecord.GetAttributeValue<EntityReference>("mcs_accountid");
+                if (accountRef == null)
+                {
+                    tracer.Trace("BigAccount: 评估记录未关联客户");
+                    return (listValue, displayName, enumRef);
+                }
+
+                var account = service.Retrieve("account", accountRef.Id,
+                    new ColumnSet("mcs_customermasterdata", "new_is_joint_venture"));
+                bool isJointVenture = account.GetAttributeValue<bool>("new_is_joint_venture");
+
+                int accountLevel = 0;
+                if (account.Contains("mcs_customermasterdata") && account["mcs_customermasterdata"] is EntityReference cmRef)
+                {
+                    var customerMasterData = service.Retrieve("mcs_customermasterdata", cmRef.Id,
+                        new ColumnSet("mcs_accountlevel"));
+                    accountLevel = customerMasterData.GetAttributeValue<OptionSetValue>("mcs_accountlevel")?.Value ?? 0;
+                }
+
+                tracer.Trace($"BigAccount: level={accountLevel}, isJointVenture={isJointVenture}");
+
+                switch (accountLevel)
+                {
+                    case 4:
+                        listValue = isJointVenture ? "S_JV" : "S";
+                        displayName = isJointVenture ? "S级控股/参股公司" : "S级";
+                        break;
+                    case 3:
+                        listValue = isJointVenture ? "A_JV" : "A";
+                        displayName = isJointVenture ? "A级控股/参股公司" : "A级";
+                        break;
+                    default:
+                        listValue = "O";
+                        displayName = "缺失";
+                        break;
+                }
+
+                var enumId = ResolveCreditItemValueByListValue(service, tracer, "BigAccount", listValue);
+                if (enumId.HasValue)
+                {
+                    enumRef = new EntityReference("mcs_credititem_value", enumId.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"BigAccount 取值异常: {ex.Message}");
+            }
+
+            return (listValue, displayName, enumRef);
+        }
+
+        /// <summary>
+        /// 根据评分项目编码和 listValue 反查 mcs_credititem_value 记录
+        /// </summary>
+        private Guid? ResolveCreditItemValueByListValue(
+            IOrganizationService service,
+            ITracingService tracer,
+            string itemCode,
+            string listValue)
+        {
+            try
+            {
+                var itemQuery = new QueryExpression("mcs_credit_items")
+                {
+                    ColumnSet = new ColumnSet("mcs_credit_itemsid"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_credit_itemsno", ConditionOperator.Equal, itemCode)
+                        }
+                    },
+                    TopCount = 1
+                };
+
+                var itemResult = service.RetrieveMultiple(itemQuery);
+                if (itemResult.Entities.Count == 0)
+                {
+                    tracer.Trace($"ResolveCreditItemValueByListValue: 评分项目 {itemCode} 不存在");
+                    return null;
+                }
+
+                var itemId = itemResult.Entities[0].Id;
+
+                var enumQuery = new QueryExpression("mcs_credititem_value")
+                {
+                    ColumnSet = new ColumnSet("mcs_credititem_valueid"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_credititemno", ConditionOperator.Equal, itemId),
+                            new ConditionExpression("mcs_listvalue", ConditionOperator.Equal, listValue),
+                            new ConditionExpression("statecode", ConditionOperator.Equal, 0)
+                        }
+                    },
+                    TopCount = 1
+                };
+
+                var enumResult = service.RetrieveMultiple(enumQuery);
+                if (enumResult.Entities.Count > 0)
+                {
+                    return enumResult.Entities[0].Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"ResolveCreditItemValueByListValue 异常: {ex.Message}");
+            }
+
+            return null;
         }
 
         #endregion
@@ -1198,6 +2003,68 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             }
         }
 
+        /// <summary>
+        /// 根据评分项目Lookup和原始值/显示名反查 mcs_credititem_value 记录
+        /// 优先按 mcs_listvalue（原始值）匹配，其次按 mcs_listname（显示名）匹配
+        /// </summary>
+        private EntityReference ResolveCreditItemValue(
+            IOrganizationService service,
+            ITracingService tracer,
+            EntityReference creditItemRef,
+            string listValue,
+            string displayValue)
+        {
+            try
+            {
+                var enumQuery = new QueryExpression("mcs_credititem_value")
+                {
+                    ColumnSet = new ColumnSet("mcs_credititem_valueid"),
+                    Criteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_credititemno", ConditionOperator.Equal, creditItemRef.Id),
+                            new ConditionExpression("statecode", ConditionOperator.Equal, 0)
+                        }
+                    },
+                    TopCount = 1
+                };
+
+                var orFilter = new FilterExpression(LogicalOperator.Or);
+                if (!string.IsNullOrEmpty(listValue))
+                {
+                    orFilter.Conditions.Add(new ConditionExpression("mcs_listvalue", ConditionOperator.Equal, listValue));
+                    orFilter.Conditions.Add(new ConditionExpression("mcs_listname", ConditionOperator.Equal, listValue));
+                }
+                if (!string.IsNullOrEmpty(displayValue))
+                {
+                    orFilter.Conditions.Add(new ConditionExpression("mcs_listvalue", ConditionOperator.Equal, displayValue));
+                    orFilter.Conditions.Add(new ConditionExpression("mcs_listname", ConditionOperator.Equal, displayValue));
+                }
+
+                if (orFilter.Conditions.Count == 0)
+                {
+                    tracer.Trace("ResolveCreditItemValue: 无可用匹配值");
+                    return null;
+                }
+
+                enumQuery.Criteria.AddFilter(orFilter);
+
+                var enumResult = service.RetrieveMultiple(enumQuery);
+                if (enumResult.Entities.Count > 0)
+                
+                {
+                    return new EntityReference("mcs_credititem_value", enumResult.Entities[0].Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"ResolveCreditItemValue 异常: {ex.Message}");
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region 内部类
@@ -1209,6 +2076,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
         {
             public string ItemCode { get; set; }
             public string ItemName { get; set; }
+            public string ItemDesc { get; set; }
             public int DataType { get; set; }
         }
 

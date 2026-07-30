@@ -42,3 +42,17 @@ CofaceApiService、CofaceTokenManager、CofaceDataSyncPlugin、BppCallbackPlugin
 ```
 本机开发 → 改命名空间 → 复制到远程 → 远程编译(D365.sln, .NET 4.6.2) → Git提交(uat) → PR → Release Tool(n8n) → 部署
 ```
+
+---
+
+## 待同步-发布列表
+
+> 以下功能已在本地开发并验证通过，但暂未推送到远程主项目/更新 DEV1 主 Assembly，将与其他功能一起批量发布。
+
+| # | 功能 | 本地路径 | 远程目标 | 状态 | 计划发布批次 |
+|---|------|---------|---------|------|------------|
+| 1 | 厂端授信模型计算 Plugin（FcaProcCalculationPlugin） | `Code/Customizations/Plugins/FactoryCredit/Calculation/` | `SanyD365.D365Extension.Sales/Plugins/FactoryCredit/` | ✅ 本地编译通过；✅ DEV1 独立 Assembly 测试通过；✅ 临时 Assembly 已注销 | 待安排 |
+| 2 | 信用画像页新增额度信息展示 | `Code/Customizations/WebResources/HTML/mcs_credit_profile.html` | 通过 Solution 发布 WebResource `mcs_credit_profile.html` | ✅ DEV1 已部署并验证；✅ 数据关系已确认；✅ 样式/文案已调整 | 待安排 |
+
+**批次说明：**
+- 厂端授信模型计算 Plugin 依赖 `mcs_fca_proc`、`mcs_fca_mdlconfig`、`mcs_fca_mdlversion`、`mcs_customermasterdata`、`mcs_customer_tag`、`mcs_outstanding` 等实体，需与相关实体/字段变更一并发布。

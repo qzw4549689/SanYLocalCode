@@ -1,4 +1,4 @@
-using Microsoft.Crm.Sdk.Messages;
+using D365ToolCommon.WebResource;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using System;
 
@@ -9,15 +9,12 @@ namespace DeployTool
         public static void Run(ServiceClient service)
         {
             Console.WriteLine(">>> 清除 WebResource 缓存...");
-            
+
             try
             {
-                // 发布所有 WebResource
-                var request = new PublishXmlRequest
-                {
-                    ParameterXml = @"<importexportxml><webresources><webresource>mcs_credit_record.js</webresource><webresource>mcs_credit_record_progress.html</webresource></webresources></importexportxml>"
-                };
-                service.Execute(request);
+                // 使用通用 WebResource 发布服务发布相关 WebResource
+                var webResourceService = new WebResourceService(service);
+                webResourceService.PublishWebResources("mcs_credit_record.js", "mcs_credit_record_progress.html");
                 Console.WriteLine("  ✅ WebResource 缓存已清除");
             }
             catch (Exception ex)

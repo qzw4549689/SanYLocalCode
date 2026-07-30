@@ -1,0 +1,109 @@
+{
+  "entityName": "mcs_fca_mdlconfig",
+  "displayName": "厂端授信模型参数配置表",
+  "displayNameZh": "厂端授信模型参数配置表",
+  "displayNameEn": "Factory Credit Model Configuration",
+  "primaryAttribute": "mcs_argid",
+  "primaryAttributeDisplayName": "厂端授信参数编码",
+  "primaryAttributeDisplayNameZh": "厂端授信参数编码",
+  "primaryAttributeDisplayNameEn": "FCA Parameter Code",
+  "primaryAttributeLength": 10,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_buyergrade",
+      "displayName": "客户分类",
+      "displayNameZh": "客户分类",
+      "displayNameEn": "Customer Category",
+      "description": "客户分类 S/A/B/C/I/D1-D5",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "S": 1,
+        "A": 2,
+        "B": 3,
+        "C": 4,
+        "I": 5,
+        "D1": 6,
+        "D2": 7,
+        "D3": 8,
+        "D4": 9,
+        "D5": 10
+      }
+    },
+    {
+      "schemaName": "mcs_creditgrade",
+      "displayName": "客户等级",
+      "displayNameZh": "客户等级",
+      "displayNameEn": "Customer Credit Grade",
+      "description": "客户等级 A0-A4/ALL",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "A0": 1,
+        "A1": 2,
+        "A2": 3,
+        "A3": 4,
+        "A4": 5,
+        "ALL": 6
+      }
+    },
+    {
+      "schemaName": "mcs_adjust1",
+      "displayName": "系数1",
+      "displayNameZh": "系数1",
+      "displayNameEn": "Factor 1",
+      "description": "财务能力系数",
+      "type": "decimal",
+      "minDecimalValue": -999999999.99,
+      "maxDecimalValue": 999999999.99,
+      "precision": 4
+    },
+    {
+      "schemaName": "mcs_adjust2",
+      "displayName": "系数2",
+      "displayNameZh": "系数2",
+      "displayNameEn": "Factor 2",
+      "description": "历史回款能力系数",
+      "type": "decimal",
+      "minDecimalValue": -999999999.99,
+      "maxDecimalValue": 999999999.99,
+      "precision": 4
+    },
+    {
+      "schemaName": "mcs_adjust3",
+      "displayName": "系数3",
+      "displayNameZh": "系数3",
+      "displayNameEn": "Factor 3",
+      "description": "历史基准额度系数",
+      "type": "decimal",
+      "minDecimalValue": -999999999.99,
+      "maxDecimalValue": 999999999.99,
+      "precision": 4
+    },
+    {
+      "schemaName": "mcs_aggfunc",
+      "displayName": "聚合方法",
+      "displayNameZh": "聚合方法",
+      "displayNameEn": "Aggregation Method",
+      "description": "聚合方法 MAX/MIN",
+      "type": "picklist",
+      "options": {
+        "MAX": 1,
+        "MIN": 2
+      }
+    },
+    {
+      "schemaName": "mcs_countryname",
+      "displayName": "历史基准额度",
+      "displayNameZh": "历史基准额度",
+      "displayNameEn": "Historical Benchmark Amount",
+      "description": "历史基准额度(USD)，客户等级=ALL时必填",
+      "type": "decimal",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 99999999999.99,
+      "precision": 2
+    }
+  ]
+}

@@ -5,7 +5,40 @@
  * 影响范围: 仅限mcs_credit_record实体
  */
 
+// 同步加载多语言帮助类（实验阶段，验证通过后可改为窗体依赖库）
+(function () {
+    if (typeof LanguageHelper !== "undefined") return;
+    try {
+        var req = new XMLHttpRequest();
+        req.open("GET", Xrm.Utility.getGlobalContext().getClientUrl() + "/WebResources/mcs_language_helper.js", false);
+        req.send();
+        if (req.status === 200) {
+            // 通过 script 标签注入，确保 LanguageHelper 定义在全局作用域
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = req.responseText;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        } else {
+            console.warn("mcs_language_helper.js 加载失败，状态码:", req.status);
+        }
+    } catch (e) {
+        console.error("加载 mcs_language_helper.js 异常:", e);
+    }
+})();
+
 var CreditRecordForm = CreditRecordForm || {};
+
+/**
+ * 多语言取词（带中文兜底）
+ * 语言包已加载时返回对应语言文本；未加载/未找到时返回原中文，保证中文用户不受影响
+ */
+CreditRecordForm.L = function (key, defaultText) {
+    if (typeof LanguageHelper !== "undefined") {
+        var v = LanguageHelper.getLabel(key);
+        if (v && v !== key) return v;
+    }
+    return defaultText;
+};
 
 // ==================== 状态常量 ====================
 CreditRecordForm.STATUS = {
@@ -23,16 +56,13 @@ CreditRecordForm.STATUS = {
 CreditRecordForm._bpfNavigating = false;
 CreditRecordForm._lastButtonStatus = null;
 
-// 状态名称映射（用于提示信息）
-CreditRecordForm.STATUS_NAMES = {
-    9: "发起信用评估",
-    10: "关联客户代码",
-    11: "内外部数据集成",
-    12: "人工复核",
-    13: "信用分计算",
-    14: "审核申请",
-    15: "审批通过",
-    16: "审批未通过"
+// 状态名称（多语言，用于提示信息）
+CreditRecordForm.getStatusName = function (status) {
+    var defaults = {
+        9: "发起信用评估", 10: "关联客户代码", 11: "内外部数据集成", 12: "人工复核",
+        13: "信用分计算", 14: "审核申请", 15: "审批通过", 16: "审批未通过"
+    };
+    return CreditRecordForm.L("CreditRecord_Status_" + status, defaults[status] || ("未知状态(" + status + ")"));
 };
 
 // ==================== 表单事件 ====================
@@ -42,6 +72,14 @@ CreditRecordForm.STATUS_NAMES = {
  */
 CreditRecordForm.onLoad = function (executionContext) {
     var formContext = executionContext.getFormContext();
+
+    // 预加载语言包；状态相关通知在语言包就绪后的回调中渲染，避免英文用户在 onLoad 阶段看到中文兜底
+    if (typeof LanguageHelper !== "undefined") {
+        LanguageHelper.loadLanguagePack(function () {
+            CreditRecordForm.toggleByStatus(formContext);
+        });
+    }
+
     var formType = formContext.ui.getFormType();
     
     // 新建时设置默认值
@@ -55,8 +93,10 @@ CreditRecordForm.onLoad = function (executionContext) {
     // 注册字段变更事件
     CreditRecordForm.registerEvents(formContext);
     
-    // 根据状态控制按钮/字段/通知
-    CreditRecordForm.toggleByStatus(formContext);
+    // 根据状态控制按钮/字段/通知（无语言包时立即渲染；有语言包时由上方回调渲染）
+    if (typeof LanguageHelper === "undefined") {
+        CreditRecordForm.toggleByStatus(formContext);
+    }
     
     // 初始化状态记录
     var statusField = formContext.getAttribute("mcs_status");
@@ -66,6 +106,149 @@ CreditRecordForm.onLoad = function (executionContext) {
     
     // 初始化附件页签（通用上传组件）
     CreditRecordForm.initAttachmentTab(formContext);
+    
+    // 阻止 BPF 流程条回退（官方 Client API）
+    CreditRecordForm.preventBpfGoBack(formContext);
+    
+    // 将 BPF 侧窗格字段设为只读
+    CreditRecordForm.lockBpfFields(formContext);
+};
+
+/**
+ * 阻止 BPF 流程条回退
+ * 使用官方 Client API addOnPreStageChange，在阶段变化前拦截
+ */
+CreditRecordForm.preventBpfGoBack = function (formContext) {
+    if (!formContext || !formContext.data || !formContext.data.process) {
+        return;
+    }
+    
+    try {
+        formContext.data.process.addOnPreStageChange(function (stageChangeContext) {
+            // 程序化重选活动阶段（修复禅道#874 弹出框不重绘）期间放行，避免拦截/死循环
+            if (CreditRecordForm._bpfNavigating) {
+                return;
+            }
+
+            var args = stageChangeContext.getEventArgs();
+            if (!args) return;
+            
+            var direction = args.getDirection();
+            
+            if (direction === "Previous") {
+                // 阻止回退
+                args.preventDefault();
+                Xrm.Navigation.openAlertDialog({
+                    text: CreditRecordForm.L("CreditRecord_BpfNoGoBack", "不允许通过流程条回退阶段，请使用上方工具栏的按钮操作。"),
+                    title: CreditRecordForm.L("CreditRecord_TipTitle", "提示")
+                });
+                return;
+            }
+            
+            if (direction === "Next") {
+                // 阻止 BPF 默认前进，改为走自定义按钮的下一步逻辑
+                // 这样会和上方工具栏《进入下一阶段》按钮效果完全一致
+                args.preventDefault();
+                CreditRecordForm.nextStep(formContext);
+            }
+        });
+        
+        // 阶段变化后重新锁定 BPF 字段（BPF 侧窗格会重新渲染）
+        formContext.data.process.addOnStageChange(function () {
+            CreditRecordForm.lockBpfFields(formContext);
+        });
+    } catch (ex) {
+        console.error("[CreditRecordForm] 注册 BPF PreStageChange 事件失败:", ex);
+    }
+};
+
+/**
+ * 强制 BPF 控件重新选中当前活动阶段，重绘弹出框（flyout）
+ * 修复禅道#874：自定义按钮/BPF 下一阶段拦截后走 updateStatus 推进，
+ * data.refresh 只重绘阶段条，已打开的弹出框仍显示上一阶段字段。
+ * setActiveStage 会再次触发 PreStageChange，用 _bpfNavigating 标志防重入。
+ */
+CreditRecordForm.reselectActiveBpfStage = function (formContext, done) {
+    var finish = function () {
+        CreditRecordForm._bpfNavigating = false;
+        if (done) done();
+    };
+    try {
+        var process = formContext.data && formContext.data.process;
+        if (!process) { finish(); return; }
+        var activeStage = process.getActiveStage();
+        if (!activeStage) { finish(); return; }
+        CreditRecordForm._bpfNavigating = true;
+        process.setActiveStage(activeStage.getId(), function () {
+            CreditRecordForm.lockBpfFields(formContext);
+            // setActiveStage 对「已是活动阶段」为 no-op，弹出框不会重绘（禅道#874 DEV1 实测）。
+            // 兜底：延时点击阶段条上新活动阶段的按钮，由平台原生重绘弹出框
+            setTimeout(function () {
+                CreditRecordForm.clickBpfStageButton(activeStage.getId());
+            }, 500);
+            finish();
+        });
+    } catch (ex) {
+        console.error("[CreditRecordForm] 重选 BPF 活动阶段失败:", ex);
+        finish();
+    }
+};
+
+/**
+ * 点击 BPF 阶段条上指定阶段的按钮，让已打开的弹出框重绘到该阶段（禅道#874）
+ * 阶段条按钮 ID = 固定前缀 + 阶段 GUID（DEV1 实测验证）
+ * 仅在弹出框当前处于打开状态时点击，避免工具栏按钮推进后无故弹出侧窗格
+ */
+CreditRecordForm.clickBpfStageButton = function (stageId) {
+    try {
+        // BPF 阶段条/弹出框在顶层文档，表单脚本运行在内容 iframe 中，两处都要找
+        var docs = [document];
+        try {
+            if (window.top && window.top.document && window.top.document !== document) {
+                docs.push(window.top.document);
+            }
+        } catch (e) { /* 跨域时只用当前 document */ }
+
+        var id = (stageId || "").replace(/[{}]/g, "").toLowerCase();
+        for (var i = 0; i < docs.length; i++) {
+            // 仅在弹出框当前处于打开状态时才点击，避免工具栏按钮推进后无故弹出侧窗格
+            var dockBtn = docs[i].getElementById("MscrmControls.Containers.ProcessStageControl-stageDockModeButton");
+            var flyoutOpen = dockBtn && dockBtn.offsetParent !== null;
+            if (!flyoutOpen) continue;
+            var btn = docs[i].getElementById("MscrmControls.Containers.ProcessBreadCrumb-processHeaderStageButton_" + id);
+            if (btn) {
+                btn.click();
+                return;
+            }
+        }
+        console.warn("[CreditRecordForm] 未找到打开的 BPF 弹出框或阶段按钮:", id);
+    } catch (ex) {
+        console.warn("[CreditRecordForm] 点击 BPF 阶段按钮失败:", ex);
+    }
+};
+
+/**
+ * 将 BPF 侧窗格中的字段设为只读
+ * BPF 设计器本身没有 Read-only 选项，通过官方 Client API 在运行时锁定
+ */
+CreditRecordForm.lockBpfFields = function (formContext) {
+    if (!formContext || !formContext.ui || !formContext.ui.controls) {
+        return;
+    }
+    
+    try {
+        // BPF 字段控件通常以 header_process_ 开头
+        formContext.ui.controls.forEach(function (control) {
+            if (!control || !control.getName) return;
+            
+            var name = control.getName();
+            if (name.indexOf("header_process_") === 0 && control.setDisabled) {
+                control.setDisabled(true);
+            }
+        });
+    } catch (ex) {
+        console.error("[CreditRecordForm] 设置 BPF 字段只读失败:", ex);
+    }
 };
 
 /**
@@ -168,7 +351,7 @@ CreditRecordForm.onStatusChange = function (executionContext) {
         statusField.setValue(oldStatus);
         
         // 提示用户必须通过按钮操作
-        Xrm.Utility.alertDialog("请使用上方工具栏的按钮进行状态流转，不要直接修改进度条中的状态。");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_UseToolbarButtons", "请使用上方工具栏的按钮进行状态流转，不要直接修改进度条中的状态。"));
         return;
     }
     
@@ -203,25 +386,28 @@ CreditRecordForm.onAccountChange = function (executionContext) {
     
     // 业务规则：客户（account）只是导航入口，客户数据统一从关联的 mcs_customermasterdata 读取。
     // 先查 account 找到关联的客户主数据，再从主数据读取客户编码/英文名称/国家编码/科法斯ID。
-    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=_mcs_customermasterdata_value")
+    // 注意：真正的客户编号在 account.mcs_sapnumber，mcs_customermasterdata.mcs_accountnumber 实际存的是 account.accountnumber（关系流水号）。
+    var accountSapNumber = "";
+    Xrm.WebApi.retrieveRecord("account", accountGuid, "?$select=_mcs_customermasterdata_value,mcs_sapnumber")
         .then(function (accountResult) {
             var customerMasterDataId = accountResult._mcs_customermasterdata_value;
+            accountSapNumber = accountResult.mcs_sapnumber || "";
             
             if (!customerMasterDataId) {
-                throw new Error("该客户未关联客户主数据，请先维护客户主数据");
+                throw new Error(CreditRecordForm.L("CreditRecord_NoMasterData", "该客户未关联客户主数据，请先维护客户主数据"));
             }
             
             var plainCustomerMasterDataId = customerMasterDataId.replace(/[{}]/g, "");
             return Xrm.WebApi.retrieveRecord("mcs_customermasterdata", plainCustomerMasterDataId,
-                "?$select=mcs_accountnumber,mcs_englishname,mcs_countrycode,mcs_cofaceid");
+                "?$select=mcs_englishname,mcs_countrycode,mcs_cofaceid");
         })
         .then(function (cm) {
             cm = cm || {};
             
-            // 客户编码
+            // 客户编码（从 account.mcs_sapnumber 读取，避免取到关系流水号）
             var custNameField = formContext.getAttribute("mcs_custname");
             if (custNameField) {
-                custNameField.setValue(cm.mcs_accountnumber || "");
+                custNameField.setValue(accountSapNumber);
             }
             
             // 客户英文名称
@@ -247,7 +433,7 @@ CreditRecordForm.onAccountChange = function (executionContext) {
         })
         .catch(function (error) {
             console.error("查询客户信息失败:", error);
-            Xrm.Utility.alertDialog("查询客户信息失败：" + (error.message || JSON.stringify(error)));
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_QueryAccountFailed", "查询客户信息失败：") + (error.message || JSON.stringify(error)));
         });
 };
 
@@ -273,15 +459,15 @@ CreditRecordForm.validateAccountFields = function (formContext) {
     var messages = [];
     
     if (!custNameEn) {
-        messages.push("客户英文名称不能为空，请先维护客户主数据");
+        messages.push(CreditRecordForm.L("CreditRecord_EnglishNameRequired", "客户英文名称不能为空，请先维护客户主数据"));
     }
     
     if (!countryCode) {
-        messages.push("国家编码不能为空");
+        messages.push(CreditRecordForm.L("CreditRecord_CountryCodeRequired", "国家编码不能为空"));
     }
     
     if (!cofaceId) {
-        messages.push("未关联科法斯客户，请先执行【关联客户代码】操作");
+        messages.push(CreditRecordForm.L("CreditRecord_NoCofaceLink", "未关联科法斯客户，请先执行【关联客户代码】操作"));
     }
     
     if (messages.length > 0) {
@@ -291,7 +477,7 @@ CreditRecordForm.validateAccountFields = function (formContext) {
             level: "WARNING",
             uniqueId: "account_validation"
         };
-        formContext.ui.setFormNotification(messages.join("；"), "WARNING", "account_validation");
+        formContext.ui.setFormNotification(messages.join(CreditRecordForm.L("CreditRecord_MsgSeparator", "；")), "WARNING", "account_validation");
     } else {
         formContext.ui.clearFormNotification("account_validation");
     }
@@ -413,6 +599,7 @@ CreditRecordForm.setGridEditable = function (formContext, gridName, editable) {
     }
 };
 
+
 /**
  * 锁定所有字段
  */
@@ -441,28 +628,28 @@ CreditRecordForm.nextStep = function (primaryControl) {
             // 校验客户已选
             var accountId = formContext.getAttribute("mcs_accountid").getValue();
             if (!accountId) {
-                Xrm.Utility.alertDialog("请先选择客户");
+                Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_SelectAccountFirst", "请先选择客户"));
                 return;
             }
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.LINK_ACCOUNT, "已关联客户");
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.LINK_ACCOUNT, CreditRecordForm.L("CreditRecord_AccountLinked", "已关联客户"));
             break;
             
         case CreditRecordForm.STATUS.LINK_ACCOUNT: // 10 → 11
             // 校验Coface ID存在
             var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
             if (!cofaceId) {
-                Xrm.Utility.alertDialog("未关联科法斯客户，无法进入数据集成阶段");
+                Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_NoCofaceCannotIntegrate", "未关联科法斯客户，无法进入数据集成阶段"));
                 return;
             }
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, "进入数据集成");
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
             break;
             
         case CreditRecordForm.STATUS.DATA_INTEGRATION: // 11 → 12
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.MANUAL_REVIEW, "进入人工复核");
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.MANUAL_REVIEW, CreditRecordForm.L("CreditRecord_EnterManualReview", "进入人工复核"));
             break;
             
         case CreditRecordForm.STATUS.MANUAL_REVIEW: // 12 → 13
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.SCORE_CALC, "进入信用分计算");
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.SCORE_CALC, CreditRecordForm.L("CreditRecord_EnterScoreCalc", "进入信用分计算"));
             break;
             
         case CreditRecordForm.STATUS.SCORE_CALC: // 13 → 14
@@ -471,7 +658,7 @@ CreditRecordForm.nextStep = function (primaryControl) {
             break;
             
         default:
-            Xrm.Utility.alertDialog("当前状态不支持【下一步】操作");
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_NextStepNotSupported", "当前状态不支持【下一步】操作"));
             break;
     }
 };
@@ -486,15 +673,15 @@ CreditRecordForm.refreshDataIntegration = function (primaryControl) {
     var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
     
     if (status !== CreditRecordForm.STATUS.MANUAL_REVIEW) {
-        Xrm.Utility.alertDialog("【数据集成刷新】仅在人工复核阶段可用");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_RefreshOnlyInReview", "【数据集成刷新】仅在人工复核阶段可用"));
         return;
     }
     
     Xrm.Utility.confirmDialog(
-        "确定要重新执行数据集成吗？这将刷新所有指标数据。",
+        CreditRecordForm.L("CreditRecord_ConfirmRefresh", "确定要重新执行数据集成吗？这将刷新所有指标数据。"),
         function () {
             // 方式：将状态改回11（数据集成），触发 CofaceDataSyncPlugin 重新执行
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, "数据集成刷新已触发");
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_RefreshTriggered", "数据集成刷新已触发"));
         },
         function () {
             // 用户取消，不做操作
@@ -565,8 +752,22 @@ CreditRecordForm.getCurrentUserDomainAccount = function () {
             if (result.entities.length > 0 && result.entities[0].mcs_domainaccount) {
                 return result.entities[0].mcs_domainaccount;
             }
-            throw new Error("当前用户未配置mcs_personnel.domainaccount");
+            throw new Error(CreditRecordForm.L("CreditRecord_NoDomainAccount", "当前用户未配置mcs_personnel.domainaccount"));
         });
+};
+
+/**
+ * 判断BPP状态是否为"进行中"
+ * 结束态（Approved/Rejected/Withdrawn/Abandoned/SubmitFailed 及 numeric 终止态）返回 false
+ */
+CreditRecordForm.isBppInProgress = function (bppStatus) {
+    if (!bppStatus) return false;
+    var status = bppStatus.toString().toLowerCase();
+    return status === "submitted" ||
+           status === "inreview" ||
+           status === "pending" ||
+           status === "10" ||
+           status === "20";
 };
 
 /**
@@ -579,22 +780,24 @@ CreditRecordForm.submitBppApproval = function (formContext, recordId) {
     // 校验信用分已计算
     var creditScore = formContext.getAttribute("mcs_creditscore").getValue();
     if (creditScore === null || creditScore === undefined) {
-        Xrm.Utility.alertDialog("信用分尚未计算，请先完成信用分计算");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_ScoreNotCalculated", "信用分尚未计算，请先完成信用分计算"));
         return;
     }
 
-    // 防重复提交：已有 workflowid 时跳过
+    // 防重复提交：只有当前BPP流程仍在进行中时才阻止；
+    // 已结束（Approved/Rejected/Withdrawn/Abandoned/SubmitFailed）允许重新提交
     var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
-    if (workflowId) {
-        Xrm.Utility.alertDialog("当前记录已存在BPP审批流程，请勿重复提交");
+    var bppStatus = formContext.getAttribute("mcs_bppstatus").getValue();
+    if (workflowId && CreditRecordForm.isBppInProgress(bppStatus)) {
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_BppAlreadyInProgress", "当前记录已存在BPP审批流程，请勿重复提交"));
         return;
     }
 
     // 确认提交
     Xrm.Utility.confirmDialog(
-        "确定要提交BPP审批吗？提交后将锁定所有字段并进入审批流程。",
+        CreditRecordForm.L("CreditRecord_ConfirmSubmitBpp", "确定要提交BPP审批吗？提交后将锁定所有字段并进入审批流程。"),
         function () {
-            CreditRecordForm.showLoading(formContext, "正在提交BPP审批...");
+            CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_SubmittingBpp", "正在提交BPP审批..."));
 
             // 1. 先保存状态到 14
             var entity = { mcs_status: CreditRecordForm.STATUS.AUDIT_APPLY };
@@ -630,22 +833,25 @@ CreditRecordForm.submitBppApproval = function (formContext, recordId) {
                     if (data && data.Result) {
                         var result = JSON.parse(data.Result);
                         if (result.Result === true || result.Result === "true") {
-                            formContext.ui.setFormNotification("BPP审批提交成功", "INFO", "bpp_start");
-                            formContext.data.refresh(true);
+                            formContext.ui.setFormNotification(CreditRecordForm.L("CreditRecord_BppSubmitSuccess", "BPP审批提交成功"), "INFO", "bpp_start");
+                            formContext.data.refresh(true).then(function () {
+                                // 强制 BPF 弹出框重绘到新活动阶段（修复禅道#874）
+                                CreditRecordForm.reselectActiveBpfStage(formContext);
+                            });
                             setTimeout(function () {
                                 formContext.ui.clearFormNotification("bpp_start");
                             }, 3000);
                         } else {
-                            Xrm.Utility.alertDialog(result.Description || "BPP审批提交失败");
+                            Xrm.Utility.alertDialog(result.Description || CreditRecordForm.L("CreditRecord_BppSubmitFailed", "BPP审批提交失败"));
                         }
                     } else {
-                        Xrm.Utility.alertDialog("BPP审批提交返回异常");
+                        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_BppSubmitAbnormal", "BPP审批提交返回异常"));
                     }
                 })
                 .catch(function (error) {
                     CreditRecordForm.hideLoading(formContext);
                     console.error("提交BPP审批失败:", error);
-                    Xrm.Utility.alertDialog("提交BPP审批失败：" + (error.message || JSON.stringify(error)));
+                    Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_SubmitBppFailedPrefix", "提交BPP审批失败：") + (error.message || JSON.stringify(error)));
                 });
         }
     );
@@ -660,7 +866,7 @@ CreditRecordForm.viewBppApproval = function (primaryControl) {
     var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
     
     if (!workflowId) {
-        Xrm.Utility.alertDialog("暂无BPP审批信息");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_NoBppInfo", "暂无BPP审批信息"));
         return;
     }
     
@@ -679,14 +885,14 @@ CreditRecordForm.abandonBppApproval = function (primaryControl) {
     var workflowId = formContext.getAttribute("mcs_workflowid").getValue();
     
     if (!workflowId) {
-        Xrm.Utility.alertDialog("当前没有进行中的BPP审批流程");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_NoActiveBpp", "当前没有进行中的BPP审批流程"));
         return;
     }
     
     Xrm.Utility.confirmDialog(
-        "确定要废弃当前BPP审批流程吗？废弃后将回到人工复核阶段。",
+        CreditRecordForm.L("CreditRecord_ConfirmAbandonBpp", "确定要废弃当前BPP审批流程吗？废弃后将回到人工复核阶段。"),
         function () {
-            CreditRecordForm.showLoading(formContext, "正在废弃BPP审批流程...");
+            CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_AbandoningBpp", "正在废弃BPP审批流程..."));
             
             // 调用mcs_bppabandonapi废弃审批
             var request = {
@@ -698,21 +904,24 @@ CreditRecordForm.abandonBppApproval = function (primaryControl) {
                 .then(function (response) {
                     CreditRecordForm.hideLoading(formContext);
                     if (response.ok) {
-                        formContext.ui.setFormNotification("BPP审批已废弃", "INFO", "bpp_abandon");
-                        formContext.data.refresh(true);
+                        formContext.ui.setFormNotification(CreditRecordForm.L("CreditRecord_BppAbandoned", "BPP审批已废弃"), "INFO", "bpp_abandon");
+                        formContext.data.refresh(true).then(function () {
+                            // 强制 BPF 弹出框重绘到新活动阶段（修复禅道#874）
+                            CreditRecordForm.reselectActiveBpfStage(formContext);
+                        });
                         setTimeout(function () {
                             formContext.ui.clearFormNotification("bpp_abandon");
                         }, 3000);
                     } else {
                         response.json().then(function (data) {
-                            Xrm.Utility.alertDialog("废弃失败：" + (data.error?.message || "未知错误"));
+                            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_AbandonFailedPrefix", "废弃失败：") + (data.error?.message || CreditRecordForm.L("CreditRecord_UnknownError", "未知错误")));
                         });
                     }
                 })
                 .catch(function (error) {
                     CreditRecordForm.hideLoading(formContext);
                     console.error("废弃BPP审批失败:", error);
-                    Xrm.Utility.alertDialog("废弃失败：" + (error.message || JSON.stringify(error)));
+                    Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_AbandonFailedPrefix", "废弃失败：") + (error.message || JSON.stringify(error)));
                 });
         }
     );
@@ -728,16 +937,16 @@ CreditRecordForm.showBppInfo = function (formContext) {
     var bppStatus = formContext.getAttribute("mcs_bppstatus").getValue();
     
     if (workflowId) {
-        var msg = "BPP审批中 | 流程ID: " + workflowId;
+        var msg = CreditRecordForm.L("CreditRecord_BppInProgressInfo", "BPP审批中 | 流程ID: ") + workflowId;
         if (nextApprover) {
-            msg += " | 当前审批人: " + nextApprover;
+            msg += CreditRecordForm.L("CreditRecord_CurrentApprover", " | 当前审批人: ") + nextApprover;
         }
         if (bppStatus) {
-            msg += " | 状态: " + bppStatus;
+            msg += CreditRecordForm.L("CreditRecord_BppStatusLabel", " | 状态: ") + bppStatus;
         }
         formContext.ui.setFormNotification(msg, "INFO", "bpp_info");
     } else {
-        formContext.ui.setFormNotification("BPP审批流程发起中，请稍后...", "INFO", "bpp_info");
+        formContext.ui.setFormNotification(CreditRecordForm.L("CreditRecord_BppStarting", "BPP审批流程发起中，请稍后..."), "INFO", "bpp_info");
     }
 };
 
@@ -751,7 +960,7 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
     // 未保存记录时禁止搜索
     var recordId = formContext.data.entity.getId();
     if (!recordId) {
-        Xrm.Utility.alertDialog("请先保存记录");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_SaveRecordFirst", "请先保存记录"));
         return;
     }
     
@@ -760,17 +969,17 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
     var accountId = formContext.getAttribute("mcs_accountid").getValue();
     
     if (status !== CreditRecordForm.STATUS.INIT && status !== CreditRecordForm.STATUS.LINK_ACCOUNT) {
-        Xrm.Utility.alertDialog("【搜索 Coface 企业】仅在发起或关联客户阶段可用");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_SearchCofaceStageLimit", "【搜索 Coface 企业】仅在发起或关联客户阶段可用"));
         return;
     }
     
     if (!accountId) {
-        Xrm.Utility.alertDialog("请先选择客户");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_SelectAccountFirst", "请先选择客户"));
         return;
     }
     
     if (cofaceId) {
-        Xrm.Utility.alertDialog("当前记录已绑定 Coface ID，无需重新搜索");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceIdBound", "当前记录已绑定 Coface ID，无需重新搜索"));
         return;
     }
     
@@ -805,7 +1014,7 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
         })
         .catch(function (error) {
             console.error("打开企业搜索弹窗失败:", error);
-            Xrm.Utility.alertDialog("打开搜索弹窗失败：" + (error.message || JSON.stringify(error)));
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_OpenSearchFailed", "打开搜索弹窗失败：") + (error.message || JSON.stringify(error)));
         });
 };
 
@@ -820,15 +1029,15 @@ CreditRecordForm.restartEvaluation = function (primaryControl) {
     
     // 仅在人工复核(12)或审批未通过(16)时可用
     if (status !== CreditRecordForm.STATUS.MANUAL_REVIEW && status !== CreditRecordForm.STATUS.REJECTED) {
-        Xrm.Utility.alertDialog("【重新发起】仅在人工复核或审批未通过状态可用");
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_RestartStageLimit", "【重新发起】仅在人工复核或审批未通过状态可用"));
         return;
     }
     
     Xrm.Utility.confirmDialog(
-        "确定要重新发起信用评估吗？这将回到数据集成阶段，您可以修改数据后重新提交审批。",
+        CreditRecordForm.L("CreditRecord_ConfirmRestart", "确定要重新发起信用评估吗？这将回到数据集成阶段，您可以修改数据后重新提交审批。"),
         function () {
             // 更新状态到数据集成阶段（11），允许重新评估
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, "重新发起评估");
+            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_RestartEvaluation", "重新发起评估"));
         },
         function () {
             // 用户取消，不做操作
@@ -840,7 +1049,7 @@ CreditRecordForm.restartEvaluation = function (primaryControl) {
  * 显示等待遮罩
  */
 CreditRecordForm.showLoading = function (formContext, message) {
-    formContext.ui.setFormNotification(message || "正在处理，请稍候...", "INFO", "loading_indicator");
+    formContext.ui.setFormNotification(message || CreditRecordForm.L("CreditRecord_Processing", "正在处理，请稍候..."), "INFO", "loading_indicator");
 };
 
 /**
@@ -859,7 +1068,7 @@ CreditRecordForm.updateStatus = function (formContext, recordId, newStatus, succ
     CreditRecordForm._lastButtonStatus = newStatus;
     
     // 显示等待画面
-    CreditRecordForm.showLoading(formContext, "正在更新状态，请稍候...");
+    CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_UpdatingStatus", "正在更新状态，请稍候..."));
     
     var entity = {};
     entity.mcs_status = newStatus;
@@ -871,20 +1080,23 @@ CreditRecordForm.updateStatus = function (formContext, recordId, newStatus, succ
             
             // 显示成功通知（INFO级别，SUCCESS不被支持）
             formContext.ui.setFormNotification(
-                successMsg + "，状态已更新为：" + CreditRecordForm.STATUS_NAMES[newStatus],
+                successMsg + CreditRecordForm.L("CreditRecord_StatusUpdatedSuffix", "，状态已更新为：") + CreditRecordForm.getStatusName(newStatus),
                 "INFO", "status_update"
             );
             
-            // 刷新表单以反映状态变更
-            formContext.data.refresh(true);
-            
+            // 刷新表单以反映状态变更，刷新完成后再清除标记
+            return formContext.data.refresh(true);
+        })
+        .then(function () {
             // 3秒后清除成功通知
             setTimeout(function () {
                 formContext.ui.clearFormNotification("status_update");
             }, 3000);
-            
-            // 清除按钮触发标记
-            CreditRecordForm._bpfNavigating = false;
+
+            // 强制 BPF 弹出框重绘到新活动阶段（修复禅道#874），完成后清除按钮触发标记
+            CreditRecordForm.reselectActiveBpfStage(formContext, function () {
+                CreditRecordForm._bpfNavigating = false;
+            });
         })
         .catch(function (error) {
             // 隐藏等待画面
@@ -897,11 +1109,11 @@ CreditRecordForm.updateStatus = function (formContext, recordId, newStatus, succ
             
             // 显示错误通知
             formContext.ui.setFormNotification(
-                "状态更新失败：" + (error.message || JSON.stringify(error)),
+                CreditRecordForm.L("CreditRecord_StatusUpdateFailed", "状态更新失败：") + (error.message || JSON.stringify(error)),
                 "ERROR", "status_update_error"
             );
             
-            Xrm.Utility.alertDialog("状态更新失败：" + (error.message || JSON.stringify(error)));
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_StatusUpdateFailed", "状态更新失败：") + (error.message || JSON.stringify(error)));
         });
 };
 
@@ -1019,15 +1231,25 @@ CreditRecordForm.initAttachmentTab = function (formContext) {
 /**
  * 保存前校验
  */
+// 重复客户在途评估校验状态标志
+CreditRecordForm._duplicateCheckInProgress = false;
+CreditRecordForm._duplicateCheckPassed = false;
+
 CreditRecordForm.onSave = function (executionContext) {
     var formContext = executionContext.getFormContext();
     var formType = formContext.ui.getFormType();
     
     // 新建时校验客户信息
     if (formType === 1) {
+        // 已通过重复客户校验，放行本次保存
+        if (CreditRecordForm._duplicateCheckPassed) {
+            CreditRecordForm._duplicateCheckPassed = false;
+            return;
+        }
+        
         var accountId = formContext.getAttribute("mcs_accountid").getValue();
         if (!accountId) {
-            Xrm.Utility.alertDialog("请选择客户");
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_PleaseSelectCustomer", "请选择客户"));
             executionContext.getEventArgs().preventDefault();
             return;
         }
@@ -1036,9 +1258,54 @@ CreditRecordForm.onSave = function (executionContext) {
         var countryCode = formContext.getAttribute("mcs_countrycode").getValue();
         
         if (!custNameEn || !countryCode) {
-            Xrm.Utility.alertDialog("客户英文名称和国家编码不能为空，请先维护客户主数据");
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_EnNameCountryRequired", "客户英文名称和国家编码不能为空，请先维护客户主数据"));
             executionContext.getEventArgs().preventDefault();
             return;
         }
+        
+        // 防止重复点击保存导致多次查询
+        if (CreditRecordForm._duplicateCheckInProgress) {
+            executionContext.getEventArgs().preventDefault();
+            return;
+        }
+        
+        // 校验是否存在相同客户的在途评估记录（状态 9-14）
+        CreditRecordForm._duplicateCheckInProgress = true;
+        executionContext.getEventArgs().preventDefault();
+        
+        var accountGuid = accountId[0].id.replace(/[{}]/g, "");
+        var statusFilter = [
+            "mcs_status eq 9",
+            "mcs_status eq 10",
+            "mcs_status eq 11",
+            "mcs_status eq 12",
+            "mcs_status eq 13",
+            "mcs_status eq 14"
+        ].join(" or ");
+        var filter = "_mcs_accountid_value eq " + accountGuid + " and (" + statusFilter + ") and statecode eq 0";
+        
+        Xrm.WebApi.retrieveMultipleRecords("mcs_credit_record", "?$select=mcs_scoreid&$filter=" + encodeURIComponent(filter) + "&$top=1")
+            .then(function (result) {
+                CreditRecordForm._duplicateCheckInProgress = false;
+                if (result.entities.length > 0) {
+                    Xrm.Utility.alertDialog("存在有重复客户评估记录，需核查！");
+                } else {
+                    // 没有重复，标记通过后重新触发保存
+                    CreditRecordForm._duplicateCheckPassed = true;
+                    formContext.data.save().then(
+                        function () { CreditRecordForm._duplicateCheckPassed = false; },
+                        function (error) {
+                            CreditRecordForm._duplicateCheckPassed = false;
+                            console.error("保存失败:", error);
+                        }
+                    );
+                }
+            })
+            .catch(function (error) {
+                CreditRecordForm._duplicateCheckInProgress = false;
+                CreditRecordForm._duplicateCheckPassed = false;
+                console.error("查询重复评估记录失败:", error);
+                Xrm.Utility.alertDialog("校验重复评估记录失败：" + (error.message || JSON.stringify(error)));
+            });
     }
 };

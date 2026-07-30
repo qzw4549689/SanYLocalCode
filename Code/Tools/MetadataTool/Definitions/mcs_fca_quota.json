@@ -1,0 +1,103 @@
+{
+  "entityName": "mcs_fca_quota",
+  "displayName": "厂端授信额度表",
+  "displayNameZh": "厂端授信额度表",
+  "displayNameEn": "Factory Credit Quota",
+  "primaryAttribute": "mcs_quotano",
+  "primaryAttributeDisplayName": "额度编码",
+  "primaryAttributeDisplayNameZh": "额度编码",
+  "primaryAttributeDisplayNameEn": "Quota Code",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_accountid",
+      "displayName": "客户编码",
+      "displayNameZh": "客户编码",
+      "displayNameEn": "Customer Code",
+      "description": "关联客户主数据 AccountMaster",
+      "type": "lookup",
+      "targetEntity": "mcs_customermasterdata",
+      "targetEntityDisplayName": "客户主数据"
+    },
+    {
+      "schemaName": "mcs_custname",
+      "displayName": "客户名称",
+      "displayNameZh": "客户名称",
+      "displayNameEn": "Customer Name",
+      "description": "客户名称",
+      "type": "string",
+      "maxLength": 500,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_sellergrant",
+      "displayName": "厂端授信额度USD",
+      "displayNameZh": "厂端授信额度USD",
+      "displayNameEn": "Factory Credit Quota USD",
+      "description": "正式生效额度",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_sellerbalance",
+      "displayName": "厂端授信余额USD",
+      "displayNameZh": "厂端授信余额USD",
+      "displayNameEn": "Factory Credit Balance USD",
+      "description": "当前可用余额，允许负数表示超额",
+      "type": "money",
+      "minDecimalValue": -999999999999.99,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_usedsellerbalance",
+      "displayName": "厂端授信占用金额USD",
+      "displayNameZh": "厂端授信占用金额USD",
+      "displayNameEn": "Factory Credit Used Amount USD",
+      "description": "已发货未回款的授信占用金额，额度=余额+占用",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": false
+    },
+    {
+      "schemaName": "mcs_doid",
+      "displayName": "模型计算序列号",
+      "displayNameZh": "模型计算序列号",
+      "displayNameEn": "Model Calculation Serial No.",
+      "description": "关联计算表序列号",
+      "type": "string",
+      "maxLength": 20,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_isactive",
+      "displayName": "是否生效",
+      "displayNameZh": "是否生效",
+      "displayNameEn": "Is Active",
+      "description": "额度是否生效，1-是，0-否",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "否": 0,
+        "是": 1
+      }
+    },
+    {
+      "schemaName": "mcs_validfrom",
+      "displayName": "生效日期",
+      "displayNameZh": "生效日期",
+      "displayNameEn": "Effective Date",
+      "description": "额度生效日期",
+      "type": "datetime",
+      "dateOnly": true
+    }
+  ]
+}

@@ -10,8 +10,10 @@ namespace CofaceApiTest
     class Program
     {
         static readonly string API_KEY = "0vneRg8vLjzPQlIfSkzO8kIDg04kfaKafTzg5sX1";
-        static readonly string AUTH_URL = "https://api.coface.com/authentication/v1/token";
-        static readonly string DATA_URL = "https://icon-api-test.coface.com/dataapi-v1";
+        // Coface 地址改为配置：appsettings.json → coface.baseUrl / coface.authUrl
+        static CofaceTestConfig _config = CofaceTestConfig.Load();
+        static string AUTH_URL => _config.AuthUrl;
+        static string DATA_URL => _config.BaseUrl;
         
         static async Task Main(string[] args)
         {

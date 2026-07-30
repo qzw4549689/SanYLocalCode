@@ -1,0 +1,227 @@
+{
+  "entityName": "mcs_fsm_resource",
+  "displayName": "融资资源管理",
+  "displayNameZh": "融资资源管理",
+  "displayNameEn": "Financing Resource",
+  "primaryAttribute": "mcs_fsm_resource_no",
+  "primaryAttributeDisplayName": "融资资源编号",
+  "primaryAttributeDisplayNameZh": "融资资源编号",
+  "primaryAttributeDisplayNameEn": "Resource No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260713",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_resource_no",
+      "displayName": "融资资源编号",
+      "displayNameZh": "融资资源编号",
+      "displayNameEn": "Resource No.",
+      "description": "业务编码，FSMR + YYYYMMDD + 4位序号",
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    {
+      "schemaName": "mcs_fsm_institution_type",
+      "displayName": "机构类型",
+      "displayNameZh": "机构类型",
+      "displayNameEn": "Institution Type",
+      "description": "机构类型：1银行/2保险/9其他",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "银行": 1,
+        "保险": 2,
+        "其他": 9
+      }
+    },
+    {
+      "schemaName": "mcs_bank_id",
+      "displayName": "银行",
+      "displayNameZh": "银行",
+      "displayNameEn": "Bank",
+      "description": "机构类型为银行时必填，用于带出银行代码和名称",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_bank",
+      "targetEntityDisplayName": "银行"
+    },
+    {
+      "schemaName": "mcs_fsm_institution_code",
+      "displayName": "机构代码",
+      "displayNameZh": "机构代码",
+      "displayNameEn": "Institution Code",
+      "description": "银行时从mcs_bank.mcs_bankno带出；保险/其他时手工输入",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_fsm_institution_name",
+      "displayName": "机构名称",
+      "displayNameZh": "机构名称",
+      "displayNameEn": "Institution Name",
+      "description": "银行时从mcs_bank.mcs_name带出；保险/其他时手工输入",
+      "type": "string",
+      "required": true,
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_fsm_institution_country",
+      "displayName": "所在国家",
+      "displayNameZh": "所在国家",
+      "displayNameEn": "Country",
+      "description": "关联国家主数据",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "mcs_country",
+      "targetEntityDisplayName": "国家"
+    },
+    {
+      "schemaName": "mcs_fsm_institution_province",
+      "displayName": "洲省",
+      "displayNameZh": "洲省",
+      "displayNameEn": "State / Province",
+      "description": "关联州/省主数据",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "mcs_state",
+      "targetEntityDisplayName": "州/省"
+    },
+    {
+      "schemaName": "mcs_fsm_institution_city",
+      "displayName": "所在城市",
+      "displayNameZh": "所在城市",
+      "displayNameEn": "City",
+      "description": "关联城市主数据",
+      "type": "lookup",
+      "required": true,
+      "targetEntity": "mcs_city",
+      "targetEntityDisplayName": "城市"
+    },
+    {
+      "schemaName": "mcs_fsm_institution_address",
+      "displayName": "具体地址",
+      "displayNameZh": "具体地址",
+      "displayNameEn": "Address",
+      "description": "具体地址",
+      "type": "string",
+      "required": true,
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_fsm_institution_contact",
+      "displayName": "联系人",
+      "displayNameZh": "联系人",
+      "displayNameEn": "Contact Person",
+      "description": "联系人",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_fsm_institution_contact_position",
+      "displayName": "联系人职位",
+      "displayNameZh": "联系人职位",
+      "displayNameEn": "Contact Position",
+      "description": "联系人职位",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_fsm_institution_contact_tel",
+      "displayName": "联系人电话",
+      "displayNameZh": "联系人电话",
+      "displayNameEn": "Contact Phone",
+      "description": "联系人电话",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_fsm_institution_contact_email",
+      "displayName": "联系人邮箱",
+      "displayNameZh": "联系人邮箱",
+      "displayNameEn": "Contact Email",
+      "description": "联系人邮箱",
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_fsm_institution_desc",
+      "displayName": "机构简介",
+      "displayNameZh": "机构简介",
+      "displayNameEn": "Institution Description",
+      "description": "机构简介",
+      "type": "memo",
+      "required": true,
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_fsm_institution_products",
+      "displayName": "金融产品名称",
+      "displayNameZh": "金融产品名称",
+      "displayNameEn": "Financial Products",
+      "description": "金融产品多选选项集；银行产品编码 1-11，保险产品编码 101-104；前端根据机构类型筛选显示",
+      "type": "multiselectpicklist",
+      "required": true,
+      "options": {
+        "Non-recourse Accounts Receivable Factoring": 1,
+        "Recourse Accounts Receivable Factoring": 2,
+        "Purchase Loan Financing": 3,
+        "Inventory Financing": 4,
+        "Dealer Financing": 5,
+        "Retail Factoring": 6,
+        "Leasing": 7,
+        "Consortium": 8,
+        "Investment Loan": 9,
+        "wholesale": 10,
+        "Others": 11,
+        "特险": 101,
+        "项目险": 102,
+        "投资险": 103,
+        "贸易险": 104
+      }
+    },
+    {
+      "schemaName": "mcs_fsm_institution_other_product",
+      "displayName": "其他金融产品名称",
+      "displayNameZh": "其他金融产品名称",
+      "displayNameEn": "Other Product",
+      "description": "选Others时录入具体产品名称",
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_fsm_institution_product_remark",
+      "displayName": "金融产品备注",
+      "displayNameZh": "金融产品备注",
+      "displayNameEn": "Product Remark",
+      "description": "金融产品特性描述",
+      "type": "memo",
+      "required": true,
+      "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_fsm_status",
+      "displayName": "状态",
+      "displayNameZh": "状态",
+      "displayNameEn": "Status",
+      "description": "启用状态，true启用/false停用",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "schemaName": "mcs_fsm_rl_status",
+      "displayName": "是否启用过",
+      "displayNameZh": "是否启用过",
+      "displayNameEn": "Ever Enabled",
+      "description": "一旦启用后不可删除",
+      "type": "boolean",
+      "required": true
+    }
+  ]
+}

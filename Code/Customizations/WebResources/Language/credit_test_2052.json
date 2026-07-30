@@ -1,0 +1,5 @@
+{
+  "CreditScoringCard_CloneNew": "克隆新建",
+  "CreditScoringCard_CloneTooltip": "克隆当前评分卡分档记录，保留评分项目信息，可修改分档区间和赋分",
+  "CreditScoringCard_AmountCurrencyHint": "金额类定量指标评分标准统一按美元（USD）配置，单位为元（1元=1美元）。系统在评分计算时会自动将 Coface 返回的当地货币按年度预算汇率换算为 USD 后比对。"
+}

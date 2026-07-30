@@ -1,4 +1,4 @@
-using Microsoft.Crm.Sdk.Messages;
+using D365ToolCommon.WebResource;
 using Microsoft.PowerPlatform.Dataverse.Client;
 using System;
 using System.Threading;
@@ -6,26 +6,22 @@ using System.Threading;
 namespace D365MetadataTool
 {
     /// <summary>
-    /// 客户信用画像 WebResource 发布器（带重试）
+    /// 客户信用画像 WebResource 发布器（带阻塞检测）
+    /// 内部统一使用 WebResourceService.PublishWebResources，保留对并发发布阻塞的等待重试逻辑。
     /// </summary>
     public class PublishProfileWebResources
     {
         public static void Run(ServiceClient service, int maxRetries = 30, int delaySeconds = 15)
         {
             var resourceNames = new[] { "mcs_credit_profile.html", "mcs_credit_wheel.html", "mcs_credit_wheel_vue.js", "mcs_credit_wheel_echarts.js" };
-            var resourceXml = string.Join("", Array.ConvertAll(resourceNames, n => $"<webresource>{n}</webresource>"));
-
-            var request = new PublishXmlRequest
-            {
-                ParameterXml = $"<importexportxml><webresources>{resourceXml}</webresources></importexportxml>"
-            };
+            var webResourceService = new WebResourceService(service);
 
             for (int i = 1; i <= maxRetries; i++)
             {
                 try
                 {
                     Console.WriteLine($">>> 尝试发布画像 WebResource... (第 {i}/{maxRetries} 次)");
-                    service.Execute(request);
+                    webResourceService.PublishWebResources(resourceNames);
                     Console.WriteLine($"  ✅ WebResource 发布成功: {string.Join(", ", resourceNames)}");
                     return;
                 }

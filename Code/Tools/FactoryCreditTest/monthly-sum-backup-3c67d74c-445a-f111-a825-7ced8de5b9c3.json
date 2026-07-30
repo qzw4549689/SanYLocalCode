@@ -1,0 +1,111 @@
+{
+  "accountId": "3c67d74c-445a-f111-a825-7ced8de5b9c3",
+  "accountName": "LTC\u5BA2\u6237-1",
+  "backupTimeUtc": "2026-07-29T12:22:02.4918450Z",
+  "records": [
+    {
+      "statecode": {
+        "kind": "optionset",
+        "v": 0
+      },
+      "statuscode": {
+        "kind": "optionset",
+        "v": 1
+      },
+      "mcs_secondhand": {
+        "kind": "bool",
+        "v": false
+      },
+      "createdon": {
+        "kind": "datetime",
+        "v": "2026-07-29T11:21:10.0000000Z"
+      },
+      "mcs_migratedtransaction": {
+        "kind": "bool",
+        "v": false
+      },
+      "mcs_paymentcollectioncurrentmonthrmb": {
+        "kind": "decimal",
+        "v": 1200000.0000000000
+      },
+      "mcs_notificationsend": {
+        "kind": "bool",
+        "v": false
+      },
+      "ownerid": {
+        "kind": "entityref",
+        "v": "systemuser",
+        "v2": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+      },
+      "mcs_overdurationdays": {
+        "kind": "int",
+        "v": 30
+      },
+      "modifiedon": {
+        "kind": "datetime",
+        "v": "2026-07-29T11:21:10.0000000Z"
+      },
+      "mcs_name": {
+        "kind": "string",
+        "v": "OUT20260710032913"
+      },
+      "mcs_downpaymentinstallment": {
+        "kind": "bool",
+        "v": false
+      },
+      "mcs_insured": {
+        "kind": "bool",
+        "v": false
+      },
+      "mcs_warrantydeposit": {
+        "kind": "bool",
+        "v": false
+      },
+      "mcs_overdue": {
+        "kind": "bool",
+        "v": false
+      },
+      "modifiedby": {
+        "kind": "entityref",
+        "v": "systemuser",
+        "v2": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+      },
+      "mcs_newoverdueamountrmb": {
+        "kind": "decimal",
+        "v": 0.0000000000
+      },
+      "mcs_realstatus": {
+        "kind": "optionset",
+        "v": 1
+      },
+      "mcs_account": {
+        "kind": "entityref",
+        "v": "account",
+        "v2": "3c67d74c-445a-f111-a825-7ced8de5b9c3"
+      },
+      "createdby": {
+        "kind": "entityref",
+        "v": "systemuser",
+        "v2": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+      },
+      "mcs_outstandingid": {
+        "kind": "guid",
+        "v": "4185d194-3f8b-f111-8077-7ced8de4eab4"
+      },
+      "owningbusinessunit": {
+        "kind": "entityref",
+        "v": "businessunit",
+        "v2": "e2bad3a4-c059-4e64-b723-d7b50be9809d"
+      },
+      "owninguser": {
+        "kind": "entityref",
+        "v": "systemuser",
+        "v2": "6ad92d8f-ab60-f111-a826-000d3aa333b3"
+      },
+      "mcs_newremainingamountrmb": {
+        "kind": "decimal",
+        "v": 500000.0000000000
+      }
+    }
+  ]
+}

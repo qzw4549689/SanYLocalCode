@@ -1,0 +1,58 @@
+{
+  "entityName": "mcs_fca_mdlversion",
+  "displayName": "厂端授信模型版本表",
+  "displayNameZh": "厂端授信模型版本表",
+  "displayNameEn": "Factory Credit Model Version",
+  "primaryAttribute": "mcs_versionid",
+  "primaryAttributeDisplayName": "模型版本",
+  "primaryAttributeDisplayNameZh": "模型版本",
+  "primaryAttributeDisplayNameEn": "Model Version",
+  "primaryAttributeLength": 10,
+  "solutionName": "entity_20260603_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_isactive",
+      "displayName": "是否生效",
+      "displayNameZh": "是否生效",
+      "displayNameEn": "Is Active",
+      "description": "模型版本是否生效，1-是，0-否",
+      "type": "picklist",
+      "required": true,
+      "options": {
+        "否": 0,
+        "是": 1
+      }
+    },
+    {
+      "schemaName": "mcs_modeldesc",
+      "displayName": "模型描述",
+      "displayNameZh": "模型描述",
+      "displayNameEn": "Model Description",
+      "description": "模型版本描述",
+      "type": "memo",
+      "maxLength": 2000,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_validfrom",
+      "displayName": "开始日期",
+      "displayNameZh": "开始日期",
+      "displayNameEn": "Valid From",
+      "description": "模型版本生效开始日期",
+      "type": "datetime",
+      "dateOnly": true,
+      "required": true
+    },
+    {
+      "schemaName": "mcs_validend",
+      "displayName": "结束日期",
+      "displayNameZh": "结束日期",
+      "displayNameEn": "Valid To",
+      "description": "模型版本生效结束日期",
+      "type": "datetime",
+      "dateOnly": true,
+      "required": true
+    }
+  ]
+}

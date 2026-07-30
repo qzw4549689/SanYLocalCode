@@ -4,7 +4,40 @@
  * 功能: 自动带出、显隐控制、下拉联动、校验
  */
 
+// 同步加载多语言帮助类（实验阶段，验证通过后可改为窗体依赖库）
+(function () {
+    if (typeof LanguageHelper !== "undefined") return;
+    try {
+        var req = new XMLHttpRequest();
+        req.open("GET", Xrm.Utility.getGlobalContext().getClientUrl() + "/WebResources/mcs_language_helper.js", false);
+        req.send();
+        if (req.status === 200) {
+            // 通过 script 标签注入，确保 LanguageHelper 定义在全局作用域
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = req.responseText;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        } else {
+            console.warn("mcs_language_helper.js 加载失败，状态码:", req.status);
+        }
+    } catch (e) {
+        console.error("加载 mcs_language_helper.js 异常:", e);
+    }
+})();
+
 var ScoringCardForm = ScoringCardForm || {};
+
+/**
+ * 多语言取词（带中文兜底）
+ * 语言包已加载时返回对应语言文本；未加载/未找到时返回原中文，保证中文用户不受影响
+ */
+ScoringCardForm.L = function (key, defaultText) {
+    if (typeof LanguageHelper !== "undefined") {
+        var v = LanguageHelper.getLabel(key);
+        if (v && v !== key) return v;
+    }
+    return defaultText;
+};
 
 /**
  * 表单加载事件
@@ -12,13 +45,18 @@ var ScoringCardForm = ScoringCardForm || {};
 ScoringCardForm.onLoad = function (executionContext) {
     var formContext = executionContext.getFormContext();
     var formType = formContext.ui.getFormType();
-    
+
+    // 预加载语言包（异步，不阻塞后续逻辑）
+    if (typeof LanguageHelper !== "undefined") {
+        LanguageHelper.loadLanguagePack();
+    }
+
     // 设置字段只读
     ScoringCardForm.setFieldsReadOnly(formContext);
-    
+
     // 根据数据类型控制显隐
     ScoringCardForm.toggleFieldsByDataType(formContext);
-    
+
     // 注册字段变更事件
     ScoringCardForm.registerEvents(formContext);
 };
@@ -159,7 +197,7 @@ ScoringCardForm.onCreditItemChange = function (executionContext) {
         })
         .catch(function (error) {
             console.error("查询评分项目失败:", error);
-            Xrm.Utility.alertDialog("查询评分项目信息失败，请重试");
+            Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_QueryItemFailed", "查询评分项目信息失败，请重试"));
         });
 };
 
@@ -222,7 +260,21 @@ ScoringCardForm.toggleFieldsByDataType = function (formContext) {
         // 清除定性值
         var listValueField = formContext.getAttribute("mcs_listvalue");
         if (listValueField) listValueField.setValue(null);
-        
+
+        // 金额类定量指标提示：评分标准统一按 USD 配置
+        var showAmountHint = function () {
+            formContext.ui.setFormNotification(
+                LanguageHelper.getLabel("CreditScoringCard_AmountCurrencyHint"),
+                "INFO",
+                "amount_currency_hint"
+            );
+        };
+        if (typeof LanguageHelper !== "undefined") {
+            LanguageHelper.loadLanguagePack(showAmountHint);
+        } else {
+            showAmountHint();
+        }
+
     } else if (dataTypeNum === 100000001) {
         // 定性(100000001)：显示listvalue，隐藏min/max
         console.log("分支: 定性");
@@ -234,13 +286,17 @@ ScoringCardForm.toggleFieldsByDataType = function (formContext) {
         var maxField = formContext.getAttribute("mcs_maxvalue");
         if (minField) minField.setValue(null);
         if (maxField) maxField.setValue(null);
-        
+        // 清除金额提示
+        formContext.ui.clearFormNotification("amount_currency_hint");
+
     } else {
         // 未选择：全部隐藏
         console.log("分支: 未匹配，全部隐藏");
         if (minValueControl) minValueControl.setVisible(false);
         if (maxValueControl) maxValueControl.setVisible(false);
         if (listValueControl) listValueControl.setVisible(false);
+        // 清除金额提示
+        formContext.ui.clearFormNotification("amount_currency_hint");
     }
     console.log("=== toggleFieldsByDataType END ===");
 };
@@ -281,7 +337,7 @@ ScoringCardForm.loadListValues = function (formContext, itemGuid) {
             listValueControl.clearOptions();
             
             // 添加默认空选项
-            listValueControl.addOption({ value: "", text: "--请选择--" });
+            listValueControl.addOption({ value: "", text: ScoringCardForm.L("CreditScoringCard_PleaseSelect", "--请选择--") });
             
             // 添加查询到的选项
             options.forEach(function (option) {
@@ -306,16 +362,9 @@ ScoringCardForm.onMinValueChange = function (executionContext) {
     var minValue = minField.getValue();
     var maxValue = maxField.getValue();
     
-    // 校验：最小值不能小于0
-    if (minValue !== null && minValue < 0) {
-        Xrm.Utility.alertDialog("定量最小值不能小于0");
-        minField.setValue(null);
-        return;
-    }
-    
     // 校验：最小值必须小于最大值
     if (minValue !== null && maxValue !== null && minValue >= maxValue) {
-        Xrm.Utility.alertDialog("定量最小值必须小于最大值");
+        Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_MinMaxError", "定量最小值必须小于最大值"));
         minField.setValue(null);
     }
 };
@@ -335,9 +384,85 @@ ScoringCardForm.onMaxValueChange = function (executionContext) {
     
     // 校验：最大值必须大于最小值
     if (minValue !== null && maxValue !== null && maxValue <= minValue) {
-        Xrm.Utility.alertDialog("定量最大值必须大于最小值");
+        Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_MaxGreaterThanMin", "定量最大值必须大于最小值"));
         maxField.setValue(null);
     }
+};
+
+/**
+ * 克隆新建当前评分卡分档记录
+ * 保留：评分卡类型、评分项目、项目编码、项目名称、数据类型、项目分类
+ * 清空：分档编码（自动生成）、定量区间、定性项目值、赋分
+ * 创建成功后打开新记录表单
+ */
+ScoringCardForm.cloneRecord = function (primaryControl) {
+    var formContext = primaryControl;
+    var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
+
+    if (!recordId) {
+        Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_SaveBeforeClone", "请先保存当前记录后再克隆。"));
+        return;
+    }
+
+    Xrm.Utility.showProgressIndicator(ScoringCardForm.L("CreditScoringCard_Cloning", "正在克隆评分卡分档..."));
+
+    var selectFields = [
+        "mcs_categoryid",
+        "mcs_credititem",
+        "mcs_itemid",
+        "mcs_itemname",
+        "mcs_datatype",
+        "mcs_typeid",
+        "mcs_cardname"
+    ].join(",");
+
+    Xrm.WebApi.retrieveRecord("mcs_credit_scoringcard", recordId, "?$select=" + selectFields)
+        .then(function (result) {
+            var newRecord = {};
+
+            // 评分卡类型
+            if (result.mcs_categoryid !== undefined && result.mcs_categoryid !== null) {
+                newRecord.mcs_categoryid = result.mcs_categoryid;
+            }
+
+            // 评分项目 Lookup
+            if (result._mcs_credititem_value) {
+                newRecord["mcs_credititem@odata.bind"] = "/mcs_credit_items(" + result._mcs_credititem_value + ")";
+            }
+
+            // 评分项目编码、名称
+            if (result.mcs_itemid) {
+                newRecord.mcs_itemid = result.mcs_itemid;
+            }
+            if (result.mcs_itemname) {
+                newRecord.mcs_itemname = result.mcs_itemname;
+            }
+
+            // 数据类型、项目分类
+            if (result.mcs_datatype !== undefined && result.mcs_datatype !== null) {
+                newRecord.mcs_datatype = result.mcs_datatype;
+            }
+            if (result.mcs_typeid !== undefined && result.mcs_typeid !== null) {
+                newRecord.mcs_typeid = result.mcs_typeid;
+            }
+
+            // 评分卡名称：保留原名称并加克隆后缀
+            newRecord.mcs_cardname = (result.mcs_cardname || "") + "（克隆）";
+
+            return Xrm.WebApi.createRecord("mcs_credit_scoringcard", newRecord);
+        })
+        .then(function (newRecordRef) {
+            Xrm.Utility.closeProgressIndicator();
+            Xrm.Navigation.openForm({
+                entityName: "mcs_credit_scoringcard",
+                entityId: newRecordRef.id
+            });
+        })
+        .catch(function (error) {
+            Xrm.Utility.closeProgressIndicator();
+            console.error("克隆评分卡分档失败:", error);
+            Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_CloneFailed", "克隆失败：") + (error.message || JSON.stringify(error)));
+        });
 };
 
 /**
@@ -355,7 +480,7 @@ ScoringCardForm.onSave = function (executionContext) {
         var maxValue = formContext.getAttribute("mcs_maxvalue").getValue();
         
         if (minValue === null || maxValue === null) {
-            Xrm.Utility.alertDialog("定量项目必须填写最小值和最大值");
+            Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_QuantMinMaxRequired", "定量项目必须填写最小值和最大值"));
             executionContext.getEventArgs().preventDefault();
             return;
         }
@@ -365,7 +490,7 @@ ScoringCardForm.onSave = function (executionContext) {
     if (dataTypeNum === 100000001) {
         var listValue = formContext.getAttribute("mcs_listvalue").getValue();
         if (!listValue || listValue.length === 0) {
-            Xrm.Utility.alertDialog("定性项目必须选择定性项目值");
+            Xrm.Utility.alertDialog(ScoringCardForm.L("CreditScoringCard_QualValueRequired", "定性项目必须选择定性项目值"));
             executionContext.getEventArgs().preventDefault();
             return;
         }

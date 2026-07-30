@@ -3,6 +3,14 @@
 ## Purpose
 A metadata management tool for Dynamics 365 (D365).
 
+## 元数据创建红线
+
+**所有实体、字段、表单、视图、关系、WebResource 等元数据的创建与更新，必须使用 `D365ToolCommon` 或本工具中已有的公共方法。**
+
+- **严禁**在任意工具、脚本、插件中直接调用 `CreateAttributeRequest`、`CreateEntityRequest`、`UpdateEntityRequest` 等 SDK 原生 API 创建元数据
+- **严禁**在本工具中临时编写新的元数据创建方法
+- 如 `EntityManager` 或 `D365ToolCommon` 中的公共方法不存在或不能满足需求，**必须向负责人提出申请，获批准后方可修改或扩展公共方法**
+
 ## Overview
 This tool is used to extract, manage, and work with D365 entity metadata, including entity definitions, attributes, forms, views, plugin steps, and web resources.
 

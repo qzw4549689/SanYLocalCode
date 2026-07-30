@@ -5,13 +5,54 @@
  * 影响范围: 仅限mcs_credit_items实体
  */
 
+// 同步加载多语言帮助类（实验阶段，验证通过后可改为窗体依赖库）
+(function () {
+    if (typeof LanguageHelper !== "undefined") return;
+    try {
+        var req = new XMLHttpRequest();
+        req.open("GET", Xrm.Utility.getGlobalContext().getClientUrl() + "/WebResources/mcs_language_helper.js", false);
+        req.send();
+        if (req.status === 200) {
+            // 通过 script 标签注入，确保 LanguageHelper 定义在全局作用域
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = req.responseText;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        } else {
+            console.warn("mcs_language_helper.js 加载失败，状态码:", req.status);
+        }
+    } catch (e) {
+        console.error("加载 mcs_language_helper.js 异常:", e);
+    }
+})();
+
 var CreditItemsForm = CreditItemsForm || {};
+
+/**
+ * 多语言取词（带中文兜底）
+ * 语言包已加载时返回对应语言文本；未加载/未找到时返回原中文，保证中文用户不受影响
+ */
+CreditItemsForm.L = function (key, defaultText) {
+    if (typeof LanguageHelper !== "undefined") {
+        var v = LanguageHelper.getLabel(key);
+        if (v && v !== key) return v;
+    }
+    return defaultText;
+};
 
 /**
  * 表单加载事件
  */
 CreditItemsForm.onLoad = function (executionContext) {
     var formContext = executionContext.getFormContext();
+
+    // 预加载语言包；数据类型提示在语言包就绪后的回调中渲染，避免英文用户在 onLoad 阶段看到中文兜底
+    if (typeof LanguageHelper !== "undefined") {
+        LanguageHelper.loadLanguagePack(function () {
+            CreditItemsForm.toggleFieldsByDataType(formContext);
+        });
+    }
+
     var formType = formContext.ui.getFormType();
     
     // 设置字段只读
@@ -20,8 +61,10 @@ CreditItemsForm.onLoad = function (executionContext) {
     // 注册字段变更事件
     CreditItemsForm.registerEvents(formContext);
     
-    // 根据数据类型初始化显隐
-    CreditItemsForm.toggleFieldsByDataType(formContext);
+    // 根据数据类型初始化显隐（无语言包时立即渲染；有语言包时由上方回调渲染）
+    if (typeof LanguageHelper === "undefined") {
+        CreditItemsForm.toggleFieldsByDataType(formContext);
+    }
 };
 
 /**
@@ -83,14 +126,14 @@ CreditItemsForm.toggleFieldsByDataType = function (formContext) {
     if (dataType === 1) {
         // 定量
         formContext.ui.setFormNotification(
-            "当前为定量指标，请在评分卡配置表中配置分值范围（最小值/最大值）",
+            CreditItemsForm.L("CreditItems_QuantHint", "当前为定量指标，请在评分卡配置表中配置分值范围（最小值/最大值）"),
             "INFO",
             "datatype_hint"
         );
     } else if (dataType === 2) {
         // 定性
         formContext.ui.setFormNotification(
-            "当前为定性指标，请在枚举值表中配置选项值",
+            CreditItemsForm.L("CreditItems_QualHint", "当前为定性指标，请在枚举值表中配置选项值"),
             "INFO",
             "datatype_hint"
         );
@@ -105,14 +148,14 @@ CreditItemsForm.onSave = function (executionContext) {
     
     // 校验必填字段
     var requiredFields = [
-        { name: "mcs_itemid", label: "评分项目编码" },
-        { name: "mcs_itemname", label: "评分项目名称" },
-        { name: "mcs_itemdesc", label: "评分项目说明" },
-        { name: "mcs_group", label: "评分项目分类" },
-        { name: "mcs_datatype", label: "数据类型" },
-        { name: "mcs_source", label: "内外部" },
-        { name: "mcs_validate", label: "人工补录" },
-        { name: "mcs_3p", label: "外部提供" }
+        { name: "mcs_itemid", label: CreditItemsForm.L("CreditItems_Field_ItemCode", "评分项目编码") },
+        { name: "mcs_itemname", label: CreditItemsForm.L("CreditItems_Field_ItemName", "评分项目名称") },
+        { name: "mcs_itemdesc", label: CreditItemsForm.L("CreditItems_Field_ItemDesc", "评分项目说明") },
+        { name: "mcs_group", label: CreditItemsForm.L("CreditItems_Field_Group", "评分项目分类") },
+        { name: "mcs_datatype", label: CreditItemsForm.L("CreditItems_Field_DataType", "数据类型") },
+        { name: "mcs_source", label: CreditItemsForm.L("CreditItems_Field_Source", "内外部") },
+        { name: "mcs_validate", label: CreditItemsForm.L("CreditItems_Field_Validate", "人工补录") },
+        { name: "mcs_3p", label: CreditItemsForm.L("CreditItems_Field_3p", "外部提供") }
     ];
     
     var missingFields = [];
@@ -124,7 +167,7 @@ CreditItemsForm.onSave = function (executionContext) {
     });
     
     if (missingFields.length > 0) {
-        Xrm.Utility.alertDialog("以下字段不能为空：" + missingFields.join("、"));
+        Xrm.Utility.alertDialog(CreditItemsForm.L("CreditForm_MissingFieldsPrefix", "以下字段不能为空：") + missingFields.join(CreditItemsForm.L("CreditForm_ListSeparator", "、")));
         executionContext.getEventArgs().preventDefault();
         return;
     }

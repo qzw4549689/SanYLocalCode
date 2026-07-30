@@ -342,7 +342,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                         if (nace.TryGetProperty("code", out var code))
                         {
                             string naceCode = code.GetString() ?? "";
-                            string industry = MapNaceToSanyIndustry(naceCode);
+                            string industry = CofaceNaceMappingHelper.GetSanyIndustry(_service, _tracer, naceCode);
                             if (!string.IsNullOrEmpty(industry) && !industries.Contains(industry))
                             {
                                 industries.Add(industry);
@@ -357,40 +357,6 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 _tracer.Trace($"解析NACE代码异常: {ex.Message}");
             }
             return "O"; // 缺失值
-        }
-
-        /// <summary>
-        /// NACE Rev.2.1 代码映射到三一行业定义
-        /// 提取4位Class前2位(Division)进行映射
-        /// </summary>
-        private string MapNaceToSanyIndustry(string naceCode)
-        {
-            if (string.IsNullOrEmpty(naceCode) || naceCode.Length < 2)
-                return "";
-
-            // 提取前2位Division
-            string division = naceCode.Substring(0, 2);
-            if (!int.TryParse(division, out int div))
-                return "";
-
-            // NACE Division → 三一行业映射（基于Joyce提供的材料）
-            switch (div)
-            {
-                case 1: return "农业";
-                case 2: return "林业";
-                case int d when d >= 5 && d <= 9: return "矿业";
-                case 23: return "商混";
-                case int d when d >= 10 && d <= 33: return "制造业";
-                case 41:
-                case 42: return "建工";
-                case 43: return "吊装";
-                case 49:
-                case 50:
-                case 51: return "集装箱运力";
-                case 52: return "港务";
-                case 77: return "租赁";
-                default: return "";
-            }
         }
 
         /// <summary>
