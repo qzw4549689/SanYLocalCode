@@ -31,8 +31,7 @@ var response = service.Execute(request);
 
 var status = response["status"]?.ToString();
 var message = response["message"]?.ToString();
-var records = response["records"]?.ToString(); // JSON 字符串：{"status":"1","message":"","records":[...]}
-// 解析示例：JObject.Parse(records)["records"] → 记录数组
+var records = response["records"]?.ToString(); // JSON 字符串，解析后为记录数组
 ```
 
 ### 2.2 JavaScript / WebResource 中调用
@@ -51,8 +50,7 @@ Xrm.WebApi.online.execute(request).then(
         result.json().then(function (response) {
             console.log("status:", response.status);
             console.log("message:", response.message);
-            // records 为包装结构，需再取 .records 才是记录数组
-            console.log("records:", JSON.parse(response.records).records);
+            console.log("records:", JSON.parse(response.records));
         });
     },
     function (error) {
@@ -83,13 +81,13 @@ Xrm.WebApi.online.execute(request).then(
 |---|---|---|
 | `status` | String | `1` 成功，`0` 失败 |
 | `message` | String | 错误信息；成功时为空 |
-| `records` | String | 匹配结果 JSON 字符串。成功时为完整包装结构 `{"status":"1","message":"","records":[...]}`，**需再取 `.records` 属性才是记录数组**；失败时为 `"[]"`（错误信息看顶层 `message`） |
+| `records` | String | 匹配记录集 JSON 字符串，解析后即为记录数组；无匹配或失败时为 `"[]"`（错误信息看顶层 `message`） |
 
 ---
 
 ## 5. 返回记录结构
 
-`records` 解析后为完整包装对象 `{"status":"1","message":"","records":[...]}`，取其中 `.records` 属性为记录数组，单条记录字段如下：
+`records` 解析后为记录数组，单条记录字段如下：
 
 | 字段 | 类型 | 说明 | 对应表名（架构名称） |
 |---|---|---|---|
@@ -129,30 +127,26 @@ request["mcs_buyercode"] = "ACN202605280000";
 
 ### 响应
 
-> 输出参数：`status="1"`、`message=""`、`records` = 如下 JSON **字符串**（比记录数组多包一层，解析后取 `.records` 为记录数组）。
+> 输出参数：`status="1"`、`message=""`、`records` = 如下 JSON **字符串**（解析后即为记录数组）。
 
 ```json
-{
-  "status": "1",
-  "message": "",
-  "records": [
-    {
-      "tradeTermId": "TC26062502",
-      "buId": "BU-1018",
-      "buName": "CONCRETE MACHINERY BU/泵路海外营销公司",
-      "subId": "A000025",
-      "subName": "China-SH",
-      "countryCode": "1,001,KT",
-      "countryName": "南非,中国,Kertdiva",
-      "typeId": "01,02",
-      "typeName": "燃油牵引车,电动牵引车",
-      "buyerGrade": "A/S",
-      "downPay": 0.4000000000,
-      "payTerm": 30,
-      "payFreq": 30
-    }
-  ]
-}
+[
+  {
+    "tradeTermId": "TC26062502",
+    "buId": "BU-1018",
+    "buName": "CONCRETE MACHINERY BU/泵路海外营销公司",
+    "subId": "A000025",
+    "subName": "China-SH",
+    "countryCode": "1,001,KT",
+    "countryName": "南非,中国,Kertdiva",
+    "typeId": "01,02",
+    "typeName": "燃油牵引车,电动牵引车",
+    "buyerGrade": "A/S",
+    "downPay": 0.4000000000,
+    "payTerm": 30,
+    "payFreq": 30
+  }
+]
 ```
 
 ### 6.2 多产品线查询示例（UAT 实测，2026-07-28）
@@ -172,30 +166,26 @@ request["mcs_buyercode"] = "AID202309210002";
 
 ### 响应（节选）
 
-> `records` 输出参数内容节选，解析后取 `.records` 为记录数组。
+> `records` 输出参数内容节选（解析后即为记录数组）。
 
 ```json
-{
-  "status": "1",
-  "message": "",
-  "records": [
-    {
-      "tradeTermId": "TC2607270026",
-      "buId": "BU-0026",
-      "buName": "Latin America BU/拉美大区",
-      "subId": "A011058",
-      "subName": "Brazil Region/巴西国区",
-      "countryCode": "AI",
-      "countryName": "Anguilla",
-      "typeId": "01,02,03",
-      "typeName": "燃油牵引车,电动牵引车,泵车",
-      "buyerGrade": "A/B/S",
-      "downPay": 0.1500000000,
-      "payTerm": 120,
-      "payFreq": 30
-    }
-  ]
-}
+[
+  {
+    "tradeTermId": "TC2607270026",
+    "buId": "BU-0026",
+    "buName": "Latin America BU/拉美大区",
+    "subId": "A011058",
+    "subName": "Brazil Region/巴西国区",
+    "countryCode": "AI",
+    "countryName": "Anguilla",
+    "typeId": "01,02,03",
+    "typeName": "燃油牵引车,电动牵引车,泵车",
+    "buyerGrade": "A/B/S",
+    "downPay": 0.1500000000,
+    "payTerm": 120,
+    "payFreq": 30
+  }
+]
 ```
 
 > 说明：单独传 `CP0202` 时无匹配记录（返回空数组）；改为 `CP0202,CP0501` 后因 CP0501 映射的分类 01 与记录相交而命中。
@@ -293,9 +283,9 @@ request["mcs_buyercode"] = "AID202309210002";
 | `0` | 产品线编码不能为空 | 缺少 `mcs_prdgroupid` |
 | `0` | 客户编码不能为空 | 缺少 `mcs_buyercode` |
 | `0` | 查询失败: ... | Plugin 执行异常 |
-| `1` | 空字符串 | 成功，但可能无匹配记录（`records` 内层 `.records` 为空数组） |
+| `1` | 空字符串 | 成功，但可能无匹配记录（`records` 为 `"[]"`） |
 
-> 失败时 `records` 输出参数固定为 `"[]"`；成功时为包装结构 `{"status":"1","message":"","records":[...]}`。
+> 无论成功/失败，`records` 输出参数均为记录数组 JSON 字符串（无匹配或失败时为 `"[]"`）。
 
 ---
 
@@ -305,15 +295,15 @@ request["mcs_buyercode"] = "AID202309210002";
 
 | 解决方案 | 内容 |
 |---|---|
-| `McsPlugin` | Plugin Assembly `SanyD365.D365Extension.Sales` |
-| `McsCustomAPI` | Custom API `mcs_QueryTradeStPayTerm`、请求参数、响应属性 |
+| `McsCustomAPI` | Custom API `mcs_QueryTradeStPayTerm`、请求参数、响应属性，**以及实现 Assembly `SanyD365.D365ExtensionApi.Sales`** |
+
+> 注意：`McsPlugin` 中的 `SanyD365.D365Extension.Sales` 仅有已废弃的 `QueryTradeStPayTermPlugin_Legacy` 副本，本接口不涉及。
 
 ### 9.2 UAT/PROD 发布
 
-通过 n8n Release Tool 发布时，需同时勾选：
+通过 n8n Release Tool 发布时，勾选：
 
-- `McsPlugin`
-- `McsCustomAPI`
+- `McsCustomAPI`（同时携带 Custom API 元数据和实现 Assembly）
 - `McsWebResource`（如同时更新 JS）
 
 ---
@@ -323,3 +313,12 @@ request["mcs_buyercode"] = "AID202309210002";
 1. **泵路事业部真实编码**：当前代码使用 `BU-1018` 作为泵路事业部标识，需业务确认后替换。
 2. **个人客户判断**：客户主数据表 `mcs_customermasterdata` 暂无 `mcs_customertype` 字段，个人客户逻辑待补充。
 3. **客户等级**：PRD 明确 `mcs_creditgrade` 暂不参与查询。
+
+---
+
+## 11. 变更记录
+
+| 日期 | 变更 |
+|---|---|
+| 2026-07-28 | `mcs_prdgroupid` 支持逗号分隔传多个产品线编码（PR 6246）；示例参数更新为实测可调通组合；补充参数对应表名（架构名称） |
+| 2026-07-30 | `records` 输出改为裸记录数组（PR 6377），与失败路径 `"[]"` 一致；修正 §9 部署说明（实现 Assembly 随 `McsCustomAPI` 发布） |

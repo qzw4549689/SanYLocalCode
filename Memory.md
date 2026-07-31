@@ -2,7 +2,7 @@
 
 > **项目：** 三一重工 D365 客户信用评估系统
 > **技术栈：** Dynamics 365 (Dataverse) + C# Plugin + JavaScript WebResource
-> **最后更新：** 2026-07-28（成交条件查询 API 产品线编码支持逗号分隔多值：PR 6246 已合并 uat，DEV1 主 Assembly 已更新并回归通过，待 UAT 发布；API 文档示例已更新为实测可调通参数）
+> **最后更新：** 2026-07-30（禅道 #1433 融资资源启用/停用修复：PR 已合并 uat，DEV1 主 Assembly 已更新并回归通过，标签纠错已发布，待用户 DEV1 界面验证及 n8n 发布 UAT）
 
 ---
 
@@ -519,7 +519,59 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | 远程合并 | 分支 `uat-20260728-peter-tradestpayterm-multi-prdgroup` → **PR 6246 已合并 `uat`**（merge `ee919f16c02`，仅 `D365ExtensionApi.Sales/Apis/TradeStPayTerm/TradeStPayTermQueryService.cs` +13/-1）；已用合并后 uat 重编并更新 DEV1 主 Assembly `SanyD365.D365ExtensionApi.Sales`（3aa32db6），主 Assembly 多值回归通过 |
 | 工具 | MetadataTool：`deploy-tradestpayterm-api` 增加可选 [Plugin类名] 参数（默认值修正为实际绑定的 ExtensionApi 类，原硬编码 `D365Extension.Sales` 副本为 `_Legacy`）；新增 `bind-customapi <唯一名> <类名>` 命令（复用 `CustomApiDeployer.BindPluginType`，只改绑定不改 Assembly） |
 | 注意 | 远程存在两份查询服务代码：当前绑定 `SanyD365.D365ExtensionApi.Sales`（本次已改）；`SanyD365.D365Extension.Sales` 副本 plugintype 名 `QueryTradeStPayTermPlugin_Legacy` 已废弃未动。plugintype 短名 `QueryTradeStPayTermPlugin` 唯一索引冲突 → 临时 Assembly 验证时本地类名临时改为 `QueryTradeStPayTermMultiPlugin`，验证后已改回 |
-| 状态 | ✅ DEV1 已生效；⏸️ 待用户 n8n 发布 UAT（`McsPlugin` + `McsCustomAPI`）；无新增 D365 组件，不涉及主清单变更 |
+| 状态 | ✅ DEV1 已生效；⏸️ 待用户 n8n 发布 UAT（**只需勾 `McsCustomAPI`**：实现 Assembly `SanyD365.D365ExtensionApi.Sales` 在该包内，不在 McsPlugin）；无新增 D365 组件，不涉及主清单变更 |
+
+---
+
+### 2.21 已完成（成交条件查询 API records 输出改裸记录数组）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-07-30 |
+| 需求 | 调用方反馈 `records` 输出多包了一层（整个 `{"status","message","records":[...]}` 包装对象），要求改为裸记录数组 |
+| 根因 | `QueryTradeStPayTermPlugin` 成功路径 `SerializeResult(result)` 序列化了整个 QueryResult；失败路径 `SetErrorResult` 本来就是 `"[]"`，两路径不一致 |
+| 改动 | `TradeStPayTermQueryService` 新增 `SerializeRecords(List<TradeStPayTermRecord>)`；Plugin 成功路径改 `SerializeRecords(result.Records)` |
+| 验证 | DEV1 临时 Assembly 三路径验证：成功有匹配→裸数组/成功无匹配→`[]`/失败→`status=0`+`message`+`[]`；清理后绑回主 Assembly、注销临时 Assembly（红线执行完毕） |
+| 远程合并 | 分支 `fix-20260728-peter-tradestpayterm-records-array` → **PR 6377 已合并 `uat`**（merge `f8a83cf51f0`，2 文件 +16/-3）；已重编并更新 DEV1 主 Assembly（3aa32db6），回归通过 |
+| 注意 | ⚠️ 首次更新 DEV1 时撞库（他人导入 Solution 超时），但 Assembly 内容已更新成功、API 绑定未受影响；补跑 deploy 完成参数/解决方案归属刷新。接口契约变更存在切换窗口：发布前 records 为包装结构（需 `.records` 多取一层），发布后为裸数组，需同步通知调用方 |
+| 状态 | ✅ DEV1 已生效；⏸️ 待用户 n8n 发布 UAT（**只需勾 `McsCustomAPI`**）后验证；文档（md+Excel）已改为裸数组契约；无新增 D365 组件 |
+
+---
+
+### 2.22 已修复待验证（融资资源启用/停用 + 删除守卫 — 禅道 #1433）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-07-30 |
+| 需求 | Bug #1433：融资资源列表点系统【激活/停用】按钮后「是否启用」列不更新；顺带落地 PRD 删除规则（未启用过+创建人才可删，角色不写死靠安全角色删除权限配置） |
+| 根因 | 系统按钮只改 `statecode/statuscode`，`mcs_fsm_resource` 无任何 Plugin/JS 回写自定义字段；且 DEV1 `mcs_fsm_rl_status` 标签误建为「是否启用/Is Active」（本地定义与 PRD 均为「是否启用过/Ever Enabled」） |
+| 方案（用户确认） | ① DEV1 标签纠错「是否启用过/Ever Enabled」（已生效，实体已发布）；② 新增 `FsmResourceStateSyncPlugin`（Update Filter=statecode PostOp，激活幂等回写 rl_status=true，单向）；③ 新增 `FsmResourceDeleteGuardPlugin`（Delete PreOp + PreImage，已启用过/非创建人拦截，SysAdmin 放行）；④ PRD「新增默认停用」不落 statecode（避免保存后只读），由「是否启用过=否」承担草稿态语义；删除按物理删除 |
+| ⚠️ 重要发现 | **DEV1 Delete 管道 `context.UserId` 恒为 SYSTEM（110ee7ff），真实操作人必须取 `InitiatingUserId`**（Trace 实锤；Update 管道两者一致）。创建人比对、角色校验一律用 InitiatingUserId |
+| 改动文件 | `Code/Customizations/Plugins/FinancingManagement/Resource/FsmResourceStateSyncPlugin.cs`（新增）<br>`Code/Customizations/Plugins/FinancingManagement/Resource/FsmResourceDeleteGuardPlugin.cs`（新增）<br>`Code/Tools/sync-plugin-to-remote.py`（Resource 映射 + 新增 `--only` 参数绕历史文件校验失败 + build_remote `cd /d`→`cd` 兼容 PowerShell） |
+| Git | 分支 `uat-20260730-peter-fsm-resource-1433`（commit `2e87ac1e9d1`，3 文件 +221）→ PR 已合并 uat（用户操作，2026-07-30） |
+| DEV1 | 主 Assembly `SanyD365.D365Extension.Sales`（ID `9d6ff315`）已更新；StateSync Step（`3b449718`；首个 `2cfa6d37` 注册后立即加 Solution 报 does not exist，删除重注册换新 ID）+ DeleteGuard Step（`f0ff8ab9`）+ PreImage 已注册启用（平台未自动扫新 Type，register-plugin-advanced 显式创建）；临时 Assembly 已注销（红线执行完毕） |
+| 验证 | 临时 Assembly 7/7 通过 + 主 Assembly 回归通过（激活回写/幂等/删除拦截/创建人可删，Trace 实锤主 Assembly 触发）；重建 Step `3b449718` 二次回归通过（停用→激活 rl_status=是、删除拦截实锤）；测试数据已清理，样本 FSMR-TEST-1433D（已启用过不可删）留存 |
+| 新增组件提醒 | 2 个 Step 已加主清单 `AllComponent_Peter_NoUAT`（2026-07-30，componenttype=92）；⚠️ 教训：PluginType(90) 不能显式 add-solution-component（报 does not exist），随 Step/Assembly 隐式入包；刚注册的 Step 立即加 Solution 可能同样报错，删除 Step 重注册可解。发版包 McsPlugin 的 Assembly+Step 待用户分布 |
+| 环境配套 | 「融资资源管理员」角色配置 `mcs_fsm_resource` Delete 权限（各环境手动，已登记《D365配置数据清单》+《上线核对清单》3.3.7） |
+| 下一步 | 1. 用户 DEV1 界面验证（停用→激活后「是否启用过」变「是」、删除拦截提示）<br>2. 用户 n8n 发布 UAT（McsPlugin + entity 包带标签）<br>3. 可选增强（暂不做）：列表自定义【启用】按钮一键启用 |
+
+---
+
+### 2.23 进行中（厂端授信额度调整需求变更：字段精简 + 默认值公式 + 生效改走BPP）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-07-30 |
+| 需求 | ① 额度生效申请表单隐藏 4 字段（产品类型/意向合同金额/支付方式/账期，用户已界面处理，字段保留非必填）；新增多行文本调整原因 `mcs_reason`（必填），旧 `mcs_remark` 隐藏降非必填；② 「调整厂端授信额度」改名「厂端授信额度调整为」，选客户时默认值=厂端授信额度、调整后余额默认=厂端授信余额，公式=调整为-额度+余额；③ 模型计算生效启用（proc 状态 3）不再直写 `mcs_fca_quota`，自动创建 `mcs_fca_quotaapp`（状态=申请，人工提交 BPP），审批通过后复用现有回调链路写额度 |
+| 改动文件 | `mcs_fca_quotaapp.js`（默认值带出+新公式+删账期30倍数校验+文案改名，删 currentUsedBalance）<br>`FcaProcActivationPlugin.cs`（状态3→自动创建申请单，含在途申请单防重、组织字段带出、`mcs_reason` 必填默认值）<br>`BPPHandlerServiceForFcaQuotaApp.cs`（BPP 表单变量取数 mcs_remark→mcs_reason，变量 Code 不变模板无需改）<br>`Definitions/mcs_fca_quotaapp.json`（补 mcs_reason、remark 降非必填、tobegrant 改名）<br>本地 `Language/2052.json`（3 个提示语 key 值改名） |
+| Git 分支 | `uat-20260730-peter-fca-proc-quotaapp`（3 commits：d4bfe43 plugin + 9fd1c95 bpp handler + 1eacec9 mcs_reason 补必填）**PR 6446 已合并 uat**（merge `0208702f26e`）<br>`uat-20260730-peter-langfile-fcaquotaapp`（a14e44c，仓库语言文件 2052 三 key 值变更）**PR 6450 已合并 uat**（merge `408d79d6b22`），仓库 uat 版与 DEV1 WebResource 已一致 |
+| DEV1 已执行 | ✅ `mcs_fca_quotaapp.js` 更新+发布<br>✅ `ms_languagefile_2052` 仅 3 key 值更新+发布（备份 `Backups/Tests/languagefile_backup_20260730/`）<br>✅ 字段标签：`mcs_tobegrant`→「厂端授信额度调整为/Adjusted Factory Credit Quota」、`mcs_reason` 补 2052/英文，实体已发布<br>✅ 远程两项目编译均通过（仅原有警告） |
+| ⚠️ 关键坑 | 1. `mcs_reason` 在 DEV1 是 **ApplicationRequired**，Plugin 自动建单必须填默认值否则创建失败；2. 远程 tx-windows 工作区常驻 8 个「M」文件是 LF/CRLF 换行符假象（`git diff --ignore-cr-at-eol` 为空），commit 只 add 指定文件；3. Windows ssh 会话无 `head` 命令、PowerShell 内联中文+`$变量` 会被本地 bash 展开，改远程文件一律「scp 下载→本地改→scp 回传（保持 CRLF）」 |
+| 新增组件 | `mcs_fca_quotaapp.mcs_reason` 字段（用户已建）。已核实：主清单 `AllComponent_Peter_NoUAT` 无任何字段级组件（按实体整体管理，quotaapp 实体已在其中且 `rootcomponentbehavior=0` 包含所有组件），**新建字段随实体导出自动带上，主清单和 entity 发版包均无需单独加字段**；发版前跑 `check-release --with-fields` 核对即可 |
+| 用户偏好（新） | **DEV 直接发布不再逐项询问**（2026-07-30 用户明确）；语言 key 持久化走远程仓库语言文件分支+PR（勿只改 DEV WebResource） |
+| DEV1 Assembly | ✅ 已用合并后 uat 代码重编译并更新 `SanyD365.D365Extension.Sales`（ID `9d6ff315`），无 PluginType 差异 |
+| DEV1 后台验证（7/30 全过） | ✅ LTC客户-1 calc→activate（proc `FCM202607300002` 状态 2→3）：自动创建申请单 `FCA202607300001`（带出当前额度/余额、tobegrant=initGrant、bppstatus=1、mcs_reason 默认值、`mcs_doid` 正确指向 proc）；✅ 额度表未触碰（仍旧 doid）；✅ 无新台账；✅ 防重：再次 2→3 未重复创建。失败残留 proc 已删，`FCA202607300001`+proc 留存供界面验证 |
+| 下一步 | 1. 用户 DEV1 界面验证：打开 `FCA202607300001` 看表单（字段隐藏/改名/默认值/公式/多行调整原因），新建申请单选客户验默认值，人工提交 BPP → 审批通过写额度<br>2. 用户 n8n 发布 UAT（McsPlugin+McsWebResource+entity 包+Messagehandler/ClientAPI）；`mcs_reason` 随实体自动分发无需单独处理 |
 
 ---
 
@@ -2675,3 +2727,27 @@ dotnet run --execute
 | Zed 已配置 | `settings.json`：`agent.thinking_display = "always_collapsed"`（Thinking 块默认折叠）；Kimi 以 custom agent 注册（`~/.local/bin/kimi acp`） |
 | **Git 工作流约定（用户确认）** | 本地 Mac SanYi = 个人仓库（origin=GitHub `SanYLocalCode`），客户仓库在 tx-windows，两边独立。**日常需求以同步 tx-windows（客户仓库）为主；功能测试 OK 后再最后提交个人本地仓库**。本地已删除 azure 远程（物理隔离误推）；历史事故=本地曾误同步客户 git，故此前一直不提交本地。AI 执行 git 变更前须复述目标远程+分支并经用户授权 |
 | 根目录清理 | 12 张无引用截图+nul 移至 `Backups/TempTest/截图清理-20260730/`；`.playwright-mcp` 日志/快照已清空；保留 `bug874-fixed.png`/`bug1283-fixed.png`/`fca-guard-create-blocked.png`（禅道Bug修复记录引用，Bug 关闭后可清） |
+
+## 会话更新（2026-07-30）— 融资管理 UAT 假提交卡死 Bug 排查与修复（FsmDataBppIntegrationPlugin 抛异常回滚）
+
+| 项目 | 内容 |
+|---|---|
+| 起因 | UAT 测试人员反馈 FSM202607290001 提交立项审批后 BPP 无返回、审批字段全空，再次提交提示「已有审批在进行中」 |
+| 根因 | 测试人员在「融资需求」阶段（mcs_fsm_status=1）点击【提交立项审批】：UAT 的 mcs_fsm_data.js 为旧版无状态前置校验，JS 直接写 mcs_bppstatus=2；后端 `FsmDataBppIntegrationPlugin` 检测「状态与审批类型不匹配」仅 trace 静默 return，不回滚 → 记录永久卡在"审批中"（UAT Plugin Trace 实锤） |
+| 修复 | 3 个「不允许提交」分支改抛 `InvalidPluginExecutionException`（事务回滚 bppstatus，前端弹具体原因）；分支 `uat-20260730-peter-fsm-bpp-guard`（commit `9c193286f50`，1 文件 +8/-6）已合并 uat |
+| DEV1 | ✅ 独立 Assembly 3 场景验证（临时子类避 2601，已注销/主 Step 已恢复/临时文件已删）✅ 主 Assembly 已更新（ID `9d6ff315`，8419 KB）✅ 主 Assembly 回归通过 |
+| UAT 数据修复 | 已清空 FSM202607290001 的 mcs_bppstatus；修复后真实提交走通全链路：bppstartapi 成功 → workflowid=870642051797164032 → 审批链接/Submitted 回写（UAT Messagehandler 含 Handler["mcs_fsm_data"] 工作正常，此前担忧排除） |
+| 遗留问题 | 1.「当前审批人」字段错位：表单绑 `mcs_nextapprover`、`BPPHandlerServiceForFsmData` 写 `mcs_bppapprover`（**用户已自行调整**）；且本次 GetCurrentApprover 未取到值（需在 BPP 门户核对实例审批人，区分 BPP 模板配置问题 vs GetNextApprover 调用问题）<br>2. ~~UAT mcs_fsm_data.js 为旧版~~ ✅ 已核实 UAT/DEV1/本地三方 MD5 一致（0b2081a2），新版含状态校验（他人发布 WebResource 时已带齐） |
+| 工具新增 | MetadataTool 通用 `update-record <实体名> <GUID> <JSON>` 命令（BuildEntityFromJson 抽取共用，#optionset 支持传 null 清空） |
+| 下一步 | ✅ 已完成：用户 n8n 发布 `McsPlugin` 到 UAT，UAT 回归通过（守卫场景拦截+回滚、主 Assembly Trace 实锤），Bug 已关闭；FSM202607290001 待测试人员在 BPP 门户通过/驳回验证回调 |
+
+## 会话更新（2026-07-30 续）— 当前审批人字段错配修复（FsmData/FCA 对齐 BPP 框架 mcs_nextapprover）
+
+| 项目 | 内容 |
+|---|---|
+| 根因 | BPP 框架 `BPPService.cs` 通用逻辑写死绑定 `mcs_nextapprover`（发起回写+结束清空，除 mcs_quoterdetail 外全实体），FsmData/FCA 表单「当前审批人」也绑该字段；但专属 Handler 与 D365 回调 Plugin 写的是 `mcs_bppapprover` → 当前审批人永远不显示 |
+| 修复 | 4 文件 `mcs_bppapprover` → `mcs_nextapprover`：`BPPHandlerServiceForFsmData/FcaQuotaApp.cs`（发起+回调回写）、`FsmDataBppCallbackPlugin/FcaQuotaAppBppCallbackPlugin.cs`（撤回/废弃清空）；分支 `uat-20260730-peter-bpp-nextapprover-fix`（commit `dcdb08a5feb`）→ **PR 6415 已合并**（merge `31c3fe298b8`） |
+| 验证 | ✅ DEV1 独立 Assembly 双模块验证（临时子类已注销、主 Step 已恢复、红线完毕）✅ DEV1 主 Assembly 已更新（`9d6ff315`，8429 KB）✅ 主 Assembly 回归 FSM+FCA 通过 |
+| BPP 侧独立问题 | UAT 实证融资立项模板 `794612913352237105` 实例（FSM202607290002 / flowId 870693550988402688）`GetNextApprover` 返回空；同时段 mcs_contract_signing 提交审批人正常（liuy2905/lanl2）→ **模板首节点审批人规则未解析出人，属 BPP 团队配置问题**，D365 代码无问题 |
+| 编译插曲 | uat 主干连续被同事提交打断：孟绥洪少逗号（自修）→ lius CS0023 `TimeSpan?`（苻坚 PR 6414 修复）；用户明确不动他人代码 |
+| 下一步 | 用户 n8n 发布 `McsPlugin` + `Messagehandler` 到 UAT → UAT 验证（需 BPP 团队先修模板审批人解析） |
