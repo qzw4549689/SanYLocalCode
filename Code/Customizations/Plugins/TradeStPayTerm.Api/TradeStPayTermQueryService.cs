@@ -523,11 +523,24 @@ namespace SanyD365.Plugins.TradeStPayTerm.Api
         }
 
         /// <summary>
-        /// 将查询结果序列化为 JSON
+        /// 将查询结果序列化为 JSON（完整包装结构）
         /// </summary>
         public static string SerializeResult(QueryResult result)
         {
             return JsonConvert.SerializeObject(result, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                Converters = { new StringEnumConverter() },
+                Formatting = Formatting.None
+            });
+        }
+
+        /// <summary>
+        /// 将记录列表序列化为 JSON 数组（records 输出参数用）
+        /// </summary>
+        public static string SerializeRecords(List<TradeStPayTermRecord> records)
+        {
+            return JsonConvert.SerializeObject(records ?? new List<TradeStPayTermRecord>(), new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 Converters = { new StringEnumConverter() },

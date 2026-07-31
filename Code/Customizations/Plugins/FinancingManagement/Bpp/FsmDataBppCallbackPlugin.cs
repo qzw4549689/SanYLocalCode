@@ -11,7 +11,7 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
     /// 1. 立项审批通过（类型=1，融资状态=2）：融资状态→3（融资解决方案），mcs_can_initiated=0
     /// 2. 融资方案审批通过（类型=2，融资状态=3）：融资状态→4（融资落实），mcs_is_valid=true，mcs_can_project=0
     /// 3. 驳回：融资状态不变，mcs_can_initiated=1（类型=1）或 mcs_can_project=1（类型=2）
-    /// 4. 撤回/废弃：审批状态回到申请，清空 mcs_bppid、mcs_bppapprover
+    /// 4. 撤回/废弃：审批状态回到申请，清空 mcs_bppid、mcs_nextapprover
     /// </summary>
     public class FsmDataBppCallbackPlugin : IPlugin
     {
@@ -111,7 +111,7 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
                         tracer.Trace("BPP 审批撤回，状态回到申请");
                         updateRecord["mcs_bppstatus"] = new OptionSetValue(STATUS_APPLY);
                         updateRecord["mcs_bppid"] = null;
-                        updateRecord["mcs_bppapprover"] = null;
+                        updateRecord["mcs_nextapprover"] = null;
                         service.Update(updateRecord);
                         break;
 
@@ -120,7 +120,7 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
                         tracer.Trace("BPP 审批废弃，状态回到申请");
                         updateRecord["mcs_bppstatus"] = new OptionSetValue(STATUS_APPLY);
                         updateRecord["mcs_bppid"] = null;
-                        updateRecord["mcs_bppapprover"] = null;
+                        updateRecord["mcs_nextapprover"] = null;
                         service.Update(updateRecord);
                         break;
 

@@ -44,10 +44,6 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         100000004: "A4"
     };
 
-    // 当前客户额度记录的占用金额（retrieveCurrentQuota 实时查询结果）
-    // 为空时按 现有额度-现有余额 推算，保证不变式：额度 = 余额 + 占用
-    var currentUsedBalance = null;
-
     /**
      * 表单加载事件
      * 1. 注册字段变更事件
@@ -335,22 +331,24 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
      */
     function retrieveCurrentQuota(formContext, accountId) {
         var filter = "_mcs_accountid_value eq " + accountId + " and mcs_isactive eq 1";
-        var query = "?$select=mcs_sellergrant,mcs_sellerbalance,mcs_usedsellerbalance&$filter=" + filter + "&$orderby=createdon desc&$top=1";
+        var query = "?$select=mcs_sellergrant,mcs_sellerbalance&$filter=" + filter + "&$orderby=createdon desc&$top=1";
 
         Xrm.WebApi.retrieveMultipleRecords("mcs_fca_quota", query).then(
             function (result) {
                 if (result.entities.length > 0) {
                     var quota = result.entities[0];
-                    setMoneyValue(formContext, "mcs_sellergrant", quota.mcs_sellergrant || 0);
-                    setMoneyValue(formContext, "mcs_sellerbalance", quota.mcs_sellerbalance || 0);
-                    // 占用金额优先取额度表实际值；字段为空（历史数据）时按 额度-余额 推算
-                    currentUsedBalance = (quota.mcs_usedsellerbalance !== null && quota.mcs_usedsellerbalance !== undefined)
-                        ? quota.mcs_usedsellerbalance
-                        : (quota.mcs_sellergrant || 0) - (quota.mcs_sellerbalance || 0);
+                    var sellerGrant = quota.mcs_sellergrant || 0;
+                    var sellerBalance = quota.mcs_sellerbalance || 0;
+                    setMoneyValue(formContext, "mcs_sellergrant", sellerGrant);
+                    setMoneyValue(formContext, "mcs_sellerbalance", sellerBalance);
+                    // 默认值：厂端授信额度调整为 = 厂端授信额度；调整后厂端授信余额 = 厂端授信余额
+                    setMoneyValue(formContext, "mcs_tobegrant", sellerGrant);
+                    setMoneyValue(formContext, "mcs_tobebalance", sellerBalance);
                 } else {
                     setMoneyValue(formContext, "mcs_sellergrant", 0);
                     setMoneyValue(formContext, "mcs_sellerbalance", 0);
-                    currentUsedBalance = 0;
+                    setMoneyValue(formContext, "mcs_tobegrant", 0);
+                    setMoneyValue(formContext, "mcs_tobebalance", 0);
                 }
                 calculateAdjustedBalance(formContext);
             },
@@ -403,16 +401,14 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
     // ==================== 调整后余额计算 ====================
 
     /**
-     * 调整后厂端授信余额 = 调整厂端授信额度 - 厂端授信占用金额
-     * 不变式：额度 = 余额 + 占用；占用优先取额度表实际值，未查询到时按 额度-余额 推算
+     * 调整后厂端授信余额 = 厂端授信额度调整为 - 厂端授信额度 + 厂端授信余额
      */
     function calculateAdjustedBalance(formContext) {
         var tobeGrant = getMoneyValue(formContext, "mcs_tobegrant") || 0;
         var sellerGrant = getMoneyValue(formContext, "mcs_sellergrant") || 0;
         var sellerBalance = getMoneyValue(formContext, "mcs_sellerbalance") || 0;
 
-        var used = (currentUsedBalance !== null) ? currentUsedBalance : (sellerGrant - sellerBalance);
-        var adjustedBalance = tobeGrant - used;
+        var adjustedBalance = tobeGrant - sellerGrant + sellerBalance;
         setMoneyValue(formContext, "mcs_tobebalance", adjustedBalance);
     }
 
@@ -427,28 +423,17 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
             return;
         }
 
-        // 调整厂端授信额度必填且 ≥ 0
+        // 厂端授信额度调整为必填且 ≥ 0
         var tobeGrantAttr = formContext.getAttribute("mcs_tobegrant");
         if (!tobeGrantAttr || tobeGrantAttr.getValue() === null) {
             eventArgs.preventDefault();
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequired", "调整厂端授信额度必填。") });
+            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequired", "厂端授信额度调整为必填。") });
             return;
         }
         if (tobeGrantAttr.getValue() < 0) {
             eventArgs.preventDefault();
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaNegative", "调整厂端授信额度不能小于 0。") });
+            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaNegative", "厂端授信额度调整为不能小于 0。") });
             return;
-        }
-
-        // 账期（天）必须是 30 的倍数
-        var payTermAttr = formContext.getAttribute("mcs_payterm");
-        if (payTermAttr && payTermAttr.getValue() !== null) {
-            var payTerm = payTermAttr.getValue();
-            if (payTerm % 30 !== 0) {
-                eventArgs.preventDefault();
-                Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_TermDaysMultiple30", "账期（天）必须是 30 的倍数。") });
-                return;
-            }
         }
 
         // 校验：如果当前额度为 0/空，必须选择模型计算序列号
@@ -858,7 +843,7 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
 
         var tobeGrantAttr = formContext.getAttribute("mcs_tobegrant");
         if (!tobeGrantAttr || tobeGrantAttr.getValue() === null || tobeGrantAttr.getValue() < 0) {
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequiredSubmit", "调整厂端授信额度必填且不能小于 0。") });
+            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequiredSubmit", "厂端授信额度调整为必填且不能小于 0。") });
             return;
         }
 

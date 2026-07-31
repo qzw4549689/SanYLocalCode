@@ -105,7 +105,7 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
                         tracer.Trace("BPP 审批撤回，状态回到申请");
                         updateRecord["mcs_bppstatus"] = new OptionSetValue(STATUS_APPLY);
                         updateRecord["mcs_bppid"] = null;
-                        updateRecord["mcs_bppapprover"] = null;
+                        updateRecord["mcs_nextapprover"] = null;
                         service.Update(updateRecord);
                         break;
 
@@ -114,7 +114,7 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
                         tracer.Trace("BPP 审批废弃，状态回到申请");
                         updateRecord["mcs_bppstatus"] = new OptionSetValue(STATUS_APPLY);
                         updateRecord["mcs_bppid"] = null;
-                        updateRecord["mcs_bppapprover"] = null;
+                        updateRecord["mcs_nextapprover"] = null;
                         service.Update(updateRecord);
                         break;
 

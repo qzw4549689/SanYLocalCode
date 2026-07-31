@@ -41,10 +41,10 @@ namespace SanyD365.Plugins.TradeStPayTerm.Api
                 var queryService = new TradeStPayTermQueryService(service, tracer);
                 var result = queryService.Query(buId, subId, countryCode, prdGroupId, buyerCode);
 
-                // 设置输出参数
+                // 设置输出参数（records 为裸记录数组，与失败路径 "[]" 一致）
                 context.OutputParameters["status"] = result.Status;
                 context.OutputParameters["message"] = result.Message;
-                context.OutputParameters["records"] = TradeStPayTermQueryService.SerializeResult(result);
+                context.OutputParameters["records"] = TradeStPayTermQueryService.SerializeRecords(result.Records);
 
                 tracer.Trace("QueryTradeStPayTermPlugin 执行完成");
             }

@@ -266,11 +266,11 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     updateEntity.Attributes.Add("mcs_fsm_data_url", $"{config.Content}{flowId}");
                 }
 
-                // 取当前审批人并回写 mcs_bppapprover
+                // 取当前审批人并回写 mcs_nextapprover（与 BPP 框架通用回写字段一致）
                 var currentApprover = await GetCurrentApprover(flowId);
                 if (!string.IsNullOrWhiteSpace(currentApprover))
                 {
-                    updateEntity.Attributes.Add("mcs_bppapprover", currentApprover);
+                    updateEntity.Attributes.Add("mcs_nextapprover", currentApprover);
                 }
 
                 await crmService.Update(updateEntity);
@@ -321,13 +321,13 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     updateEntity.Attributes.Add("mcs_approvedate", DateTime.Now);
                 }
 
-                // 每次回调都取当前审批人回写 mcs_bppapprover
+                // 每次回调都取当前审批人回写 mcs_nextapprover（与 BPP 框架通用回写字段一致）
                 if (request.FlowId.HasValue)
                 {
                     var currentApprover = await GetCurrentApprover(request.FlowId.Value.ToString());
                     if (!string.IsNullOrWhiteSpace(currentApprover))
                     {
-                        updateEntity.Attributes.Add("mcs_bppapprover", currentApprover);
+                        updateEntity.Attributes.Add("mcs_nextapprover", currentApprover);
                     }
                 }
 

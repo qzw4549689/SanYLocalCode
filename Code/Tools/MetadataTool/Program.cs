@@ -2439,6 +2439,17 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         CreateRecordFromJson(service, args[1], args[2]);
                         break;
 
+                    case "update-record":
+                        if (args.Length < 4 || !Guid.TryParse(args[2], out var updateGuid))
+                        {
+                            Console.WriteLine("用法: dotnet run update-record <实体名> <记录GUID> <JSON|@文件路径>");
+                            Console.WriteLine("  类型后缀与 create-record 相同；#optionset 传 null 可清空选项集字段");
+                            Console.WriteLine("  示例: dotnet run update-record mcs_fsm_data 8b690ba4-... '{\"mcs_bppstatus#optionset\":null}'");
+                            return;
+                        }
+                        UpdateRecordFromJson(service, args[1], updateGuid, args[3]);
+                        break;
+
                     case "list-failed-imports":
                         {
                             int topImports = args.Length >= 2 && int.TryParse(args[1], out int ti) ? ti : 30;
@@ -10928,12 +10939,45 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
     // 通用创建记录（后台测试用）：JSON 键支持类型后缀 #int/#decimal/#bool/#optionset/#optionsetcollection/#lookup
     static void CreateRecordFromJson(ServiceClient service, string entityName, string jsonOrFile)
     {
+        var entity = BuildEntityFromJson(service, entityName, jsonOrFile);
+        if (entity == null) return;
+
+        try
+        {
+            var id = service.Create(entity);
+            Console.WriteLine($"  ✅ 已创建 {entityName} ({id})");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ❌ 创建被拦截/失败: {ex.Message}");
+        }
+    }
+
+    static void UpdateRecordFromJson(ServiceClient service, string entityName, Guid id, string jsonOrFile)
+    {
+        var entity = BuildEntityFromJson(service, entityName, jsonOrFile);
+        if (entity == null) return;
+        entity.Id = id;
+
+        try
+        {
+            service.Update(entity);
+            Console.WriteLine($"  ✅ 已更新 {entityName} ({id})");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ❌ 更新被拦截/失败: {ex.Message}");
+        }
+    }
+
+    static Entity BuildEntityFromJson(ServiceClient service, string entityName, string jsonOrFile)
+    {
         var json = jsonOrFile.StartsWith("@") ? File.ReadAllText(jsonOrFile.Substring(1)) : jsonOrFile;
         var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(json);
         if (dict == null || dict.Count == 0)
         {
             Console.WriteLine("  ❌ JSON 为空或解析失败");
-            return;
+            return null;
         }
 
         var entity = new Entity(entityName);
@@ -10961,7 +11005,7 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                     entity[field] = val.GetBoolean();
                     break;
                 case "optionset":
-                    entity[field] = new OptionSetValue(val.GetInt32());
+                    entity[field] = val.ValueKind == System.Text.Json.JsonValueKind.Null ? null : new OptionSetValue(val.GetInt32());
                     break;
                 case "optionsetcollection":
                     var osc = new OptionSetValueCollection();
@@ -10977,11 +11021,16 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                     entity[field] = osc;
                     break;
                 case "lookup":
+                    if (val.ValueKind == System.Text.Json.JsonValueKind.Null)
+                    {
+                        entity[field] = null;
+                        break;
+                    }
                     var parts = (val.GetString() ?? "").Split(':');
                     if (parts.Length != 2 || !Guid.TryParse(parts[1], out var lookupGuid))
                     {
                         Console.WriteLine($"  ❌ lookup 值格式错误（应为 logicalName:guid）: {field} = {val.GetString()}");
-                        return;
+                        return null;
                     }
                     entity[field] = new EntityReference(parts[0], lookupGuid);
                     break;
@@ -10991,15 +11040,7 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
             }
         }
 
-        try
-        {
-            var id = service.Create(entity);
-            Console.WriteLine($"  ✅ 已创建 {entityName} ({id})");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"  ❌ 创建被拦截/失败: {ex.Message}");
-        }
+        return entity;
     }
 
     // 删除字段前的强制提醒与确认（方案A试点）：返回 true 才允许删除

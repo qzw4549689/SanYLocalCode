@@ -143,6 +143,9 @@
 | 融资管理 | 融资资源管理表单逻辑 | `Customizations/WebResources/JS/mcs_fsm_resource.js` | `mcs_fsm_resource`、`mcs_bank` | 机构类型=银行时选择银行自动带出机构代码（`mcs_bank.mcs_bankno`）/机构名称（`mcs_bank.mcs_name`）并锁定只读；从银行切换到其他类型时隐藏 Bank 并同时清空 Bank/机构代码/机构名称三个字段；金融产品多选按类型筛选：银行 1-11 / 保险 101-104 / 其他仅 Others(11)（FluentUI 多选控件 addOption 需用对象签名 {text,value}） |
 | 融资管理 | 融资需求级联带出/弹窗过滤/清空联动/保存校验 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_leadmain`、`mcs_quoter`、`mcs_quote_main`、`mcs_contract`、`mcs_customermasterdata` | `FsmDataForm.onLoad`：线索（新字段 `mcs_leadmain_id`→mcs_leadmain）/报价单（新字段 `mcs_quoter_id`→mcs_quoter）/合同 onChange 全量重算派生字段（大区/国家/事业部/客户名称/客户编码，优先级 合同>报价单>线索，客户编码取 sapnumber）；合同/报价单向上代入线索；报价单/合同弹窗按线索过滤（addPreSearch）；来源清空时派生字段联动清空；onSave 校验三来源至少一个 + 重复性校验（三者任一相同即重复，异步查询后放行）；提交立项/方案审批前置分阶段必填校验（融资六要素/解决方案全字段+合同号），融资经理自动取登录人。旧字段 mcs_lead_id/mcs_quote_id 保留不删（2026-07-24 红线） |
 
+| 融资管理 | 融资资源状态同步（激活回写是否启用过，禅道 #1433） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceStateSyncPlugin.cs` | `mcs_fsm_resource` | Update Filter=statecode PostOp Sync；列表【激活】（statecode→0）时幂等回写 `mcs_fsm_rl_status=true`（单向标记，停用不清）；主 Assembly 类名 `SanyD365.D365Extension.Sales.Plugins.FinancingManagement.Resource.FsmResourceStateSyncPlugin` |
+| 融资管理 | 融资资源删除守卫（禅道 #1433 关联 PRD 删除规则） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceDeleteGuardPlugin.cs` | `mcs_fsm_resource` | Delete PreOp Sync + PreImage（mcs_fsm_rl_status+createdby）；已启用过拦截、非创建人拦截（SysAdmin 放行）；⚠️ Delete 管道 `context.UserId` 恒为 SYSTEM，创建人比对必须用 `InitiatingUserId`；业务角色不写死靠安全角色删除权限配置 |
+
 ---
 
 ## 7. 贸易条款

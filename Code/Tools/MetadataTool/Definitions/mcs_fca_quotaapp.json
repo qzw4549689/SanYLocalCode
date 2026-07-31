@@ -174,8 +174,8 @@
     },
     {
       "schemaName": "mcs_tobegrant",
-      "displayName": "调整厂端授信额度",
-      "displayNameZh": "调整厂端授信额度",
+      "displayName": "厂端授信额度调整为",
+      "displayNameZh": "厂端授信额度调整为",
       "displayNameEn": "Adjusted Factory Credit Quota",
       "description": "人工申请调整额度",
       "type": "money",
@@ -201,9 +201,19 @@
       "displayName": "调整原因",
       "displayNameZh": "调整原因",
       "displayNameEn": "Adjustment Reason",
-      "description": "调整原因",
+      "description": "调整原因（旧字段，界面已隐藏，由 mcs_reason 替代）",
       "type": "string",
       "maxLength": 1000,
+      "required": false
+    },
+    {
+      "schemaName": "mcs_reason",
+      "displayName": "调整原因",
+      "displayNameZh": "调整原因",
+      "displayNameEn": "Adjustment Reason",
+      "description": "调整原因（多行文本，2026-07 需求变更新增）",
+      "type": "memo",
+      "maxLength": 2000,
       "required": true
     },
     {

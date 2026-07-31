@@ -5,25 +5,23 @@ using System;
 namespace SanyD365.Plugins.FactoryCredit
 {
     /// <summary>
-    /// 厂端授信模型计算表 - 生效启用回写 Plugin
+    /// 厂端授信模型计算表 - 生效启用 Plugin
     /// 触发时机：mcs_fca_proc Update PostOperation
-    /// 业务规则：当计算状态从非"生效启用"变为 3（生效启用）时
-    /// 1. 在 mcs_fca_quota（厂端授信额度表）中创建或更新客户额度记录
-    /// 2. 在 mcs_fca_records（厂端授信额度动态调整管理台账表）中生成一条初始化台账
+    /// 业务规则（2026-07 需求变更）：当计算状态从非"生效启用"变为 3（生效启用）时，
+    /// 不再直接写入 mcs_fca_quota（厂端授信额度表），而是自动创建 mcs_fca_quotaapp（额度生效申请单，
+    /// 审批状态=申请），由业务在额度生效申请页面检查后人工提交 BPP 审批；审批通过后由
+    /// FcaQuotaAppBppCallbackPlugin → QuotaActivationService 回写额度表并生效。
     /// </summary>
     public class FcaProcActivationPlugin : IPlugin
     {
         // 计算状态选项集值
         private const int STATUS_ACTIVE = 3;
 
+        // mcs_fca_quotaapp.mcs_bppstatus 选项集值：1 - 申请
+        private const int BPP_STATUS_APPLY = 1;
+
         // mcs_fca_quota.mcs_isactive 选项集值
         private const int IS_ACTIVE_YES = 1;
-
-        // mcs_fca_records.mcs_proccess 选项集值：环节1 - 厂端授信模型计算
-        private const int PROCESS_MODEL_CALC = 1;
-
-        // mcs_fca_records.mcs_adjust 选项集值：1 - 初始化
-        private const int ADJUST_INIT = 1;
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -91,21 +89,19 @@ namespace SanyD365.Plugins.FactoryCredit
             }
             catch (Exception ex)
             {
-                tracer.Trace($"生效启用回写失败: {ex.Message}");
-                throw new InvalidPluginExecutionException($"生效启用回写失败: {ex.Message}");
+                tracer.Trace($"生效启用处理失败: {ex.Message}");
+                throw new InvalidPluginExecutionException($"生效启用处理失败: {ex.Message}");
             }
         }
 
         private void ProcessActivation(IOrganizationService service, ITracingService tracer, Guid procId)
         {
-            // 读取完整计算记录
+            // 读取完整计算记录（含组织字段，一并带出到申请单）
             Entity proc = service.Retrieve("mcs_fca_proc", procId,
-                new ColumnSet("mcs_accountid", "mcs_initigrant", "mcs_validfrom", "mcs_doid"));
+                new ColumnSet("mcs_accountid", "mcs_initigrant", "mcs_orgid", "mcs_orgname", "mcs_buid", "mcs_buname"));
 
             EntityReference accountRef = proc.GetAttributeValue<EntityReference>("mcs_accountid");
             Money initGrant = proc.GetAttributeValue<Money>("mcs_initigrant");
-            DateTime? validFrom = proc.GetAttributeValue<DateTime?>("mcs_validfrom");
-            string doid = proc.GetAttributeValue<string>("mcs_doid");
 
             // 客户编码需从关联 Account 的 SAP 客户编号读取，避免取到客户名称或关系流水号
             string customerCode = GetCustomerCode(service, tracer, accountRef);
@@ -122,82 +118,116 @@ namespace SanyD365.Plugins.FactoryCredit
 
             tracer.Trace($"处理生效启用: procId={procId}, accountId={accountRef.Id}, initGrant={initGrant.Value}, customerCode={customerCode}");
 
-            // 1. 回写/创建厂端授信额度表
-            // 核心不变式：授信额度 = 授信余额 + 占用金额（sellergrant = sellerbalance + usedsellerbalance）
-            Entity quota = GetOrCreateQuota(service, tracer, accountRef, customerCode);
-            bool isNewQuota = quota.Id == Guid.Empty;
-            // 决策点A：更新已有额度时占用不清零，余额 = 新额度 - 现有占用
-            decimal usedAmount = isNewQuota ? 0m : (quota.GetAttributeValue<Money>("mcs_usedsellerbalance")?.Value ?? 0m);
-            decimal oldBalance = isNewQuota ? 0m : (quota.GetAttributeValue<Money>("mcs_sellerbalance")?.Value ?? 0m);
-            decimal newBalance = initGrant.Value - usedAmount;
-            tracer.Trace($"额度记录准备更新/创建: quotaId={(isNewQuota ? "(新记录)" : quota.Id.ToString())}, custname={quota.GetAttributeValue<string>("mcs_custname")}, used={usedAmount}, oldBalance={oldBalance}, newBalance={newBalance}");
-            quota["mcs_sellergrant"] = initGrant;
-            quota["mcs_sellerbalance"] = new Money(newBalance);
-            if (isNewQuota)
+            // 防重复：同一模型计算序列号已存在在途申请单（申请/审批中）时不再重复创建
+            if (HasPendingQuotaApp(service, tracer, procId))
             {
-                quota["mcs_usedsellerbalance"] = new Money(0m);
-            }
-            quota["mcs_isactive"] = new OptionSetValue(IS_ACTIVE_YES);
-            quota["mcs_validfrom"] = validFrom ?? DateTime.UtcNow;
-            quota["mcs_doid"] = doid;
-            quota["mcs_fca_procid"] = new EntityReference("mcs_fca_proc", procId);
-
-            if (!isNewQuota)
-            {
-                service.Update(quota);
-                tracer.Trace($"已更新额度记录: {quota.Id}");
-            }
-            else
-            {
-                quota.Id = service.Create(quota);
-                tracer.Trace($"已创建额度记录: {quota.Id}");
+                tracer.Trace("已存在该模型计算序列号的在途额度生效申请单（申请/审批中），跳过自动创建");
+                return;
             }
 
-            // 2. 生成台账记录（mcs_recordid 由通用自动编号服务生成）
-            // 决策点B：初始化台账调整金额=0（PRD口径），调整前余额取额度记录原值
-            Entity ledger = new Entity("mcs_fca_records");
-            ledger["mcs_accountid"] = accountRef;
-            ledger["mcs_custname"] = customerCode;
-            ledger["mcs_proccess"] = new OptionSetValue(PROCESS_MODEL_CALC);
-            ledger["mcs_adjust"] = new OptionSetValue(ADJUST_INIT);
-            ledger["mcs_sellergrant"] = initGrant;
-            ledger["mcs_asisbalance"] = new Money(oldBalance);
-            ledger["mcs_tobebalance"] = new Money(newBalance);
-            ledger["mcs_adjustamt"] = new Money(0m);
+            // 读取客户当前生效额度（无额度记录时按 0 处理）
+            GetCurrentQuota(service, tracer, accountRef, out decimal sellerGrant, out decimal sellerBalance);
 
-            Guid ledgerId = service.Create(ledger);
-            tracer.Trace($"已创建台账记录: {ledgerId}");
+            // 需求公式：调整后厂端授信余额 = 厂端授信额度调整为 - 厂端授信额度 + 厂端授信余额
+            decimal tobeBalance = initGrant.Value - sellerGrant + sellerBalance;
+
+            // 自动创建额度生效申请单（审批状态=申请，由业务在页面检查后人工提交 BPP）
+            Entity quotaApp = new Entity("mcs_fca_quotaapp");
+            quotaApp["mcs_accountid"] = accountRef;
+            quotaApp["mcs_custname"] = customerCode;
+            quotaApp["mcs_doid"] = new EntityReference("mcs_fca_proc", procId);
+            quotaApp["mcs_initigrant"] = initGrant;
+            quotaApp["mcs_sellergrant"] = new Money(sellerGrant);
+            quotaApp["mcs_sellerbalance"] = new Money(sellerBalance);
+            quotaApp["mcs_tobegrant"] = initGrant;
+            quotaApp["mcs_tobebalance"] = new Money(tobeBalance);
+            quotaApp["mcs_quotasum"] = new Money(0m);
+            quotaApp["mcs_quotabalance"] = new Money(0m);
+            quotaApp["mcs_bppstatus"] = new OptionSetValue(BPP_STATUS_APPLY);
+            // mcs_reason（调整原因）为平台必填字段，自动创建时填入默认说明，业务可在页面修改
+            quotaApp["mcs_reason"] = "厂端授信模型计算生效启用自动生成，请确认后提交审批。";
+            CopyOrgFields(proc, quotaApp);
+
+            Guid quotaAppId = service.Create(quotaApp);
+            tracer.Trace($"已自动创建额度生效申请单: {quotaAppId}（待人工提交 BPP 审批）");
         }
 
-        private Entity GetOrCreateQuota(IOrganizationService service, ITracingService tracer,
-            EntityReference accountRef, string customerCode)
+        /// <summary>
+        /// 查询是否已存在同一模型计算序列号的在途额度生效申请单（审批状态=申请/审批中）
+        /// </summary>
+        private bool HasPendingQuotaApp(IOrganizationService service, ITracingService tracer, Guid procId)
         {
-            QueryExpression query = new QueryExpression("mcs_fca_quota")
+            QueryExpression query = new QueryExpression("mcs_fca_quotaapp")
             {
-                ColumnSet = new ColumnSet("mcs_fca_quotaid", "mcs_sellerbalance", "mcs_usedsellerbalance"),
+                ColumnSet = new ColumnSet("mcs_fca_quotaappid"),
                 Criteria = new FilterExpression
                 {
                     Conditions =
                     {
-                        new ConditionExpression("mcs_accountid", ConditionOperator.Equal, accountRef.Id)
+                        new ConditionExpression("mcs_doid", ConditionOperator.Equal, procId),
+                        new ConditionExpression("mcs_bppstatus", ConditionOperator.In, new object[] { BPP_STATUS_APPLY, 2 })
                     }
                 },
                 TopCount = 1
             };
 
             EntityCollection result = service.RetrieveMultiple(query);
+            tracer.Trace($"在途申请单检查: 命中 {result.Entities.Count} 条");
+            return result.Entities.Count > 0;
+        }
 
+        /// <summary>
+        /// 读取客户当前生效的厂端授信额度和余额（mcs_isactive=1，最新一条）；无记录时返回 0
+        /// </summary>
+        private void GetCurrentQuota(IOrganizationService service, ITracingService tracer,
+            EntityReference accountRef, out decimal sellerGrant, out decimal sellerBalance)
+        {
+            sellerGrant = 0m;
+            sellerBalance = 0m;
+
+            QueryExpression query = new QueryExpression("mcs_fca_quota")
+            {
+                ColumnSet = new ColumnSet("mcs_sellergrant", "mcs_sellerbalance"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("mcs_accountid", ConditionOperator.Equal, accountRef.Id),
+                        new ConditionExpression("mcs_isactive", ConditionOperator.Equal, IS_ACTIVE_YES)
+                    }
+                },
+                TopCount = 1
+            };
+            query.AddOrder("createdon", OrderType.Descending);
+
+            EntityCollection result = service.RetrieveMultiple(query);
             if (result.Entities.Count > 0)
             {
-                tracer.Trace("找到已有额度记录，执行更新");
-                return result.Entities[0];
+                Entity quota = result.Entities[0];
+                sellerGrant = quota.GetAttributeValue<Money>("mcs_sellergrant")?.Value ?? 0m;
+                sellerBalance = quota.GetAttributeValue<Money>("mcs_sellerbalance")?.Value ?? 0m;
+                tracer.Trace($"读取到当前生效额度: grant={sellerGrant}, balance={sellerBalance}");
             }
+            else
+            {
+                tracer.Trace("客户暂无生效额度记录，额度/余额按 0 处理");
+            }
+        }
 
-            tracer.Trace("未找到额度记录，创建新记录");
-            Entity quota = new Entity("mcs_fca_quota");
-            quota["mcs_accountid"] = accountRef;
-            quota["mcs_custname"] = customerCode;
-            return quota;
+        /// <summary>
+        /// 将模型计算记录上的组织字段带出到申请单（proc 与 quotaapp 字段同名）
+        /// </summary>
+        private void CopyOrgFields(Entity proc, Entity quotaApp)
+        {
+            string[] orgFields = { "mcs_orgid", "mcs_orgname", "mcs_buid", "mcs_buname" };
+            foreach (string field in orgFields)
+            {
+                string value = proc.GetAttributeValue<string>(field);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    quotaApp[field] = value;
+                }
+            }
         }
 
         /// <summary>

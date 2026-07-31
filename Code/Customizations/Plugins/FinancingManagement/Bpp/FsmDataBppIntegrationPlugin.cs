@@ -111,20 +111,22 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
 
                 if (!isInitiationApproval && !isProjectApproval)
                 {
-                    tracer.Trace($"融资状态({fsmStatus})与审批类型({approveType})不匹配，跳过 BPP 提交");
-                    return;
+                    // 不允许提交：抛异常让事务回滚 mcs_bppstatus，避免记录卡在"审批中"的假提交脏数据
+                    tracer.Trace($"融资状态({fsmStatus})与审批类型({approveType})不匹配，中断并回滚");
+                    throw new InvalidPluginExecutionException(
+                        "当前融资状态不允许提交该类型审批：立项审批需在【融资立项】阶段提交，融资方案审批需在【融资解决方案】阶段提交。");
                 }
 
                 if (isInitiationApproval && !canInitiated)
                 {
-                    tracer.Trace("当前不允许提交立项审批(mcs_can_initiated=0)，跳过");
-                    return;
+                    tracer.Trace("当前不允许提交立项审批(mcs_can_initiated=0)，中断并回滚");
+                    throw new InvalidPluginExecutionException("当前记录不允许提交立项审批（可提交立项标记为否）。");
                 }
 
                 if (isProjectApproval && !canProject)
                 {
-                    tracer.Trace("当前不允许提交融资方案审批(mcs_can_project=0)，跳过");
-                    return;
+                    tracer.Trace("当前不允许提交融资方案审批(mcs_can_project=0)，中断并回滚");
+                    throw new InvalidPluginExecutionException("当前记录不允许提交融资方案审批（可提交方案标记为否）。");
                 }
 
                 // 防重复提交

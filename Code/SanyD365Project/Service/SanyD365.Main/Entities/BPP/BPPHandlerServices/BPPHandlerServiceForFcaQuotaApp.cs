@@ -78,7 +78,7 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 <attribute name=""mcs_sellerbalance""/>
                 <attribute name=""mcs_tobegrant""/>
                 <attribute name=""mcs_tobebalance""/>
-                <attribute name=""mcs_remark""/>
+                <attribute name=""mcs_reason""/>
                 <attribute name=""createdby""/>
                 <attribute name=""createdon""/>
                 <filter type=""and"">
@@ -152,7 +152,8 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     ["mcs_sellerbalance"] = record.GetDecimalValue("mcs_sellerbalance"),
                     ["mcs_tobegrant"] = record.GetDecimalValue("mcs_tobegrant"),
                     ["mcs_tobebalance"] = record.GetDecimalValue("mcs_tobebalance"),
-                    ["mcs_remark"] = record.GetStringValue("mcs_remark"),
+                    // 调整原因已切换为新字段 mcs_reason（多行文本）；BPP 模板变量 Code 仍为 mcs_remark，无需改模板
+                    ["mcs_remark"] = record.GetStringValue("mcs_reason"),
                     // 申请人/申请日期：实体无此业务字段，取系统创建人/创建时间（与表单视图一致）
                     ["mcs_applicant"] = record.GetLookupEntityReference("createdby")?.Name ?? string.Empty,
                     ["mcs_approver"] = string.Empty,
@@ -266,11 +267,11 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     updateEntity.Attributes.Add("mcs_fca_quotaapp_url", $"{config.Content}{flowId}");
                 }
 
-                // 取当前审批人并回写 mcs_bppapprover（实体无 mcs_nextapprover 字段，复用 mcs_bppapprover，与 FsmData 一致）
+                // 取当前审批人并回写 mcs_nextapprover（与 BPP 框架通用回写字段一致，实体已有 mcs_nextapprover 字段）
                 var currentApprover = await GetCurrentApprover(flowId);
                 if (!string.IsNullOrWhiteSpace(currentApprover))
                 {
-                    updateEntity.Attributes.Add("mcs_bppapprover", currentApprover);
+                    updateEntity.Attributes.Add("mcs_nextapprover", currentApprover);
                 }
 
                 await crmService.Update(updateEntity);
@@ -321,13 +322,13 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     updateEntity.Attributes.Add("mcs_approvedate", DateTime.Now);
                 }
 
-                // 每次回调都取当前审批人回写 mcs_bppapprover
+                // 每次回调都取当前审批人回写 mcs_nextapprover（与 BPP 框架通用回写字段一致）
                 if (request.FlowId.HasValue)
                 {
                     var currentApprover = await GetCurrentApprover(request.FlowId.Value.ToString());
                     if (!string.IsNullOrWhiteSpace(currentApprover))
                     {
-                        updateEntity.Attributes.Add("mcs_bppapprover", currentApprover);
+                        updateEntity.Attributes.Add("mcs_nextapprover", currentApprover);
                     }
                 }
 

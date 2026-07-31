@@ -102,6 +102,9 @@ FILE_MAP = {
     # FinancingManagement BPP
     "FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs": r"Plugins\FinancingManagement\Bpp\FsmDataBppIntegrationPlugin.cs",
     "FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs": r"Plugins\FinancingManagement\Bpp\FsmDataBppCallbackPlugin.cs",
+    # FinancingManagement 融资资源（禅道 #1433）
+    "FinancingManagement/Resource/FsmResourceStateSyncPlugin.cs": r"Plugins\FinancingManagement\Resource\FsmResourceStateSyncPlugin.cs",
+    "FinancingManagement/Resource/FsmResourceDeleteGuardPlugin.cs": r"Plugins\FinancingManagement\Resource\FsmResourceDeleteGuardPlugin.cs",
     "FactoryCredit/Bpp/Services/QuotaActivationService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaActivationService.cs",
     "FactoryCredit/Bpp/Services/QuotaRecordService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaRecordService.cs",
     "FactoryCredit/Calculation/Services/CalculationLogService.cs": r"Plugins\FactoryCredit\Calculation\Services\CalculationLogService.cs",
@@ -350,7 +353,7 @@ def build_remote(host: str, remote_dir: str, csproj_name: str = "SanyD365.D365Ex
     print("\n=== 远程编译验证 ===")
     result = subprocess.run(
         ["ssh", host,
-         f"cd /d \"{remote_dir}\" && msbuild {csproj_name} /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal"],
+         f"cd \"{remote_dir}\" && msbuild {csproj_name} /p:Configuration=Release /p:Platform=AnyCPU /verbosity:minimal"],
         capture_output=True, text=True
     )
     print(result.stdout)
@@ -359,8 +362,8 @@ def build_remote(host: str, remote_dir: str, csproj_name: str = "SanyD365.D365Ex
     return result.returncode == 0
 
 
-def sync(dry_run: bool = False, output_to_local: Path = None):
-    """执行同步主流程。"""
+def sync(dry_run: bool = False, output_to_local: Path = None, only: set = None):
+    """执行同步主流程。only 非空时只同步指定的本地相对路径文件。"""
     print(f"本地根目录: {LOCAL_ROOT}")
     print(f"远程主机: {REMOTE_HOST}")
     print(f"远程项目目录: {REMOTE_PROJECT_DIR}")
@@ -379,6 +382,8 @@ def sync(dry_run: bool = False, output_to_local: Path = None):
     csproj_entries_by_project = {}
 
     for local_rel, remote_rel, project_dir, csproj_name in tasks:
+        if only and local_rel not in only:
+            continue
         local_path = LOCAL_ROOT / local_rel
         if not local_path.exists():
             print(f"⚠️ 本地文件不存在，跳过: {local_path}")
@@ -460,9 +465,11 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="只打印同步计划，不执行")
     parser.add_argument("--output-to-local", type=Path, help="输出转换后的文件到本地目录（用于调试）")
     parser.add_argument("--pull-dll", type=Path, help="同步并编译成功后，把 DLL 拉回指定路径")
+    parser.add_argument("--only", type=str, help="只同步指定文件（本地相对路径，逗号分隔），用于绕过无关历史文件校验失败")
     args = parser.parse_args()
 
-    sync(dry_run=args.dry_run, output_to_local=args.output_to_local)
+    only_set = set(s.strip() for s in args.only.split(",") if s.strip()) if args.only else None
+    sync(dry_run=args.dry_run, output_to_local=args.output_to_local, only=only_set)
 
     if args.pull_dll and not args.dry_run and not args.output_to_local:
         pull_dll(args.pull_dll)

@@ -38,7 +38,7 @@ class ZentaoClient:
         data = response.json()
         self.token = data.get("token")
         self.headers = {
-            "Authorization": f"Bearer {self.token}",
+            "Token": self.token,
             "Content-Type": "application/json"
         }
         print(f"✅ 登录成功，Token: {self.token[:20]}...")
@@ -145,6 +145,98 @@ class ZentaoClient:
         url = f"{self.api_url}/executions/{execution_id}/tasks"
         params = {"page": page, "limit": limit}
         response = requests.get(url, headers=self.headers, params=params)
+        response.raise_for_status()
+        return response.json()
+
+    # ========== Bug 读取/解决（2026-07-30 新增） ==========
+
+    def get_my_profile(self):
+        """获取当前登录用户信息（含 account）"""
+        url = f"{self.api_url}/user"
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+
+    def get_bug(self, bug_id):
+        """获取单个 Bug 详情"""
+        url = f"{self.api_url}/bugs/{bug_id}"
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+
+    def get_my_bugs(self, product_ids=None, status="active", max_pages=5, limit=100):
+        """
+        获取指派给我的 Bug 列表。
+        优先尝试 /my/bugs 接口（部分版本支持）；不支持时遍历产品 Bug 列表按 assignedTo 过滤。
+
+        Args:
+            product_ids: 指定产品 ID 列表；None 时自动取全部产品
+            status: 过滤状态，默认 active（未解决）；传 None 或 'all' 不过滤
+        Returns:
+            list: Bug 字典列表
+        """
+        # 方案 1：/my/bugs（禅道 18+ 支持）
+        try:
+            url = f"{self.api_url}/my/bugs"
+            params = {"limit": limit}
+            if status and status != "all":
+                params["status"] = status
+            response = requests.get(url, headers=self.headers, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                bugs = data.get("bugs", data) if isinstance(data, dict) else data
+                if isinstance(bugs, list):
+                    return self._filter_bugs(bugs, status)
+        except Exception:
+            pass
+
+        # 方案 2：遍历产品 Bug 列表按 assignedTo 过滤
+        if product_ids is None:
+            products = self.get_products()
+            product_list = products.get("products", products) if isinstance(products, dict) else products
+            product_ids = [p["id"] for p in product_list]
+
+        my_bugs = []
+        for pid in product_ids:
+            for page in range(1, max_pages + 1):
+                data = self.get_product_bugs(pid, page=page, limit=limit)
+                bugs = data.get("bugs", []) if isinstance(data, dict) else data
+                if not bugs:
+                    break
+                for bug in bugs:
+                    assigned = bug.get("assignedTo")
+                    account = assigned.get("account") if isinstance(assigned, dict) else assigned
+                    if account == self.account:
+                        my_bugs.append(bug)
+                if len(bugs) < limit:
+                    break
+        return self._filter_bugs(my_bugs, status)
+
+    @staticmethod
+    def _filter_bugs(bugs, status):
+        if not status or status == "all":
+            return bugs
+        return [b for b in bugs if str(b.get("status")) == status]
+
+    def resolve_bug(self, bug_id, resolution="fixed", resolved_build="trunk",
+                    assigned_to=None, comment=None):
+        """
+        标记 Bug 为已解决。
+
+        Args:
+            bug_id: Bug ID
+            resolution: 解决方案，默认 fixed（已修复）。其他：notrepro/wontfix/bydesign/duplicate 等
+            resolved_build: 解决版本，默认 trunk
+            assigned_to: 解决后指派人账号（通常为 Bug 提出人，用于验证关闭）
+            comment: 处理结果说明
+        """
+        url = f"{self.api_url}/bugs/{bug_id}/resolve"
+        payload = {"resolution": resolution, "resolvedBuild": resolved_build}
+        if assigned_to:
+            payload["assignedTo"] = assigned_to
+        if comment:
+            payload["comment"] = comment
+        response = requests.post(url, headers=self.headers, json=payload)
         response.raise_for_status()
         return response.json()
 
