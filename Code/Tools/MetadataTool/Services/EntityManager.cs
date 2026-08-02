@@ -757,6 +757,116 @@ public class EntityManager
 		Console.WriteLine("  ✓ 发布完成");
 	}
 
+	/// <summary>
+	/// 导入 Solution ZIP（2026-07-31，Ribbon 部署链路：导出→合并 customizations.xml→导入）
+	/// 非托管叠加导入，导入后不自动发布（由调用方按需发布指定实体）
+	/// </summary>
+	public void ImportSolution(string zipPath)
+	{
+		Console.WriteLine($">>> 导入 Solution: {zipPath}");
+		var zipBytes = File.ReadAllBytes(zipPath);
+		Console.WriteLine($"  包大小: {zipBytes.Length / 1024} KB");
+		var req = new ImportSolutionRequest
+		{
+			CustomizationFile = zipBytes,
+			PublishWorkflows = false,
+			OverwriteUnmanagedCustomizations = true,
+			ImportJobId = Guid.NewGuid()
+		};
+		_service.Execute(req);
+		Console.WriteLine("  ✅ 导入完成");
+	}
+
+	/// <summary>
+	/// 幂等部署实体 RibbonDiffXml（2026-07-31，融资管理提交审批按钮显隐）
+	/// 链路：导出实体所在 Solution → 解包合并 customizations.xml 实体 RibbonDiffXml 节点
+	/// （按 Id 前缀清理旧节点后合入片段 CustomActions/CommandDefinitions/RuleDefinitions/LocLabels）
+	/// → 重新打包 → 非托管导入 → 发布实体。
+	/// 背景：元数据实体 entity 不支持 ribbondiffxml 直接读写，实体 Ribbon 只能随 Solution 导入生效。
+	/// 片段文件参考 Code/Customizations/Ribbon/mcs_fsm_data.ribbon.xml。
+	/// </summary>
+	/// <param name="entityName">实体逻辑名</param>
+	/// <param name="ribbonXmlPath">RibbonDiffXml 片段文件路径</param>
+	/// <param name="solutionName">实体所在 Solution 唯一名（导出/导入载体）</param>
+	/// <param name="workDir">解包工作目录</param>
+	/// <param name="idPrefix">幂等清理前缀（默认 mcs.{实体名}.）</param>
+	public void DeployRibbonDiff(string entityName, string ribbonXmlPath, string solutionName, string workDir, string idPrefix = null)
+	{
+		idPrefix ??= "mcs." + entityName + ".";
+		Console.WriteLine($">>> 部署 RibbonDiffXml: {entityName}（载体 Solution={solutionName}，幂等前缀 {idPrefix}）");
+
+		// 1. 导出 Solution 并解包
+		Directory.CreateDirectory(workDir);
+		var zipPath = Path.Combine(workDir, solutionName + ".zip");
+		ExportSolution(solutionName, zipPath);
+		var extractDir = Path.Combine(workDir, "unpacked");
+		if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
+		System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractDir);
+		var custPath = Path.Combine(extractDir, "customizations.xml");
+		if (!File.Exists(custPath)) throw new FileNotFoundException("包内缺少 customizations.xml", custPath);
+
+		// 2. 定位实体节点的 RibbonDiffXml
+		var doc = XDocument.Load(custPath, LoadOptions.PreserveWhitespace);
+		var snippetRoot = XDocument.Load(ribbonXmlPath).Root ?? throw new InvalidOperationException("片段文件缺少 RibbonDiffXml 根节点");
+		var entityEl = doc.Root?.Element("Entities")?.Elements("Entity")
+			.FirstOrDefault(e => string.Equals(e.Element("Name")?.Value?.Trim(), entityName, StringComparison.OrdinalIgnoreCase))
+			?? throw new InvalidOperationException($"customizations.xml 中未找到实体节点: {entityName}");
+		var ribbonEl = entityEl.Element("RibbonDiffXml");
+		if (ribbonEl == null)
+		{
+			ribbonEl = new XElement("RibbonDiffXml");
+			entityEl.Add(ribbonEl);
+			Console.WriteLine("  实体节点无 RibbonDiffXml，已新建");
+		}
+
+		bool HasPrefix(XElement el) => ((string)el.Attribute("Id"))?.StartsWith(idPrefix, StringComparison.OrdinalIgnoreCase) == true;
+
+		// 3. 合入平铺节（CustomActions / CommandDefinitions / LocLabels）：先删同前缀旧节点再追加
+		foreach (var sectionName in new[] { "CustomActions", "CommandDefinitions", "LocLabels" })
+		{
+			var snippetSection = snippetRoot.Element(sectionName);
+			if (snippetSection == null || !snippetSection.Elements().Any()) continue;
+			var section = ribbonEl.Element(sectionName);
+			if (section == null) { section = new XElement(sectionName); ribbonEl.Add(section); }
+			section.Elements().Where(HasPrefix).Remove();
+			foreach (var child in snippetSection.Elements()) section.Add(new XElement(child));
+			Console.WriteLine($"  ✓ {sectionName}: 合入 {snippetSection.Elements().Count()} 个节点");
+		}
+
+		// 4. 合入 RuleDefinitions（二级容器：TabDisplayRules/DisplayRules/EnableRules）
+		var snippetRules = snippetRoot.Element("RuleDefinitions");
+		if (snippetRules != null)
+		{
+			var rules = ribbonEl.Element("RuleDefinitions");
+			if (rules == null) { rules = new XElement("RuleDefinitions"); ribbonEl.Add(rules); }
+			foreach (var container in snippetRules.Elements())
+			{
+				if (!container.Elements().Any()) continue;
+				var currentContainer = rules.Element(container.Name);
+				if (currentContainer == null) { currentContainer = new XElement(container.Name); rules.Add(currentContainer); }
+				currentContainer.Elements().Where(HasPrefix).Remove();
+				foreach (var child in container.Elements()) currentContainer.Add(new XElement(child));
+				Console.WriteLine($"  ✓ RuleDefinitions/{container.Name.LocalName}: 合入 {container.Elements().Count()} 个节点");
+			}
+		}
+
+		// 5. Templates：没有时补标准模板引用
+		if (ribbonEl.Element("Templates") == null && snippetRoot.Element("Templates") != null)
+			ribbonEl.Add(new XElement(snippetRoot.Element("Templates")));
+
+		doc.Save(custPath);
+		Console.WriteLine("  ✅ customizations.xml 合并完成");
+
+		// 6. 重新打包 → 导入 → 发布
+		var newZip = Path.Combine(workDir, solutionName + "_ribbon.zip");
+		if (File.Exists(newZip)) File.Delete(newZip);
+		System.IO.Compression.ZipFile.CreateFromDirectory(extractDir, newZip);
+		Console.WriteLine($"  ✅ 已重新打包: {newZip}");
+
+		ImportSolution(newZip);
+		PublishEntity(entityName);
+	}
+
 	public void PublishEntities(params string[] entityNames)
 	{
 		if (entityNames.Length != 0)

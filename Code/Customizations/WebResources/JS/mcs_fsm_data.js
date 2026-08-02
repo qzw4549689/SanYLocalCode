@@ -152,9 +152,9 @@ var FsmDataForm = (function () {
     var _quoteMainIdsForLead = null;
 
     // 未上表单字段的服务端值缓存（onLoad/保存后刷新），供 getFieldValue 回退读取
-    // 背景：mcs_bppstatus/mcs_approve_type/mcs_can_initiated/mcs_can_project 未放到表单上
+    // 背景：mcs_bppstatus/mcs_approve_type/mcs_can_initiated/mcs_can_project/mcs_fsm_credit_amount_usd 未放到表单上
     var _fieldCache = {};
-    var CACHE_FIELDS = ["mcs_bppstatus", "mcs_approve_type", "mcs_can_initiated", "mcs_can_project"];
+    var CACHE_FIELDS = ["mcs_bppstatus", "mcs_approve_type", "mcs_can_initiated", "mcs_can_project", "mcs_fsm_credit_amount_usd"];
 
     function getLookup(formContext, fieldName) {
         var attr = formContext.getAttribute(fieldName);
@@ -218,6 +218,52 @@ var FsmDataForm = (function () {
             function (r) { return r[fieldName]; },
             function () { return getFieldValue(formContext, fieldName); }
         );
+    }
+
+    // =====================================================================
+    // 融资金额USD 自动折算（PRD：根据授信金额自动转换为USD存入）
+    // 组织基础币种 = USD，公式：USD = 授信金额 ÷ 所选币种汇率（D365 交易货币表）
+    // =====================================================================
+    var _currencyRateCache = {};   // transactioncurrencyid → exchangerate
+
+    /**
+     * 授信金额/融资币种变更时自动折算 USD 并写入服务端（字段未上表单，仅存库）
+     */
+    function updateCreditAmountUsd(formContext) {
+        var amountAttr = formContext.getAttribute("mcs_fsm_credit_amount");
+        var currencyRef = getLookup(formContext, "mcs_fsm_currency");
+        var amount = amountAttr ? amountAttr.getValue() : null;
+        if (amount === null || amount === undefined || !currencyRef) return; // 缺一不算，保留现值
+
+        var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
+        if (!recordId) return; // 未保存记录不后台写（授信金额为融资解决方案阶段字段，此时记录已保存）
+
+        var currencyId = currencyRef.id.replace(/[{}]/g, "").toLowerCase();
+        var applyRate = function (rate) {
+            if (!rate) return;
+            var usd = Math.round((amount / rate) * 100) / 100;
+            var current = getFieldValue(formContext, "mcs_fsm_credit_amount_usd");
+            if (current !== null && current !== undefined && Math.abs(current - usd) < 0.005) return; // 值未变化不写
+            Xrm.WebApi.updateRecord("mcs_fsm_data", recordId, { "mcs_fsm_credit_amount_usd": usd }).then(
+                function () {
+                    _fieldCache["mcs_fsm_credit_amount_usd"] = usd;
+                    console.log("[FSM] 融资金额USD 自动折算: " + amount + " / " + rate + " = " + usd);
+                },
+                function (e) { console.warn("[FSM] 融资金额USD 折算写入失败:", e); }
+            );
+        };
+
+        if (_currencyRateCache[currencyId]) {
+            applyRate(_currencyRateCache[currencyId]);
+        } else {
+            Xrm.WebApi.retrieveRecord("transactioncurrency", currencyId, "?$select=exchangerate").then(
+                function (r) {
+                    _currencyRateCache[currencyId] = r["exchangerate"];
+                    applyRate(r["exchangerate"]);
+                },
+                function (e) { console.warn("[FSM] 汇率读取失败:", e); }
+            );
+        }
     }
 
     /**
@@ -491,8 +537,8 @@ var FsmDataForm = (function () {
     function validateRequiredFields(formContext, fieldNames) {
         var missing = [];
         fieldNames.forEach(function (f) {
-            var attr = formContext.getAttribute(f);
-            var v = attr ? attr.getValue() : null;
+            // 表单上读不到时回退读服务端缓存（如 mcs_fsm_credit_amount_usd 未上表单，由自动折算写入）
+            var v = getFieldValue(formContext, f);
             var empty = (v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0));
             if (empty) {
                 var ctrl = formContext.getControl(f);
@@ -568,6 +614,9 @@ var FsmDataForm = (function () {
     // 阶段双向同步重入保护
     var _syncingStage = false;
 
+    // reconcileStagesOnLoad → syncBpfFromStatus 程序化推进标记（门禁放行，2026-08-01）
+    var _reconcilingFromStatus = false;
+
     function getStageNumberByName(stageName) {
         if (!stageName) return null;
         for (var i = 0; i < BPF_STAGE_NAMES.length; i++) {
@@ -624,22 +673,40 @@ var FsmDataForm = (function () {
         var status = (statusAttr && statusAttr.getValue()) ? statusAttr.getValue() : FSM_STATUS.DEMAND;
         var bpfNum = getBpfStageNumber(formContext);
         if (bpfNum === status) return;
-        try {
-            var targetId = null;
-            process.getActivePath().forEach(function (st) {
-                if (getStageNumberByName(st.getName()) === status) targetId = st.getId();
-            });
-            if (!targetId) return;
-            _syncingStage = true;
-            process.setActiveStage(targetId, function () {
-                _syncingStage = false;
-                applyStageControl(formContext);
-                lockBpfFields(formContext);
-            });
-        } catch (e) {
+        // 官方文档：setActiveStage 仅用于回退到"已走过"的阶段（且要求选中阶段=活动阶段），
+        // 前进到未走过阶段一律返回 invalid（2026-08-01 UAT/DEV1 实测实锤）；前进必须用 moveNext
+        _syncingStage = true;
+        _reconcilingFromStatus = true;
+        var finish = function () {
             _syncingStage = false;
-            console.warn("[FSM] 同步 BPF 阶段失败:", e);
-        }
+            _reconcilingFromStatus = false;
+            applyStageControl(formContext);
+            lockBpfFields(formContext);
+        };
+        // 预算式推进：最多移动 (status - bpfNum) 次，绝不多发 moveNext。
+        // 教训（2026-08-01 DEV1 实测）：moveNext 回调触发时 getActiveStage() 可能仍返回旧阶段（竞态），
+        // 若按“移动后重读阶段”决定继续，目标为最终阶段时会多发一次 moveNext 把流程直接推到 completed（无法撤销）。
+        var movesLeft = status - bpfNum;
+        var stepForward = function () {
+            if (movesLeft <= 0) { finish(); return; }
+            var cur = getBpfStageNumber(formContext);
+            if (cur === null || cur >= status) { finish(); return; }
+            movesLeft--;
+            try {
+                process.moveNext(function (result) {
+                    if (result === "success") {
+                        stepForward();
+                    } else {
+                        console.warn("[FSM] moveNext 同步阶段中止:", result);
+                        finish();
+                    }
+                });
+            } catch (e) {
+                console.warn("[FSM] 同步 BPF 阶段失败:", e);
+                finish();
+            }
+        };
+        stepForward();
     }
 
     /**
@@ -670,6 +737,7 @@ var FsmDataForm = (function () {
         if (!process) return;
         try {
             process.addOnPreStageChange(function (stageChangeContext) {
+                if (_reconcilingFromStatus) return; // 程序化同步（syncBpfFromStatus→moveNext）直接放行
                 var args = stageChangeContext.getEventArgs();
                 if (!args || args.getDirection() !== "Next") return;
                 var targetStage = args.getStage ? args.getStage() : null;
@@ -679,7 +747,9 @@ var FsmDataForm = (function () {
                 var approveType = getFieldValue(formContext, "mcs_approve_type");
                 var bppStatus = getFieldValue(formContext, "mcs_bppstatus");
 
-                var initiationPassed = (approveType === APPROVE_TYPE.INITIATION && bppStatus === BPP_STATUS.APPROVED);
+                // 方案类型审批存在（任何状态）⟹ 立项必然已通过（提交方案的前置=立项通过且状态=3，2026-08-01 修复误判）
+                var initiationPassed = (approveType === APPROVE_TYPE.INITIATION && bppStatus === BPP_STATUS.APPROVED)
+                    || (approveType === APPROVE_TYPE.PROJECT);
                 var projectPassed = (approveType === APPROVE_TYPE.PROJECT && bppStatus === BPP_STATUS.APPROVED);
 
                 if (targetNum >= FSM_STATUS.SOLUTION && !initiationPassed) {
@@ -795,8 +865,18 @@ var FsmDataForm = (function () {
         formContext.data.entity.addOnSave(onSaveValidate);
 
         // 未上表单字段的服务端值缓存（BPF 门禁/提交校验回退读取）
-        refreshFieldCache(formContext);
+        refreshFieldCache(formContext).then(function () {
+            // 存量记录打开表单时补齐空的 融资金额USD（自动折算兜底）
+            var existingUsd = _fieldCache["mcs_fsm_credit_amount_usd"];
+            if (existingUsd === null || existingUsd === undefined) updateCreditAmountUsd(formContext);
+        });
         formContext.data.entity.addOnPostSave(function () { refreshFieldCache(formContext); });
+
+        // 融资金额USD 自动折算：授信金额/融资币种变更时重算
+        ["mcs_fsm_credit_amount", "mcs_fsm_currency"].forEach(function (f) {
+            var attr = formContext.getAttribute(f);
+            if (attr) attr.addOnChange(function () { updateCreditAmountUsd(formContext); });
+        });
 
         // 按当前阶段控制 tab 字段可写 + 必填；阶段/审批状态变化时重新应用
         applyStageControl(formContext);
@@ -896,6 +976,34 @@ var FsmDataForm = (function () {
                 submitApproval(formContext, APPROVE_TYPE.PROJECT, t("FsmData_TypeProject", "融资方案审批"));
             });
         });
+    };
+
+    // =====================================================================
+    // Ribbon 显隐规则（经典 Ribbon DisplayRule 同步 CustomRule，2026-07-31）
+    // 按 PRD：【提交立项审批】仅融资立项(2)可见；【提交融资方案审批】仅融资解决方案(3)可见；新增未保存均隐藏
+    // 角色判断同步规则做不了（需异步查询），维持 JS 提交时的现有拦截
+    // =====================================================================
+    function ribbonShowForStage(primaryControl, stage) {
+        try {
+            var formContext = primaryControl;
+            if (!formContext || !formContext.data || !formContext.data.entity) return false;
+            if (!formContext.data.entity.getId()) return false; // 新增未保存
+            var attr = formContext.getAttribute("mcs_fsm_status");
+            return attr ? attr.getValue() === stage : false;
+        } catch (e) {
+            console.warn("[FSM] Ribbon 显隐规则异常:", e);
+            return false;
+        }
+    }
+
+    /** Ribbon DisplayRule：【提交立项审批】仅融资立项阶段可见 */
+    self.ribbonShowSubmitInitiation = function (primaryControl) {
+        return ribbonShowForStage(primaryControl, FSM_STATUS.INITIATION);
+    };
+
+    /** Ribbon DisplayRule：【提交融资方案审批】仅融资解决方案阶段可见 */
+    self.ribbonShowSubmitProject = function (primaryControl) {
+        return ribbonShowForStage(primaryControl, FSM_STATUS.SOLUTION);
     };
 
     // 预加载语言包（异步，不阻塞后续逻辑）

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  mcs_fsm_data 表单命令栏提交审批按钮（RibbonDiffXml 片段，2026-07-31）
+  用途：替代原现代 appaction 按钮（mcs_fsm_data_submit_initiation/project），
+        将 PRD 显隐规则内联为 DisplayRule CustomRule（同步 JS），随实体包跨环境（生产零手动步骤）。
+        2026-08-01 DEV1 已验证三阶段显隐全部正确。备选方案：ValueRule Field="mcs_fsm_status" Value="2"/"3"
+        （声明式、不依赖 JS，可消除 UAT「先发 McsWebResource」顺序依赖；未经环境验证，暂保留 CustomRule）。
+  显隐口径（PRD）：【提交立项审批】仅融资立项(2)可见；【提交融资方案审批】仅融资解决方案(3)可见；新增未保存均隐藏。
+  平台限制：UCI 经典 Ribbon 按钮固定进「更多命令」溢出菜单，Sequence=10/11 尽量靠前（参照成交条件 r3 方案）。
+  UAT 注意：非托管导入只做叠加，旧 appaction 残留需在 UAT Command Designer 手动隐藏（可逆）。
+  合并方式：由 MetadataTool deploy-ribbon 幂等合并进实体 ribbondiffxml（按 mcs.mcs_fsm_data. 前缀清理旧节点后追加）。
+-->
+<RibbonDiffXml>
+  <CustomActions>
+    <CustomAction Id="mcs.mcs_fsm_data.FormSubmitInitiation.CustomAction"
+                  Location="Mscrm.Form.mcs_fsm_data.MainTab.Actions.Controls._children"
+                  Sequence="10">
+      <CommandUIDefinition>
+        <Button Id="mcs.mcs_fsm_data.FormSubmitInitiation.Button"
+                Command="mcs.mcs_fsm_data.FormSubmitInitiation.Command"
+                ModernImage="CheckMark"
+                LabelText="$LocLabels:mcs.mcs_fsm_data.FormSubmitInitiation.LabelText"
+                ToolTipTitle="$LocLabels:mcs.mcs_fsm_data.FormSubmitInitiation.ToolTipTitle"
+                TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+    <CustomAction Id="mcs.mcs_fsm_data.FormSubmitProject.CustomAction"
+                  Location="Mscrm.Form.mcs_fsm_data.MainTab.Actions.Controls._children"
+                  Sequence="11">
+      <CommandUIDefinition>
+        <Button Id="mcs.mcs_fsm_data.FormSubmitProject.Button"
+                Command="mcs.mcs_fsm_data.FormSubmitProject.Command"
+                ModernImage="CheckMark"
+                LabelText="$LocLabels:mcs.mcs_fsm_data.FormSubmitProject.LabelText"
+                ToolTipTitle="$LocLabels:mcs.mcs_fsm_data.FormSubmitProject.ToolTipTitle"
+                TemplateAlias="o1" />
+      </CommandUIDefinition>
+    </CustomAction>
+  </CustomActions>
+  <Templates>
+    <RibbonTemplates Id="Mscrm.Templates"></RibbonTemplates>
+  </Templates>
+  <CommandDefinitions>
+    <CommandDefinition Id="mcs.mcs_fsm_data.FormSubmitInitiation.Command">
+      <EnableRules />
+      <DisplayRules>
+        <DisplayRule Id="mcs.mcs_fsm_data.ShowSubmitInitiation" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction FunctionName="FsmDataForm.submitInitiationApproval" Library="$webresource:mcs_fsm_data.js">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+    <CommandDefinition Id="mcs.mcs_fsm_data.FormSubmitProject.Command">
+      <EnableRules />
+      <DisplayRules>
+        <DisplayRule Id="mcs.mcs_fsm_data.ShowSubmitProject" />
+      </DisplayRules>
+      <Actions>
+        <JavaScriptFunction FunctionName="FsmDataForm.submitProjectApproval" Library="$webresource:mcs_fsm_data.js">
+          <CrmParameter Value="PrimaryControl" />
+        </JavaScriptFunction>
+      </Actions>
+    </CommandDefinition>
+  </CommandDefinitions>
+  <RuleDefinitions>
+    <TabDisplayRules />
+    <DisplayRules>
+      <DisplayRule Id="mcs.mcs_fsm_data.ShowSubmitInitiation">
+        <CustomRule FunctionName="FsmDataForm.ribbonShowSubmitInitiation" Library="$webresource:mcs_fsm_data.js" Default="0">
+          <CrmParameter Value="PrimaryControl" />
+        </CustomRule>
+      </DisplayRule>
+      <DisplayRule Id="mcs.mcs_fsm_data.ShowSubmitProject">
+        <CustomRule FunctionName="FsmDataForm.ribbonShowSubmitProject" Library="$webresource:mcs_fsm_data.js" Default="0">
+          <CrmParameter Value="PrimaryControl" />
+        </CustomRule>
+      </DisplayRule>
+    </DisplayRules>
+    <EnableRules />
+  </RuleDefinitions>
+  <LocLabels>
+    <LocLabel Id="mcs.mcs_fsm_data.FormSubmitInitiation.LabelText">
+      <Titles>
+        <Title description="提交立项审批" languagecode="2052" />
+        <Title description="Submit Project Initiation Approval" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_fsm_data.FormSubmitInitiation.ToolTipTitle">
+      <Titles>
+        <Title description="将融资立项提交 BPP 立项审批" languagecode="2052" />
+        <Title description="Submit the financing initiation for BPP project initiation approval" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_fsm_data.FormSubmitProject.LabelText">
+      <Titles>
+        <Title description="提交融资方案审批" languagecode="2052" />
+        <Title description="Submit Financing Solution Approval" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+    <LocLabel Id="mcs.mcs_fsm_data.FormSubmitProject.ToolTipTitle">
+      <Titles>
+        <Title description="将融资解决方案提交 BPP 融资方案审批" languagecode="2052" />
+        <Title description="Submit the financing solution for BPP financing solution approval" languagecode="1033" />
+      </Titles>
+    </LocLabel>
+  </LocLabels>
+</RibbonDiffXml>
