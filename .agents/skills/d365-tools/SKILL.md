@@ -245,9 +245,9 @@ dotnet run update-field-range <实体名> <字段名> <最小值> <最大值>
 
 ---
 
-## 4. 命令栏按钮部署（App Action 优先，显隐随包场景用 RibbonDiffXml）
+## 4. 命令栏按钮部署（🚨 2026-08-01 用户明确：跨环境发布一律 RibbonDiffXml）
 
-> **核心原则（2026-07-27 修订）：默认用 C# SDK 创建 App Action；仅当按钮需要「显隐规则随包走」时改用 RibbonDiffXml。**
+> **核心原则（2026-08-01 再次修订，用户指定并记入 AGENTS.md 红线）：凡需要随包跨环境（DEV→UAT→生产）发布的命令栏按钮，一律用 RibbonDiffXml 内联在实体自定义中随实体包走；App Action 现代按钮仅限 DEV 临时验证场景。导包改实体前必须先问用户用哪个载体包，严禁自行选择。**
 
 ### 4.1 两种载体对比与选型
 
@@ -258,9 +258,9 @@ dotnet run update-field-range <实体名> <字段名> <最小值> <最大值>
 | 始终显示 + JS 拦截 | ✅ 首选 | 不必要 |
 | **显隐规则随包**（如 SelectionCountRule） | ❌ 经典规则靠 N:N 关联 `appaction_appactionrule_classicrules`（`IsCustomizable=False`），**永不随包**；Power Fx 公式必须注册进命令组件库（不可跨环境） | ✅ **规则内联在 XML，随实体包走，生产零手动步骤** |
 
-**选型结论**：无显隐需求 → App Action；有显隐需求且要求跨环境零手动 → RibbonDiffXml。
-**案例**：`Code/Customizations/Ribbon/mcs_trade_stpayterm.ribbon.xml`（3 个列表批量按钮，内联 `SelectionCountRule Minimum=1`，1033/2052 LocLabels，CrmParameter `SelectedControlSelectedItemIds`+`SelectedControl` 与 JS 签名一一对应；合并进实体包 customizations.xml 实体 Ribbon 节点导入）。
-**注意**：Ribbon 按钮在 UCI 固定落入「更多命令」溢出菜单（两轮实测：Sequence/ModernImage 不影响位置，主栏只渲染现代命令；Sequence 决定溢出菜单内排序、ModernImage 提供图标）；Location 用 `Mscrm.HomepageGrid.{entity}.MainTab.Management.Controls._children`；同一实体不要 Legacy + App Action 混用同一功能按钮（会重复）。**DEV1 迭代可用本机 pac CLI 导入**（`pac solution import`，已有 peter_qiuzw profile），撞锁报 `Cannot start another [Import]` 错峰重试。
+**选型结论（2026-08-01 用户定稿）**：跨环境发布的按钮 → 一律 RibbonDiffXml；App Action 仅限 DEV 临时验证。**载体包必须先问用户**（红线），导出重导会带上包内全部组件（含他人实体），擅自选包影响面不可控。
+**案例**：`Code/Customizations/Ribbon/mcs_trade_stpayterm.ribbon.xml`（3 个列表批量按钮，内联 `SelectionCountRule Minimum=1`，1033/2052 LocLabels，CrmParameter `SelectedControlSelectedItemIds`+`SelectedControl` 与 JS 签名一一对应）；`Code/Customizations/Ribbon/mcs_credit_record.ribbon.xml`（表单按钮【Coface 下单】，`Mscrm.Form.{entity}.MainTab.Management.Controls._children`，CrmParameter `PrimaryControl`）。部署用 `MetadataTool deploy-ribbon <实体> <xml> <载体Solution> [工作目录] [幂等前缀]`（导出载体包→合并实体 Ribbon 节点→重打包→非托管导入→发布，幂等）。
+**注意**：Ribbon 按钮在 UCI 固定落入「更多命令」溢出菜单（两轮实测：Sequence/ModernImage 不影响位置，主栏只渲染现代命令；Sequence 决定溢出菜单内排序、ModernImage 提供图标）；Location 表单用 `Mscrm.Form.{entity}.MainTab.Management.Controls._children`、列表用 `Mscrm.HomepageGrid.{entity}.MainTab.Management.Controls._children`；同一实体不要 Legacy + App Action 混用同一功能按钮（会重复）。**DEV1 迭代可用本机 pac CLI 导入**（`pac solution import`，已有 peter_qiuzw profile），撞锁报 `Cannot start another [Import]` 错峰重试。
 
 ### 4.2 App Action 正确创建方式
 
