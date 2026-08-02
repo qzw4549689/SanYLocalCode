@@ -131,6 +131,52 @@ namespace D365MetadataTool.Services
         }
 
         /// <summary>
+        /// 部署 Coface 系统内下单 Custom API
+        /// </summary>
+        public Guid DeployCofacePlaceOrderApi(string pluginTypeName, string solutionName = "McsCustomAPI")
+        {
+            const string uniqueName = "mcs_CofacePlaceOrder";
+            Console.WriteLine($">>> 部署 Custom API: {uniqueName}");
+
+            // 1. 查找 Plugin Type
+            var pluginTypeId = QueryPluginType(pluginTypeName);
+            if (pluginTypeId == Guid.Empty)
+            {
+                Console.WriteLine($"  ❌ 未找到 Plugin Type: {pluginTypeName}");
+                return Guid.Empty;
+            }
+            Console.WriteLine($"  Plugin Type: {pluginTypeId}");
+
+            // 2. 创建/更新 Custom API
+            var apiId = CreateOrUpdateCustomApi(pluginTypeId, solutionName, uniqueName,
+                "Coface 系统内下单",
+                "Coface 系统内下单状态机推进接口：调查单/URBA监控单/Report单下单与就绪查询（供信用评估记录表单【Coface 下单】按钮调用）");
+            if (apiId == Guid.Empty)
+            {
+                Console.WriteLine("  ❌ Custom API 创建/更新失败");
+                return Guid.Empty;
+            }
+
+            // 3. 创建请求参数
+            var requestParamIds = new List<Guid>
+            {
+                CreateRequestParameter(apiId, "CreditRecordId", "信用评估记录ID", "String", false, solutionName)
+            };
+
+            // 4. 创建响应属性
+            var responsePropIds = new List<Guid>
+            {
+                CreateResponseProperty(apiId, "ResultJson", "下单结果(JSON)", "String", solutionName)
+            };
+
+            // 5. 加入解决方案
+            AddToSolution(apiId, requestParamIds, responsePropIds, solutionName);
+
+            Console.WriteLine("  ✅ Custom API 部署完成");
+            return apiId;
+        }
+
+        /// <summary>
         /// 删除指定 Custom Action（流程/操作）
         /// 仅删除 category=1 的 workflow，避免误删 Custom API 或工作流
         /// </summary>

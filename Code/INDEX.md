@@ -95,8 +95,8 @@
 
 | 模块 | 功能点 | 代码路径 | 涉及实体 | 备注 |
 |---|---|---|---|---|
-| Coface 集成 | Coface API 服务封装 | `Customizations/Plugins/CofaceIntegration/Api/CofaceApiService.cs` | — | 本地独立 Assembly；封装公司搜索、URBA360、Report、PDF 下载等 HTTP 调用 |
-| Coface 集成 | Coface Token 管理 | `Customizations/Plugins/CofaceIntegration/Token/CofaceTokenManager.cs` | `ms_systemconfiguration` | 本地独立 Assembly；每次重新获取 idToken |
+| Coface 集成 | Coface API 服务封装 | `Customizations/Plugins/CofaceIntegration/Api/CofaceApiService.cs` | — | 本地独立 Assembly；封装公司搜索、URBA360、Report、PDF 下载、下单接口（ExecutePost/调查单/URBA监控单/Report单/即时报告）等 HTTP 调用 |
+| Coface 集成 | Coface Token 管理 | `Customizations/Plugins/CofaceIntegration/Token/CofaceTokenManager.cs` | `ms_systemconfiguration` | 本地独立 Assembly；Token 缓存化（读写 `coface_idtoken`/`coface_token_expiry`，失效自动重新认证，回写用系统身份） |
 | Coface 集成 | Coface API 配置读取 | `Customizations/Plugins/CofaceIntegration/CofaceConfigHelper.cs` | `ms_systemconfiguration` | 本地独立 Assembly；读取 CofaceApiConfig JSON 配置 |
 | Coface 集成 | Coface API 配置模型 | `Customizations/Plugins/CofaceIntegration/CofaceApiConfig.cs` | — | 本地独立 Assembly；baseUrl/authUrl/apiKey/username/password |
 | Coface 集成 | Coface 国家特殊处理配置 | `Customizations/Plugins/CofaceIntegration/CofaceCountryConfig.cs` | — | 本地独立 Assembly；定义受限国家/CEE 国家及 Report 产品映射 |
@@ -109,6 +109,8 @@
 | Coface 集成 | URBA360 数据解析 | `Customizations/Plugins/CofaceIntegration/Parser/Urba360Parser.cs` | `mcs_coface_financial_indicator` | 本地独立 Assembly；提取外部评级、国别/行业风险、财务指标等 9 项 |
 | Coface 集成 | Coface 数据集成主 Plugin | `Customizations/Plugins/CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs` | `mcs_credit_record`、`mcs_customer_tag`、`mcs_credit_items`、`mcs_credit_scoringcard`、`mcs_customer_file`、`account`、`mcs_customermasterdata`、`salesorder`、`mcs_outstanding` | 本地独立 Assembly；状态 11 时拉取 URBA360/Full Report/内部交易数据并写入标签 |
 | Coface 集成 | Coface 企业搜索 Custom Action | `Customizations/Plugins/CofaceIntegration/Plugin/CofaceSearchCompanyPlugin.cs` | — | 本地独立 Assembly；Custom Action `mcs_CofaceSearchCompany` |
+| Coface 集成 | Coface 系统内下单 Custom API Plugin | `Customizations/Plugins/CofaceIntegration/Plugin/CofacePlaceOrderPlugin.cs` | `mcs_credit_record` | 本地独立 Assembly；Custom API `mcs_CofacePlaceOrder`；点击推进式下单状态机（调查单→URBA监控单→Report单），防重复扣费先查后下 |
+| Coface 集成 | Coface 订单信息提取帮助类 | `Customizations/Plugins/CofaceIntegration/CofaceOrderInfoHelper.cs` | — | 本地独立 Assembly；从 CofaceDataSyncPlugin 抽取的 URBA/Report 订单就绪判定与 publicationId 提取公共逻辑 |
 | Coface 集成 | Coface 订单查询测试程序 | `Customizations/Plugins/CofaceIntegration/CheckCofaceOrders.cs` | — | 本地独立 Assembly；独立控制台入口，仅输出参数 |
 | Coface 集成 | Coface API 测试工具 | `Tools/CofaceApiTest/Program.cs` | — | 认证、URBA360/Report 订单查询与内容获取 |
 | Coface 集成 | 国家代码测试 | `Tools/CofaceApiTest/TestCountryCode.cs` | — | 对比 `countryCode=CN` 与 `PL` 的 URBA360 响应 |
@@ -154,6 +156,7 @@
 |---|---|---|---|---|
 | 贸易条款 | 成交条件样板库表单逻辑 | `Customizations/WebResources/JS/mcs_trade_stpayterm.js` | `mcs_trade_stpayterm` | Lookup 编码/名称同步、多选查找组件同步、克隆新增、列表批量申请/审批/拒绝 |
 | 贸易条款 | 成交条件样板库列表批量按钮 Ribbon 定义（2026-07-27 新增） | `Customizations/Ribbon/mcs_trade_stpayterm.ribbon.xml` | `mcs_trade_stpayterm` | 批量申请/审批/拒绝 3 按钮 + 内联 SelectionCountRule（勾选≥1 显示）+ 双语 LocLabels；显隐规则随实体包走，替代原 appaction 方案（N:N 关联不随包） |
+| 信用评估管理 | 【Coface 下单】表单按钮（2026-08-01 最终定稿 App Action） | `Tools/DeployTool/AppActionDeployer.cs`（DeployButtons 中 `mcs_credit_record_place_coface_order`） | `mcs_credit_record` | Coface 系统内下单按钮（`CreditRecordForm.placeCofaceOrder` + PrimaryControl，fonticon=ShoppingCart）；用户最终决策：无特殊显隐控制用 App Action，不用 Ribbon（曾短暂 Ribbon 化后回退，环境残留用 ValueRule 恒否 DisplayRule 同 Id 覆盖隐藏） |
 | 贸易条款 | 成交条件产品分类关系表单逻辑 | `Customizations/WebResources/JS/mcs_trade_ptgrouptype.js` | `mcs_trade_ptgrouptype` | 产品线/产品分类 Lookup 变更后自动带出编码与名称 |
 | 贸易条款 | 成交条件样板库编码自动生成 | `Customizations/Plugins/TradeStPayTerm/AutoNumber/TradeStPayTermAutoNumberPlugin.cs` | `mcs_trade_stpayterm` | 本地独立 Assembly；规则：TC + YYMMDD + 2 位序列号 |
 | 贸易条款 | 成交条件产品分类关系产品线同步 | `Customizations/Plugins/TradeStPayTerm/Sync/TradePtGroupTypeProductLineSyncPlugin.cs` | `mcs_trade_ptgrouptype`、`mcs_productline` | 本地独立 Assembly；根据产品线 Lookup 同步编码/名称 |
@@ -284,7 +287,7 @@
 | 元数据工具 | Coface 基础数据导入导出 | `Tools/MetadataTool/Services/CofaceDataSyncHelper.cs` | `mcs_coface_*` | NACE mapping、汇率配置导入导出 |
 | 元数据工具 | 合同产品明细诊断 | `Tools/MetadataTool/Services/ContractProductDiagnosticHelper.cs` | `mcs_contract`、`mcs_contractdetail` | 已签待执行合同产品名称诊断 |
 | 元数据工具 | 信用评估记录集成诊断 | `Tools/MetadataTool/Services/CreditRecordDiagnosticHelper.cs` | `mcs_credit_record` | 检查 record / tags / files / scoring card / trace |
-| 元数据工具 | Custom API 部署 | `Tools/MetadataTool/Services/CustomApiDeployer.cs` | — | `DeployTradeStPayTermQueryApi`、`DeleteCustomApi`、`BindPluginType` |
+| 元数据工具 | Custom API 部署 | `Tools/MetadataTool/Services/CustomApiDeployer.cs` | — | `DeployTradeStPayTermQueryApi`、`DeployFcaQuotaAdjustApi`、`DeployCofacePlaceOrderApi`、`DeleteCustomApi`、`BindPluginType` |
 | 元数据工具 | 客户画像 WebResource 发布 | `Tools/MetadataTool/Services/PublishProfileWebResources.cs` | — | 阻塞检测/重试发布 |
 | 元数据工具 | 查询 Custom API | `Tools/MetadataTool/Services/QueryCustomApis.cs` | — | `ListCustomApis` 含参数与响应属性 |
 | 元数据工具 | 查询 Plugin Steps | `Tools/MetadataTool/Services/QueryPluginSteps.cs` | — | `QueryStepsByNamespace`、`QueryAssemblyVersion` 等 |

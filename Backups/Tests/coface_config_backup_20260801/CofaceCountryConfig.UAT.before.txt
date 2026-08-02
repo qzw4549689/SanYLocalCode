@@ -1,0 +1,60 @@
+  - 49cc946a-ab6a-f111-ab0c-000d3ac76370: ms_name=CofaceCountryConfig, ms_content={
+  "RestrictedCountries": [
+    "AF",
+    "AG",
+    "BI",
+    "BT",
+    "BZ",
+    "CF",
+    "CU",
+    "DJ",
+    "ER",
+    "ET",
+    "GD",
+    "GN",
+    "GQ",
+    "GW",
+    "IQ",
+    "IR",
+    "KI",
+    "KP",
+    "KV",
+    "LS",
+    "LY",
+    "MN",
+    "MZ",
+    "NE",
+    "RU",
+    "SB",
+    "SD",
+    "SO",
+    "SS",
+    "ST",
+    "SY",
+    "TL",
+    "TV",
+    "UA",
+    "VE",
+    "VU",
+    "WS",
+    "YE",
+    "ZW"
+  ],
+  "CeeCountries": [
+    "RU"
+  ],
+  "DefaultReportProductSlug": "customized-report",
+  "DefaultReportProductCode": "301",
+  "RestrictedReportProductSlug": "full-report",
+  "CeeReportProductSlug": "customized-report",
+  "CeeReportProductCode": "21000"
+}
+  - 88e8fe5f-276a-f111-ab0d-70a8a548df5f: ms_name=LeadOperationsTeam, ms_content=b40676e5-266a-f111-ab0d-000d3ac6ed0d
+  - 8d6ff65e-1c6a-f111-ab0c-6045bd1fd565: ms_name=PMReferencePriceCalculationConfig, ms_content={
+  "factoryList": ["5803", "1301", "5802"],
+  "customerList": [
+    {
+      "customerCode": "0200015365",
+      "freightSurchargeRatio": 0.1
+    }
+  ]

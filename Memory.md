@@ -2,7 +2,7 @@
 
 > **项目：** 三一重工 D365 客户信用评估系统
 > **技术栈：** Dynamics 365 (Dataverse) + C# Plugin + JavaScript WebResource
-> **最后更新：** 2026-07-30（禅道 #1433 融资资源启用/停用修复：PR 已合并 uat，DEV1 主 Assembly 已更新并回归通过，标签纠错已发布，待用户 DEV1 界面验证及 n8n 发布 UAT）
+> **最后更新：** 2026-08-01（Coface 系统内下单本地开发完成：编译全过，DEV1 部署与沙盒联调待下周一用户协调 Coface 后进行）
 
 ---
 
@@ -343,6 +343,7 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 13. **前端语言包先独立测试再合并公共文件**：为避免污染现有公共语言包，先新建 `ms_languagefile_credit_test_*` 测试 WebResource 在 DEV1 验证；验证通过后，再将 key 合并到 `ms_languagefile_1033/2052`；测试 WebResource 保留作为本地版本翻译文件备份，不删除。
 14. **🚨 绝对禁止覆盖公共/通用文件**：AI 严禁直接覆盖任何文件内容，尤其是多人共用的通用文件（如 `ms_languagefile_1033/2052`、`1033.json`、`2052.json` 等）。只允许在已有内容后追加；如需修改通用文件，必须先获得用户逐字明确授权。
 15. **本地语言文件是唯一数据源（2026-07-20 新增）**：`Code/Customizations/WebResources/Language/1033.json` 和 `2052.json` 只放我们自己的翻译 key（当前 23 个），作为唯一真相源。任何翻译修改必须**先改本地文件，再以本地为准**逐条核对、只更新 DEV 语言包 WebResource 中有差异的 key（严禁整包覆盖 `ms_languagefile_1033/2052`）；同步前先导出 DEV 现有文件备份。新增 key 时同样先落地本地文件再同步。
+16. **🚨 语言包修改的唯一通道（2026-08-01 用户两次强调，强制）**：**禁止直连修改任何环境（含 DEV1）的语言文件 WebResource**；唯一通道 = **修改远程服务器 tx-windows（C:\Projects\D365）仓库里的语言文件，走 git 分支 + PR 合并发布，发布后 DEV 和 UAT 都生效**。完整顺序：①先改本地唯一数据源 `Language/1033.json`+`2052.json`（纯追加）→ ②scp 下载远程仓库语言文件 → 本地纯追加 → scp 回传（保持 CRLF）→ ③远程建分支 `uat-YYYYMMDD-peter-langfile-xxx` commit + push（必须等用户说「提交/推送」）→ ④用户 PR 合并 → ⑤发布后 DEV/UAT 自动生效，**无需也不允许再单独动环境 WebResource**。误改环境必须立即用备份回滚（2026-08-01 已执行一次回滚并 MD5 验证复原）。
 
 
 ---
@@ -571,7 +572,35 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | 用户偏好（新） | **DEV 直接发布不再逐项询问**（2026-07-30 用户明确）；语言 key 持久化走远程仓库语言文件分支+PR（勿只改 DEV WebResource） |
 | DEV1 Assembly | ✅ 已用合并后 uat 代码重编译并更新 `SanyD365.D365Extension.Sales`（ID `9d6ff315`），无 PluginType 差异 |
 | DEV1 后台验证（7/30 全过） | ✅ LTC客户-1 calc→activate（proc `FCM202607300002` 状态 2→3）：自动创建申请单 `FCA202607300001`（带出当前额度/余额、tobegrant=initGrant、bppstatus=1、mcs_reason 默认值、`mcs_doid` 正确指向 proc）；✅ 额度表未触碰（仍旧 doid）；✅ 无新台账；✅ 防重：再次 2→3 未重复创建。失败残留 proc 已删，`FCA202607300001`+proc 留存供界面验证 |
-| 下一步 | 1. 用户 DEV1 界面验证：打开 `FCA202607300001` 看表单（字段隐藏/改名/默认值/公式/多行调整原因），新建申请单选客户验默认值，人工提交 BPP → 审批通过写额度<br>2. 用户 n8n 发布 UAT（McsPlugin+McsWebResource+entity 包+Messagehandler/ClientAPI）；`mcs_reason` 随实体自动分发无需单独处理 |
+| UAT 发布与验证（7/31） | 用户 n8n 已发 UAT。首轮核对发现 entity 包漏带 quotaapp 元数据（`mcs_reason` 不存在/标签未更新/remark 仍必填），用户补发后全齐。✅ Assembly/JS/语言包均一致；✅ 功能验证通过：TEST ACCOUNT 建 proc（initGrant=120000）→ 状态 3 → 自动建单 `FCA202608010001`（无额度客户按 0 带出、tobegrant=120000、bppstatus=1、reason 默认值、doid 正确）、额度表未写（0 条）、无台账；测试数据已清理。⚠️ 教训：新增字段后 entity 发版包必须重新导出（首版包漏了 quotaapp 元数据） |
+| 下一步 | 1. 用户 UAT 界面验证：表单默认值/公式/隐藏字段/多行调整原因、人工提交 BPP → 审批通过写额度（端到端最后一环）<br>2. 全部验证通过后本需求变更关闭 |
+
+---
+
+### 2.24 进行中（Coface 系统内下单 — 本地开发完成，待 DEV1 部署与沙盒联调）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-01 |
+| 需求 | Coface 下单从线下人工改为 D365 系统内完成：「关联客户代码」阶段【Coface 下单】按钮手动触发，点击推进式状态机（调查单→URBA监控单→Report单），未就绪前端硬阻断进入数据集成（PRD 口径） |
+| 方案/计划 | 实施方案 V2.0：`Documents/Planning/Coface系统内下单/Coface系统内下单实施方案.md`；开发实施计划：`~/.kimi/plans/valkyrie-gorgon-kid-flash.md`（含默认决策：Plugin 归 Extension.Sales + 前端硬阻断） |
+| 状态 | ✅ 本地开发完成、编译全部通过；✅ **2026-08-01 DEV1 部署与非沙盒测试全部完成**（3字段+双语标签+表单、CofaceCountryConfig 新结构、JS+发布、【Coface 下单】按钮、Custom API 部署测试后已按红线注销临时 Assembly）；⏸️ Coface 沙盒联调待下周一用户协调后进行（联调前一条命令重建：`deploy-cofaceorder-api <本地DLL> SanyD365.Plugins.CofaceIntegration.Plugin.CofacePlaceOrderPlugin`） |
+| DEV1 测试记录（2026-08-01 全过） | ① 后端前置校验：状态≠10 拦截“仅在关联客户代码阶段可用”✅；无 Coface ID 拦截 ✅<br>② 状态机推进（测试记录 SCO202608010001，绑定 icon#5415240/PL 已有订单，**全程只读 GET 零新单零费用**）：第1次调用复用已有 URBA 单→状态2 ✅；第2次 URBA ready→复用已有 Report 单→状态3 ✅；第3次 Report ready→状态4 已就绪 ✅；第4次幂等提示 ✅；下单三字段回写正确 ✅<br>③ 前端 UI（Playwright 实测）：表单 3 字段正常显示；【Coface 下单】按钮（溢出菜单）点击弹窗提示正确 ✅；【下一步】硬阻断：状态0→自动推进一次查询→阻断提示“URBA已下单待就绪”✅；再点推进到“Report已下单待就绪”阻断 ✅；第三次推进到已就绪并自动放行进入数据集成 ✅，**CofaceDataSyncPlugin 重构后回归正常**（13 指标 58 标签+Report附件已保存）✅<br>④ 测试数据已清理（15 标签+1 附件+1 评估记录）；McsCustomAPI 无组件残留 |
+| ⚠️ 环境偏差 | `ms_systemconfiguration` **不存在** `coface_idtoken`/`coface_token_expiry` 字段（方案假设有误）：Token 缓存化代码按设计降级为每次重新认证（行为与旧版一致，功能不受影响）；是否在共享实体上加这两个字段待用户决策（或改存我方实体/不缓存） |
+| 语言 key | 本地 1033/2052.json 已追加 15 key；**已按红线 16 走仓库分支推送**：`uat-20260801-peter-langfile-cofaceorder`（commit `ed637f19b60`，5965/5954 基础上纯追加 15×2，远程验证 JSON 可解析）；DEV1 提示语当前走 JS 中文兜底（显示正常） |
+| 选项集英文标签 | `mcs_cofaceorderstatus` 全部 6 个选项双语已齐（2026-08-01 晚）：选项 1-5 早前已设；选项 0 因公共方法 `MetadataFieldService.UpdateOptionSetLabels` 的 `value==0` 跳过 bug 被漏，**用户批准后已修复该 bug（D365ToolCommon，删除 value==0 跳过）并补上 `Not Ordered`**，实体已发布，2052 中文验证无丢失。翻译总表已同步登记 |
+| 收尾开发（2026-08-01 晚） | ✅ `AppActionDeployer` 中【Coface 下单】CreateButton 代码已删（防 buttons 命令重建已删 App Action），DeployTool 重编通过；✅ 《上线核对清单》4.1 CofaceCountryConfig 新结构迁移要求 + 9.13/9.14 Open Items；✅ `Code/INDEX.md` Ribbon 条目 + CustomApiDeployer 方法清单；✅ 实施方案文档按钮方案同步改为 Ribbon |
+| 按钮改 App Action（2026-08-01 用户最终决策） | 用户最终定稿：【Coface 下单】无特殊显隐控制，**用 App Action 不用 Ribbon**（AGENTS.md 红线已修订为：需显隐随包/跨环境零手动用 Ribbon，简单按钮经用户确认可用 App Action）。✅ App Action `mcs_credit_record_place_coface_order` 已重建（fonticon=ShoppingCart，seq=100100019）；✅ Ribbon 残留已清除。⚠️ 教训：① 非托管导入**永不删除** Ribbon diff（从包中移除节点再导入无效）；② 同 Id 覆盖 + 恒否 DisplayRule 可隐藏残留按钮——**`CrmClientTypeRule Type="Legacy"` 在 UCI 也匹配（无效），恒否规则用 `<ValueRule Field="statecode" Value="999999" InvertResult="false" Default="false"/>`**；③ 清除后已把 entity_20260727_peter 里的 Ribbon 节点剥净重新导入（UAT 发版包干净），DEV1 隐藏覆盖层留在非托管层不可见无害；④ 命令栏缓存于 Cache Storage+Service Worker，验证必须先清缓存 |
+| ⚠️ uat 主干阻塞（他人问题，用户知悉不管） | 2026-08-01 拉平 uat 后发现**他人提交把加密二进制 .cs 文件带进了 uat**（文件头 `%TSD-Header-###%`，涉 `Const.cs`/`Startup.cs`/`ShipmentDeclare*.cs`/`LtcController.cs` 等，来自 wangtianjiu/mamf3 等的 QD-WTJ 等分支，PR 6591 等批次）：`git show` 直接读仓库对象确认仓库存的就是密文，**全团队 uat 当前编译不过（CS2015）**。已取证非我方造成（我方 PR 仅 7 个 Coface 文本文件 + 2 个语言 JSON；加密前基线 `052e8fc7986` 是明文）。**后果：DEV1 主 Assembly 更新暂停**（红线要求用合并后 uat 编译 DLL），待 uat 修复后补做；周一沙盒联调如需 Custom API，先用本地临时 Assembly（deploy-cofaceorder-api 传本地 DLL+类名），测完即注销 |
+| 推送（2026-08-01 用户授权） | ✅ 分支 `uat-20260801-peter-coface-placeorder`（commit `a16b9352119`，7 文件 +1452/-315：4 修改+2 新增+csproj）已推送；✅ 语言分支 `uat-20260801-peter-langfile-cofaceorder` 已推送；均基于最新 uat（推送前 stash→ff 拉平 56 提交→pop）；待用户合并 PR<br>⚠️ 同步踩坑：远程 Plugin 命名空间父链不同，新 Plugin 文件必须显式 `using SanyD365.Plugins.CofaceIntegration;`（本地靠父命名空间隐式解析，远程会编译失败 CS0246），已修 |
+| 主清单 | 已核实 `mcs_credit_record` 实体整体 + `mcs_credit_record.js` 均在主清单：3 字段随实体自动带、JS 已覆盖；✅ **Custom API 本体(31ec7f7c)+参数 CreditRecordId(53facb82)+响应 ResultJson(62facb82) 已加入主清单 `AllComponent_Peter_NoUAT`**（2026-08-01，绑主 Assembly 后重建的新 ID，旧 ID 平台级联清除）；按钮为 Ribbon 随实体包无独立组件 |
+| ✅ 主 Assembly 归并完成（2026-08-01 晚） | uat 加密文件已由提交人修复（PR 6595 等）→ 代码 PR 6596 合并 → 重编 → DEV1 主 Assembly `SanyD365.D365Extension.Sales`（ID `9d6ff315`）已更新含 `CofacePlaceOrderPlugin` → 平台未自动扫出新 Type，用 `deploy-cofaceorder-api` 显式创建主 Assembly Type（28ec7f7c）并重绑 Custom API → **临时 Assembly `SanyD365.Plugins.CofaceIntegration` 已注销（红线执行完毕）** → 主 Assembly 冒烟回归 2→3→4 通过，测试数据已清理。⚠️ 教训：两个分支只被合并了一个时（语言 PR 6590 先于代码 PR 6596），用 uat 编译的 DLL 不含新代码，推送分支后必须确认每个分支的 PR 都已合并再编译 |
+| ✅ 真实下单联测（2026-08-01 晚，沙盒） | 用户指示用 `icon#5239780`（PL，无 Report 单）DEV1 实测：① URBA 复用正常；② **Report 下单文档参数已过时**——`report` 字符串形式被接口拒绝（400 Invalid JSON structure），curl 逐参数探明正确结构 `{"slug":"customized-report","customReportId":301,"format":["json"],"language":"en"}`（report 对象、format 数组、language 必填、customReportId 数字）；③ JSON 单 `ff0c5bcc`、PDF 单 `0fb440d2` 真实下单成功（in-preparation）；④ 修复代码（PlaceReportOrder 签名改 slug/productCode/format/language、删 GetReportOrderValue）→ PR 6599 合并 → DEV1 Assembly 更新 → 续测：URBA 复用→Report 复用（防重不重复下单）→状态 3→提示 6-7 工作日，全链路通；⑤ 测试记录 `bc1e42c2-a78d-f111-8077-6045bd1c0e3b`（SCO202608010001）**保留**，待 Report Ready 后测最后一步（3→4→数据集成取新报告+PDF 附件） |
+| 核心设计 | 状态机字段 `mcs_cofaceorderstatus`（0未下单/1调查单已提交/2URBA已下单待就绪/3Report已下单待就绪/4已就绪/5下单失败）+ `mcs_cofaceordermsg` + `mcs_cofaceorderdate`；防重复扣费：每分支先查已有订单再下单；下单失败置 5 不静默成功；双格式国家 JSON/PDF 两单间隔 5 秒 |
+| 新增/修改文件 | **新增** `CofaceIntegration/Plugin/CofacePlaceOrderPlugin.cs`（Custom API `mcs_CofacePlaceOrder` 实现，入参 CreditRecordId，出参 ResultJson）<br>**新增** `CofaceIntegration/CofaceOrderInfoHelper.cs`（URBA/Report 订单就绪判定公共逻辑，从 DataSyncPlugin 抽取，纯重构行为不变）<br>`Api/CofaceApiService.cs`（ExecutePost/RetryPost + 5 个下单方法：即时报告/调查单/查调查单/URBA监控单/Report单）<br>`Token/CofaceTokenManager.cs`（Token 缓存化：读 `coface_idtoken`/`coface_token_expiry`，systemService 回写，失败降级）<br>`CofaceCountryConfig.cs`（DualFormatCountries 36 国 + LegitimateInterestByCountry DE=100 + GetReportOrderValue）<br>`CofaceDataSyncPlugin.cs`（改调 Helper + 入口 4 行初始化修正）<br>`mcs_credit_record.js`（placeCofaceOrder 按钮命令 + nextStep 10→11 就绪硬阻断，先自动推进一次查询）<br>`CustomApiDeployer.cs`（DeployCofacePlaceOrderApi）/`MetadataTool Program.cs`（deploy/delete/test-cofaceorder-api 三命令 + add-fields mcs_credit_record 三字段块）<br>`AppActionDeployer.cs`（【Coface 下单】按钮 seq=100100019）<br>`sync-plugin-to-remote.py`（FILE_MAP +2）<br>`DeployTool/CofaceConfigDeployer.cs`（配置数据类加 DualFormatCountries/LegitimateInterestByCountry）<br>本地 `Language/1033.json`/`2052.json` 各纯追加 15 个 CreditRecord_CofaceOrder* key（共 375 keys） |
+| 待确认（阻塞细节） | C1~C5（给 Coface）/ B1~B7（给业务）下周一协调；report 下单参数枚举值（GetReportOrderValue 映射）为沙盒联调第 1 优先级；双格式国家列表文档标题 39 国/要点 35 国/表格实际 36 国，代码按表格 36 国实现待澄清 |
+| 新增组件清单（待加入主清单/发版包，下周一 DEV1 验证后执行） | ① 3 个新字段（随 mcs_credit_record 实体，`add-fields mcs_credit_record` 创建）② Custom API `mcs_CofacePlaceOrder` 本体+1 参数+1 响应（→McsCustomAPI）③ Plugin Step（Custom API MainOperation，平台自动创建）④ App Action【Coface 下单】（→entity 包）⑤ `mcs_credit_record.js` 变更（→McsWebResource）⑥ 语言 key 15×2（走仓库语言文件分支+PR 红线流程） |
+| 下一步（下周一） | 1. 用户协调 Coface 沙盒 + 回填 C1~C5/B1~B7<br>2. DEV1：`add-fields mcs_credit_record` 建 3 字段+发布 → DeployTool 更新 CofaceCountryConfig JSON → 注册临时 Assembly `SanyD365.Plugins.CofaceIntegration` + deploy-cofaceorder-api → 部署 App Action → 更新 mcs_credit_record.js → 语言 key 同步<br>3. 按实施方案第 11 章 10 场景沙盒联调<br>4. 验证通过：注销临时 Assembly（红线）→ sync 归并远程 → 用户授权后推送/PR → 主 Assembly 更新+重绑 → 组件加主清单 → 发版核对 |
 
 ---
 

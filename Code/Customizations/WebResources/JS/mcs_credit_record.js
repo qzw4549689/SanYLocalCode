@@ -641,7 +641,8 @@ CreditRecordForm.nextStep = function (primaryControl) {
                 Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_NoCofaceCannotIntegrate", "未关联科法斯客户，无法进入数据集成阶段"));
                 return;
             }
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
+            // PRD 口径：Coface 订单未就绪时阻断进入数据集成（先自动推进一次状态查询再判定）
+            CreditRecordForm.checkCofaceOrderReadyAndProceed(formContext, recordId);
             break;
             
         case CreditRecordForm.STATUS.DATA_INTEGRATION: // 11 → 12
@@ -1015,6 +1016,152 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
         .catch(function (error) {
             console.error("打开企业搜索弹窗失败:", error);
             Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_OpenSearchFailed", "打开搜索弹窗失败：") + (error.message || JSON.stringify(error)));
+        });
+};
+
+// ==================== Coface 系统内下单 ====================
+
+/**
+ * Coface 下单状态选项集（与 mcs_credit_record.mcs_cofaceorderstatus 一致）
+ */
+CreditRecordForm.COFACE_ORDER_STATUS = {
+    NONE: 0,              // 未下单
+    INVESTIGATING: 1,     // 调查单已提交
+    URBA_PENDING: 2,      // URBA已下单待就绪
+    REPORT_PENDING: 3,    // Report已下单待就绪
+    READY: 4,             // 已就绪
+    FAILED: 5             // 下单失败
+};
+
+/**
+ * Coface 下单状态名称（多语言，用于提示信息）
+ */
+CreditRecordForm.getCofaceOrderStatusName = function (orderStatus) {
+    var defaults = {
+        0: "未下单", 1: "调查单已提交", 2: "URBA已下单待就绪",
+        3: "Report已下单待就绪", 4: "已就绪", 5: "下单失败"
+    };
+    if (orderStatus === null || orderStatus === undefined) orderStatus = 0;
+    return CreditRecordForm.L("CreditRecord_CofaceOrderStatus_" + orderStatus, defaults[orderStatus] || ("未知状态(" + orderStatus + ")"));
+};
+
+/**
+ * 调用 Custom API mcs_CofacePlaceOrder（推进下单状态机）
+ * 返回解析后的 ResultJson：{ Status, Message, OrderStatus, OrderStatusName }
+ */
+CreditRecordForm.callCofacePlaceOrderApi = function (recordId) {
+    var request = {
+        getMetadata: function () {
+            return {
+                boundParameter: null,
+                parameterTypes: {
+                    "CreditRecordId": { typeName: "Edm.String", structuralProperty: 1 }
+                },
+                operationType: 0,
+                operationName: "mcs_CofacePlaceOrder"
+            };
+        },
+        CreditRecordId: recordId
+    };
+
+    return Xrm.WebApi.online.execute(request).then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        if (data && data.ResultJson) {
+            return JSON.parse(data.ResultJson);
+        }
+        throw new Error(CreditRecordForm.L("CreditRecord_CofaceOrderAbnormal", "Coface 下单接口返回异常"));
+    });
+};
+
+/**
+ * 【Coface 下单】按钮命令
+ * 状态10（关联客户代码）且已绑定 Coface ID 时可用，每次点击推进一个下单阶段
+ */
+CreditRecordForm.placeCofaceOrder = function (primaryControl) {
+    var formContext = primaryControl;
+
+    // 未保存记录时禁止下单
+    var recordId = formContext.data.entity.getId();
+    if (!recordId) {
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_SaveRecordFirst", "请先保存记录"));
+        return;
+    }
+    recordId = recordId.replace(/[{}]/g, "");
+
+    var status = formContext.getAttribute("mcs_status").getValue();
+    if (status !== CreditRecordForm.STATUS.LINK_ACCOUNT) {
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceOrderStageLimit", "【Coface 下单】仅在关联客户代码阶段可用"));
+        return;
+    }
+
+    var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
+    if (!cofaceId) {
+        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceOrderNoCofaceId", "未关联科法斯客户，请先执行【搜索 Coface 企业】绑定 Coface ID"));
+        return;
+    }
+
+    CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_CofaceOrderPlacing", "正在执行 Coface 下单/状态查询，请稍候..."));
+
+    CreditRecordForm.callCofacePlaceOrderApi(recordId)
+        .then(function (result) {
+            CreditRecordForm.hideLoading(formContext);
+            var message = (result && result.Message) || CreditRecordForm.L("CreditRecord_CofaceOrderAbnormal", "Coface 下单接口返回异常");
+            if (result && result.OrderStatusName) {
+                message += "\n" + CreditRecordForm.L("CreditRecord_CofaceOrderCurrentStatusPrefix", "当前下单状态：") + result.OrderStatusName;
+            }
+            Xrm.Utility.alertDialog(message);
+            // 刷新表单显示最新下单三字段
+            formContext.data.refresh(true);
+        })
+        .catch(function (error) {
+            CreditRecordForm.hideLoading(formContext);
+            console.error("Coface 下单失败:", error);
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceOrderFailedPrefix", "Coface 下单失败：") + (error.message || JSON.stringify(error)));
+        });
+};
+
+/**
+ * 进入数据集成前的就绪校验（PRD 口径：未就绪阻断并停留本阶段）
+ * 下单状态非「已就绪」时先自动调一次下单 API 推进状态查询，再按结果放行/阻断
+ */
+CreditRecordForm.checkCofaceOrderReadyAndProceed = function (formContext, recordId) {
+    var orderStatusAttr = formContext.getAttribute("mcs_cofaceorderstatus");
+    var orderStatus = orderStatusAttr ? orderStatusAttr.getValue() : null;
+
+    // 已就绪：直接放行
+    if (orderStatus === CreditRecordForm.COFACE_ORDER_STATUS.READY) {
+        CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
+        return;
+    }
+
+    // 未就绪：先自动推进一次状态查询（可能刚 Ready）
+    CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_CofaceOrderChecking", "正在查询 Coface 订单状态，请稍候..."));
+
+    CreditRecordForm.callCofacePlaceOrderApi(recordId)
+        .then(function (result) {
+            CreditRecordForm.hideLoading(formContext);
+            if (result && result.OrderStatus === CreditRecordForm.COFACE_ORDER_STATUS.READY) {
+                // 查询后已就绪：刷新表单并放行
+                formContext.data.refresh(true).then(function () {
+                    CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
+                });
+                return;
+            }
+            // 仍未就绪：阻断并提示（PRD：停留「关联客户代码」阶段）
+            formContext.data.refresh(true);
+            var statusName = (result && result.OrderStatusName) || CreditRecordForm.getCofaceOrderStatusName(orderStatus);
+            var message = CreditRecordForm.L("CreditRecord_CofaceOrderBlocked", "Coface 订单未就绪，无法进入内外部数据集成阶段。请等待订单完成后重试。");
+            message += "\n" + CreditRecordForm.L("CreditRecord_CofaceOrderCurrentStatusPrefix", "当前下单状态：") + statusName;
+            if (result && result.Message) {
+                message += "\n" + result.Message;
+            }
+            Xrm.Utility.alertDialog(message);
+        })
+        .catch(function (error) {
+            CreditRecordForm.hideLoading(formContext);
+            console.error("Coface 订单状态查询失败:", error);
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceOrderCheckFailed", "Coface 订单状态查询失败，请稍后再试：") + (error.message || JSON.stringify(error)));
         });
 };
 

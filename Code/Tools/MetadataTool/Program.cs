@@ -97,6 +97,9 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
         Console.WriteLine("  dotnet run deploy-fcaquota-api <DLL路径> [Plugin类名] - 部署厂端授信余额调整 Custom API");
         Console.WriteLine("  dotnet run delete-fcaquota-api                - 删除厂端授信余额调整 Custom API");
         Console.WriteLine("  dotnet run test-fcaquota-api <客户编码> <金额> <环节> <动作> [合同编码] [订单编码] - 测试厂端授信余额调整 Custom API");
+        Console.WriteLine("  dotnet run deploy-cofaceorder-api <DLL路径> [Plugin类名] - 部署 Coface 系统内下单 Custom API");
+        Console.WriteLine("  dotnet run delete-cofaceorder-api             - 删除 Coface 系统内下单 Custom API");
+        Console.WriteLine("  dotnet run test-cofaceorder-api <信用评估记录ID> - 测试 Coface 系统内下单 Custom API");
         Console.WriteLine("  dotnet run test-tradestpayterm-api <buId> <subId> <countryCode> <prdGroupId> <buyerCode> - 测试成交条件样板库查询 Custom API");
         Console.WriteLine("  dotnet run query-tradestpayterm-samples [条数] - 查询成交条件样板库样本数据");
         Console.WriteLine("  dotnet run create-tradestpayterm-testdata    - 创建一条生效的成交条件样板库测试数据");
@@ -202,6 +205,69 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         else
                         {
                             manager.PublishAll();
+                        }
+                        break;
+
+                    case "deploy-ribbon":
+                        if (args.Length < 4)
+                        {
+                            Console.WriteLine("用法: dotnet run deploy-ribbon <实体名> <RibbonDiffXml片段文件路径> <载体Solution唯一名> [工作目录] [幂等前缀]");
+                            Console.WriteLine("  示例: dotnet run deploy-ribbon mcs_fsm_data ../../Customizations/Ribbon/mcs_fsm_data.ribbon.xml entity_20260713 /tmp/ribbon_fsm");
+                            Console.WriteLine("  说明: 导出载体Solution→合并实体RibbonDiffXml→重打包→非托管导入→发布实体（幂等）");
+                            return;
+                        }
+                        manager.DeployRibbonDiff(args[1], args[2], args[3],
+                            args.Length >= 5 ? args[4] : Path.Combine(Path.GetTempPath(), "ribbon_" + args[1]),
+                            args.Length >= 6 ? args[5] : null);
+                        break;
+
+                    case "import-solution":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run import-solution <Solution ZIP路径>");
+                            Console.WriteLine("  说明: 非托管叠加导入，导入后不自动发布，需另行 publish <实体名>");
+                            return;
+                        }
+                        manager.ImportSolution(args[1]);
+                        break;
+
+                    case "get-entity-ribbon":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run get-entity-ribbon <实体名> <输出XML路径>");
+                            Console.WriteLine("  说明: 读取实体生效 Ribbon（RetrieveEntityRibbonRequest，只读诊断）");
+                            return;
+                        }
+                        {
+                            var ribbonResp = (RetrieveEntityRibbonResponse)service.Execute(new RetrieveEntityRibbonRequest
+                            {
+                                EntityName = args[1],
+                                RibbonLocationFilter = RibbonLocationFilters.All
+                            });
+                            var raw = ribbonResp.CompressedEntityXml;
+                            string ribbonText;
+                            try
+                            {
+                                // CompressedEntityXml 实为 ZIP 包，内含 RibbonXml.xml
+                                using var ms = new MemoryStream(raw);
+                                using var zip = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Read);
+                                var entry = zip.GetEntry("RibbonXml.xml") ?? zip.Entries[0];
+                                using var sr = new StreamReader(entry.Open());
+                                ribbonText = sr.ReadToEnd();
+                            }
+                            catch
+                            {
+                                try
+                                {
+                                    using var ms = new MemoryStream(raw);
+                                    using var gz = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionMode.Decompress);
+                                    using var sr = new StreamReader(gz);
+                                    ribbonText = sr.ReadToEnd();
+                                }
+                                catch { ribbonText = System.Text.Encoding.UTF8.GetString(raw); }
+                            }
+                            File.WriteAllText(args[2], ribbonText);
+                            Console.WriteLine($"✅ 生效 Ribbon 已导出: {args[2]}（{ribbonText.Length} 字符）");
                         }
                         break;
 
@@ -1032,6 +1098,33 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                             return;
                         }
                         TestCofaceSearchApi(service, args[1], args[2]);
+                        break;
+
+                    case "deploy-cofaceorder-api":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run deploy-cofaceorder-api <DLL路径> [Plugin类名]");
+                            Console.WriteLine("  示例(本地独立Assembly验证): dotnet run deploy-cofaceorder-api Code/Customizations/Plugins/CofaceIntegration/bin/Debug/net462/SanyD365.Plugins.CofaceIntegration.dll SanyD365.Plugins.CofaceIntegration.Plugin.CofacePlaceOrderPlugin");
+                            return;
+                        }
+                        string cofaceOrderDllPath = args[1];
+                        // 默认类名与归并后远程主项目一致（Extension.Sales Assembly）；本地独立 Assembly 验证时需显式传类名
+                        string cofaceOrderClassName = args.Length >= 3 ? args[2] : "SanyD365.D365Extension.Sales.Plugins.CofaceIntegration.CofacePlaceOrderPlugin";
+                        manager.RegisterPluginAssemblyOnly(cofaceOrderDllPath, cofaceOrderClassName);
+                        new D365MetadataTool.Services.CustomApiDeployer(service).DeployCofacePlaceOrderApi(cofaceOrderClassName);
+                        break;
+
+                    case "delete-cofaceorder-api":
+                        new D365MetadataTool.Services.CustomApiDeployer(service).DeleteCustomApi("mcs_CofacePlaceOrder");
+                        break;
+
+                    case "test-cofaceorder-api":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("用法: dotnet run test-cofaceorder-api <信用评估记录ID>");
+                            return;
+                        }
+                        TestCofacePlaceOrderApi(service, args[1]);
                         break;
 
                     case "test-tradestpayterm-api":
@@ -2432,7 +2525,7 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         if (args.Length < 3)
                         {
                             Console.WriteLine("用法: dotnet run create-record <实体名> <JSON|@文件路径>");
-                            Console.WriteLine("  类型后缀: 字段#int / #decimal / #bool / #optionset / #optionsetcollection(逗号分隔) / #lookup(值=logicalName:guid)；无后缀按 string");
+                            Console.WriteLine("  类型后缀: 字段#int / #decimal / #money / #bool / #optionset / #optionsetcollection(逗号分隔) / #lookup(值=logicalName:guid)；无后缀按 string");
                             Console.WriteLine("  示例: dotnet run create-record mcs_trade_stpayterm '{\"mcs_buid\":\"BU-1018\",\"mcs_creditgrade#optionset\":100000000}'");
                             return;
                         }
@@ -8171,6 +8264,27 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                 "BPP审批链接", 1000));
             Console.WriteLine("融资管理 BPP 审批字段添加完成！");
         }
+        else if (entityName == "mcs_credit_record")
+        {
+            Console.WriteLine("添加信用评估记录 Coface 系统内下单字段...");
+            // Coface 系统内下单三字段（实施方案 V2.0 第 7 章）
+            TryCreateField(() => manager.CreatePicklistField("mcs_credit_record", "mcs_cofaceorderstatus", "Coface 下单状态",
+                "0未下单/1调查单已提交/2URBA已下单待就绪/3Report已下单待就绪/4已就绪/5下单失败",
+                new Dictionary<string, int>
+                {
+                    { "未下单", 0 },
+                    { "调查单已提交", 1 },
+                    { "URBA已下单待就绪", 2 },
+                    { "Report已下单待就绪", 3 },
+                    { "已就绪", 4 },
+                    { "下单失败", 5 }
+                }));
+            TryCreateField(() => manager.CreateStringField("mcs_credit_record", "mcs_cofaceordermsg", "Coface 下单信息",
+                "各阶段订单号、publicationId、companyIdentificationId、失败原因", 500));
+            TryCreateField(() => manager.CreateDateTimeField("mcs_credit_record", "mcs_cofaceorderdate", "Coface 下单时间",
+                "最近一次下单/状态变更时间"));
+            Console.WriteLine("信用评估记录 Coface 系统内下单字段添加完成！");
+        }
         else
         {
             Console.WriteLine($"暂不支持为实体 {entityName} 批量添加字段");
@@ -11001,6 +11115,9 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                 case "decimal":
                     entity[field] = val.GetDecimal();
                     break;
+                case "money":
+                    entity[field] = new Money(val.GetDecimal());
+                    break;
                 case "bool":
                     entity[field] = val.GetBoolean();
                     break;
@@ -11675,6 +11792,30 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
             var request = new OrganizationRequest("mcs_CofaceSearchCompany");
             request["CompanyName"] = companyName;
             request["CountryCode"] = countryCode;
+
+            var response = service.Execute(request);
+            var resultJson = response["ResultJson"]?.ToString() ?? "";
+
+            Console.WriteLine($"  ✅ 调用成功");
+            Console.WriteLine($"     ResultJson: {resultJson}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ❌ 调用失败: {ex.Message}");
+            if (ex.InnerException != null)
+                Console.WriteLine($"     Inner: {ex.InnerException.Message}");
+        }
+    }
+
+    static void TestCofacePlaceOrderApi(ServiceClient service, string creditRecordId)
+    {
+        Console.WriteLine($">>> 测试 Custom API: mcs_CofacePlaceOrder");
+        Console.WriteLine($"    入参: CreditRecordId={creditRecordId}");
+
+        try
+        {
+            var request = new OrganizationRequest("mcs_CofacePlaceOrder");
+            request["CreditRecordId"] = creditRecordId;
 
             var response = service.Execute(request);
             var resultJson = response["ResultJson"]?.ToString() ?? "";

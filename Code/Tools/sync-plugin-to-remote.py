@@ -68,6 +68,7 @@ FILE_MAP = {
     "CofaceIntegration/CofaceExchangeRateHelper.cs": r"Application\Sales\CofaceIntegration\CofaceExchangeRateHelper.cs",
     "CofaceIntegration/CofaceNaceMappingHelper.cs": r"Application\Sales\CofaceIntegration\CofaceNaceMappingHelper.cs",
     "CofaceIntegration/CofaceQualitativeMappingHelper.cs": r"Application\Sales\CofaceIntegration\CofaceQualitativeMappingHelper.cs",
+    "CofaceIntegration/CofaceOrderInfoHelper.cs": r"Application\Sales\CofaceIntegration\CofaceOrderInfoHelper.cs",
     "CofaceIntegration/Api/CofaceApiService.cs": r"Application\Sales\CofaceIntegration\CofaceApiService.cs",
     "CofaceIntegration/Parser/FullReportParser.cs": r"Application\Sales\CofaceIntegration\FullReportParser.cs",
     "CofaceIntegration/Parser/Urba360Parser.cs": r"Application\Sales\CofaceIntegration\Urba360Parser.cs",
@@ -76,6 +77,7 @@ FILE_MAP = {
     # Coface Plugin 层
     "CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs": r"Plugins\CofaceIntegration\CofaceIntegrationDataSyncPlugin.cs",
     "CofaceIntegration/Plugin/CofaceSearchCompanyPlugin.cs": r"Plugins\CofaceIntegration\CofaceSearchCompanyPlugin.cs",
+    "CofaceIntegration/Plugin/CofacePlaceOrderPlugin.cs": r"Plugins\CofaceIntegration\CofacePlaceOrderPlugin.cs",
 
     # BPP Callback Plugin
     "BppIntegration/Plugin/BppCallbackPlugin.cs": r"Plugins\CreditRecord\CreditRecordBppCallbackPlugin.cs",

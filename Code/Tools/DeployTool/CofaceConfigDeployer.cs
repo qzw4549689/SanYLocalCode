@@ -49,7 +49,20 @@ namespace DeployTool
                 DefaultReportProductCode = "301",
                 RestrictedReportProductSlug = "full-report",
                 CeeReportProductSlug = "customized-report",
-                CeeReportProductCode = "21000"
+                CeeReportProductCode = "21000",
+                // 不支持一单双格式的 39 国（来源：科法斯Report不支持1个订单双格式的国家列表20260520，不含 RU）
+                DualFormatCountries = new List<string>
+                {
+                    "HK", "IN", "MY", "CM", "CI", "SN", "CD", "CG", "GA", "GH",
+                    "TD", "BF", "BJ", "ML", "NE", "TG", "JP", "AR", "BO", "BR",
+                    "CL", "CO", "CR", "CU", "DO", "EC", "SV", "GT", "HN", "MX",
+                    "NI", "PA", "PY", "PE", "UY", "VE"
+                },
+                // 德国公司下单需附带 legitimateInterest（值域参考 GET /legitimateinterestcodes）
+                LegitimateInterestByCountry = new Dictionary<string, string>
+                {
+                    { "DE", "100" }
+                }
             };
 
             string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
@@ -168,6 +181,8 @@ namespace DeployTool
             public string RestrictedReportProductSlug { get; set; } = "full-report";
             public string CeeReportProductSlug { get; set; } = "customized-report";
             public string CeeReportProductCode { get; set; } = "21000";
+            public List<string> DualFormatCountries { get; set; } = new();
+            public Dictionary<string, string> LegitimateInterestByCountry { get; set; } = new();
         }
     }
 }

@@ -830,7 +830,7 @@ namespace D365ToolCommon.Metadata
             foreach (var option in enumAttr.OptionSet.Options)
             {
                 int value = option.Value ?? 0;
-                if (value == 0 || !labels.ContainsKey(value))
+                if (!labels.ContainsKey(value))
                 {
                     continue;
                 }

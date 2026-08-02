@@ -77,6 +77,21 @@ namespace DeployTool
                 100100018
             );
 
+            // 创建【Coface 下单】按钮（Coface 系统内下单，显隐由 JS 校验：仅关联客户代码阶段可用）
+            // 2026-08-01 用户决策：该按钮无特殊显隐控制，用 App Action 即可，不用 Ribbon
+            CreateButton(
+                "mcs_credit_record_place_coface_order",
+                "Coface 下单",
+                "Coface 系统内下单：调查单/URBA监控单/Report单，每次点击推进一个下单阶段",
+                "CreditRecordForm.placeCofaceOrder",
+                webResourceId,
+                entityId,
+                "mcs_credit_record",
+                100100019,
+                "ShoppingCart",
+                "entity_20260727_peter"
+            );
+
             // 部署评分卡相关按钮
             DeployScoringCardButtons();
 

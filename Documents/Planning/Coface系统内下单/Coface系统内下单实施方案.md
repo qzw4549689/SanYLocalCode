@@ -266,7 +266,7 @@ flowchart TD
 | CofaceApiService | 修改 | 新增第 8 章 5 个方法；Token 缓存化 |
 | 配置 | 修改 | `ms_systemconfiguration.CofaceCountryConfig` JSON 增加 `DualFormatCountries`（双格式 39 国列表，待 C3 确认范围）+ 可选 `LegitimateInterest`（德国） |
 | 前端 JS | 修改 | `mcs_credit_record.js`：`placeCofaceOrder`（点击 → retrieveRecord 查状态 → 调 Custom API → 提示结果并刷新）；`nextStep` 就绪校验（先推进一次状态查询再判定） |
-| 按钮 | 新增 | App Action【Coface 下单】（DeployTool AppActionDeployer 扩展，显隐逻辑同【搜索 Coface 企业】模式） |
+| 按钮 | 新增 | 【Coface 下单】RibbonDiffXml（`Code/Customizations/Ribbon/mcs_credit_record.ribbon.xml`，随实体包发布；2026-08-01 用户决策替代 App Action，显隐逻辑同【搜索 Coface 企业】模式由 JS 校验） |
 | 元数据 | 新增 | 3 个字段（中英双语标签）+ 实体发布 + 加入主清单 Solution |
 | 翻译 | 新增 | 按钮/提示语中英语言 key（先本地 1033/2052.json 追加，再同步 DEV） |
 
@@ -306,7 +306,7 @@ flowchart TD
 
 1. DEV1 独立 Assembly（`SanyD365.Plugins.CofaceIntegration.Api` 之类临时名）验证 → **测试结束立即注销**（红线）；
 2. 归并远程主项目 `SanyD365.D365ExtensionApi.Sales`（Custom API 实现插件规范归属）→ PR → 合并 `uat` → 重编 → 更新 DEV1 主 Assembly → 重绑 Custom API → 回归；
-3. 组件第一时间加入主清单 `AllComponent_Peter_NoUAT`：3 字段（随实体）/ Custom API 本体+参数+响应 / App Action / WebResource 变更；
+3. 组件第一时间加入主清单 `AllComponent_Peter_NoUAT`：3 字段（随实体）/ Custom API 本体+参数+响应 / WebResource 变更（按钮为 RibbonDiffXml 随实体包，无独立组件）；
 4. 发版前 `check-solution-coverage` 核对 + 字段快照对比（防 80041A06）；
 5. n8n 发布：`entity_XXX`（字段）+ `McsCustomAPI`（Custom API + 实现 Assembly）+ `McsWebResource`（JS + 语言包）。
 
@@ -357,6 +357,7 @@ flowchart TD
 |---|---|---|
 | 下单限流 | 单用户 10-12 次/分钟，每次下单间隔 5 秒 | Coface 下单接口清单 |
 | Report 就绪时长 | 约 6-7 个工作日（in-preparation → Ready） | Solutions Flow |
+| Report 下单 report 参数 | **对象结构**（2026-08-01 沙盒实测）：`{"slug":"customized-report","customReportId":301,"format":["json"],"language":"en"}`；文档的字符串形式 `"full-report-urba"` 已不被接受（400） | 沙盒实测 |
 | URBA 监控单有效期 | 实测到 2109（长期监控） | Coface_API接口测试结果 |
 | Token 有效期 | 60 分钟（OAuth2） | Coface 下单接口清单 |
 | 双格式 39 国 | HK/IN/MY/JP/BR 等（不含 RU），需 JSON+PDF 两单 | 双格式国家列表 20260520 |

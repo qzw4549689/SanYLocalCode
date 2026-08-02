@@ -49,6 +49,42 @@ namespace SanyD365.Plugins.CofaceIntegration
         public string CeeReportProductCode { get; set; } = "21000";
 
         /// <summary>
+        /// 不支持一单双格式的国家代码列表（39 国，需 JSON/PDF 分别下两单）
+        /// 来源：科法斯Report不支持1个订单双格式的国家列表20260520（不含 RU）
+        /// TODO(C3 待确认)：两单是否两份费用待 Coface 书面确认
+        /// </summary>
+        public List<string> DualFormatCountries { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 下单需附带 legitimateInterest 的国家代码 → 取值（如德国 DE）
+        /// 值域参考 GET /legitimateinterestcodes
+        /// </summary>
+        public Dictionary<string, string> LegitimateInterestByCountry { get; set; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// 判断指定国家是否需要 JSON/PDF 分别下两单
+        /// </summary>
+        public bool IsDualFormatCountry(string countryCode)
+        {
+            return !string.IsNullOrEmpty(countryCode) &&
+                   DualFormatCountries.Contains(countryCode.ToUpperInvariant());
+        }
+
+        /// <summary>
+        /// 获取指定国家下单时需附带的 legitimateInterest 值，无配置返回 null
+        /// </summary>
+        public string GetLegitimateInterest(string countryCode)
+        {
+            if (string.IsNullOrEmpty(countryCode) || LegitimateInterestByCountry == null)
+            {
+                return null;
+            }
+            return LegitimateInterestByCountry.TryGetValue(countryCode.ToUpperInvariant(), out var value)
+                ? value
+                : null;
+        }
+
+        /// <summary>
         /// 判断指定国家是否属于受限国家（含 CEE）
         /// </summary>
         public bool IsRestrictedCountry(string countryCode)
