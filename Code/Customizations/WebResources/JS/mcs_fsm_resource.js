@@ -4,7 +4,11 @@
  * 1. 机构类型=银行时，选择银行（mcs_bank_id）自动带出机构代码（mcs_bank.mcs_bankno）
  *    与机构名称（mcs_bank.mcs_name），并锁定只读；保险/其他时手工输入
  * 2. 金融产品名称（mcs_fsm_institution_products）多选选项集按机构类型筛选：
- *    银行(1) → 选项 1-11；保险(2) → 选项 101-104；其他(9) → 仅 Others(11)
+ *    银行(1)/保险(2) → 选项 1-10（禅道 #1572：保险与银行同一代码表）；其他(9) → 仅 Others(10)（禅道 #1576 新代码表）
+ * 3. 国家→洲省→城市级联过滤（禅道 #1528）：
+ *    洲省弹窗按所选国家过滤（mcs_state.mcs_countryid）；
+ *    城市弹窗按所选洲省过滤（mcs_city.mcs_stateid）；
+ *    国家变更清空洲省/城市，洲省变更清空城市
  * 触发：主窗体 onLoad（字段 onChange 在 onLoad 中程序化注册）
  */
 
@@ -20,13 +24,19 @@ var FsmResourceForm = (function () {
         OTHER: 9        // 其他
     };
 
-    // mcs_fsm_institution_products 多选选项集允许值（编码设计：银行 1-11，保险 101-104）
-    var BANK_PRODUCT_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-    var INSURANCE_PRODUCT_VALUES = [101, 102, 103, 104];
-    var OTHER_PRODUCT_VALUES = [11]; // 其他类型仅允许 Others
+    // mcs_fsm_institution_products 多选选项集允许值
+    // （禅道 #1572：保险与银行使用同一代码表；禅道 #1576：代码表改为 1-10，Others=10，101-104 保险专属选项不再展示）
+    var BANK_PRODUCT_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    var OTHER_PRODUCT_VALUES = [10]; // 其他类型仅允许 Others（#1576 后 Others=10）
 
     // 完整选项缓存（onLoad 时快照，避免 removeOption 后丢失标签）
     var allProductOptions = null;
+
+    // 省市区级联字段（禅道 #1528）
+    var FIELD_COUNTRY = "mcs_fsm_institution_country";   // 所在国家 → mcs_country
+    var FIELD_PROVINCE = "mcs_fsm_institution_province"; // 洲省 → mcs_state
+    var FIELD_CITY = "mcs_fsm_institution_city";         // 所在城市 → mcs_city
+    var EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
     /**
      * 表单 onLoad 入口
@@ -42,6 +52,35 @@ var FsmResourceForm = (function () {
             var bankAttr = formContext.getAttribute("mcs_bank_id");
             if (bankAttr) {
                 bankAttr.addOnChange(onBankChange);
+            }
+
+            // 省市区级联：父级变更清空子级（禅道 #1528）
+            var countryAttr = formContext.getAttribute(FIELD_COUNTRY);
+            if (countryAttr) {
+                countryAttr.addOnChange(function () {
+                    clearLookup(formContext, FIELD_PROVINCE);
+                    clearLookup(formContext, FIELD_CITY);
+                });
+            }
+            var provinceAttr = formContext.getAttribute(FIELD_PROVINCE);
+            if (provinceAttr) {
+                provinceAttr.addOnChange(function () {
+                    clearLookup(formContext, FIELD_CITY);
+                });
+            }
+
+            // 省市区级联：弹窗按父级过滤
+            var provinceControl = formContext.getControl(FIELD_PROVINCE);
+            if (provinceControl) {
+                provinceControl.addPreSearch(function () {
+                    filterProvinceByCountry(formContext);
+                });
+            }
+            var cityControl = formContext.getControl(FIELD_CITY);
+            if (cityControl) {
+                cityControl.addPreSearch(function () {
+                    filterCityByProvince(formContext);
+                });
             }
 
             // 快照完整产品选项（在筛选之前）
@@ -119,10 +158,8 @@ var FsmResourceForm = (function () {
 
         // 3. 金融产品多选按类型筛选
         var allowedValues = null; // null = 不筛选（类型未选时显示全部）
-        if (type === INSTITUTION_TYPE.BANK) {
+        if (type === INSTITUTION_TYPE.BANK || type === INSTITUTION_TYPE.INSURANCE) {
             allowedValues = BANK_PRODUCT_VALUES;
-        } else if (type === INSTITUTION_TYPE.INSURANCE) {
-            allowedValues = INSURANCE_PRODUCT_VALUES;
         } else if (type === INSTITUTION_TYPE.OTHER) {
             allowedValues = OTHER_PRODUCT_VALUES;
         }
@@ -164,6 +201,56 @@ var FsmResourceForm = (function () {
                 console.error("读取银行信息失败:", error.message);
             }
         );
+    }
+
+    /**
+     * 清空 Lookup 字段值
+     */
+    function clearLookup(formContext, fieldName) {
+        var attr = formContext.getAttribute(fieldName);
+        if (attr && attr.getValue()) {
+            attr.setValue(null);
+        }
+    }
+
+    /**
+     * 取 Lookup 字段的 GUID（无花括号小写），未选返回 null
+     */
+    function getLookupId(formContext, fieldName) {
+        var attr = formContext.getAttribute(fieldName);
+        var ref = attr ? attr.getValue() : null;
+        if (!ref || ref.length === 0) {
+            return null;
+        }
+        return ref[0].id.replace(/[{}]/g, "").toLowerCase();
+    }
+
+    /**
+     * 洲省弹窗按所选国家过滤（mcs_state.mcs_countryid）；未选国家时显示空结果
+     */
+    function filterProvinceByCountry(formContext) {
+        var countryId = getLookupId(formContext, FIELD_COUNTRY) || EMPTY_GUID;
+        var fetchXml = "<fetch><entity name='mcs_state'>" +
+            "<filter type='and'><condition attribute='mcs_countryid' operator='eq' value='" + countryId + "' /></filter>" +
+            "</entity></fetch>";
+        var ctrl = formContext.getControl(FIELD_PROVINCE);
+        if (ctrl) {
+            ctrl.addCustomFilter(fetchXml, "mcs_state");
+        }
+    }
+
+    /**
+     * 城市弹窗按所选洲省过滤（mcs_city.mcs_stateid）；未选洲省时显示空结果
+     */
+    function filterCityByProvince(formContext) {
+        var provinceId = getLookupId(formContext, FIELD_PROVINCE) || EMPTY_GUID;
+        var fetchXml = "<fetch><entity name='mcs_city'>" +
+            "<filter type='and'><condition attribute='mcs_stateid' operator='eq' value='" + provinceId + "' /></filter>" +
+            "</entity></fetch>";
+        var ctrl = formContext.getControl(FIELD_CITY);
+        if (ctrl) {
+            ctrl.addCustomFilter(fetchXml, "mcs_city");
+        }
     }
 
     /**

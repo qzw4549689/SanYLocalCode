@@ -1,0 +1,20 @@
+{
+  "mcs_fsm_status#optionset": 3,
+  "mcs_bppstatus#optionset": 3,
+  "mcs_approve_type#optionset": 1,
+  "mcs_fsm_amount#money": 100000,
+  "mcs_fsm_currency#lookup": "transactioncurrency:4aba070d-1810-ee11-8f6e-000d3a0943da",
+  "mcs_fsm_period#int": 12,
+  "mcs_fsm_payment_ratio#decimal": 0.2,
+  "mcs_fsm_interest_rate#decimal": 0.05,
+  "mcs_fsm_product_desc": "测试产品",
+  "mcs_fsm_device_count#int": 10,
+  "mcs_fsm_device_name": "测试设备",
+  "mcs_fsm_resource_products#optionsetcollection": "1",
+  "mcs_fsm_credit_amount#money": 100000,
+  "mcs_fsm_credit_amount_usd#decimal": 70000,
+  "mcs_fsm_interest_discount#money": 1,
+  "mcs_fsm_fee#money": 1,
+  "mcs_fsm_repurchase_conditions": "测试回购条件",
+  "mcs_fsm_other_conditions": "测试其它条件"
+}

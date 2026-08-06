@@ -1,0 +1,462 @@
+- generic [ref=f14e1]:
+  - generic [ref=f14e482]:
+    - banner [ref=f14e11]:
+      - link [ref=f14e483] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=f14e13]: 跳转至主内容
+      - button [ref=f14e484] [cursor=pointer]: 
+      - button [ref=f14e486] [cursor=pointer]: Sany CRM Sales
+      - generic [ref=f14e19] [cursor=pointer]: 廉洁诚信
+      - generic:
+        - generic: 
+        - searchbox [disabled]
+      - generic [ref=f14e20]: DEV
+      - region [ref=f14e21]:
+        - region [ref=f14e487]:
+          - menubar [ref=f14e488]:
+            - menuitem [ref=f14e489] [cursor=pointer]:
+              - generic [ref=f14e25]: 
+            - text: 
+            - menuitem [ref=f14e490] [cursor=pointer]:
+              - generic [ref=f14e29]: 
+            - menuitem [ref=f14e491] [cursor=pointer]:
+              - generic [ref=f14e33]: 
+            - menuitem [ref=f14e492] [cursor=pointer]:
+              - generic [ref=f14e37]: 
+            - menuitem [ref=f14e493] [cursor=pointer]:
+              - generic [ref=f14e41]: 
+            - menuitem [ref=f14e494] [cursor=pointer]
+            - menuitem [ref=f14e495] [cursor=pointer]
+            - menuitem [ref=f14e496] [cursor=pointer]:
+              - generic [ref=f14e53]: 
+            - menuitem [ref=f14e497] [cursor=pointer]:
+              - generic [ref=f14e57]: Help
+        - button [ref=f14e498] [cursor=pointer]:
+          - generic [ref=f14e64]:
+            - generic [ref=f14e65]: "# 邱正卫 的帐户管理员"
+            - generic [ref=f14e66]: "#"
+    - navigation [ref=f14e499]:
+      - button [expanded] [ref=f14e500] [cursor=pointer]:
+        - generic [ref=f14e70]: 
+      - tree [ref=f14e501]:
+        - treeitem [ref=f14e502] [cursor=pointer]:
+          - generic [ref=f14e74]:
+            - generic [ref=f14e76]: 
+            - generic [ref=f14e77]: 主页
+        - treeitem [ref=f14e503] [cursor=pointer]:
+          - generic [ref=f14e79]:
+            - generic [ref=f14e81]: 
+            - generic [ref=f14e82]: 最近
+          - generic [ref=f14e83]: 
+        - treeitem [ref=f14e504] [cursor=pointer]:
+          - generic [ref=f14e86]:
+            - generic [ref=f14e88]: 
+            - generic [ref=f14e89]: 已固定
+          - generic [ref=f14e90]: 
+        - treeitem [ref=f14e505] [cursor=pointer]:
+          - generic [ref=f14e93]: 货款管理
+          - generic [ref=f14e95]: 
+        - treeitem [expanded] [ref=f14e506] [cursor=pointer]:
+          - generic [ref=f14e98]: 融资管理
+          - generic [ref=f14e100]: 
+          - group [ref=f14e507]:
+            - treeitem [selected] [ref=f14e508]:
+              - generic [ref=f14e104]: 融资管理
+            - treeitem [ref=f14e509]:
+              - generic [ref=f14e111]: 融资资源管理
+        - treeitem [expanded] [ref=f14e510] [cursor=pointer]:
+          - generic [ref=f14e118]: 厂端授信管理
+          - generic [ref=f14e120]: 
+          - group [ref=f14e511]:
+            - treeitem [ref=f14e512]:
+              - generic [ref=f14e124]: 授信模型版本
+            - treeitem [ref=f14e513]:
+              - generic [ref=f14e131]: 授信参数配置
+            - treeitem [ref=f14e514]:
+              - generic [ref=f14e138]: 授信模型计算
+            - treeitem [ref=f14e515]:
+              - generic [ref=f14e145]: 额度生效申请
+            - treeitem [ref=f14e516]:
+              - generic [ref=f14e152]: 额度管理台账
+            - treeitem [ref=f14e517]:
+              - generic [ref=f14e159]: 厂端授信额度
+        - treeitem [expanded] [ref=f14e518] [cursor=pointer]:
+          - generic [ref=f14e166]: 客户资信
+          - generic [ref=f14e168]: 
+          - group [ref=f14e519]:
+            - treeitem [ref=f14e520]:
+              - generic [ref=f14e172]: 客户信用评估
+            - treeitem [ref=f14e521]:
+              - generic [ref=f14e179]: 客户评分卡
+            - treeitem [ref=f14e522]:
+              - generic [ref=f14e186]: 客户评分项目
+        - treeitem [expanded] [ref=f14e523] [cursor=pointer]:
+          - generic [ref=f14e193]: 交易风险管理
+          - generic [ref=f14e195]: 
+          - group [ref=f14e524]:
+            - treeitem [ref=f14e525]:
+              - generic [ref=f14e199]: 成交条件基线库
+            - treeitem [ref=f14e526]:
+              - generic [ref=f14e206]: 重点尽调
+        - treeitem [ref=f14e527] [cursor=pointer]:
+          - generic [ref=f14e213]: 额度管理
+          - generic [ref=f14e215]: 
+        - treeitem [ref=f14e528] [cursor=pointer]:
+          - generic [ref=f14e218]: 白名单管理
+          - generic [ref=f14e220]: 
+        - treeitem [ref=f14e529] [cursor=pointer]:
+          - generic [ref=f14e223]: 基础数据
+          - generic [ref=f14e225]: 
+        - treeitem [ref=f14e530] [cursor=pointer]:
+          - generic [ref=f14e228]: 风险清单
+          - generic [ref=f14e230]: 
+        - treeitem [ref=f14e531] [cursor=pointer]:
+          - generic [ref=f14e233]: 风险排查
+          - generic [ref=f14e235]: 
+        - treeitem [ref=f14e532] [cursor=pointer]:
+          - generic [ref=f14e238]: 风险上报
+          - generic [ref=f14e240]: 
+        - treeitem [ref=f14e533] [cursor=pointer]:
+          - generic [ref=f14e243]: 风险处置
+          - generic [ref=f14e245]: 
+        - treeitem [ref=f14e534] [cursor=pointer]:
+          - generic [ref=f14e248]: 中信保管理
+          - generic [ref=f14e250]: 
+      - button [ref=f14e535] [cursor=pointer]:
+        - text: 风
+        - generic [ref=f14e253]: 风控
+        - generic [ref=f14e254]: 
+    - main [ref=f14e257]:
+      - form [ref=f14e536]:
+        - button [disabled] [ref=f14e537]:
+          - generic [ref=f14e260]: 
+        - separator [ref=f14e261]
+        - link [ref=f14e538] [cursor=pointer]
+        - separator [ref=f14e266]
+        - region [ref=f14e539]:
+          - menubar [ref=f14e540]:
+            - menuitem [ref=f14e541] [cursor=pointer]:
+              - generic [ref=f14e270]: 保存
+            - menuitem [ref=f14e542] [cursor=pointer]:
+              - generic [ref=f14e275]: 保存并关闭
+            - menuitem [ref=f14e543] [cursor=pointer]:
+              - generic [ref=f14e280]: 新建
+            - menuitem [ref=f14e544] [cursor=pointer]:
+              - generic [ref=f14e285]: 停用
+            - menuitem [ref=f14e545] [cursor=pointer]:
+              - generic [ref=f14e290]: 删除
+            - menuitem [ref=f14e546] [cursor=pointer]:
+              - generic [ref=f14e295]: 刷新
+            - menuitem [ref=f14e547] [cursor=pointer]:
+              - generic [ref=f14e300]: 检查访问
+            - menuitem [ref=f14e548] [cursor=pointer]:
+              - generic [ref=f14e305]: 
+        - button [ref=f14e589] [cursor=pointer]: 共享
+        - heading [level=1] [ref=f14e590]:
+          - text: FSM202607250004
+          - status [ref=f14e591]: "- 已保存"
+        - generic [ref=f14e317]: 融资管理
+        - text: 融资立项 状态
+        - button [ref=f14e592] [cursor=pointer]:
+          - generic [ref=f14e319]: 
+        - link [ref=f14e593] [cursor=pointer]:
+          - /url: https://dev1.crm5.dynamics.com/main.aspx?appid=4268989a-aede-45e0-93ec-f07b02f3e383&forceUCI=1&ribbondebug=true&pagetype=entityrecord&etn=systemuser&id=6ad92d8f-ab60-f111-a826-000d3aa333b3
+          - text: "# 邱正卫"
+        - text: 负责人
+        - button [ref=f14e594] [cursor=pointer]:
+          - generic [ref=f14e323]: 
+        - status [ref=f14e324]:
+          - heading [level=2] [ref=f14e595]: 融资管理
+          - generic [ref=f14e596]: 已开启 7 天
+        - button [ref=f14e597] [cursor=pointer]:
+          - generic [ref=f14e328]: 
+        - status [ref=f14e329]: 融资立项
+        - list [ref=f14e598] [cursor=pointer]:
+          - listitem [ref=f14e331]:
+            - button [ref=f14e599]:
+              - generic [ref=f14e333]: 融资需求
+          - listitem [ref=f14e334]:
+            - button [ref=f14e600]:
+              - generic [ref=f14e336]:
+                - text: 融资立项
+                - generic [ref=f14e337]: (6 天)
+          - listitem [ref=f14e338]:
+            - button [ref=f14e601]:
+              - generic [ref=f14e340]: 融资解决方案
+          - listitem [ref=f14e341]:
+            - button [ref=f14e602]:
+              - generic [ref=f14e343]: 融资落实
+        - button [ref=f14e603] [cursor=pointer]:
+          - generic [ref=f14e345]: 
+        - status [ref=f14e346]: 融资立项
+        - tablist [ref=f14e604]:
+          - tab [selected] [ref=f14e605] [cursor=pointer]: 融资需求
+          - tab [ref=f14e606] [cursor=pointer]: 融资六要素
+          - tab [ref=f14e607] [cursor=pointer]: 融资需求管理
+          - tab [ref=f14e608] [cursor=pointer]: 融资解决方案
+          - tab [ref=f14e609] [cursor=pointer]: 融资落实
+          - tab [ref=f14e610] [cursor=pointer]: 附件
+          - tab [ref=f14e611] [cursor=pointer]: 审批信息
+          - tab [ref=f14e612] [cursor=pointer]:
+            - text: 相关
+            - generic [ref=f14e357]: 
+        - tabpanel [ref=f14e613]:
+          - region [ref=f14e614]:
+            - heading [level=2] [ref=f14e615]: 需求基本信息
+            - text: 
+            - generic [ref=f14e361]: 融资管理编号
+            - generic [ref=f14e362]: "*"
+            - img [ref=f14e616]:
+              - generic [ref=f14e364]: 
+            - textbox [ref=f14e617]:
+              - /placeholder: "---"
+              - text: FSM202607250004
+            - text: 
+            - generic [ref=f14e370]: 报价单编号
+            - status [ref=f14e371]
+            - combobox [ref=f14e618]: "---"
+            - button [ref=f14e619] [cursor=pointer]:
+              - generic [ref=f14e374]: 
+            - text: 
+            - generic [ref=f14e376]: 大区
+            - list [ref=f14e620]:
+              - listitem [ref=f14e378]:
+                - generic [ref=f14e379]: 
+                - link [ref=f14e621] [cursor=pointer]: INDONESIA AREA/印尼大区
+                - button [ref=f14e622] [cursor=pointer]:
+                  - generic [ref=f14e383]: 
+            - button [ref=f14e623] [cursor=pointer]:
+              - generic [ref=f14e385]: 
+            - status [ref=f14e386]
+            - text: 
+            - generic [ref=f14e388]: 国家
+            - list [ref=f14e624]:
+              - listitem [ref=f14e390]:
+                - generic [ref=f14e391]: 
+                - link [ref=f14e625] [cursor=pointer]: Algeria
+                - button [ref=f14e626] [cursor=pointer]:
+                  - generic [ref=f14e395]: 
+            - button [ref=f14e627] [cursor=pointer]:
+              - generic [ref=f14e397]: 
+            - status [ref=f14e398]
+            - text: 
+            - generic [ref=f14e400]: 客户编码
+            - generic [ref=f14e401]: "*"
+            - textbox [ref=f14e628]:
+              - /placeholder: "---"
+              - text: BMW0001
+            - text: 
+            - generic [ref=f14e407]: 子公司
+            - textbox [ref=f14e629]:
+              - /placeholder: "---"
+            - text: 
+            - generic [ref=f14e413]: 线索编号
+            - list [ref=f14e630]:
+              - listitem [ref=f14e415]:
+                - generic [ref=f14e416]: 
+                - link [ref=f14e631] [cursor=pointer]: LDCRM202607240001
+                - button [ref=f14e632] [cursor=pointer]:
+                  - generic [ref=f14e420]: 
+            - button [ref=f14e633] [cursor=pointer]:
+              - generic [ref=f14e422]: 
+            - status [ref=f14e423]
+            - text: 
+            - generic [ref=f14e425]: 合同编号
+            - list [ref=f14e634]:
+              - listitem [ref=f14e427]:
+                - generic [ref=f14e428]: 
+                - link [ref=f14e635] [cursor=pointer]: FSMTEST-合同-01
+                - button [ref=f14e636] [cursor=pointer]:
+                  - generic [ref=f14e432]: 
+            - button [ref=f14e637] [cursor=pointer]:
+              - generic [ref=f14e434]: 
+            - status [ref=f14e435]
+            - text: 
+            - generic [ref=f14e437]: 国区
+            - list [ref=f14e638]:
+              - listitem [ref=f14e439]:
+                - generic [ref=f14e440]: 
+                - link [ref=f14e639] [cursor=pointer]: 阿尔及利亚国区
+                - button [ref=f14e640] [cursor=pointer]:
+                  - generic [ref=f14e444]: 
+            - button [ref=f14e641] [cursor=pointer]:
+              - generic [ref=f14e446]: 
+            - status [ref=f14e447]
+            - text: 
+            - generic [ref=f14e449]: 事业部
+            - list [ref=f14e642]:
+              - listitem [ref=f14e451]:
+                - generic [ref=f14e452]: 
+                - link [ref=f14e643] [cursor=pointer]: SANY INTERNATIONAL OPERATION HQ/国际经营总部
+                - button [ref=f14e644] [cursor=pointer]:
+                  - generic [ref=f14e456]: 
+            - button [ref=f14e645] [cursor=pointer]:
+              - generic [ref=f14e458]: 
+            - status [ref=f14e459]
+            - text: 
+            - generic [ref=f14e461]: 客户名称
+            - generic [ref=f14e462]: "*"
+            - list [ref=f14e646]:
+              - listitem [ref=f14e464]:
+                - generic [ref=f14e465]: 
+                - link [ref=f14e647] [cursor=pointer]: LTC客户-1
+                - button [ref=f14e648] [cursor=pointer]:
+                  - generic [ref=f14e469]: 
+            - button [ref=f14e649] [cursor=pointer]:
+              - generic [ref=f14e471]: 
+            - status [ref=f14e472]
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic: "# 邱正卫"
+  - generic [ref=f14e478]:
+    - iframe [ref=f14e480]:
+      
+    - generic [ref=f14e481] [cursor=pointer]: ×
+  - generic:
+    - generic:
+      - dialog:
+        - generic [ref=f14e656]:
+          - generic [ref=f14e658]:
+            - generic [ref=f14e659]: 命令检查器
+            - button "Regenerate ribbon metadata" [active] [ref=f14e660] [cursor=pointer]
+            - button [ref=f14e664] [cursor=pointer]:
+              - generic [ref=f14e665]: 
+          - generic [ref=f14e667]:
+            - generic [ref=f14e668]:
+              - generic [ref=f14e669]: "Command Bar: Global : null"
+              - tree "list" [ref=f14e674]:
+                - treeitem "HideCustomActions" [level=1] [ref=f14e675] [cursor=pointer]
+                - treeitem "搜索 (system)" [level=1] [ref=f14e677] [cursor=pointer]
+                - treeitem "助手 (system)" [level=1] [ref=f14e679] [cursor=pointer]
+                - treeitem "创建新记录 (system)" [level=1] [ref=f14e681] [cursor=pointer]:
+                  - generic [ref=f14e682]: 
+                - treeitem "通知 (system)" [level=1] [ref=f14e685] [cursor=pointer]
+                - treeitem "设置 (system)" [level=1] [ref=f14e687] [cursor=pointer]
+                - treeitem "帮助 (system)" [level=1] [ref=f14e689] [cursor=pointer]
+                - 'treeitem "Tab Id: Mscrm.CommandBar" [expanded] [level=1] [ref=f14e691] [cursor=pointer]':
+                  - generic [ref=f14e692]: 
+                - 'treeitem "Group Id: Mscrm.GlobalTab.New" [expanded] [level=2] [ref=f14e695] [cursor=pointer]':
+                  - generic [ref=f14e696]: 
+                - treeitem "岗位" [level=3] [selected] [ref=f14e699] [cursor=pointer]
+                - treeitem "公告" [level=3] [ref=f14e701] [cursor=pointer]
+                - treeitem "公告 (已隐藏)" [level=3] [ref=f14e703] [cursor=pointer]
+                - treeitem "启动拨号程序 (已隐藏)" [level=3] [ref=f14e705] [cursor=pointer]
+                - treeitem "跟踪相关项 (已隐藏)" [level=3] [ref=f14e707] [cursor=pointer]
+                - treeitem "在无相关项的情况下跟踪 (已隐藏)" [level=3] [ref=f14e709] [cursor=pointer]
+                - treeitem "在无相关项的情况下跟踪 (已隐藏)" [level=3] [ref=f14e711] [cursor=pointer]
+                - treeitem "取消跟踪 (已隐藏)" [level=3] [ref=f14e713] [cursor=pointer]
+                - treeitem "取消跟踪 (已隐藏)" [level=3] [ref=f14e715] [cursor=pointer]
+                - treeitem "查看电子邮件 (已隐藏)" [level=3] [ref=f14e717] [cursor=pointer]
+                - treeitem "查看约会 (已隐藏)" [level=3] [ref=f14e719] [cursor=pointer]
+                - treeitem "在 Dynamics 365 中查看 (已隐藏)" [level=3] [ref=f14e721] [cursor=pointer]
+                - treeitem "离线 (已隐藏)" [level=3] [ref=f14e723] [cursor=pointer]
+                - treeitem "启动状态对话框 (已隐藏)" [level=3] [ref=f14e725] [cursor=pointer]
+                - treeitem "插入 (已隐藏)" [expanded] [level=3] [ref=f14e727] [cursor=pointer]:
+                  - generic [ref=f14e728]: 
+                - treeitem "添加模板 (已隐藏)" [level=4] [ref=f14e731] [cursor=pointer]
+                - treeitem "添加销售宣传资料 (已隐藏)" [level=4] [ref=f14e733] [cursor=pointer]
+                - treeitem "添加知识文章 (已隐藏)" [level=4] [ref=f14e735] [cursor=pointer]
+                - treeitem "跟进 (已隐藏)" [level=3] [ref=f14e737] [cursor=pointer]
+                - treeitem "取消跟进 (已隐藏)" [level=3] [ref=f14e739] [cursor=pointer]
+                - treeitem "意见反馈 (已隐藏)" [level=3] [ref=f14e741] [cursor=pointer]
+                - treeitem "离线 (已隐藏)" [level=3] [ref=f14e743] [cursor=pointer]
+                - treeitem "意见反馈 (已隐藏)" [level=3] [ref=f14e745] [cursor=pointer]
+                - treeitem "Download" [level=3] [ref=f14e747] [cursor=pointer]
+                - treeitem "Outlook 检查器 (已隐藏)" [level=3] [ref=f14e749] [cursor=pointer]
+                - treeitem "--- (已隐藏)" [level=3] [ref=f14e751] [cursor=pointer]
+                - 'treeitem "Group Id: Mscrm.GlobalTab.Tools" [expanded] [level=2] [ref=f14e753] [cursor=pointer]':
+                  - generic [ref=f14e754]: 
+                - treeitem "Copilot (已隐藏)" [level=3] [ref=f14e757] [cursor=pointer]
+                - treeitem "Bootstrap Copilot (已隐藏)" [level=3] [ref=f14e759] [cursor=pointer]
+                - treeitem "Teams 聊天 (已隐藏)" [level=3] [ref=f14e761] [cursor=pointer]
+                - treeitem "嵌入式 Teams 协作 (已隐藏)" [level=3] [ref=f14e763] [cursor=pointer]
+                - treeitem "Copilot (已隐藏)" [level=3] [ref=f14e765] [cursor=pointer]
+                - treeitem "Hidden (已隐藏)" [level=3] [ref=f14e767] [cursor=pointer]
+                - treeitem "发送反馈 (已隐藏)" [level=3] [ref=f14e769] [cursor=pointer]
+                - treeitem "发送反馈 (已隐藏)" [level=3] [ref=f14e771] [cursor=pointer]
+                - treeitem "发送反馈 (已隐藏)" [level=3] [ref=f14e773] [cursor=pointer]
+                - treeitem "连接和共享 (已隐藏)" [expanded] [level=3] [ref=f14e775] [cursor=pointer]:
+                  - generic [ref=f14e776]: 
+                - treeitem "Dynamics 365 社区 (已隐藏)" [level=4] [ref=f14e779] [cursor=pointer]
+                - treeitem "提交观点 (已隐藏)" [level=4] [ref=f14e781] [cursor=pointer]
+                - treeitem "共享反馈 (已隐藏)" [level=4] [ref=f14e783] [cursor=pointer]
+            - generic [ref=f14e785]:
+              - generic [ref=f14e786]: Button - 岗位
+              - generic [ref=f14e789]:
+                - tablist [ref=f14e790]:
+                  - tab "Button properties" [selected] [ref=f14e791] [cursor=pointer]
+                  - tab "Command properties" [ref=f14e795] [cursor=pointer]
+                - tabpanel "Button properties" [ref=f14e799]:
+                  - generic [ref=f14e800]:
+                    - separator [ref=f14e801]
+                    - generic [ref=f14e802]:
+                      - generic [ref=f14e803]:
+                        - text: mcs.ApplicationRibbon.Job.Button
+                        - generic [ref=f14e804]: 
+                        - button "查看按钮解决方案层" [ref=f14e808] [cursor=pointer]
+                      - list [ref=f14e809]:
+                        - listitem [ref=f14e810]:
+                          - generic [ref=f14e811]:
+                            - generic [ref=f14e812]: ControlType
+                            - generic [ref=f14e813]: Button
+                        - listitem [ref=f14e814]:
+                          - generic [ref=f14e815]:
+                            - generic [ref=f14e816]: Alt
+                            - generic [ref=f14e817]:
+                              - text: 岗位
+                              - button "查看标签解决方案层" [ref=f14e818] [cursor=pointer]
+                        - listitem [ref=f14e819]:
+                          - generic [ref=f14e820]:
+                            - generic [ref=f14e821]: Command
+                            - generic [ref=f14e822]: mcs.ApplicationRibbon.Job.Command
+                        - listitem [ref=f14e823]:
+                          - generic [ref=f14e824]:
+                            - generic [ref=f14e825]: CommandTypeSpecified
+                            - generic [ref=f14e826]: "---"
+                        - listitem [ref=f14e827]:
+                          - generic [ref=f14e828]:
+                            - generic [ref=f14e829]: Id
+                            - generic [ref=f14e830]: mcs.ApplicationRibbon.Job.Button
+                        - listitem [ref=f14e831]:
+                          - generic [ref=f14e832]:
+                            - generic [ref=f14e833]: LabelText
+                            - generic [ref=f14e834]:
+                              - text: 岗位
+                              - button "查看标签解决方案层" [ref=f14e835] [cursor=pointer]
+                        - listitem [ref=f14e836]:
+                          - generic [ref=f14e837]:
+                            - generic [ref=f14e838]: ModernCommandTypeSpecified
+                            - generic [ref=f14e839]: "---"
+                        - listitem [ref=f14e840]:
+                          - generic [ref=f14e841]:
+                            - generic [ref=f14e842]: Sequence
+                            - generic [ref=f14e843]: "0"
+                        - listitem [ref=f14e844]:
+                          - generic [ref=f14e845]:
+                            - generic [ref=f14e846]: ToolTipTitle
+                            - generic [ref=f14e847]:
+                              - text: 岗位切换
+                              - button "查看标签解决方案层" [ref=f14e848] [cursor=pointer]
+                        - listitem [ref=f14e849]:
+                          - generic [ref=f14e850]:
+                            - generic [ref=f14e851]: ToolTipDescription
+                            - generic [ref=f14e852]:
+                              - text: 岗位切换
+                              - button "查看标签解决方案层" [ref=f14e853] [cursor=pointer]
+                        - listitem [ref=f14e854]:
+                          - generic [ref=f14e855]:
+                            - generic [ref=f14e856]: SolutionUniqueName
+                            - generic [ref=f14e857]: Active
+                        - listitem [ref=f14e858]:
+                          - generic [ref=f14e859]:
+                            - generic [ref=f14e860]: LocalizationErrors
+                            - generic [ref=f14e861]: "---"

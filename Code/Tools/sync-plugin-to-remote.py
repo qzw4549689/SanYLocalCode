@@ -107,6 +107,10 @@ FILE_MAP = {
     # FinancingManagement 融资资源（禅道 #1433）
     "FinancingManagement/Resource/FsmResourceStateSyncPlugin.cs": r"Plugins\FinancingManagement\Resource\FsmResourceStateSyncPlugin.cs",
     "FinancingManagement/Resource/FsmResourceDeleteGuardPlugin.cs": r"Plugins\FinancingManagement\Resource\FsmResourceDeleteGuardPlugin.cs",
+    # FinancingManagement 融资资源机构代码重复校验（禅道 #1512）
+    "FinancingManagement/Resource/FsmResourceDuplicationCheckPlugin.cs": r"Plugins\FinancingManagement\Resource\FsmResourceDuplicationCheckPlugin.cs",
+    # FinancingManagement 融资落实订单号唯一校验（禅道 #1511）
+    "FinancingManagement/Detail/FsmDetailDataDuplicationCheckPlugin.cs": r"Plugins\FinancingManagement\Detail\FsmDetailDataDuplicationCheckPlugin.cs",
     "FactoryCredit/Bpp/Services/QuotaActivationService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaActivationService.cs",
     "FactoryCredit/Bpp/Services/QuotaRecordService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaRecordService.cs",
     "FactoryCredit/Calculation/Services/CalculationLogService.cs": r"Plugins\FactoryCredit\Calculation\Services\CalculationLogService.cs",

@@ -2,7 +2,7 @@
 
 > **项目：** 三一重工 D365 客户信用评估系统
 > **技术栈：** Dynamics 365 (Dataverse) + C# Plugin + JavaScript WebResource
-> **最后更新：** 2026-08-01（Coface 系统内下单本地开发完成：编译全过，DEV1 部署与沙盒联调待下周一用户协调 Coface 后进行）
+> **最后更新：** 2026-08-05（#1576 配套：UAT 融资资源产品值 11→10 数据修复完成（3 条，fix-fsm-resource-product11 apply，预检无残留）；生产导入 entity 包前需对生产再执行同一命令，上线核对清单 2.4.13 / 看板 rowid 44 已标注）；此前：2026-08-05（Bug #1559 补充：方案页签机构名称/编码 6 字段按值显隐（空组隐藏）已部署 DEV1 发布，mcs_fsm_data.js MD5 `ae167df6` + picker html MD5 `b47a6f6b`，看板发布清单 rowid 45/46，用户 DEV1 界面验证已通过；配套：DEV1 新增保险/其他类型测试机构各 1 条，FSM202608010001 审批状态改 1 解锁；MetadataTool 新增 `set-fsm-bppstatus` 命令、`create-fsm-resource-testdata` 支持类型参数。另：当日上午 Zed 侧栏线程条目丢失事故——kimi 会话数据在 `~/.kimi/sessions/` 完好，已修复 Zed db 条目+会话标题恢复，Bug-1559 完整对话提取至 `Documents/Tests/BugReports/Bug-1559-会话记录-恢复.md`）；此前：2026-08-05（待发布登记迁移任务看板：原《待发布内容清单.md》废弃删除，统一登记看板「发布清单」`http://122.51.232.70:8100/`；看板新增发布清单视图+按包归档+逐项登记 API）；此前：2026-08-05（发版核对策略按截图固定 14 环节顺序固化）；此前：2026-08-04（Bug #1559 融资六要素/解决方案页面字段改造：8 新字段+表单+JS 已部署 DEV1 并发布，Node 仿真 40/40，待用户界面验证；entity 发版包 entity_20260727_peter 发版前必须重新导出；Bug #1576 金融产品新代码表：三字段选项 1-10 改新标签+删旧值 11 已生效 DEV1，mcs_fsm_resource.js 同步已部署，UAT 3 条值 11 数据已登记发版前修复，待用户界面验证；Bug #1561 融资立项/方案提交审批备注：2 新字段 mcs_fsm_initiation_remark/project_remark（Memo 2000 双语）+表单 tab_3/tab_4+JS 阶段控制与提交 payload+BPP Handler 按 approve_type 分流映射 mcs_remark，DEV1 已全部部署发布，BPP Handler **PR 6847 已合并 uat**（merge `747ac65eb1b`），⏸️ 待用户 n8n 发布 Messagehandler 后验证；⚠️ 2026-08-05 修正：评审意见改放平台级 ApproveOpn/RetryApproveOpn（审批记录-起草人节点意见，FundClaim 先例），不走 formVars mcs_remark（模板无此 Code 静默丢弃），BPP 模板侧零改动；已同步 tx-windows 编译 0 错误，✅ 分支 `uat-20260805-peter-fsm-remark-approveopn` 已推送（commit `8ad1181a5a8`），**PR 6916 已合并 uat**（merge `05bb25c9b5e`），合并后重编译 0 错误，✅ MessageHandler 已发布 UAT（2026-08-05），⏸️ 待用户 UAT 新提交一次验证起草人节点意见；配套无编号修复（UAT 反馈）：必填提示架构名→中文标签+提交前 refreshFieldCache 免手动刷新，DEV1 已部署 70485 bytes，看板 rowid 47，待 n8n 发 McsWebResource 到 UAT；语言 key FsmData_Field_CreditAmountUsd 待授权走仓库推送）
 
 ---
 
@@ -103,6 +103,8 @@
 > - **PublishAll 执行红线**：凡是需要 `PublishAll`（全局发布）的操作，由用户执行；AI 只运行指定实体的发布（如 `dotnet run publish mcs_customer_tag`），不运行无实体参数的 `dotnet run publish` 或等效全局发布命令。
 > - **🚨 Plugin Assembly 更新红线（2026-06-25 新增）**：更新 DEV Assembly 前，必须先将代码推送到项目 Git 并合并到 `uat`，再用合并后的 `uat` 代码重新编译 DLL。严禁使用未入仓代码编译的 DLL 更新 DEV Assembly！
 > - **🚨 绝对禁止覆盖公共/通用文件（2026-06-27 新增）**：AI 严禁直接覆盖任何文件内容，尤其是多人共用的通用文件（如 `ms_languagefile_1033/2052`、`1033.json`、`2052.json` 等语言包、AGENTS.md、开发规范文档等）。只允许在已有内容后追加。AI 不得擅自修改所有人公用的通用文件；如需修改，必须先获得用户逐字明确授权，并说明改动范围。
+- **组件 Step 加发版包由 AI 执行（2026-08-03 用户指示，长期有效）**：新增 Step 在 DEV 验证通过后，AI 直接用 `add-solution-component`（幂等）加入对应发版包（Step→McsPlugin），并在任务看板「发布清单」登记该项（in_package 标 true），无需再逐项询问；其余组件（实体/App Action/WebResource/Custom API 等）仍按原规则——归属不清楚必须问用户，禁止自行决定。
+- **🚨 待发布登记已迁移到任务看板（2026-08-05 用户指示，长期有效）**：原《待发布内容清单.md》（`Documents/Planning/Releases/`）已废弃删除，待发布内容统一登记到任务看板「📦 发布清单」（`http://122.51.232.70:8100/`，部署于 tx-windows，源码 `Code/Tools/KanbanBoard/`）——逐项登记 API `POST /api/release-items/item`（section: entity/webresource/plugin/customapi/config/manual），发版后按包归档 `POST /api/release-items/release`；任务看板三栏（待处理/开发中/待发布/已发布）+ 发布清单按 Solution 包聚合（entity 类默认 entity_当天日期_peter 新包，其余固定包），登记口径详见 `/skill:d365-dev` 8.3.3。
 
 当前本地 `origin` 指向个人 GitHub（`https://github.com/qzw4549689/SanYLocalCode.git`），这是历史备份用途。
 
@@ -600,7 +602,71 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | 新增/修改文件 | **新增** `CofaceIntegration/Plugin/CofacePlaceOrderPlugin.cs`（Custom API `mcs_CofacePlaceOrder` 实现，入参 CreditRecordId，出参 ResultJson）<br>**新增** `CofaceIntegration/CofaceOrderInfoHelper.cs`（URBA/Report 订单就绪判定公共逻辑，从 DataSyncPlugin 抽取，纯重构行为不变）<br>`Api/CofaceApiService.cs`（ExecutePost/RetryPost + 5 个下单方法：即时报告/调查单/查调查单/URBA监控单/Report单）<br>`Token/CofaceTokenManager.cs`（Token 缓存化：读 `coface_idtoken`/`coface_token_expiry`，systemService 回写，失败降级）<br>`CofaceCountryConfig.cs`（DualFormatCountries 36 国 + LegitimateInterestByCountry DE=100 + GetReportOrderValue）<br>`CofaceDataSyncPlugin.cs`（改调 Helper + 入口 4 行初始化修正）<br>`mcs_credit_record.js`（placeCofaceOrder 按钮命令 + nextStep 10→11 就绪硬阻断，先自动推进一次查询）<br>`CustomApiDeployer.cs`（DeployCofacePlaceOrderApi）/`MetadataTool Program.cs`（deploy/delete/test-cofaceorder-api 三命令 + add-fields mcs_credit_record 三字段块）<br>`AppActionDeployer.cs`（【Coface 下单】按钮 seq=100100019）<br>`sync-plugin-to-remote.py`（FILE_MAP +2）<br>`DeployTool/CofaceConfigDeployer.cs`（配置数据类加 DualFormatCountries/LegitimateInterestByCountry）<br>本地 `Language/1033.json`/`2052.json` 各纯追加 15 个 CreditRecord_CofaceOrder* key（共 375 keys） |
 | 待确认（阻塞细节） | C1~C5（给 Coface）/ B1~B7（给业务）下周一协调；report 下单参数枚举值（GetReportOrderValue 映射）为沙盒联调第 1 优先级；双格式国家列表文档标题 39 国/要点 35 国/表格实际 36 国，代码按表格 36 国实现待澄清 |
 | 新增组件清单（待加入主清单/发版包，下周一 DEV1 验证后执行） | ① 3 个新字段（随 mcs_credit_record 实体，`add-fields mcs_credit_record` 创建）② Custom API `mcs_CofacePlaceOrder` 本体+1 参数+1 响应（→McsCustomAPI）③ Plugin Step（Custom API MainOperation，平台自动创建）④ App Action【Coface 下单】（→entity 包）⑤ `mcs_credit_record.js` 变更（→McsWebResource）⑥ 语言 key 15×2（走仓库语言文件分支+PR 红线流程） |
+| ✅ UAT 发布与验证（2026-08-02） | 用户 n8n 已发 4 包（entity_20260727_peter / McsPlugin / McsCustomAPI / McsWebResource）；UAT 核对：3 字段✅、App Action✅、JS 与本地逐行一致✅、Plugin Type✅、Custom API✅、配置新结构✅（前一天已 upsert）；UAT 冒烟：状态≠10 拦截✅、新建记录复用 URBA→Report 推进到状态 3✅（零新单），测试数据已清理 |
 | 下一步（下周一） | 1. 用户协调 Coface 沙盒 + 回填 C1~C5/B1~B7<br>2. DEV1：`add-fields mcs_credit_record` 建 3 字段+发布 → DeployTool 更新 CofaceCountryConfig JSON → 注册临时 Assembly `SanyD365.Plugins.CofaceIntegration` + deploy-cofaceorder-api → 部署 App Action → 更新 mcs_credit_record.js → 语言 key 同步<br>3. 按实施方案第 11 章 10 场景沙盒联调<br>4. 验证通过：注销临时 Assembly（红线）→ sync 归并远程 → 用户授权后推送/PR → 主 Assembly 更新+重绑 → 组件加主清单 → 发版核对 |
+
+---
+
+### 2.25 已关闭（融资管理阶段≥3 融资需求区+六要素锁定 — 禅道 #1509）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-03 |
+| 需求 | Bug #1509：进入融资落实（状态=4）后融资需求和融资六要素仍可填写，应全锁（来源用例 TC-FSM-DATA-013/014） |
+| 根因 | `mcs_fsm_data.js` `applyStageControl` 阶段判断/事件触发均正确，但锁定清单只覆盖 INITIATION_TAB+SOLUTION_TAB+2 个元数据必填字段；融资需求区 10 字段+六要素 6 字段不在任何禁用清单（`REQUIRED_SIX_ELEMENTS` 仅用于 onSave 必填校验） |
+| 修复 | `mcs_fsm_data.js` 新增 `DEMAND_AREA_FIELDS`（16 字段：来源三字段+级联带出 7+六要素 6），规则=仅状态 1/2 可写，状态≥3 或审批中锁定；设备台数/产品名称沿用既有规则不重复 |
+| 锁定起点依据 | 状态=2 时六要素仍需补全后提交立项审批（TC-FSM-DATA-012），故锁定起点=状态≥3 |
+| 部署 | ✅ DEV1 已部署+发布（52416 bytes，回读逐字节一致）；⚠️ 部署期间他人 PublishAll/导包约 10 分钟，内容两次被旧版回退、发布被阻塞，结束后重部署成功 |
+| 验证 | ✅ Node 锁定矩阵仿真 6/6；✅ 用户 DEV1 验证通过（FSM202608030001 后台改状态 2→3→4，状态3 需求区只读/方案可写、状态4 全锁） |
+| 状态 | 📋 已关闭（2026-08-03）；⏸️ 待用户 n8n 发布 UAT（McsWebResource） |
+
+---
+
+### 2.26 已修复待验证（融资落实订单号唯一 + 融资资源机构代码重复/必填 — 禅道 #1511 #1512）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-03 |
+| 需求 | Bug #1511：同一融资管理记录下可建两条同订单号落实记录；Bug #1512：可建两条同机构代码融资资源 + 3 个必填字段未强制。核查结论：均为真 Bug（UAT 重复数据全是 7/22-8/2 测试期新建，非历史数据；代码侧两实体零唯一性校验，同源问题） |
+| PRD 口径 | 《LTC营销风控_外部融资额度管理》：落实「新增-保存：唯一性校验（订单号）」「编辑-保存：唯一性校验（订单号，存在即更新）」；资源「新增-保存：必填校验+新增重复性校验（机构代码）」。用户确认：落实=**同一 mcs_fsm_data_id 下 mcs_order_id 唯一**（不同融资管理记录间不拦截）；资源=机构代码**全局唯一含停用**（停用机构再用应走「启用」）；「存在即更新」语义暂按拦截实现，待业务确认 |
+| 改动 | 新增 `Plugins/FinancingManagement/Detail/FsmDetailDataDuplicationCheckPlugin.cs`（Create/Update PreOp，Update Filter=mcs_order_id,mcs_fsm_data_id+PreImage 补齐，系统身份查重，拦截提示显式 Retrieve 订单名称——Create Target Lookup 无 Name）<br>新增 `Plugins/FinancingManagement/Resource/FsmResourceDuplicationCheckPlugin.cs`（Create/Update PreOp，Update Filter=mcs_fsm_institution_code，提示含已有记录编号+引导启用）<br>DEV1 元数据：mcs_fsm_institution_desc/other_product/product_remark 改 ApplicationRequired 并发布（与定义 JSON/PRD 对齐）<br>sync-plugin-to-remote.py 映射、Code/INDEX.md、禅道Bug修复记录均已更新 |
+| Git | 分支 `uat-20260803-peter-fsm-uniqueness-1511-1512`（commit `6ad079d2f8b`，3 文件 +187）→ **PR 6677 已合并 uat**（merge `7b543be3ad7`） |
+| DEV1 | 临时 Assembly 验证 9/9（落实 5 + 资源 4）后注销（红线）；合并后 uat 重编译并更新主 Assembly `SanyD365.D365Extension.Sales`（ID `9d6ff315`，8480 KB）；4 Step 已注册（Detail Create `2f5d10c1`/Update `611cc632`+PreImage、Resource Create `8c35bbaf`/Update `be578820`）；主 Assembly 回归 4/4 通过；测试数据全清 |
+| 主清单 | ✅ 4 Step 已加 `AllComponent_Peter_NoUAT`（componenttype=92） |
+| 下一步 | 1. 用户 n8n 发布 UAT（McsPlugin + entity 包带必填元数据）<br>2. UAT 验证后关闭两 Bug<br>3. ⚠️ UAT 存量重复数据（910290000340×4 等测试数据）Plugin 上线后编辑会被拦截，需提醒测试同学清理；「存在即更新」语义待业务确认 |
+
+---
+
+### 2.27 已修复待验证（融资资源国家→省→市级联过滤 — 禅道 #1528）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-03 |
+| 需求 | Bug #1528（来源用例-578）：融资资源管理选择国家后省/市未过滤，期望自动过滤省市区 |
+| 根因 | `mcs_fsm_resource.js` 三个地址 Lookup（`mcs_fsm_institution_country`→mcs_country / `mcs_fsm_institution_province`→mcs_state / `mcs_fsm_institution_city`→mcs_city）各自独立、无任何级联过滤代码；表单实际为国家/洲省/城市三级，无「区」字段 |
+| 过滤前提 | DEV1 在线核实：`mcs_state.mcs_countryid`（Lookup→国家）、`mcs_city.mcs_stateid`（Lookup→省）均存在且数据已填充 |
+| 改动 | `Code/Customizations/WebResources/JS/mcs_fsm_resource.js`（唯一文件）：onLoad 追加省/市控件 addPreSearch+addCustomFilter（省按国家 GUID `mcs_countryid eq`、市按省 GUID `mcs_stateid eq`，未选父级用空 GUID 显示空结果）；国家 onChange 清空省/市、省 onChange 清空市。参考同模块 `mcs_fsm_data.js` 成熟模式；纯前端修复，无新增 D365 组件、不动元数据 |
+| DEV1 | ✅ 部署前 diff（DEV1=git HEAD 一致）→ 部署+发布（12021 bytes，回读逐字节一致）→ 表单 onLoad 绑定回读确认 |
+| 验证 | ✅ Playwright：未选国家省弹窗空；中国→省下拉仅中国省份（Anhui/Beijing/Fujian…）；Beijing 省下无城市记录属主数据未维护（非过滤问题）<br>✅ 用户界面验证通过（中国→Hunan→Changsha） |
+| 用户偏好（新） | **界面测试 AI 做不到位的及时告知用户来测**（2026-08-03 用户指示，本次 Playwright 选 Lookup 下拉项耗时过长触发） |
+| 下一步 | 用户 n8n 发布 UAT（McsWebResource）后 UAT 验证 → 关闭；已登记《待发布内容清单》McsWebResource 分区 |
+
+---
+
+### 2.28 已修复待验证（融资六要素/解决方案页面字段改造 — 禅道 #1559）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-04 |
+| 需求 | ①六要素「融资产品」改单选下拉（仅银行类金融产品 1-11）；②方案页：金融产品=与融资产品同一字段两处展示（必填、只读）、融资资源机构=多选（按金融产品过滤，必填，多选带入逗号分隔）、新增银行/保险/其它机构名称+编码 6 字段（自动带入、非必填）；③贴息/融资费用/回购条件/其它条件 4 项改非必填 |
+| 用户口径 | 融资产品**单选**；金融产品=融资产品**同一字段双单元格展示**（非带入逻辑）；不用旧字段仅表单 visible=false 隐藏不删；改动字段全部放「融资解决方案」tab |
+| 元数据 | DEV1 新建 8 字段（定义 JSON + Program.cs add-fields 块，TryCreateField 幂等）：`mcs_fsm_product`（Picklist 1-11）、`mcs_fsm_resource_ids`（Memo 2000 存 GUID 逗号分隔）、银行/保险/其它机构名称+编码 6×string(1000)；双语标签经 set-field-label 补齐（CreateXxxField 只落 1033 已知问题，同 #1555 路径）；实体已发布 |
+| 表单 | 备份后 update-form-xml：4 旧单元格隐藏（product_desc/resource_id/resource_name/resource_products）+六要素 tab 融资产品单元格+方案 tab 8 新单元格；**v2（用户界面测试后）**：平台 PCF `mcs_common.control.lookup.multiplechoice` bundle 实锤查询无 $filter 不满足下拉级过滤→改自制 HTML picker 单元格（rowspan=8）+controlDescriptions 移除+resource_ids 隐藏单元格保留属性+6 带入字段单列排布；发布+回读全绿 |
+| JS | `mcs_fsm_data.js`（64433 bytes，MD5 `4ec4b533`）：必填三清单同步（四项移出、product/resource_ids 入列）；新增 `onResourceIdsChanged`（启用+产品包含校验，不匹配移除并提示）+`fillInstitutionFields`（按机构类型 1/2/9 分组逗号带入 6 字段）+`SOLUTION_AUTO_FIELDS` 始终只读+产品变更清空重选；废弃 #1507 `syncResourceName`/`filterProductsByResource`/`ALL_PRODUCT_OPTIONS`；锁定矩阵沿用 #1540/#1560 口径（mcs_fsm_product 仅在 DEMAND_AREA_FIELDS，状态1 可写、≥2 全锁含方案侧单元格） |
+| 关键决策 | 机构过滤：平台多选 PCF 无过滤参数（manifest 仅 saveattribute/entity/attribute，bundle 查询写死 select+top=5000）→ afk 自决**自制 HTML WebResource `mcs_fsm_resource_multiselect.html`**（嵌入式 picker：仅启用且机构产品含所选融资产品的机构才显示，搜索+勾选写回 resource_ids，产品变更重新过滤；可编辑状态由 applyStageControl 推 `setEditable`+拉 `__fsmResourcePickerEditable` 双通道）；产品未选时显示「请先选择融资产品」提示 |
+| 新 WebResource | `mcs_fsm_resource_multiselect.html`（ID `a95bbe4c-c88f-f111-8077-7ced8db4dd60`）已创建发布+**已加主清单**（componenttype=61）；发版包 McsWebResource 待加入 |
+| 验证 | Node 仿真 40/40（必填/锁定/分组带入/过滤）；部署前 diff DEV1=本地 `04295acc`，部署回读逐字节一致；用户界面验证：①「金融产品可修改」=浏览器缓存旧 JS，强刷后正常 ✅；②机构下拉过滤→v2 常开面板样式被用户否决（未先报方案，批评接受）→v3 重写为原 PCF 同款 UX（收起单行输入框、点击弹浮层下拉、勾选写回多行文本）→v4 标准化清理（bppstatus 隐藏字段上表单，picker 直读属性自算可编辑，删除推送/拉取/轮询/兜底；CustomEvent 通知；字体 getComputedStyle 拷贝系统标签；对齐实测兄弟字段盒），表单恢复成对布局，已部署发布回读全绿；③减选后带入不更新→v5 修复：picker 勾选时**同步直写** 6 字段（本地 `_allResources` 零异步），表单 JS 异步带入仅作导入/API 兜底；✅ 用户 DEV 确认通过（增删多选/字段一致性/DB 核对一致）。⚠️ 后续注意：#1576（另一会话）已将 `mcs_fsm_product` 选项改为新代码表 1-10 并删值 11，`mcs_fsm_data.js` 已被后续会话推进至 68084 bytes（#1578/无编号新建误放开/#1561 增量，均含本 #1559 变更） |
+| 收尾 | ✅ 禅道登记+《待发布内容清单》（entity 包 8 字段+表单、McsWebResource JS、语言 key 待推送）+数据表定义 v1 已更新；⏸️ 语言 key `FsmData_ResourceFiltered`（379→380）本地已追加，仓库分支推送待用户授权；⚠️ entity_20260727_peter 08-04 已导出 zip 早于本次字段创建，**发版前必须重新导出** |
 
 ---
 
@@ -2780,3 +2846,78 @@ dotnet run --execute
 | BPP 侧独立问题 | UAT 实证融资立项模板 `794612913352237105` 实例（FSM202607290002 / flowId 870693550988402688）`GetNextApprover` 返回空；同时段 mcs_contract_signing 提交审批人正常（liuy2905/lanl2）→ **模板首节点审批人规则未解析出人，属 BPP 团队配置问题**，D365 代码无问题 |
 | 编译插曲 | uat 主干连续被同事提交打断：孟绥洪少逗号（自修）→ lius CS0023 `TimeSpan?`（苻坚 PR 6414 修复）；用户明确不动他人代码 |
 | 下一步 | 用户 n8n 发布 `McsPlugin` + `Messagehandler` 到 UAT → UAT 验证（需 BPP 团队先修模板审批人解析） |
+
+## 会话更新（2026-08-04）— 融资资源管理/融资落实附件页签上线（禅道 #1555/#1562，Uploader 三件套+平台配置缓存坑）
+
+| 项目 | 内容 |
+|---|---|
+| 需求 | #1555 融资资源管理（`mcs_fsm_resource`）附件页签是空壳无上传控件；#1562 融资落实（`mcs_fsm_detail_data`）表单无附件页签。均按融资管理（`mcs_fsm_data`）同款方案补齐 |
+| Uploader 三件套（缺一不可） | ① 表单嵌入平台通用控件 `mcs_/CommonCore/Html/Uploader.html`（classid `{9FDF5F91-88B1-47F4-AD53-C11EFC01A01D}`，PassParameters=false 时控件自动取父表单实体名+记录ID，零 JS 改动）；② `mcs_customer_file.mcs_{实体名}id` Lookup 字段（Uploader 后端按此查/写附件，缺失报「加载数据失败！」）；③ `UploadFileTypeMapping`（`ms_systemconfiguration`）追加实体映射 key（缺失 Custom API `mcs_GetUploadFilePageInitInfo` 400） |
+| 🚨 平台配置缓存坑（新教训） | 平台插件（`SanyD365.D365ExtensionApi`）读系统配置走 `SystemConfigurationRepositoryCacheProxy` 本地缓存，版本号存 `ms_versionconfiguration` 实体 `CommonCacheVersion` 记录（`ms_version` 字段）。**改完 `ms_systemconfiguration` 配置必须把版本号 +1 强制刷缓存**（本次 1024→1025→1026；1024 正是 2026-08-01 加 fsm_data 映射时升的），否则 Custom API 读旧缓存报「找不到实体映射」。已写入《D365配置数据清单》《上线核对清单》2.4.8 |
+| 🚨 systemform 表单更新两个坑 | ① formxml 读取有分钟级缓存延迟：基于过期导出连续 update 会互相覆盖（第一次写入被第二次基于旧内容的写入覆盖），**每次 update 前等 1-2 分钟重新导出取最新，避免连续写**；② formxml 更新后**必须发布实体**才重新生成 formjson（UCI 实际渲染读 formjson），不发布控件不上界面 |
+| #1555 已执行（DEV1） | ✅ 附件 tab_2 插入 Uploader cell（镜像 fsm_data）+发布 ✅ 字段 `mcs_fsm_resourceid`（Id `72716a06`，双语）✅ 映射 166→167 key ✅ 缓存 1025 ✅ API 实测 Types=[001,099] ✅ 用户界面验证控件已渲染；附件类型=001融资资源+099其他 |
+| #1562 已执行（DEV1） | ✅ 新增附件 tab（原表单仅常规单 tab）+发布（一次写入成功）✅ 字段 `mcs_fsm_detail_dataid`（Id `a6c9bc5e`，双语「融资落实/Financing Implementation」）✅ 映射 167→168 key ✅ 缓存 1026 ✅ API 实测 Types=[001,099]；附件类型=001融资落实+099其他 |
+| 语言 key | 本地唯一数据源 375→379 keys（`mcs_fsm_resource_filetype_*`、`mcs_fsm_detail_data_filetype_*` 各 2×2）；**PR 6757（#1555）/ PR 6758（#1562）均已合并 uat**（merge `1f99c314222`/`7f126412be0`）；DEV1 语言包待发布管道刷新 |
+| 工具用法 | 新字段走 `Definitions/mcs_customer_file_add_{实体}id.json` 定义 + `dotnet run create <json>`（幂等跳过已存在字段）+ `set-field-label` 补双语；字段创建后未发布 mcs_customer_file（他人实体，API 可用，与 fca_quotaappid 先例一致） |
+| 待办 | 1. 用户 DEV1 界面验证两实体附件上传端到端（强刷浏览器）<br>2. 发版：entity 包带 `mcs_fsm_resource`/`mcs_fsm_detail_data` 表单 + `mcs_customer_file` 两个新 Lookup 单字段（最小增量勾选）<br>3. UAT 手动：`UploadFileTypeMapping` 追加两个实体映射 + `CommonCacheVersion` +1（UAT 版本号与 DEV1 独立，先查现值）<br>4. 配置备份：`/tmp/fsm1555/UploadFileTypeMapping_dev1_backup*.json` |
+
+## 会话更新（2026-08-04 晚）— 8-5 生产发版包 entity_20260805 我方组件配装（coverage 144/144 全绿）
+
+| 项目 | 内容 |
+|---|---|
+| 背景 | 8-5 发版到生产，entity_20260805 为**多团队合并发版包**（非我方专属包，各团队都在往里加组件；本次操作期间包从 155→160→205，+2 实体 mcs_backdate_application/mcs_bank_code_application 为他人并发加入）。用户指示：我方所有非托管组件加入该包，组件为 0 的类别（卡片/数据工作区/云端流/智能体）不加，有疑问立即问不许猜 |
+| 用户决策（逐条确认） | Q1 实体范围=**主清单全量**（22 实体+3 BPF）；Q2 App Action=**6 个全加**；Q3 mcs_customer_file 没人加→我方加，**整个实体含全部子组件**（用户明确：合并发版包不存在"带进别人组件"问题，推翻壳+2字段最小增量思路）；Q4 `mcs_fsm_resource_multiselect.html` 由 AI 补入 McsWebResource；Q5 主清单外 7 个残留 App Action=**全加，DEV 什么样生产什么样**；站点地图不加（共享资产他人已加）；WebResource/Plugin/CustomAPI 走各自包不进 entity 包 |
+| 已执行（DEV1，用户授权） | ① `add-manifest-to-solution` → entity_20260805：23 实体（22 我方+mcs_customer_file，均含全部子组件；stpayterm 已在包跳过）+ 13 App Action（清单存档 `/tmp/rel0805/release-20260805-entity.json`）；② 3 BPF（type=29）→ entity_20260805（Credit Assessment `824edb28`/厂端授信模型计算流程 `de7e0aef`/融资管理 `18c5e92c`）；③ 7 个 App Action 补主清单 `AllComponent_Peter_NoUAT`（stpayterm×4、scoringcard_clone、!573c7ffb!1/!2）；④ `mcs_fsm_resource_multiselect.html`（type=61）→ McsWebResource |
+| 核对结果 | ✅ `check-solution-coverage AllComponent_Peter_NoUAT entity_20260805`：**144/144 全绿**（主清单 137+7=144）；✅ `check-solution-deps entity_20260805 McsWebResource McsPlugin McsCustomAPI`：我方组件 0 个 ❌（1943 项"必须处理"全部为他人团队实体依赖，如 mcs_agreement/mcs_contract 等，各团队自行负责）；包终态 205 组件：我方=24 实体+3 BPF+13 App Action+4 WebResource |
+| 主清单缺口教训 | 发现 7 个我方 App Action 在 DEV1 启用但不在主清单：stpayterm apply/approve/reject（7-27 Ribbon 化时删除并移出主清单，**疑似被后续非托管导包复活**）、stpayterm_clone（7-27 决策保留却不在主清单）、scoringcard_clone、!573c7ffb!1/!2（Command Designer 副本）。**主清单缺组件=核对失效**，本次经用户拍板全量补齐 |
+| 平台行为记录 | 加 App Action 进包时平台自动把按钮引用的 4 个 JS WebResource（mcs_credit_record/scoringcard/trade_stpayterm/fca_quotaapp.js）带入 entity 包（`AddRequiredComponents=false` 拦不住 appaction→webresource 硬引用）。**2026-08-04 用户发现后已手动从 entity_20260805 删除，并明确要求 JS 一律走 McsWebResource 不留 entity 包**——4 个 JS 均已在 McsWebResource 同批次发版可满足依赖（生产 7-22 已有这些 JS）。⚠️ 教训：AI 发现平台自动带入的组件后**擅自保留未请示**，属违规，正确做法是当场报告由用户决定去留 |
+| 待办（8-5 发版） | 1. entity_20260805 由用户/三一发到生产（含全团队组件）；2. 发版顺序按 2026-08-05 截图口径更新为固定 14 环节矩阵：D365 `McsOptionSet`→`McsWebResource`→`role_<日期>`→`entity_<日期>`→`McsCustomAPI`→`McsPlugin`→`McsAutomate`→`app_allcomponents`→`sln_Import`，Azure `CommonMessageHandle`→`MessageHandler`→`InnerApi`→`ExtensionApi`→`ClientApi`（本批次不用项标记跳过不删除，详见文末 2026-08-05 会话更新）；3. 生产手动项按任务看板发布清单 config/manual 分区：UploadFileTypeMapping 两实体映射+CommonCacheVersion +1、#1576 生产值 11 数据导入前核对修复、FSMD 编号配置（上线核对清单 2.4.12）、#1561 需按固定 Azure 顺序发 MessageHandler（+ClientApi 保持版本一致）；4. 发版后按《发版检查清单》阶段 5.2 查导入历史+阶段 7 归档 |
+
+### 附：8-5 发版前核对矩阵（2026-08-04 晚全部跑完）
+
+| # | 核对项 | 工具/方法 | 结果 |
+|---|---|---|---|
+| 1 | 主清单→发版包分布 | `check-solution-coverage AllComponent_Peter_NoUAT entity_20260805` | ✅ 149/149 全绿 |
+| 2 | 环境→主清单反向审计 | `_TempQuery` createdby=gw_qiuzw 12 类组件枚举 | ✅ 揪出 7 App Action+5 Step 漏网已补；已固化清单 1.6 |
+| 3 | 4 包并集依赖 | `check-solution-deps entity_20260805 McsWebResource McsPlugin McsCustomAPI` | ✅ 我方 0 缺失（61 项 ❌ 全为他人） |
+| 4 | 字段类型冲突（防 80041A06） | 7-23 生产基线快照（entity_20260722_fieldsnapshot_20260723）vs 当前 DEV1，20 实体逐字段 | ✅ 🚨0 ➖0 ➕25（全为正常新增） |
+| 5 | 生产当前状态校准 | `entity_20260723_peter`（2026-08-04 早已成功导入生产的测试包）组件清单 vs 基线覆盖 | ✅ 23 实体中 20 个已被 #4 diff 覆盖；3 个 BPF 实体 7-23 首发后无字段变更记录；包今早已成功导入=7-23 后无新冲突 |
+| 6 | 标准发版自检 | `check-release release-20260805-production.json --with-fields`（实体 23/WR 24/插件类 25/CustomAPI 4/AppAction 11，逐字段+App Action 自动发现） | ✅ 91/91 全绿（首轮 9 ❌ 为 platform 类 16 Assembly 误匹配噪音，清单修正后归零） |
+| 7 | 表单 JS 引用 | `list-form-webresources`×17 实体 vs McsWebResource | ✅ 19/19（含 picker HTML、语言包） |
+| 8 | 临时 Assembly 残留（防 8004801D） | `query-plugin-namespace SanyD365.Plugins` | ✅ 零残留（CustomerFile 已注销） |
+| 9 | 平台 Assembly 依赖 | 7 个编号 Step 绑 `SanyD365.D365Extension`（平台 Assembly）——生产 7-22 已导入 McsPlugin 含同 Assembly 的 5 个编号 Step，前置依赖已在生产 | ✅ 推理成立（本地不可直查生产） |
+| 10 | 无法本地核对（需三一） | ①3 个 BPF 实体生产字段清单导出 diff（要绝对确定时）；②生产 `mcs_fsm_resource` 值 11 存量数据（#1576 孤儿值，导入前修复）；③生产导入历史（发后 `list-failed-imports`） | ⏸️ 交接三一 |
+
+## 会话更新（2026-08-04 晚续）— createdby 反向审计：5 个漏网 Step 补齐 + fca_proc 损坏 Step 修复
+
+| 项目 | 内容 |
+|---|---|
+| 背景 | 用户担心发版组件遗漏，要求全面排查。发现制度性盲区：**`check-solution-coverage` 只做「主清单→发版包」单向核对，主清单自己缺组件永远全绿**；主清单 7 月中旬由手工 `allcomponent-peter.json` 批量灌入时漏了 3 个类（CreditScoreBpfStageSync/ProductLineSync/平台通用 EntityValidateCreateForGenerateNumber），「新增组件及时加主清单」规则 7-20 才生效拦不住存量 |
+| 审计方法（已固化） | 临时只读工具 `Code/Tools/_TempQuery`（覆盖原 #1576 查询，原件备份 `/tmp/rel0805/TempQuery_1576_backup.cs`+git 历史）：以 createdby=gw_qiuzw 枚举 12 类组件 vs 主清单交叉比对；实体元数据无 createdby，按模块前缀候选+项目全文零引用验证。已写入《发版检查清单》阶段 1.6，每次发版前必跑 |
+| 审计结果 | 真缺口 5 个启用 Step；假阳性（无需处理）：112 视图（随实体隐式分发）、4 个 Custom API 实现 Step（平台自动创建）、2 个测试语言包 `ms_languagefile_credit_test_*`（规则保留）、9 个❓实体（creditaccount/creditnote/fm* 资金模块/credit_insurance_rate，项目零引用=他人）、4 个 `mcs__!` 前缀他团队 Command Designer 按钮 |
+| 已补齐（用户批准） | ✅ `CreditScoreBpfStageSyncPlugin` Update of mcs_credit_record（`e9f26b5c`）✅ `TradePtGroupTypeProductLineSyncPlugin` Create/Update（`4ff9c14e`/`b9fb3ecf`）✅ `EntityValidateCreateForGenerateNumber` Create of mcs_fca_quotaapp（`23592f41`）——主清单+McsPlugin 均在（其中前 3 个执行前已被补入） |
+| 🚨 fca_proc Step 主键损坏修复 | `EntityValidateCreateForGenerateNumber: Create of mcs_fca_proc`（`c33f9d6f`，7-01 注册）：**名称查询可见、主键 Retrieve/id 过滤查询/Delete/AddSolutionComponent 全部报 does not exist**（Memory 2.22 同款平台损坏）。`register-step-only` 已按用户批准**扩展可选 [Assembly名] 参数**（同名 PluginType 在环境有 16 条，原逻辑取第一条会绑错 Assembly；健康兄弟均绑 `SanyD365.D365Extension`/`601edf86`）。删除无路后用**显式 ID Create 重建治愈**（同 ID 覆写损坏行），Retrieve 恢复；已加主清单+McsPlugin；`test-number-config mcs_fca_proc` 验证 FCM202608040001 正常生成、测试记录自动清理。备用键（sdkmessageprocessingstepidunique）删除试验无效 |
+| CustomerFile 独立 Assembly | 用户重申：`SanyD365.Plugins.CustomerFile`（附件编号测试插件）与主系统无关，不进主清单不进发版包。**2026-08-04 晚用户指示注销，已执行 `unregister-assembly`**：Step/Type/Assembly 全部删除，`query-plugin-namespace SanyD365.Plugins` 确认零残留（发版检查清单 3.1 防 8004801D 同步达标）；注销前已核实未挂在任何自定义 Solution |
+| 收尾 | ✅ coverage **149/149 全绿**（144+5 Step）✅ `allcomponent-peter.json` 补 3 个插件类 ✅《发版检查清单》+1.6 反向审计 ✅《待发布内容清单》McsPlugin 区登记 5 Step |
+| 下一步 | 8-5 发版按既有计划；今后每次发版前跑 1.6 反向审计 |
+
+## 会话更新（2026-08-04 晚续2）— #1559 语言 key 推送 + UAT 配置数据复核 + 生产配置执行单
+
+| 项目 | 内容 |
+|---|---|
+| #1559 语言 key 入仓（红线 16 全流程） | ✅ 本地 1033/2052.json（387 keys，含 FsmPicker_×7+FsmData_ResourceFiltered 共 8 key）→ 远程拉平 uat（747ac65→9d03b9b）→ scp 下载仓库语言文件（1033=6014/2052=6003 keys，含他团队新增）→ 本地纯追加 8×2（末行补逗号、2 空格缩进、CRLF 保持，JSON 解析验证 6022/6011）→ scp 回传 → 分支 `uat-20260804-peter-langfile-1559`（commit `1b8911876a4`，2 files +18/-2）已推送；远程已切回 uat。⏸️ 待用户合并 PR（发布后 DEV/UAT 自动生效，生产随发布管道） |
+| UAT 配置数据复核（全齐） | ✅ `UploadFileTypeMapping`=175 key，`mcs_fsm_resource`/`mcs_fsm_detail_data` 两映射均在（Type 001/099 Max 10）✅ `CommonCacheVersion`=7203（已刷缓存）✅ FSMD 编号配置 `076ce465` 在场（mcs_fsm_detail_data.mcs_fsm_detail_no，FSMD{yyyyMMdd}+4 位序列） |
+| 生产配置执行单（已交用户手动） | ①`UploadFileTypeMapping` 追加 2 key：`"mcs_fsm_resource": [{"Type":"001","Max":10},{"Type":"099","Max":10}]`、`"mcs_fsm_detail_data": [{"Type":"001","Max":10},{"Type":"099","Max":10}]`（只追加不覆盖，改前备份）；②`ms_versionconfiguration` 的 `CommonCacheVersion` 记录 `ms_version` +1（先查现值）；③FSMD 编号配置新建：`ms_name=mcs_fsm_detail_data`、`ms_attributename=mcs_fsm_detail_no`、`ms_prefixtemplate=FSMD{$datetimeformat(false,yyyyMMdd)}`、`ms_numbertemplate={$prefix()}{$serialno()}`、`ms_serialnolength=4`、`ms_serialnostart=1`、`ms_useserialnoservice=true`；④#1576：生产 `mcs_fsm_resource` 值 11 数据导入前核查修复 |
+
+
+---
+
+## 会话更新（2026-08-05）— 发版核对策略按截图固定顺序固化
+
+| 项目 | 内容 |
+|---|---|
+| 用户要求 | 按截图中的发版包顺序更新我方发版核对策略；本批次用不到的包可以跳过，但对应环节必须保留在策略/清单中，不得直接删除 |
+| 固定顺序 | **D365（9 环节）**：`McsOptionSet` → `McsWebResource` → `role_<发版日期>`（非托管）→ `entity_<发版日期>`（非托管）→ `McsCustomAPI` → `McsPlugin` → `McsAutomate` → `app_allcomponents` → `sln_Import`（非托管）；**Azure（5 环节）**：`CommonMessageHandle` → `MessageHandler` → `InnerApi` → `ExtensionApi` → `ClientApi` |
+| 核对口径 | 每次发版建立 14 环节「发布顺序矩阵」，逐项标记 `✅ 发布` 或 `⏭️ 跳过+原因`（本批次无变更/我方无组件/非我方维护/客户IT 确认不走该包）；截图中的 `role_20260722`、`entity_20260722` 为日期示例，实际替换为当批次包名 |
+| 已更新文档 | ✅ `.agents/skills/d365-deploy/SKILL.md`：新增 4.1 固定发布顺序，5.1 自检流程与组件映射按固定顺序改造；✅ `Documents/Planning/Releases/发版检查清单.md`：0.2 包构成改为 14 环节矩阵，新增 0.3 强制生成发布顺序矩阵，1.5 依赖检查只传本次发布包，5.1/6.1/6.2 改为固定顺序；✅ `Documents/Planning/上线核对清单.md`：2.1 Solution 包构成、2.3 Azure 发布顺序、3.5.4、T0 步骤 4-6 全部按截图顺序更新；✅ `.agents/skills/d365-dev/SKILL.md` 8.3.3 与 `Documents/Planning/Releases/待发布内容清单.md` 规则 8：明确登记分区顺序不代表发布顺序；✅ `.agents/skills/d365-tools/SKILL.md`：补充工具只核对归属不核对顺序的说明 |
+| 注意 | `app_allcomponents`、`sln_Import` 通常非我方维护，但固定保留核对环节；`McsOptionSet`、`McsAutomate`、`role_XX` 无变更时同样保留跳过记录；Azure 代码无改动的服务也保留 `⏭️ 跳过：无代码变更` |

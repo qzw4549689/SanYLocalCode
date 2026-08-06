@@ -1,0 +1,25 @@
+{
+  "entityName": "mcs_customer_file",
+  "displayName": "客户资信附件表",
+  "displayNameZh": "客户资信附件表",
+  "displayNameEn": "Customer Credit File",
+  "primaryAttribute": "mcs_fileid",
+  "primaryAttributeDisplayName": "文件统一编号",
+  "primaryAttributeDisplayNameZh": "文件统一编号",
+  "primaryAttributeDisplayNameEn": "File ID",
+  "primaryAttributeLength": 100,
+  "solutionName": "",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_resourceid",
+      "displayName": "融资资源管理",
+      "displayNameZh": "融资资源管理",
+      "displayNameEn": "Financing Resource",
+      "description": "关联融资资源管理记录，用于在融资资源管理表单中管理附件",
+      "type": "lookup",
+      "targetEntity": "mcs_fsm_resource",
+      "targetEntityDisplayName": "融资资源管理"
+    }
+  ]
+}

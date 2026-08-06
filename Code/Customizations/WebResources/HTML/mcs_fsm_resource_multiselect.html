@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>融资资源机构多选</title>
+<style>
+    body { margin: 0; padding: 0; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; font-size: 13px; }
+    /* 行内布局：标签列（与表单 labelwidth=115 对齐）+ 控件 */
+    .rowline { display: flex; align-items: center; min-height: 32px; }
+    .fLabel { flex: none; width: 115px; color: #605e5c; font-size: 12px; font-weight: 400; padding-right: 8px; box-sizing: border-box; margin-left: 150px; }
+    /* 收起态：与相邻字段一致的单行输入框 */
+    .control { display: flex; align-items: center; min-height: 30px; border: 1px solid #d1d1d1; border-radius: 2px;
+               background: #fff; cursor: text; padding: 1px 6px; box-sizing: border-box; overflow: hidden; flex: 1; margin-right: 4px; }
+    .control:hover { border-color: #8a8886; }
+    .control.open { border-color: #0078d4; }
+    .control.disabled { cursor: default; pointer-events: none; background: #f5f5f5; border-color: transparent; }
+    .control.disabled .tags { color: #605e5c; }
+    #lockIcon { display: none; flex: none; margin-right: 4px; font-size: 11px; color: #605e5c; filter: grayscale(1); }
+    .tags { display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; overflow: hidden; white-space: nowrap; flex: 1; }
+    .tag { background: #edebe9; border-radius: 2px; padding: 2px 4px; display: inline-flex; align-items: center; gap: 4px; }
+    .tag .x { cursor: pointer; color: #605e5c; font-weight: bold; }
+    .tag .x:hover { color: #a80000; }
+    .placeholder { color: #757575; }
+    .arrow { color: #605e5c; margin-left: 4px; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="rowline">
+    <span class="fLabel" id="fLabel">融资资源机构</span>
+    <div class="control disabled" id="control">
+        <span id="lockIcon">🔒</span>
+        <div class="tags" id="tags"><span class="placeholder" id="ph"></span></div>
+        <span class="arrow">▾</span>
+    </div>
+</div>
+<script>
+(function () {
+    "use strict";
+
+    // ==================== 多语言（自包含 L()，英文用户加载 1033 语言包） ====================
+    var _langDict = null;
+    function L(key, defaultText) {
+        if (_langDict && _langDict[key]) return _langDict[key];
+        return defaultText;
+    }
+    function getXrm() {
+        try {
+            if (typeof Xrm !== "undefined" && Xrm.Utility) return Xrm;
+            if (window.parent && window.parent.Xrm) return window.parent.Xrm;
+        } catch (e) {}
+        return null;
+    }
+    function loadLanguagePack() {
+        return new Promise(function (resolve) {
+            var langId = 2052;
+            try {
+                var x = getXrm();
+                if (x && x.Utility && x.Utility.getGlobalContext) {
+                    langId = x.Utility.getGlobalContext().userSettings.languageId;
+                }
+            } catch (e) {}
+            if (langId !== 1033) { resolve(); return; }
+            var req = new XMLHttpRequest();
+            req.open("GET", "/WebResources/ms_languagefile_1033", true);
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) { try { _langDict = JSON.parse(req.responseText); } catch (e) {} }
+                    resolve();
+                }
+            };
+            req.send();
+        });
+    }
+
+    // ==================== 状态 ====================
+    var _editable = false;
+    var _allResources = [];
+    var _filtered = [];
+    var _selected = [];
+    var _page = null;
+    var _panel = null;          // 父文档中的下拉浮层
+    var _lockedStyle = null;    // 从兄弟锁定字段复制的计算样式（灰底/无边框，与系统锁定字段一致）
+
+    var elControl = document.getElementById("control");
+    var elTags = document.getElementById("tags");
+    var elPh = document.getElementById("ph");
+
+    function getAttr(name) {
+        try { return _page ? _page.getAttribute(name) : null; } catch (e) { return null; }
+    }
+    function getProduct() {
+        var a = getAttr("mcs_fsm_product");
+        return a ? a.getValue() : null;
+    }
+    function getSelectedIds() {
+        var a = getAttr("mcs_fsm_resource_ids");
+        var raw = a ? a.getValue() : null;
+        return raw ? String(raw).split(",").map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 0; }) : [];
+    }
+    function setFormValue(field, value) {
+        var a = getAttr(field);
+        if (!a) return;
+        var v = value || null;
+        if (a.getValue() !== v) a.setValue(v);
+    }
+
+    /** 选中变化时同步带入 6 个名称/编码字段（本地 _allResources 已有全部数据，零异步） */
+    function fillDerivedFields() {
+        var bN = [], bC = [], iN = [], iC = [], oN = [], oC = [];
+        _selected.forEach(function (id) {
+            var r = findResource(id);
+            if (!r) return;
+            var t = r.mcs_fsm_institution_type;
+            var names = t === 1 ? bN : t === 2 ? iN : oN;
+            var codes = t === 1 ? bC : t === 2 ? iC : oC;
+            if (r.mcs_fsm_institution_name) names.push(r.mcs_fsm_institution_name);
+            if (r.mcs_fsm_institution_code) codes.push(r.mcs_fsm_institution_code);
+        });
+        setFormValue("mcs_fsm_bank_names", bN.join(","));
+        setFormValue("mcs_fsm_bank_codes", bC.join(","));
+        setFormValue("mcs_fsm_insurance_names", iN.join(","));
+        setFormValue("mcs_fsm_insurance_codes", iC.join(","));
+        setFormValue("mcs_fsm_other_names", oN.join(","));
+        setFormValue("mcs_fsm_other_codes", oC.join(","));
+        // setValue 不触发表单 onChange，显式 fireOnChange 让表单 JS 刷新 6 字段显隐（不影响 resource_ids 的异步兜底）
+        ["mcs_fsm_bank_names", "mcs_fsm_bank_codes",
+            "mcs_fsm_insurance_names", "mcs_fsm_insurance_codes",
+            "mcs_fsm_other_names", "mcs_fsm_other_codes"].forEach(function (f) {
+            var a = getAttr(f);
+            if (a && a.fireOnChange) a.fireOnChange();
+        });
+    }
+
+    function writeSelectedIds() {
+        var a = getAttr("mcs_fsm_resource_ids");
+        if (a) a.setValue(_selected.length > 0 ? _selected.join(",") : null);
+        fillDerivedFields();
+    }
+
+    /** 在父文档按标签文本+字段名找兄弟字段的标签/控件元素（用于对齐与复制锁定样式） */
+    function findSiblingField(labelText, fieldName) {
+        try {
+            var parentDoc = window.parent.document;
+            var all = parentDoc.querySelectorAll("*");
+            var labelEl = null;
+            for (var i = 0; i < all.length; i++) {
+                var el = all[i];
+                if (el.children.length === 0 && el.offsetParent && (el.textContent || "").trim() === labelText
+                    && el.closest('[data-id*="' + fieldName + '"]')) {
+                    labelEl = el;
+                    break;
+                }
+            }
+            // 兑底：放宽容器校验
+            if (!labelEl) {
+                for (var j = 0; j < all.length; j++) {
+                    var el2 = all[j];
+                    if (el2.children.length === 0 && el2.offsetParent && (el2.textContent || "").trim() === labelText) {
+                        labelEl = el2;
+                        break;
+                    }
+                }
+            }
+            if (!labelEl) return null;
+            var fieldBox = labelEl.closest('[data-id*="' + fieldName + '"]');
+            var ctrlEl = null;
+            if (fieldBox) ctrlEl = fieldBox.querySelector("input, [role='textbox'], [role='combobox'], [contenteditable='true']");
+            if (!ctrlEl && fieldBox) ctrlEl = fieldBox;
+            return { labelEl: labelEl, ctrlEl: ctrlEl };
+        } catch (e) { return null; }
+    }
+
+    /** 锁定态样式对齐：复制兄弟锁定字段的灰底/无边框样式 + 显示锁图标（2026-08-06 用户反馈样式不一致） */
+    function applyLockedStyle() {
+        var lockEl = document.getElementById("lockIcon");
+        if (lockEl) lockEl.style.display = _editable ? "none" : "";
+        if (_editable) {
+            elControl.style.background = "";
+            elControl.style.border = "";
+            elControl.style.borderRadius = "";
+            return;
+        }
+        if (!_lockedStyle) return; // 未找到兄弟字段时保留 CSS 兑底样式
+        elControl.style.background = _lockedStyle.background;
+        elControl.style.border = _lockedStyle.border;
+        elControl.style.borderRadius = _lockedStyle.borderRadius;
+    }
+
+    /** 与右列兄弟字段「银行机构编码」动态对齐：标签左缘/控件盒左缘/右缘三针点实测校准（找不到则保留 CSS 经验值） */
+    function alignWithSiblings() {
+        try {
+            var fr = window.frameElement;
+            if (!fr) return;
+            var frLeft = fr.getBoundingClientRect().left;
+            // 1) 找兄弟字段（对齐基准：银行机构编码）
+            var sibling = findSiblingField("银行机构编码", "mcs_fsm_bank_codes");
+            if (!sibling) return;
+            var labelEl = sibling.labelEl;
+            var labelRect = labelEl.getBoundingClientRect();
+            var fLabel = document.querySelector(".fLabel");
+            // 0) 字体样式直接复制系统标签的计算样式（字体/字号/字重/颜色/行高）
+            var cs = window.parent.getComputedStyle(labelEl);
+            fLabel.style.fontFamily = cs.fontFamily;
+            fLabel.style.fontSize = cs.fontSize;
+            fLabel.style.fontWeight = cs.fontWeight;
+            fLabel.style.fontStyle = cs.fontStyle;
+            fLabel.style.color = cs.color;
+            fLabel.style.lineHeight = cs.lineHeight;
+            fLabel.style.letterSpacing = cs.letterSpacing;
+            var delta = Math.round(labelRect.left - frLeft);
+            if (delta >= 0 && delta < 800) fLabel.style.marginLeft = delta + "px";
+            // 2) 复用统一查找取控件盒
+            var ctrlEl = sibling.ctrlEl;
+            if (ctrlEl) {
+                var cRect = ctrlEl.getBoundingClientRect();
+                // 控件盒：锁图标在 input 左侧约 24px，右缘留约 6px 内边距
+                var boxLeft = cRect.left - 24;
+                var boxRight = cRect.right + 6;
+                var labelW = Math.round(boxLeft - labelRect.left);
+                if (labelW > 60 && labelW < 400) fLabel.style.width = labelW + "px";
+                var w = Math.round(boxRight - boxLeft);
+                if (w > 150) elControl.style.maxWidth = w + "px";
+            }
+            // 3) 复制锁定字段样式（基准字段可能被 #1559 显隐规则隐藏，按优先级依次尝试常显锁定字段）
+            var styleSources = [
+                ["银行机构编码", "mcs_fsm_bank_codes"],
+                ["贴息", "mcs_fsm_interest_discount"],
+                ["融资费用", "mcs_fsm_fee"],
+                ["金融产品", "mcs_fsm_product"]
+            ];
+            for (var s = 0; s < styleSources.length; s++) {
+                var src = findSiblingField(styleSources[s][0], styleSources[s][1]);
+                if (src && src.ctrlEl) {
+                    var scs = window.parent.getComputedStyle(src.ctrlEl);
+                    _lockedStyle = { background: scs.background, border: scs.border, borderRadius: scs.borderRadius };
+                    break;
+                }
+            }
+            applyLockedStyle();
+        } catch (e) { console.warn("[FsmPicker] align 异常:", e); }
+    }
+
+    /** 可编辑状态：直接读表单属性计算（mcs_fsm_status/mcs_bppstatus 隐藏在场/mcs_bppstatuscode） */
+    function isEditable() {
+        var st = getAttr("mcs_fsm_status");
+        if (!st || st.getValue() !== 3) return false;
+        var bpp = getAttr("mcs_fsm_bppstatus");
+        if (bpp && bpp.getValue() === 2) return false; // 审批中
+        var codeAttr = getAttr("mcs_bppstatuscode");
+        var code = codeAttr ? ("" + (codeAttr.getValue() || "")).toLowerCase() : "";
+        if (code === "submitted" || code === "inreview" || code === "pending" || code === "10" || code === "20") return false;
+        return true;
+    }
+    function applyEditable() {
+        _editable = isEditable();
+        elControl.classList.toggle("disabled", !_editable);
+        // 2026-08-06 用户反馈：锁定（非状态3/审批中）时隐藏下拉箭头、显示锁图标并复制兄弟锁定字段样式，与相邻锁定字段一致
+        document.querySelector(".arrow").style.display = _editable ? "" : "none";
+        applyLockedStyle();
+        if (!_editable) closePanel();
+        renderTags();
+    }
+
+    // ==================== 数据 ====================
+    function loadResources() {
+        var x = getXrm();
+        if (!x || !x.WebApi) return Promise.resolve();
+        return x.WebApi.retrieveMultipleRecords("mcs_fsm_resource",
+            "?$select=mcs_fsm_resourceid,mcs_fsm_institution_name,mcs_fsm_institution_code,mcs_fsm_institution_type,mcs_fsm_institution_products,statecode" +
+            "&$filter=statecode eq 0&$top=5000")
+            .then(function (result) {
+                _allResources = result.entities;
+                applyProductFilter();
+            })
+            .catch(function (e) { console.error("[FsmPicker] 查询融资资源失败:", e); });
+    }
+
+    /** 按所选融资产品过滤候选机构（机构产品包含所选产品） */
+    function applyProductFilter() {
+        var product = getProduct();
+        if (product === null || product === undefined) {
+            _filtered = [];
+        } else {
+            _filtered = _allResources.filter(function (r) {
+                var prods = r.mcs_fsm_institution_products
+                    ? String(r.mcs_fsm_institution_products).split(",").map(function (x) { return parseInt(x, 10); })
+                    : [];
+                return prods.indexOf(product) >= 0;
+            });
+        }
+        renderTags();
+        if (_panel) renderPanelList(_panel, "");
+    }
+
+    function findResource(id) {
+        for (var i = 0; i < _allResources.length; i++) {
+            if ((_allResources[i].mcs_fsm_resourceid || "").toLowerCase() === id.toLowerCase()) return _allResources[i];
+        }
+        return null;
+    }
+
+    // ==================== 收起态标签 ====================
+    function renderTags() {
+        _selected = getSelectedIds();
+        elTags.querySelectorAll(".tag").forEach(function (t) { t.remove(); });
+        if (_selected.length === 0) {
+            // 锁定时空值显示空白（与相邻锁定字段一致），仅可编辑时显示「请选择…」
+            elPh.style.display = _editable ? "" : "none";
+            elPh.textContent = L("FsmPicker_Placeholder", "请选择…");
+            return;
+        }
+        elPh.style.display = "none";
+        _selected.forEach(function (id) {
+            var r = findResource(id);
+            var tag = document.createElement("span");
+            tag.className = "tag";
+            tag.appendChild(document.createTextNode(r ? (r.mcs_fsm_institution_name || id) : id));
+            if (_editable) {
+                var x = document.createElement("span");
+                x.className = "x";
+                x.textContent = "✕";
+                x.onclick = function (ev) {
+                    ev.stopPropagation();
+                    _selected = _selected.filter(function (g) { return g !== id; });
+                    writeSelectedIds();
+                    renderTags();
+                    if (_panel) renderPanelList(_panel, getPanelKeyword());
+                };
+                tag.appendChild(x);
+            }
+            elTags.appendChild(tag);
+        });
+    }
+
+    // ==================== 下拉浮层（渲染在父文档，浮层覆盖不撑开布局） ====================
+    function openPanel() {
+        if (!_editable || _panel) return;
+        var parentDoc;
+        try { parentDoc = window.parent.document; } catch (e) { return; }
+        var fr = window.frameElement;
+        if (!fr) { console.warn("[FsmPicker] frameElement 为 null，无法定位浮层"); return; }
+
+        var rect = fr.getBoundingClientRect();
+        var ctrlRect = elControl.getBoundingClientRect(); // 控件在 iframe 内的相对位置
+        var panelLeft = Math.round(rect.left + ctrlRect.left);
+        var panelTop = Math.round(rect.top + ctrlRect.bottom + 1);
+        var panelWidth = Math.max(Math.round(ctrlRect.width), 260); // 与控件同宽
+        var panel = parentDoc.createElement("div");
+        panel.setAttribute("style",
+            "position:fixed;left:" + panelLeft + "px;top:" + panelTop + "px;" +
+            "width:" + panelWidth + "px;max-height:320px;display:flex;flex-direction:column;" +
+            "background:#fff;border:1px solid #d1d1d1;border-radius:2px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" +
+            "z-index:999999;font-family:'Segoe UI','Microsoft YaHei',sans-serif;font-size:13px;");
+        panel.innerHTML =
+            '<input type="text" class="fsmp-search" style="border:none;border-bottom:1px solid #edebe9;padding:7px 9px;outline:none;font-size:13px;" />' +
+            '<div class="fsmp-list" style="overflow-y:auto;flex:1;"></div>';
+        parentDoc.body.appendChild(panel);
+        _panel = panel;
+
+        var search = panel.querySelector(".fsmp-search");
+        search.placeholder = L("FsmPicker_SearchPlaceholder", "搜索机构名称/编码");
+        search.oninput = function () { renderPanelList(panel, search.value); };
+
+        renderPanelList(panel, "");
+        elControl.classList.add("open");
+
+        // 面板外点击/滚动/缩放 → 收起
+        setTimeout(function () {
+            parentDoc.addEventListener("mousedown", onOutside, true);
+            document.addEventListener("mousedown", onOwnDoc, true);
+            window.parent.addEventListener("resize", closePanel);
+            window.parent.addEventListener("scroll", closePanel, true);
+        }, 0);
+        search.focus();
+    }
+
+    function onOwnDoc(ev) {
+        // 点击自身输入框不收起；输入框 click 已 stopPropagation 控制开合
+    }
+    function onOutside(ev) {
+        if (_panel && !_panel.contains(ev.target)) closePanel();
+    }
+    function getPanelKeyword() {
+        if (!_panel) return "";
+        var s = _panel.querySelector(".fsmp-search");
+        return s ? s.value : "";
+    }
+
+    function closePanel() {
+        if (!_panel) return;
+        var parentDoc = window.parent.document;
+        parentDoc.removeEventListener("mousedown", onOutside, true);
+        document.removeEventListener("mousedown", onOwnDoc, true);
+        window.parent.removeEventListener("resize", closePanel);
+        window.parent.removeEventListener("scroll", closePanel, true);
+        _panel.remove();
+        _panel = null;
+        elControl.classList.remove("open");
+    }
+
+    function renderPanelList(panel, keyword) {
+        var list = panel.querySelector(".fsmp-list");
+        list.innerHTML = "";
+        var product = getProduct();
+        if (product === null || product === undefined) {
+            list.innerHTML = '<div style="color:#757575;padding:10px;text-align:center;"></div>';
+            list.firstChild.textContent = L("FsmPicker_SelectProductFirst", "请先在融资六要素选择融资产品");
+            return;
+        }
+        var kw = (keyword || "").toLowerCase();
+        var shown = _filtered.filter(function (r) {
+            if (!kw) return true;
+            var name = (r.mcs_fsm_institution_name || "").toLowerCase();
+            var code = (r.mcs_fsm_institution_code || "").toLowerCase();
+            return name.indexOf(kw) >= 0 || code.indexOf(kw) >= 0;
+        });
+        if (shown.length === 0) {
+            var h = window.parent.document.createElement("div");
+            h.setAttribute("style", "color:#757575;padding:10px;text-align:center;");
+            h.textContent = L("FsmPicker_NoMatch", "无匹配机构（机构需启用且金融产品包含所选融资产品）");
+            list.appendChild(h);
+            return;
+        }
+        shown.forEach(function (r) {
+            var id = r.mcs_fsm_resourceid;
+            var row = window.parent.document.createElement("label");
+            row.setAttribute("style", "display:flex;align-items:center;gap:6px;padding:6px 9px;cursor:pointer;");
+            row.onmouseover = function () { row.style.background = "#f3f2f1"; };
+            row.onmouseout = function () { row.style.background = ""; };
+            var cb = window.parent.document.createElement("input");
+            cb.type = "checkbox";
+            cb.checked = _selected.indexOf(id) >= 0;
+            cb.onchange = function () {
+                if (cb.checked) {
+                    if (_selected.indexOf(id) < 0) _selected.push(id);
+                } else {
+                    _selected = _selected.filter(function (g) { return g !== id; });
+                }
+                writeSelectedIds();
+                renderTags();
+            };
+            row.appendChild(cb);
+            row.appendChild(window.parent.document.createTextNode(r.mcs_fsm_institution_name || id));
+            var code = window.parent.document.createElement("span");
+            code.setAttribute("style", "color:#757575;margin-left:auto;font-size:12px;");
+            code.textContent = r.mcs_fsm_institution_code || "";
+            row.appendChild(code);
+            list.appendChild(row);
+        });
+    }
+
+    // ==================== 初始化 ====================
+    function init() {
+        var x = getXrm();
+        _page = x && x.Page ? x.Page : null;
+        if (!_page) {
+            elPh.textContent = "Xrm.Page unavailable";
+            return;
+        }
+        var productAttr = getAttr("mcs_fsm_product");
+        if (productAttr) productAttr.addOnChange(function () { closePanel(); applyProductFilter(); });
+        var idsAttr = getAttr("mcs_fsm_resource_ids");
+        if (idsAttr) idsAttr.addOnChange(function () { renderTags(); if (_panel) renderPanelList(_panel, getPanelKeyword()); });
+        // 可编辑状态：初始化计算一次 + 订阅三个属性变更 + 表单阶段控制自定义事件（无轮询/无推送）
+        applyEditable();
+        ["mcs_fsm_status", "mcs_fsm_bppstatus", "mcs_bppstatuscode"].forEach(function (f) {
+            var a = getAttr(f);
+            if (a) a.addOnChange(applyEditable);
+        });
+        try { window.parent.addEventListener("FsmStageChanged", applyEditable); } catch (e) {}
+        elControl.addEventListener("click", function () {
+            if (!_editable) return;
+            if (_panel) closePanel(); else openPanel();
+        });
+        document.getElementById("fLabel").textContent = L("FsmPicker_Label", "融资资源机构");
+        elPh.textContent = L("FsmPicker_Placeholder", "请选择…");
+        alignWithSiblings();
+        setTimeout(alignWithSiblings, 1000);
+        setTimeout(alignWithSiblings, 3000);
+        renderTags();
+        loadResources();
+    }
+
+    loadLanguagePack().then(init);
+})();
+</script>
+</body>
+</html>

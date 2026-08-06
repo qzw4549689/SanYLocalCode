@@ -133,8 +133,8 @@
 | BPP 集成 | 客户信用评估 BPP 审批处理 | `SanyD365Project/Service/SanyD365.Main/Entities/BPP/BPPHandlerServices/BPPHandlerServiceForCreditRecord.cs` | `mcs_credit_record`、`account`、`mcs_bppapply` | 实现 `IBPPHandlerService`：封装 BPP 表单变量、发起前清理旧流程、发起后更新审批链接/下一审批人、统一回调处理、错误信息回写 |
 | BPP 集成 | 融资管理 BPP 提交（立项/方案审批） | `Customizations/Plugins/FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs` | `mcs_fsm_data` | 本地独立 Assembly；`mcs_bppstatus` 非2→2 时校验状态与可提交标记后调 `mcs_bppstartapi` |
 | BPP 集成 | 融资管理 BPP 回调处理 | `Customizations/Plugins/FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs` | `mcs_fsm_data` | 本地独立 Assembly；监听 `mcs_bppstatuscode`，按 `mcs_approve_type` 流转融资状态（2→3 / 3→4），驳回恢复可提交标记，撤回/废弃清空 BPP 标识 |
-| BPP 集成 | 融资管理 BPP 审批处理 | `SanyD365Project/Service/SanyD365.Main/Entities/BPP/BPPHandlerServices/BPPHandlerServiceForFsmData.cs` | `mcs_fsm_data`、`mcs_bppapply` | 实现 `IBPPHandlerService`；按 `mcs_approve_type` 选 TemplateCode（FsmDataInitiation/FsmDataProject），表单变量含融资编号/记录链接/客户名称/客户编码/融资经理 |
-| BPP 集成 | 融资管理表单提交审批逻辑 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data` | `FsmDataForm.submitInitiationApproval` / `submitProjectApproval`：前端校验后置 `mcs_approve_type` + `mcs_bppstatus=2` 触发后端 Plugin |
+| BPP 集成 | 融资管理 BPP 审批处理 | `SanyD365Project/Service/SanyD365.Main/Entities/BPP/BPPHandlerServices/BPPHandlerServiceForFsmData.cs` | `mcs_fsm_data`、`mcs_bppapply` | 实现 `IBPPHandlerService`；按 `mcs_approve_type` 选 TemplateCode（FsmDataInitiation/FsmDataProject），表单变量含融资编号/记录链接/客户名称/客户编码/融资经理；#1561 起按审批类型取提交备注（立项取 `mcs_fsm_initiation_remark`/方案取 `mcs_fsm_project_remark`）写入平台级 `ApproveOpn`/`RetryApproveOpn`（审批记录-起草人节点意见，FundClaim 先例；不走表单变量，融资两个 BPP 模板无备注字段 Code） |
+| BPP 集成 | 融资管理表单提交审批逻辑 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data` | `FsmDataForm.submitInitiationApproval` / `submitProjectApproval`：前端校验后置 `mcs_approve_type` + `mcs_bppstatus=2` 触发后端 Plugin；#1561 起 payload 按审批类型带对应提交审批备注字段（`mcs_fsm_initiation_remark`/`mcs_fsm_project_remark`，仅状态 2/3 可填，随 updateRecord 同事务落库） |
 
 ---
 
@@ -143,10 +143,13 @@
 | 模块 | 功能点 | 代码路径 | 涉及实体 | 备注 |
 |---|---|---|---|---|
 | 融资管理 | 融资资源管理表单逻辑 | `Customizations/WebResources/JS/mcs_fsm_resource.js` | `mcs_fsm_resource`、`mcs_bank` | 机构类型=银行时选择银行自动带出机构代码（`mcs_bank.mcs_bankno`）/机构名称（`mcs_bank.mcs_name`）并锁定只读；从银行切换到其他类型时隐藏 Bank 并同时清空 Bank/机构代码/机构名称三个字段；金融产品多选按类型筛选：银行 1-11 / 保险 101-104 / 其他仅 Others(11)（FluentUI 多选控件 addOption 需用对象签名 {text,value}） |
-| 融资管理 | 融资需求级联带出/弹窗过滤/清空联动/保存校验 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_leadmain`、`mcs_quoter`、`mcs_quote_main`、`mcs_contract`、`mcs_customermasterdata` | `FsmDataForm.onLoad`：线索（新字段 `mcs_leadmain_id`→mcs_leadmain）/报价单（新字段 `mcs_quoter_id`→mcs_quoter）/合同 onChange 全量重算派生字段（大区/国家/事业部/客户名称/客户编码，优先级 合同>报价单>线索，客户编码取 sapnumber）；合同/报价单向上代入线索；报价单/合同弹窗按线索过滤（addPreSearch）；来源清空时派生字段联动清空；onSave 校验三来源至少一个 + 重复性校验（三者任一相同即重复，异步查询后放行）；提交立项/方案审批前置分阶段必填校验（融资六要素/解决方案全字段+合同号），融资经理自动取登录人。旧字段 mcs_lead_id/mcs_quote_id 保留不删（2026-07-24 红线） |
+| 融资管理 | 融资需求级联带出/弹窗过滤/清空联动/保存校验 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_leadmain`、`mcs_quoter`、`mcs_quote_main`、`mcs_contract`、`mcs_customermasterdata` | `FsmDataForm.onLoad`：线索（新字段 `mcs_leadmain_id`→mcs_leadmain）/报价单（新字段 `mcs_quoter_id`→mcs_quoter）/合同 onChange 全量重算派生字段（大区/国家/事业部/客户名称/客户编码，优先级 合同>报价单>线索，客户编码取 sapnumber）；合同/报价单向上代入线索；报价单/合同弹窗按线索过滤（addPreSearch）；来源清空时派生字段联动清空；onSave 校验三来源至少一个 + 重复性校验（三者任一相同即重复，异步查询后放行）；提交立项/方案审批前置分阶段必填校验（融资六要素+合同号；方案阶段四项贴息/费用/回购/其它条件 2026-08-04 #1559 起非必填），融资经理自动取登录人。旧字段 mcs_lead_id/mcs_quote_id 保留不删（2026-07-24 红线） |
+| 融资管理 | 融资六要素/解决方案页面字段（禅道 #1559） | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_fsm_resource` | 六要素「融资产品」单选选项集 `mcs_fsm_product`（仅银行类 1-11），六要素/方案双单元格同一字段（方案侧标签=金融产品、只读）；「融资资源机构」多选 = 自制 HTML WebResource `mcs_fsm_resource_multiselect.html` 嵌入式 picker（平台 PCF `mcs_common.control.lookup.multiplechoice` 无过滤参数不满足下拉级过滤，bundle 实锤查询无 $filter）：仅启用且机构产品含所选融资产品的机构显示，搜索+勾选写回 `mcs_fsm_resource_ids`（Memo 存 GUID 逗号分隔，表单隐藏单元格保留属性），`onResourceIdsChanged` 校验并按机构类型（1银行/2保险/9其它）分组把名称/编码逗号分隔带入 6 个只读字段（`mcs_fsm_bank/insurance/other_names/codes`，`SOLUTION_AUTO_FIELDS` 始终只读）；融资产品变更清空重选；#1507 的 syncResourceName/filterProductsByResource/ALL_PRODUCT_OPTIONS 已废弃移除，旧字段 product_desc/resource_id/resource_name/resource_products 表单隐藏保留不删 |
 
 | 融资管理 | 融资资源状态同步（激活回写是否启用过，禅道 #1433） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceStateSyncPlugin.cs` | `mcs_fsm_resource` | Update Filter=statecode PostOp Sync；列表【激活】（statecode→0）时幂等回写 `mcs_fsm_rl_status=true`（单向标记，停用不清）；主 Assembly 类名 `SanyD365.D365Extension.Sales.Plugins.FinancingManagement.Resource.FsmResourceStateSyncPlugin` |
 | 融资管理 | 融资资源删除守卫（禅道 #1433 关联 PRD 删除规则） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceDeleteGuardPlugin.cs` | `mcs_fsm_resource` | Delete PreOp Sync + PreImage（mcs_fsm_rl_status+createdby）；已启用过拦截、非创建人拦截（SysAdmin 放行）；⚠️ Delete 管道 `context.UserId` 恒为 SYSTEM，创建人比对必须用 `InitiatingUserId`；业务角色不写死靠安全角色删除权限配置 |
+| 融资管理 | 融资资源机构代码重复校验（禅道 #1512） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceDuplicationCheckPlugin.cs` | `mcs_fsm_resource` | Create/Update PreOp Sync（Update Filter=mcs_fsm_institution_code）；机构代码全局唯一、含停用记录（用户确认口径）；系统身份查重防权限绕过；拦截提示含已有记录编号并引导「启用」原记录 |
+| 融资管理 | 融资落实订单号唯一校验（禅道 #1511） | `Customizations/Plugins/FinancingManagement/Detail/FsmDetailDataDuplicationCheckPlugin.cs` | `mcs_fsm_detail_data` | Create/Update PreOp Sync（Update Filter=mcs_order_id,mcs_fsm_data_id + PreImage 补齐）；同一融资管理记录（mcs_fsm_data_id）下订单号（mcs_order_id）唯一，不同融资管理记录间不拦截（用户确认口径，PRD 融资方案落实-新增-保存唯一性校验）；系统身份查重；拦截提示显示订单名称（Create Target Lookup 无 Name 需显式 Retrieve） |
 
 ---
 
@@ -315,6 +318,7 @@
 | Solution 浏览 | Solution 组件浏览器 | `Tools/SolutionViewer/server.js` | — | Node.js Web 应用，用于浏览 D365 Solution 组件 |
 | Solution 浏览 | 项目配置 | `Tools/SolutionViewer/package.json` | — | Node.js 依赖配置 |
 | 禅道同步 | 禅道同步工具 | `Tools/ZentaoSync/` | — | 禅道数据同步工具（详见该目录 README） |
+| 任务看板 | 任务进度看板（待处理/开发中/待发布/已发布） | `Tools/KanbanBoard/` | — | 纯 Python 标准库 + SQLite，部署于 tx-windows:8100（计划任务 KanbanBoard 常驻，开机自启）；AI 通过 REST API 录入/更新任务 |
 
 ---
 

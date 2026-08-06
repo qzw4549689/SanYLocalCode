@@ -112,6 +112,9 @@ dotnet run --no-build -- check-solution-coverage <源Solution唯一名> [实体�
 #   Custom API 及其实现 Assembly/Step→McsCustomAPI、其余 Assembly+Step→McsPlugin、
 #   实体/站点地图/App Action→实体包（每次发版新建需传第二个参数，如 entity_20260722）、
 #   角色→role_XX（每版本一包，跳过）
+#
+# 注：以上命令只核对组件归属/覆盖，不核对发布顺序。发布顺序统一按
+# /skill:d365-deploy 4.1 的 14 环节固定顺序矩阵执行；本批次用不到的包标记跳过，不删除环节。
 
 # ========== 主清单 Solution 维护（写操作，需用户明确授权） ==========
 dotnet run --no-build -- add-manifest-to-solution <清单.json> <Solution唯一名>

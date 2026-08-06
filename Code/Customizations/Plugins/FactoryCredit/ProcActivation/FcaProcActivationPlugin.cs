@@ -111,9 +111,9 @@ namespace SanyD365.Plugins.FactoryCredit
                 throw new InvalidPluginExecutionException("客户编码不能为空，无法生效启用。");
             }
 
-            if (initGrant == null || initGrant.Value <= 0)
+            if (initGrant == null || initGrant.Value < 0)
             {
-                throw new InvalidPluginExecutionException("调整模型额度必须大于 0，无法生效启用。");
+                throw new InvalidPluginExecutionException("调整模型额度不能小于 0，无法生效启用。");
             }
 
             tracer.Trace($"处理生效启用: procId={procId}, accountId={accountRef.Id}, initGrant={initGrant.Value}, customerCode={customerCode}");

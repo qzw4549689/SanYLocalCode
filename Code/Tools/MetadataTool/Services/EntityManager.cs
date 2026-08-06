@@ -577,6 +577,31 @@ public class EntityManager
 		}
 	}
 
+	/// <summary>
+	/// 删除选项集的单个选项值（禅道 #1576：金融产品代码表删除旧值 11 Others）。
+	/// 注意：仅删除选项定义，存量数据中已存该值的记录会残留孤儿值，调用前必须先核查/修复数据。
+	/// </summary>
+	public void DeleteOption(string entityName, string fieldName, int value)
+	{
+		Console.WriteLine($"删除选项: {entityName}.{fieldName} 值={value}");
+		try
+		{
+			DeleteOptionValueRequest request = new DeleteOptionValueRequest
+			{
+				EntityLogicalName = entityName,
+				AttributeLogicalName = fieldName,
+				Value = value
+			};
+			_service.Execute(request);
+			Console.WriteLine("  ✓ 已删除");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"  ⚠ 删除失败: {ex.Message}");
+			throw;
+		}
+	}
+
 	public void DeleteField(string entityName, string fieldName)
 	{
 		Console.WriteLine("删除字段: " + entityName + "." + fieldName);

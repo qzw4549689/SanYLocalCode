@@ -1,0 +1,25 @@
+{
+  "entityName": "mcs_customer_file",
+  "displayName": "客户资信附件表",
+  "displayNameZh": "客户资信附件表",
+  "displayNameEn": "Customer Credit File",
+  "primaryAttribute": "mcs_fileid",
+  "primaryAttributeDisplayName": "文件统一编号",
+  "primaryAttributeDisplayNameZh": "文件统一编号",
+  "primaryAttributeDisplayNameEn": "File ID",
+  "primaryAttributeLength": 100,
+  "solutionName": "",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_detail_dataid",
+      "displayName": "融资落实",
+      "displayNameZh": "融资落实",
+      "displayNameEn": "Financing Implementation",
+      "description": "关联融资落实记录，用于在融资落实表单中管理附件",
+      "type": "lookup",
+      "targetEntity": "mcs_fsm_detail_data",
+      "targetEntityDisplayName": "融资落实"
+    }
+  ]
+}

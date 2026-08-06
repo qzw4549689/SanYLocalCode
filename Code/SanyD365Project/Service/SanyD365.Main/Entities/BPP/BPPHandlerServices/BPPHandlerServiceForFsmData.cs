@@ -80,6 +80,8 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 <attribute name=""mcs_customer_name""/>
                 <attribute name=""mcs_customer_id""/>
                 <attribute name=""mcs_fsm_manager""/>
+                <attribute name=""mcs_fsm_initiation_remark""/>
+                <attribute name=""mcs_fsm_project_remark""/>
                 <attribute name=""createdon""/>
                 <filter type=""and"">
                   <condition attribute=""mcs_fsm_dataid"" operator=""eq"" value=""{EntityId}""/>
@@ -146,6 +148,12 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
 
                 LoggerMainHelper.LogInformation($"BPPHandlerServiceForFsmData.GetBppFormData 组装表单数据", $"FsmNo={fsmNo}, CustomerName={customerName}, CustomerId={record.GetStringValue("mcs_customer_id")}, Manager={managerName}");
 
+                // Bug #1561：提交审批备注（评审意见），按审批类型分流：
+                // 立项审批取 mcs_fsm_initiation_remark，融资方案审批取 mcs_fsm_project_remark
+                var submitRemark = approveType == APPROVE_TYPE_INITIATION
+                    ? record.GetStringValue("mcs_fsm_initiation_remark")
+                    : record.GetStringValue("mcs_fsm_project_remark");
+
                 // 表单变量（与 BPP 模板字段 Code 对应）
                 // mcs_approver 传空字符串，审批人员由 BPP 模板配置
                 var formVars = new Dictionary<string, object?>
@@ -168,7 +176,11 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     TitleName = titleName,
                     TitleNameCn = titleNameCn,
                     FormVarChaInfo = JsonSerializerHelper.Serializer(formVars),
-                    VariableInfo = new Dictionary<string, object>()
+                    VariableInfo = new Dictionary<string, object>(),
+                    // Bug #1561：评审意见放平台级「发起/重提时审批意见」字段（审批记录-起草人节点下展示，
+                    // 参照 FundClaim 先例），不走表单变量（融资两个模板无备注字段 Code，BPP 模板侧零改动）
+                    ApproveOpn = submitRemark,
+                    RetryApproveOpn = submitRemark
                 };
                 LoggerMainHelper.LogInformation($"BPPHandlerServiceForFsmData.GetBppFormData 完成", $"TemplateCode={result.TemplateCode}, TitleName={result.TitleName}");
                 return result;

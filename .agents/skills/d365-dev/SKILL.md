@@ -432,10 +432,52 @@ dotnet run --no-build -- add-manifest-to-solution <清单.json> AllComponent_Pet
 | 通知时机 | 完成汇报时（不是等发版前才提） |
 | 通知内容 | 组件类型 + 名称 + 建议归属 Solution（entity_XX / McsWebResource / McsPlugin / McsCustomAPI / 主清单） |
 | 组件范围 | 实体/字段/表单/视图/关系/BPF/WebResource/Plugin Assembly/Step/Custom API/App Action/工作流/文档模板等一切新组件 |
-| 加包责任人 | **由用户加入对应的包**；AI 仅提醒和（经授权后）代为操作 |
+| 加包责任人 | **Step 类组件由 AI 直接加入对应发版包**（2026-08-03 用户指示，长期有效：Step→McsPlugin，登记看板发布清单时同步完成）；其余组件（实体/App Action/WebResource 等）仍由用户加入对应的包，AI 仅提醒和（经授权后）代为操作 |
 | 失误定级 | 漏报 = 发版漏组件 = 严重失误 |
 
 > 本要求与 8.3.1（主清单强制维护）配合：8.3.1 管「加什么」，本节管「AI 必须主动说」。
+
+### 8.3.3 🚨 开发完成必须登记任务看板「发布清单」（2026-08-03 用户明确，2026-08-05 起改为看板登记，强制执行）
+
+> **每次开发/修 Bug 在 DEV 验证通过后、完成汇报前，必须把本次待发布内容逐项登记到任务看板发布清单（`http://122.51.232.70:8100/`，📦 发布清单 Tab），不等发版前补。**
+> 历史教训：AI 多次漏登（如 2026-08-03 #1507/#1508 改 `mcs_fsm_data.js` 未登记，被用户发现并批评）。
+> 原《待发布内容清单.md》已于 2026-08-05 按用户指示废弃删除（历史见 git），**看板是唯一登记处**。
+
+**登记节点（开发流程固定一步，不得跳过）：**
+
+```
+本地开发 → 本地验证 → DEV 部署/验证通过 → ①加主清单(8.3.1) → ②通知用户(8.3.2)
+         → ③登记看板发布清单(本节) → 完成汇报
+```
+
+**登记 API（逐项登记，幂等性由 AI 自查 GET 后判断）：**
+
+```bash
+# 登记一项（开发完成即执行）
+curl -X POST http://122.51.232.70:8100/api/release-items/item \
+  -H 'Content-Type: application/json' \
+  -d '{"section":"webresource","component":"mcs_fsm_data.js",
+       "summary":"#1560 状态3放行合同编号可编辑","ref":"禅道 #1560",
+       "package":"McsWebResource","in_package":true}'
+
+# 更新单项（如补入包状态）：PATCH /api/release-items/item/<rowid>
+# 删除误登记：               DELETE /api/release-items/item/<rowid>
+# 查询当前批次（含 rowid）：  GET /api/release-items
+# 发版后按包归档：           POST /api/release-items/release {"package":"McsWebResource"}
+```
+
+| 要求 | 说明 |
+|---|---|
+| 登记时机 | DEV 验证通过后立即登记，是完成汇报的**前置条件**（汇报中须复述登记情况） |
+| 登记范围 | **一切待发布内容都要登记，不止新组件**：①新增组件（实体/字段/Step/Custom API/App Action 等）②既有组件的代码/内容变更（JS 改动、Plugin 代码改动、语言包 key 变更）③元数据变更（必填级别/字段范围/标签）④配置数据（各环境手动项）⑤手动步骤（Command Designer/角色/BPP 模板） |
+| section 取值 | `entity`（实体/字段/表单/视图/关系/BPF/Ribbon/App Action）/ `webresource`（McsWebResource）/ `plugin`（McsPlugin）/ `customapi`（McsCustomAPI）/ `config`（配置数据，不随 Solution）/ `manual`（手动步骤） |
+| 登记口径 | 每项：component（组件名）+ summary（变更内容/原因）+ ref（禅道号）+ package + in_package；**同一文件/组件被多个 Bug 改动时合并为一项**（PATCH 更新 summary/ref），ref 并列所有禅道号 |
+| entity 类 package | 用户已指定发版包名（如 `entity_20260727_peter`）则填指定名；未指定留空，看板自动归入「entity_当天日期_peter」默认新包 |
+| Step 类组件 | 登记时同步由 AI 直接 `add-solution-component` 加入 McsPlugin（8.3.2 用户指示），in_package 标 true |
+| 不需要登记 | 本地临时独立 Assembly、纯测试组件、他人组件（红线，同样不得加主清单） |
+| 发版闭环 | 用户发布某包后告知 AI → AI 调 `POST /api/release-items/release` 按包归档 + 任务看板对应任务置「已发布」 |
+
+> 看板发布清单是「本次发什么」的视角，主清单是「全部资产」的视角，两者都要维护；发版核对统一按 `/skill:d365-deploy` 4.1 的 14 环节固定顺序矩阵执行，配合《发版检查清单.md》逐项核对。
 
 ### 8.4 阶段四：远程服务器集成（tx-windows）
 

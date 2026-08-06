@@ -50,6 +50,9 @@ var FsmDataForm = (function () {
         IMPLEMENTATION: 4   // 融资落实
     };
 
+    // 融资落实页签（tab_5）子网格控件名（目标实体 mcs_fsm_detail_data）
+    var IMPLEMENTATION_SUBGRID = "Subgrid_new_1";
+
     // mcs_fsm_data.mcs_bppstatus 选项集值
     var BPP_STATUS = {
         APPLY: 1,       // 申请
@@ -57,6 +60,9 @@ var FsmDataForm = (function () {
         APPROVED: 3,    // 通过
         REJECTED: 4     // 驳回
     };
+
+    // Bug #1559（2026-08-04）：金融产品改为与六要素「融资产品」同一字段 mcs_fsm_product（单选选项集，仅银行类 1-11），
+    // 原 #1507 多选字段 mcs_fsm_resource_products 表单隐藏弃用，ALL_PRODUCT_OPTIONS / filterProductsByResource 同步移除
 
     // mcs_fsm_data.mcs_approve_type 选项集值
     var APPROVE_TYPE = {
@@ -106,14 +112,26 @@ var FsmDataForm = (function () {
         }
 
         // 更新审批类型 + 审批状态为 2（审批中），触发后端 Plugin 调用 mcs_bppstartapi
-        Xrm.WebApi.updateRecord("mcs_fsm_data", recordId, {
+        // Bug #1561：备注随本次 Update 同一事务落库（表单上未保存的修改也一并提交），
+        // 保证 BPP 侧 GetBppFormData 读取到最新值；立项/方案分别提交各自的备注字段
+        var remarkField = (approveType === APPROVE_TYPE.INITIATION) ? "mcs_fsm_initiation_remark" : "mcs_fsm_project_remark";
+        var remarkAttr = formContext.getAttribute(remarkField);
+        var payload = {
             "mcs_approve_type": approveType,
             "mcs_bppstatus": BPP_STATUS.IN_REVIEW
-        }).then(
+        };
+        payload[remarkField] = remarkAttr ? remarkAttr.getValue() : null;
+        Xrm.WebApi.updateRecord("mcs_fsm_data", recordId, payload).then(
             function () {
                 Xrm.Navigation.openAlertDialog({ text: typeName + t("FsmData_SubmittedSuffix", "已提交。") }).then(function () {
-                    formContext.data.refresh(false);
-                    refreshFieldCache(formContext);
+                    // Bug #1508：提交成功后立即更新本地缓存并锁定表单字段（审批中全锁），
+                    // 再刷新表单与服务端缓存后重放一次阶段控制，确保以服务端真实状态为准
+                    _fieldCache["mcs_bppstatus"] = BPP_STATUS.IN_REVIEW;
+                    _fieldCache["mcs_approve_type"] = approveType;
+                    applyStageControl(formContext);
+                    formContext.data.refresh(false).then(function () {
+                        refreshFieldCache(formContext).then(function () { applyStageControl(formContext); });
+                    });
                 });
             },
             function (error) {
@@ -264,6 +282,161 @@ var FsmDataForm = (function () {
                 function (e) { console.warn("[FSM] 汇率读取失败:", e); }
             );
         }
+    }
+
+    // =====================================================================
+    // Bug #1559（2026-08-04）：融资资源机构多选（mcs_fsm_resource_ids 存 GUID 逗号分隔）
+    // 候选校验：启用（statecode=0）且机构产品包含所选融资产品；
+    // 选中变化按机构类型（1银行/2保险/9其它）分组，名称/编码逗号分隔带入 6 个只读字段
+    // =====================================================================
+    var _resourceFilterRunning = false; // onChange 内 setValue 会再触发 onChange，防重入
+
+    /**
+     * 值不同才写入（避免 onLoad 回填把表单标脏）
+     */
+    function setIfChanged(formContext, fieldName, value) {
+        var attr = formContext.getAttribute(fieldName);
+        if (!attr) return;
+        var current = attr.getValue();
+        var normalized = (value === null || value === undefined || value === "") ? null : value;
+        if (current !== normalized) attr.setValue(normalized);
+    }
+
+    /**
+     * 按机构类型分组，把名称/编码逗号分隔带入 6 个字段
+     */
+    function fillInstitutionFields(formContext, resources) {
+        var bankNames = [], bankCodes = [], insNames = [], insCodes = [], othNames = [], othCodes = [];
+        resources.forEach(function (r) {
+            var type = r["mcs_fsm_institution_type"];
+            var name = r["mcs_fsm_institution_name"];
+            var code = r["mcs_fsm_institution_code"];
+            var names = type === 1 ? bankNames : type === 2 ? insNames : othNames;
+            var codes = type === 1 ? bankCodes : type === 2 ? insCodes : othCodes;
+            if (name) names.push(name);
+            if (code) codes.push(code);
+        });
+        setIfChanged(formContext, "mcs_fsm_bank_names", bankNames.join(","));
+        setIfChanged(formContext, "mcs_fsm_bank_codes", bankCodes.join(","));
+        setIfChanged(formContext, "mcs_fsm_insurance_names", insNames.join(","));
+        setIfChanged(formContext, "mcs_fsm_insurance_codes", insCodes.join(","));
+        setIfChanged(formContext, "mcs_fsm_other_names", othNames.join(","));
+        setIfChanged(formContext, "mcs_fsm_other_codes", othCodes.join(","));
+        updateInstitutionVisibility(formContext);
+    }
+
+    /** 机构名称/编码 6 字段分组（名称+编码 同组同显隐） */
+    var INSTITUTION_FIELD_GROUPS = [
+        ["mcs_fsm_bank_names", "mcs_fsm_bank_codes"],
+        ["mcs_fsm_insurance_names", "mcs_fsm_insurance_codes"],
+        ["mcs_fsm_other_names", "mcs_fsm_other_codes"]
+    ];
+
+    /**
+     * 机构名称/编码 6 字段显隐（Bug #1559 补充 2026-08-04）：
+     * 组内任一字段有值则整组显示，全空则整组隐藏。
+     * 触发时机：onLoad 初始化 / 表单异步带入完成后 / picker 写入后 fireOnChange。
+     */
+    function updateInstitutionVisibility(formContext) {
+        INSTITUTION_FIELD_GROUPS.forEach(function (pair) {
+            var hasValue = pair.some(function (f) {
+                var a = formContext.getAttribute(f);
+                var v = a ? a.getValue() : null;
+                return v !== null && v !== undefined && ("" + v).trim() !== "";
+            });
+            pair.forEach(function (f) {
+                var ctrl = formContext.getControl(f);
+                if (ctrl && ctrl.setVisible) ctrl.setVisible(hasValue);
+            });
+        });
+    }
+
+    /**
+     * 融资资源机构多选变更：校验启用状态 + 融资产品匹配，不匹配项移除并提示；有效项带入 6 个名称/编码字段
+     */
+    function onResourceIdsChanged(formContext) {
+        if (_resourceFilterRunning) return;
+        var attr = formContext.getAttribute("mcs_fsm_resource_ids");
+        if (!attr) return;
+        var raw = attr.getValue();
+        var guids = raw ? String(raw).split(",").map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 0; }) : [];
+        if (guids.length === 0) {
+            fillInstitutionFields(formContext, []);
+            return;
+        }
+        var productAttr = formContext.getAttribute("mcs_fsm_product");
+        var product = productAttr ? productAttr.getValue() : null; // 单选选项集 int 或 null
+
+        var promises = guids.map(function (guid) {
+            return Xrm.WebApi.retrieveRecord("mcs_fsm_resource", guid,
+                "?$select=mcs_fsm_institution_type,mcs_fsm_institution_name,mcs_fsm_institution_code,mcs_fsm_institution_products,statecode")
+                .catch(function (e) { console.warn("[FSM] 查询融资资源失败:", guid, e); return null; });
+        });
+        Promise.all(promises).then(function (results) {
+            // 防异步乱序覆盖：发起查询后字段值已被更新（如用户连续勾选），放弃本次写入，由最新一次变更负责
+            var currentRaw = attr.getValue() || "";
+            if (currentRaw !== (raw || "")) {
+                console.log("[FSM] 机构多选带入放弃过期写入（值已变更）");
+                return;
+            }
+            var valid = [], removed = [];
+            results.forEach(function (r, i) {
+                if (!r) { removed.push(guids[i]); return; }
+                var ok = r["statecode"] === 0;
+                // 融资产品已选时，机构产品必须包含所选产品；产品为空（不应出现，立项审批已校验）保守放行
+                if (ok && product !== null && product !== undefined) {
+                    var prods = r["mcs_fsm_institution_products"]
+                        ? String(r["mcs_fsm_institution_products"]).split(",").map(function (x) { return parseInt(x, 10); })
+                        : [];
+                    ok = prods.indexOf(product) >= 0;
+                }
+                if (ok) valid.push(r); else removed.push(r["mcs_fsm_institution_name"] || guids[i]);
+            });
+            if (removed.length > 0) {
+                _resourceFilterRunning = true;
+                attr.setValue(valid.length > 0 ? valid.map(function (r) { return r["mcs_fsm_resourceid"]; }).join(",") : null);
+                _resourceFilterRunning = false;
+                Xrm.Navigation.openAlertDialog({
+                    text: t("FsmData_ResourceFiltered", "以下机构已停用或不包含所选融资产品，已移除：") + removed.join("、")
+                });
+            }
+            fillInstitutionFields(formContext, valid);
+        });
+    }
+
+    /**
+     * 融资产品变更时清空机构多选及 6 个带入字段（防脏数据）
+     */
+    function clearResourceSelection(formContext) {
+        var attr = formContext.getAttribute("mcs_fsm_resource_ids");
+        if (attr && attr.getValue()) attr.setValue(null); // 触发 onResourceIdsChanged 清空 6 字段
+        fillInstitutionFields(formContext, []);
+    }
+
+    /**
+     * 授信金额默认值：取融资金额（有值时放入，支持手工修改）（Bug #1507，PRD）
+     * 仅融资解决方案阶段且授信金额为空时默认，不覆盖用户已录入/已修改的值
+     */
+    function defaultCreditAmount(formContext) {
+        if (getCurrentStage(formContext) !== FSM_STATUS.SOLUTION) return;
+        var creditAttr = formContext.getAttribute("mcs_fsm_credit_amount");
+        if (!creditAttr || creditAttr.getValue() !== null) return;
+        var amountAttr = formContext.getAttribute("mcs_fsm_amount");
+        var amount = amountAttr ? amountAttr.getValue() : null;
+        if (amount === null || amount === undefined) return;
+        creditAttr.setValue(amount); // 触发 onChange 自动折算 USD
+    }
+
+    /**
+     * Bug #1538：融资经理默认值——进入融资立项阶段（状态 2）且字段为空时，自动带出当前登录人
+     * （不强制保存，保持可编辑，随用户保存落库；用户手改后不覆盖）
+     */
+    function defaultManager(formContext) {
+        if (getCurrentStage(formContext) !== FSM_STATUS.INITIATION) return;
+        var managerAttr = formContext.getAttribute("mcs_fsm_manager");
+        if (!managerAttr || managerAttr.getValue()) return;
+        var userSettings = Xrm.Utility.getGlobalContext().userSettings;
+        managerAttr.setValue([{ id: userSettings.userId, entityType: "systemuser", name: userSettings.userName }]);
     }
 
     /**
@@ -530,6 +703,11 @@ var FsmDataForm = (function () {
         });
     }
 
+    // 未上表单字段的提示标签回退（无控件可取 label 时避免弹窗显示架构名，2026-08-05 用户反馈）
+    var OFF_FORM_FIELD_LABELS = {
+        "mcs_fsm_credit_amount_usd": { key: "FsmData_Field_CreditAmountUsd", zh: "融资金额USD" }
+    };
+
     /**
      * 通用必填校验（控件 label 取当前 UI 语言）
      * @returns 缺失字段 label 数组
@@ -542,23 +720,25 @@ var FsmDataForm = (function () {
             var empty = (v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0));
             if (empty) {
                 var ctrl = formContext.getControl(f);
-                missing.push(ctrl ? ctrl.getLabel() : f);
+                missing.push(ctrl ? ctrl.getLabel() : (OFF_FORM_FIELD_LABELS[f] ? t(OFF_FORM_FIELD_LABELS[f].key, OFF_FORM_FIELD_LABELS[f].zh) : f));
             }
         });
         return missing;
     }
 
     // 融资六要素 + 融资需求管理阶段必填（提交立项审批时校验）
+    // Bug #1559：融资产品文本 mcs_fsm_product_desc → 单选选项集 mcs_fsm_product
+    // Bug #1578：设备台数/产品名称改完全非必填，移出本清单（立项/方案审批均不校验）
     var REQUIRED_SIX_ELEMENTS = [
         "mcs_fsm_amount", "mcs_fsm_currency", "mcs_fsm_period", "mcs_fsm_payment_ratio",
-        "mcs_fsm_interest_rate", "mcs_fsm_product_desc", "mcs_fsm_device_count", "mcs_fsm_device_name"
+        "mcs_fsm_interest_rate", "mcs_fsm_product"
     ];
     // 融资解决方案阶段追加必填（提交融资方案审批时校验，另含合同号必填）
-    // 注：融资机构编号/名称按 PRD 截图为选填，不在本清单内
+    // Bug #1559：金融产品=六要素融资产品同字段 mcs_fsm_product；融资资源机构多选 mcs_fsm_resource_ids 必填；
+    //           贴息/融资费用/回购条件/其它条件 4 项改非必填
     var REQUIRED_SOLUTION_EXTRA = [
-        "mcs_fsm_resource_product", "mcs_fsm_credit_amount",
-        "mcs_fsm_credit_amount_usd", "mcs_fsm_interest_discount", "mcs_fsm_fee",
-        "mcs_fsm_repurchase_conditions", "mcs_fsm_other_conditions"
+        "mcs_fsm_product", "mcs_fsm_resource_ids",
+        "mcs_fsm_credit_amount", "mcs_fsm_credit_amount_usd"
     ];
 
     // =====================================================================
@@ -569,18 +749,56 @@ var FsmDataForm = (function () {
     var INITIATION_TAB = {
         stage: FSM_STATUS.INITIATION,
         required: ["mcs_fsm_manager", "mcs_fsm_is_initiated", "mcs_can_initiated"],
-        optional: []
+        // Bug #1561：立项提交审批备注（评审意见），仅状态 2 可填，提交立项审批时随记录推给 BPP
+        optional: ["mcs_fsm_initiation_remark"]
     };
     // 融资解决方案 tab（阶段 3 融资解决方案时可写 + 必填/选填）
+    // Bug #1559：金融产品=六要素融资产品同字段（SOLUTION_TAB.required 提供必填星标，可写锁定由 DEMAND_AREA_FIELDS 兜底）、
+    //           机构多选必填；4 项改非必填；旧单选机构字段表单隐藏移出清单
     var SOLUTION_TAB = {
         stage: FSM_STATUS.SOLUTION,
-        required: ["mcs_fsm_resource_product", "mcs_fsm_credit_amount", "mcs_fsm_credit_amount_usd",
-                   "mcs_fsm_interest_discount", "mcs_fsm_fee", "mcs_fsm_repurchase_conditions",
-                   "mcs_fsm_other_conditions", "mcs_can_project", "mcs_is_valid"],
-        optional: ["mcs_fsm_resource_id", "mcs_fsm_resource_name"]
+        required: ["mcs_fsm_product", "mcs_fsm_resource_ids", "mcs_fsm_credit_amount", "mcs_fsm_credit_amount_usd",
+                   "mcs_can_project", "mcs_is_valid"],
+        // Bug（2026-08-04 新建误放开）：贴息/融资费用/回购条件/其它条件 4 项 #1559 改非必填时漏进本清单，
+        // 导致不受阶段控制恒可编辑；移入 optional 恢复「仅状态 3 可写，其余阶段禁用」
+        optional: ["mcs_fsm_interest_discount", "mcs_fsm_fee", "mcs_fsm_repurchase_conditions", "mcs_fsm_other_conditions",
+                   // Bug #1561：方案提交审批备注（评审意见），仅状态 3 可填，提交融资方案审批时随记录推给 BPP
+                   "mcs_fsm_project_remark"]
     };
-    // 需求融资管理 tab 中元数据已必填的字段：只控禁用，不调 setRequiredLevel（避免与元数据必填冲突）
+    // Bug #1559：方案页 6 个机构名称/编码字段由多选组件自动带入，任何阶段始终只读
+    var SOLUTION_AUTO_FIELDS = [
+        "mcs_fsm_bank_names", "mcs_fsm_bank_codes",
+        "mcs_fsm_insurance_names", "mcs_fsm_insurance_codes",
+        "mcs_fsm_other_names", "mcs_fsm_other_codes"
+    ];
+    // 设备台数/产品名称（六要素）：只控禁用，不调 setRequiredLevel
+    // Bug #1578：两字段已改元数据非必填；锁定口径——状态 1/2/3 均可编辑，提交方案审批后锁死
+    //            （审批中随 lockAll 锁定，方案审批通过转状态 4 全锁，取代 #1540「状态 1 才可写」口径）
     var INITIATION_TAB_METADATA_REQUIRED = ["mcs_fsm_device_count", "mcs_fsm_device_name"];
+
+    // 融资需求区 + 融资六要素字段（Bug #1509 建清单、#1540 改口径）：仅阶段 1（融资需求）可写，
+    // BPF 点「下一步」进入融资立项（状态=2）起锁定只读，仅报价编码/合同编码除外；
+    // 状态 4 / 审批中随 lockAll 全锁。
+    // 注：设备台数/产品名称已由 INITIATION_TAB_METADATA_REQUIRED 控制（同口径），不在此重复；
+    //     本组字段均为元数据必填，只做禁用控制，不调 setRequiredLevel。
+    var DEMAND_AREA_FIELDS = [
+        // 来源三字段
+        "mcs_leadmain_id", "mcs_quoter_id", "mcs_contract_id",
+        // 级联带出（融资需求信息）
+        "mcs_big_area", "mcs_country_id", "mcs_country_area",
+        "mcs_division_id", "mcs_sub_company", "mcs_customer_name", "mcs_customer_id",
+        // 融资六要素（除设备台数/产品名称）
+        // Bug #1559：融资产品文本 mcs_fsm_product_desc → 单选选项集 mcs_fsm_product（六要素/方案双单元格， attr.controls 全量锁定）
+        "mcs_fsm_amount", "mcs_fsm_currency", "mcs_fsm_period",
+        "mcs_fsm_payment_ratio", "mcs_fsm_interest_rate", "mcs_fsm_product"
+    ];
+
+    // Bug #1540：进入融资立项（状态=2）后融资需求+六要素全锁，仅报价编码/合同编码仍可写
+    var DEMAND_INITIATION_EDITABLE = ["mcs_quoter_id", "mcs_contract_id"];
+
+    // Bug #1560：融资解决方案（状态=3）提交融资方案审批时校验合同编号必填，
+    // 故状态 3 放行合同编号可修改（仅合同编号，报价编码仍锁定）
+    var DEMAND_SOLUTION_EDITABLE = ["mcs_contract_id"];
 
     /**
      * 设置字段可写状态（遍历该字段所有控件）
@@ -790,10 +1008,14 @@ var FsmDataForm = (function () {
     /**
      * 按当前阶段控制 需求融资管理 / 融资解决方案 两个 tab 的可写与必填
      * 规则：
-     *  - 状态 1（含新建）：两个 tab 均禁用、不必填
-     *  - 状态 2：需求融资管理 tab 可写 + 必填；方案 tab 禁用
-     *  - 状态 3：方案 tab 可写 + 必填/选填；需求融资管理 tab 锁定只读
-     *  - 状态 4 或审批中（mcs_bppstatus=2）：全部锁定只读
+     *  - 状态 1（含新建）：立项/方案两个 tab 均禁用、不必填；融资需求区 + 融资六要素可写
+     *  - 状态 2：需求融资管理 tab（立项信息字段）可写 + 必填；方案 tab 禁用；
+     *           融资需求区 + 融资六要素锁定只读，仅报价编码/合同编码除外（Bug #1540，来源用例-545）
+     *  - 状态 3：方案 tab 可写 + 必填/选填；需求融资管理 tab 锁定只读；
+     *           融资需求区 + 融资六要素锁定只读（Bug #1509，用例 TC-FSM-DATA-013）
+     *  - 状态 4 或审批中（mcs_bppstatus=2）：全部锁定只读（用例 TC-FSM-DATA-014）
+     *  - 融资需求区 + 融资六要素：仅状态 1 可写（#1540 后），状态 ≥2 锁定（报价/合同编码状态 2 例外）
+     *  - 设备台数/产品名称例外（Bug #1578）：状态 1/2/3 均可编辑，提交方案审批后锁死（审批中/状态 4 随 lockAll）
      */
     function applyStageControl(formContext) {
         var status = getCurrentStage(formContext);
@@ -814,11 +1036,52 @@ var FsmDataForm = (function () {
             });
         });
 
-        // 元数据必填字段随需求融资管理 tab 只做禁用控制
-        var initiationEditable = !lockAll && (status === INITIATION_TAB.stage);
+        // 设备台数/产品名称（六要素，只做禁用控制；Bug #1578 已改非必填）：
+        // Bug #1578 口径——状态 1/2/3 均可编辑，提交融资方案审批后锁死
+        // （审批中 lockAll 自动锁；方案审批通过转状态 4 全锁；取代 #1540「进入融资立项即锁」口径）
+        var demandMetaEditable = !lockAll && (status === FSM_STATUS.DEMAND
+            || status === FSM_STATUS.INITIATION || status === FSM_STATUS.SOLUTION);
         INITIATION_TAB_METADATA_REQUIRED.forEach(function (f) {
-            setFieldDisabled(formContext, f, !initiationEditable);
+            setFieldDisabled(formContext, f, !demandMetaEditable);
         });
+
+        // 融资需求区 + 融资六要素：仅融资需求阶段（状态 1）可写；进入融资立项（状态 2）起锁定，
+        // 仅报价编码/合同编码除外（Bug #1540，取代 #1509「状态 1/2 可写」口径）；
+        // 融资解决方案（状态 3）再放行合同编号（Bug #1560：提交融资方案审批校验合同编号必填，须可修改）
+        DEMAND_AREA_FIELDS.forEach(function (f) {
+            var editable = !lockAll && (status === FSM_STATUS.DEMAND
+                || (status === FSM_STATUS.INITIATION && DEMAND_INITIATION_EDITABLE.indexOf(f) >= 0)
+                || (status === FSM_STATUS.SOLUTION && DEMAND_SOLUTION_EDITABLE.indexOf(f) >= 0));
+            setFieldDisabled(formContext, f, !editable);
+        });
+
+        // Bug #1559：方案页 6 个机构名称/编码带入字段任何阶段始终只读
+        SOLUTION_AUTO_FIELDS.forEach(function (f) {
+            setFieldDisabled(formContext, f, true);
+        });
+
+        // Bug（2026-08-04 新建误放开）：金融产品双单元格同属性（六要素 tab_2 + 方案 tab_4），
+        // 属性级 setDisabled 两格互相覆盖（SOLUTION_TAB 禁用后被 DEMAND_AREA_FIELDS 六要素规则误放开），
+        // 按控件所在 tab 分别控制：六要素格=仅状态 1 可写；方案格=仅状态 3 可写
+        var productStageAttr = formContext.getAttribute("mcs_fsm_product");
+        if (productStageAttr) {
+            var productDemandEditable = !lockAll && status === FSM_STATUS.DEMAND;
+            var productSolutionEditable = !lockAll && status === FSM_STATUS.SOLUTION;
+            productStageAttr.controls.forEach(function (ctrl) {
+                try {
+                    var tab = ctrl.getParent() && ctrl.getParent().getParent() ? ctrl.getParent().getParent().getName() : "";
+                    ctrl.setDisabled(tab === "tab_4" ? !productSolutionEditable : !productDemandEditable);
+                } catch (e) { /* 单元格定位异常时保持属性级结果 */ }
+            });
+        }
+
+        // 融资落实子网格：仅融资落实阶段（状态 4）显示，其余阶段隐藏（页签保留，禁止提前新增）
+        // 2026-08-06 用户需求：未到融资落实阶段不允许新增融资落实记录
+        var implGrid = formContext.getControl(IMPLEMENTATION_SUBGRID);
+        if (implGrid && implGrid.setVisible) implGrid.setVisible(status === FSM_STATUS.IMPLEMENTATION);
+
+        // Bug #1559：阶段控制每次执行后通知 picker 重算可编辑状态（picker 自读表单属性判定，标准自定义事件）
+        try { window.dispatchEvent(new CustomEvent("FsmStageChanged")); } catch (e) { console.warn("[FSM] FsmStageChanged 事件分发失败:", e); }
     }
 
     function alertMissingFields(missing) {
@@ -869,6 +1132,9 @@ var FsmDataForm = (function () {
             // 存量记录打开表单时补齐空的 融资金额USD（自动折算兜底）
             var existingUsd = _fieldCache["mcs_fsm_credit_amount_usd"];
             if (existingUsd === null || existingUsd === undefined) updateCreditAmountUsd(formContext);
+            // Bug #1508：缓存就绪后重放阶段控制，确保审批中（bppstatus=2）记录打开表单即锁定
+            // （onLoad 同步执行的 applyStageControl 早于异步缓存填充，bppInReview 必为 false）
+            applyStageControl(formContext);
         });
         formContext.data.entity.addOnPostSave(function () { refreshFieldCache(formContext); });
 
@@ -878,12 +1144,44 @@ var FsmDataForm = (function () {
             if (attr) attr.addOnChange(function () { updateCreditAmountUsd(formContext); });
         });
 
+        // Bug #1559：融资资源机构多选 → 校验（启用+产品匹配）并带入机构名称/编码；融资产品变更清空重选
+        var resourceIdsAttr = formContext.getAttribute("mcs_fsm_resource_ids");
+        if (resourceIdsAttr) resourceIdsAttr.addOnChange(function () { onResourceIdsChanged(formContext); });
+        var productAttr1559 = formContext.getAttribute("mcs_fsm_product");
+        if (productAttr1559) productAttr1559.addOnChange(function () { clearResourceSelection(formContext); });
+        // Bug #1559 补充：机构名称/编码 6 字段按值显隐（空组隐藏）；picker 写入后经 fireOnChange 触发
+        updateInstitutionVisibility(formContext);
+        INSTITUTION_FIELD_GROUPS.forEach(function (pair) {
+            pair.forEach(function (f) {
+                var a = formContext.getAttribute(f);
+                if (a) a.addOnChange(function () { updateInstitutionVisibility(formContext); });
+            });
+        });
+        // 存量回填：机构多选有值但名称字段全空时重新带入（覆盖 Excel/API 导入直写 resource_ids 的场景）
+        if (resourceIdsAttr && resourceIdsAttr.getValue()) {
+            var bankNamesAttr = formContext.getAttribute("mcs_fsm_bank_names");
+            var insNamesAttr = formContext.getAttribute("mcs_fsm_insurance_names");
+            var othNamesAttr = formContext.getAttribute("mcs_fsm_other_names");
+            if ((!bankNamesAttr || !bankNamesAttr.getValue()) && (!insNamesAttr || !insNamesAttr.getValue())
+                && (!othNamesAttr || !othNamesAttr.getValue())) {
+                onResourceIdsChanged(formContext);
+            }
+        }
+
+        // Bug #1507：授信金额默认取融资金额（阶段变化进入融资解决方案时也兜底默认一次）
+        defaultCreditAmount(formContext);
+
+        // Bug #1538：已在融资立项阶段的存量记录打开表单时带出融资经理
+        defaultManager(formContext);
+
         // 按当前阶段控制 tab 字段可写 + 必填；阶段/审批状态变化时重新应用
         applyStageControl(formContext);
         var statusAttrForStage = formContext.getAttribute("mcs_fsm_status");
         if (statusAttrForStage) statusAttrForStage.addOnChange(function () {
             applyStageControl(formContext);
             syncBpfFromStatus(formContext);
+            defaultCreditAmount(formContext); // Bug #1507：进入融资解决方案阶段时兜底默认授信金额
+            defaultManager(formContext); // Bug #1538：进入融资立项阶段时带出融资经理
         });
         var bppAttrForStage = formContext.getAttribute("mcs_bppstatus");
         if (bppAttrForStage) bppAttrForStage.addOnChange(function () { applyStageControl(formContext); });
@@ -896,6 +1194,7 @@ var FsmDataForm = (function () {
                     syncStatusFromBpf(formContext);
                     applyStageControl(formContext);
                     lockBpfFields(formContext);
+                    defaultManager(formContext); // Bug #1538：BPF 点「下一步」进入融资立项时带出融资经理
                 });
             } catch (ex) {
                 console.error("[FSM] 注册 BPF 阶段事件失败:", ex);
@@ -954,7 +1253,11 @@ var FsmDataForm = (function () {
     self.submitProjectApproval = function (primaryControl) {
         var formContext = primaryControl;
 
+        // 先刷新未上表单字段的服务端缓存再校验（2026-08-05 用户反馈「要刷新后才能检测到字段有值」：
+        // mcs_fsm_credit_amount_usd 由自动折算异步写库，刚填完授信金额点提交时缓存未更新会误报必填）
+        refreshFieldCache(formContext).then(function () {
         // 融资解决方案提交：所有页面字段除附件外必填 + 合同号必填（PRD）
+        // Bug #1578：设备台数/产品名称已移出 REQUIRED_SIX_ELEMENTS，方案审批天然不校验
         var missing = validateRequiredFields(formContext,
             REQUIRED_SIX_ELEMENTS.concat(REQUIRED_SOLUTION_EXTRA).concat([SRC.CONTRACT]));
         if (missing.length > 0) { alertMissingFields(missing); return; }
@@ -976,6 +1279,7 @@ var FsmDataForm = (function () {
                 submitApproval(formContext, APPROVE_TYPE.PROJECT, t("FsmData_TypeProject", "融资方案审批"));
             });
         });
+        }); // refreshFieldCache 后再走校验与提交
     };
 
     // =====================================================================

@@ -5,16 +5,20 @@ using System;
 namespace SanyD365.Plugins.FinancingManagement.Resource
 {
     /// <summary>
-    /// 融资资源管理 - 状态同步Plugin（禅道 #1433）
+    /// 融资资源管理 - 状态同步Plugin（禅道 #1433 / #1513）
     /// 触发时机：mcs_fsm_resource Update PostOperation，statecode 字段变更（列表【激活/停用】系统按钮）
     /// 业务规则：
-    /// 1. 记录被激活（statecode 变为 0 Active）时，将「是否启用过」mcs_fsm_rl_status 幂等回写为 true
-    /// 2. 单向标记：停用不清除；已启用过的记录不允许删除（由 FsmResourceDeleteGuardPlugin 拦截）
+    /// 1. 记录被激活（statecode 变为 0 Active）时：
+    ///    - 将「是否启用过」mcs_fsm_rl_status 幂等回写为 true（#1433，单向标记不清除，删除守卫用）
+    ///    - 将「是否启用」mcs_fsm_status 回写为 true（#1513）
+    /// 2. 记录被停用（statecode 变为 1 Inactive）时，将「是否启用」mcs_fsm_status 回写为 false（#1513）
+    /// 3. 已启用过的记录不允许删除（由 FsmResourceDeleteGuardPlugin 拦截）
     /// </summary>
     public class FsmResourceStateSyncPlugin : IPlugin
     {
-        // statecode 值：0 = Active
+        // statecode 值：0 = Active, 1 = Inactive
         private const int STATE_ACTIVE = 0;
+        private const int STATE_INACTIVE = 1;
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -62,28 +66,58 @@ namespace SanyD365.Plugins.FinancingManagement.Resource
             OptionSetValue newState = target.GetAttributeValue<OptionSetValue>("statecode");
             tracer.Trace($"新 statecode: {newState?.Value}");
 
-            // 只处理激活方向；停用不做任何处理（单向标记不清除）
-            if (newState == null || newState.Value != STATE_ACTIVE)
+            bool isActivate = newState != null && newState.Value == STATE_ACTIVE;
+            bool isDeactivate = newState != null && newState.Value == STATE_INACTIVE;
+            if (!isActivate && !isDeactivate)
             {
-                tracer.Trace("非激活方向，跳过");
+                tracer.Trace("非激活/停用方向，跳过");
                 return;
             }
 
-            // 幂等：实时读取当前值，已是「启用过」则不再回写（避免依赖 PostImage，注册更简单）
+            // 幂等：实时读取当前值，仅回写需要变更的字段（避免依赖 PostImage，注册更简单）
             try
             {
-                Entity current = service.Retrieve("mcs_fsm_resource", target.Id, new ColumnSet("mcs_fsm_rl_status"));
+                Entity current = service.Retrieve("mcs_fsm_resource", target.Id, new ColumnSet("mcs_fsm_rl_status", "mcs_fsm_status"));
                 bool alreadyEnabled = current.GetAttributeValue<bool?>("mcs_fsm_rl_status") ?? false;
-                if (alreadyEnabled)
+                bool currentEnabled = current.GetAttributeValue<bool?>("mcs_fsm_status") ?? false;
+                tracer.Trace($"当前值：是否启用过={alreadyEnabled}, 是否启用={currentEnabled}");
+
+                Entity updateRecord = new Entity("mcs_fsm_resource") { Id = target.Id };
+                bool needUpdate = false;
+
+                if (isActivate)
                 {
-                    tracer.Trace("是否启用过已是 是，无需回写");
+                    // #1433：「是否启用过」单向标记，只置 true 不清除
+                    if (!alreadyEnabled)
+                    {
+                        updateRecord["mcs_fsm_rl_status"] = true;
+                        needUpdate = true;
+                    }
+                    // #1513：激活 →「是否启用」= 是
+                    if (!currentEnabled)
+                    {
+                        updateRecord["mcs_fsm_status"] = true;
+                        needUpdate = true;
+                    }
+                }
+                else
+                {
+                    // #1513：停用 →「是否启用」= 否（不影响「是否启用过」单向标记）
+                    if (currentEnabled)
+                    {
+                        updateRecord["mcs_fsm_status"] = false;
+                        needUpdate = true;
+                    }
+                }
+
+                if (!needUpdate)
+                {
+                    tracer.Trace("目标字段均已是目标值，无需回写（幂等跳过）");
                     return;
                 }
 
-                Entity updateRecord = new Entity("mcs_fsm_resource") { Id = target.Id };
-                updateRecord["mcs_fsm_rl_status"] = true;
                 service.Update(updateRecord);
-                tracer.Trace($"已将记录 {target.Id} 的「是否启用过」回写为 是");
+                tracer.Trace($"已回写记录 {target.Id}：{(isActivate ? "激活" : "停用")}方向，字段=[{string.Join(",", updateRecord.Attributes.Keys)}]");
             }
             catch (Exception ex)
             {

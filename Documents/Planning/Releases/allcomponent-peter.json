@@ -21,7 +21,9 @@
     "mcs_fsm_resource",
     "mcs_fsm_data",
     "mcs_fsm_detail_data",
-    "mcs_fmprocess"
+    "mcs_fmprocess",
+    "mcs_credit",
+    "mcs_creditmodelprocess"
   ],
   "webresources": [
     "mcs_account.js",
@@ -59,7 +61,8 @@
     "CreditRecordAutoNumberPlugin",
     "CreditRecordStatusTransitionPlugin",
     "CreditScoreCalculationPlugin",
-    "CustomerFileAutoNumberPlugin",
+    "CreditScoreBpfStageSyncPlugin",
+    "TradePtGroupTypeProductLineSyncPlugin",
     "CustomerMasterDataCreditValidationPlugin",
     "CustomerTagInitPlugin",
     "CustomerTagValidationPlugin",
@@ -76,7 +79,9 @@
   ],
   "customApis": [
     "mcs_QueryTradeStPayTerm",
-    "mcs_CofaceSearchCompany"
+    "mcs_CofaceSearchCompany",
+    "mcs_AdjustFcaQuotaBalance",
+    "mcs_CofacePlaceOrder"
   ],
   "appActions": [
     "mcs_credit_record_refresh_data",
@@ -87,9 +92,8 @@
     "mcs_trade_stpayterm_apply",
     "mcs_trade_stpayterm_approve",
     "mcs_trade_stpayterm_reject",
-    "mcs_fsm_data_submit_initiation",
-    "mcs_fsm_data_submit_project",
     "mcs__!573c7ffbf3a345e0aa6d98bef171c5b8!mcs_credit_record!0",
-    "mcs__!a64f0c87adf740c687d8612696e3aa44!mcs_fca_quotaapp!0"
+    "mcs__!a64f0c87adf740c687d8612696e3aa44!mcs_fca_quotaapp!0",
+    "mcs_credit_record_place_coface_order"
   ]
 }

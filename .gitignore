@@ -73,3 +73,4 @@ Documents/Tests/Secret.json
 # Excel 转换专用虚拟环境
 .venv_excel/
 Code/Tools/ZentaoSync/.zentao.json
+kanban.db*

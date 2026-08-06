@@ -34,7 +34,7 @@ description: D365 项目发布部署指南。适用于 Service 项目编译、D3
 |------|--------|---------|---------|
 | **C# DeployTool** | ⭐ P0 | WebResource更新、App Action按钮、数据修复、批量操作、发布 | `Code/Tools/DeployTool/` |
 | **MetadataTool CLI** | P1 | 实体/字段/表单/视图/Plugin 部署 | `Code/Tools/MetadataTool/` |
-| **n8n Release Tool** | P1 | Azure 代码发布（ClientAPI / MessageHandler / ExtensionAPI / InnerAPI） | 网页端 |
+| **n8n Release Tool** | P1 | Solution / Azure 代码发布（ClientAPI / MessageHandler / ExtensionAPI / InnerAPI / CommonMessageHandle） | 网页端 |
 | **PAC CLI** | P2 | Solution 导出（备份用） | `pac solution export` |
 | **D365 界面** | P3 | 权限设置 | make.powerapps.com |
 
@@ -157,6 +157,29 @@ C:\Projects\D365\D365\SanyD365.D365Extension.Sales\bin\Release\SanyD365.D365Exte
 | Plugin（`CreditRecordBppIntegrationPlugin` 等） | `McsPlugin` |
 | JS WebResource | `McsWebResource` |
 
+### 4.1 固定发布顺序（2026-08-05 截图口径，强制）
+
+> **核对规则**：每次发版必须按以下完整顺序建立「发布顺序矩阵」。我们用不到的包**不得从清单中删除**，必须保留该环节并标记 `⏭️ 跳过` + 原因（如「本批次无变更」「我方无组件」「客户IT 确认不走该包」）。
+
+| 顺序 | 类别 | 发布项 | 本次核对口径 |
+|---:|---|---|---|
+| 1 | D365 | `McsOptionSet` | 全局选项集；无我方变更则跳过 |
+| 2 | D365 | `McsWebResource` | JS/HTML/语言包 |
+| 3 | D365 | `role_<发版日期>`（非托管） | 安全角色包；无角色变更则跳过 |
+| 4 | D365 | `entity_<发版日期>`（非托管） | 实体/字段/表单/视图/关系/BPF/App Action |
+| 5 | D365 | `McsCustomAPI` | Custom API 本体/参数/响应及实现 Assembly/Step |
+| 6 | D365 | `McsPlugin` | Plugin Assembly + Step |
+| 7 | D365 | `McsAutomate` | 普通工作流；无我方资产则跳过 |
+| 8 | D365 | `app_allcomponents` | App 全组件包；通常非我方维护，按批次确认后跳过 |
+| 9 | D365 | `sln_Import`（非托管） | 通用导入包；通常非我方维护，按批次确认后跳过 |
+| 10 | Azure | `CommonMessageHandle` | 公共消息处理 |
+| 11 | Azure | `MessageHandler` | BPP Consumer |
+| 12 | Azure | `InnerApi` | 内部 API |
+| 13 | Azure | `ExtensionApi` | Custom API 服务端 |
+| 14 | Azure | `ClientApi` | Web API；与 MessageHandler 保持版本一致 |
+
+> 截图中的 `role_20260722` / `entity_20260722` 是日期示例；实际发版替换为当批次包名（如 `role_20260805` / `entity_20260805`）。跳过只表示本次不发布，不表示从核对策略中移除。
+
 ---
 
 ## 5. Plugin 同步检查
@@ -188,11 +211,12 @@ dotnet run query-assembly-version <名称>
 **流程：**
 
 ```
-1. 确定本次发版范围（哪些实体/JS/Plugin/Custom API/App Action，实体包名 entity_XX）
-2. 编写发版清单 JSON → Documents/Planning/Releases/release-<日期>-<主题>.json
-3. 跑 check-release（只读）→ 看报告
-4. 有 ❌ → 用户在 D365 UI 添加缺失组件 → 重跑 → 全绿
-5. 全绿后等待 n8n 发布
+1. 确定本次发版范围（哪些实体/JS/Plugin/Custom API/App Action/角色/工作流，实体包名 entity_XX）
+2. 按 §4.1 固定顺序建立发布顺序矩阵：9 个 D365 包 + 5 个 Azure 发布项逐项标记「发布 / 跳过+原因」
+3. 编写发版清单 JSON → Documents/Planning/Releases/release-<日期>-<主题>.json
+4. 跑 check-release（只读）→ 看报告
+5. 有 ❌ → 用户在 D365 UI 添加缺失组件 → 重跑 → 全绿
+6. 全绿后等待 n8n / 客户IT 按发布顺序矩阵执行
 ```
 
 **清单格式：**
@@ -219,16 +243,17 @@ dotnet run --no-build -- check-release ../../../Documents/Planning/Releases/rele
 
 **核对规则（三一开发手册 4.4「每次迭代发布清单」）：**
 
-| 组件 | 应在 Solution |
-|---|---|
-| 实体 / 字段 / 站点地图 / App Action | `entity_XX`（每次发版新建，清单指定 `entitySolution`） |
-| js / html / 翻译 json | `McsWebResource` |
-| OptionSet（实体关联下拉选） | `McsOptionSet` |
-| Plugin Assembly + Step（实体插件） | `McsPlugin`（Type 不单独入包，属正常惯例） |
-| Custom API（含请求参数/响应属性）**及其实现 Assembly/Step** | `McsCustomAPI` |
-| 普通工作流 | `McsAutomate` |
-| BPF（`workflow.category=4`） | `entity_XX`（随实体包发，用户确认约定） |
-| 角色 | `role_XX`（每个版本一个包） |
+| 固定顺序 | 组件 | 应在 Solution | 本批次无内容时 |
+|---:|---|---|---|
+| 1 | OptionSet（实体关联下拉选） | `McsOptionSet` | `⏭️ 跳过：无全局选项集变更` |
+| 2 | js / html / 翻译 json | `McsWebResource` | `⏭️ 跳过：无 WebResource 变更` |
+| 3 | 角色 | `role_XX`（每个版本一个包，非托管） | `⏭️ 跳过：无角色变更` |
+| 4 | 实体 / 字段 / 站点地图 / App Action / BPF（`workflow.category=4`） | `entity_XX`（每次发版新建，清单指定 `entitySolution`，非托管） | 不可跳过（除非本批次完全无元数据变更） |
+| 5 | Custom API（含请求参数/响应属性）**及其实现 Assembly/Step** | `McsCustomAPI` | `⏭️ 跳过：无 Custom API 变更` |
+| 6 | Plugin Assembly + Step（实体插件） | `McsPlugin`（Type 不单独入包，属正常惯例） | `⏭️ 跳过：无 Plugin 变更` |
+| 7 | 普通工作流 | `McsAutomate` | `⏭️ 跳过：无我方工作流资产/变更` |
+| 8 | App 全组件 | `app_allcomponents` | `⏭️ 跳过：非我方维护/本批次不发布` |
+| 9 | 通用导入 | `sln_Import`（非托管） | `⏭️ 跳过：非我方维护/本批次不发布` |
 
 > 注意：Custom API 的实现 Plugin Assembly/Step 归属 `McsCustomAPI` 而非 `McsPlugin`（如 `SanyD365.D365ExtensionApi.Sales`）；判断依据是 Step 的 Type 是否被 `customapi.plugintypeid` 引用。 |
 

@@ -116,6 +116,7 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
         Console.WriteLine("  dotnet run query-contract-products <accountId> - 查询客户合同明细产品字段（只读诊断）");
         Console.WriteLine("  dotnet run query-optionset-labels <实体名> <字段名> [langId] - 查询选项集本地化标签");
         Console.WriteLine("  dotnet run update-optionset-labels <实体名> <字段名> <labels.json> [langId] - 更新选项集标签");
+        Console.WriteLine("  dotnet run delete-option <实体名> <字段名> <选项值> - 删除选项集单个选项值（存量数据需先修复）");
         Console.WriteLine("  dotnet run create-credit-profile-fields  - 创建客户画像所需缺失字段（mcs_blacklist/mcs_creditgrant）");
         Console.WriteLine("  dotnet run list-number-configs [实体名] - 查询系统自动编号配置（只读）");
         Console.WriteLine("  dotnet run create-number-config <实体名> <属性名> <前缀模板> <数字模板> <序列号长度> [序号开始] [使用序列号服务true|false] - 新增自动编号配置");
@@ -312,6 +313,20 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         string targetScoreId = args[1];
                         int targetStatus = args.Length >= 3 && int.TryParse(args[2], out int s) ? s : 12;
                         UpdateCreditRecordStatus(service, targetScoreId, targetStatus);
+                        break;
+
+                    case "fix-fsm-resource-product11":
+                        FixFsmResourceProduct11(service, args.Length >= 2 && args[1].Equals("apply", StringComparison.OrdinalIgnoreCase));
+                        break;
+
+                    case "set-fsm-bppstatus":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run set-fsm-bppstatus <融资编号> <1申请|2审批中|3通过|4驳回|clear>");
+                            Console.WriteLine("  示例: dotnet run set-fsm-bppstatus FSM202608010001 1   # 回到申请状态并清空审批状态码（解锁表单字段）");
+                            return;
+                        }
+                        SetFsmBppStatus(service, args[1], args[2]);
                         break;
 
                     case "simulate-bpp-callback":
@@ -911,7 +926,7 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         break;
 
                     case "create-fsm-resource-testdata":
-                        CreateFsmResourceTestData(service);
+                        CreateFsmResourceTestData(service, args.Length >= 2 ? int.Parse(args[1]) : 1);
                         break;
 
                     case "create-fsm-source-testdata":
@@ -1652,6 +1667,16 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         manager.UpdateOptionLabels(args[1], args[2], valueToLabel);
                         break;
 
+                    case "delete-option":
+                        if (args.Length < 4)
+                        {
+                            Console.WriteLine("用法: dotnet run delete-option <实体名> <字段名> <选项值>");
+                            Console.WriteLine("  注意: 仅删选项定义，存量数据残留孤儿值需先修复");
+                            return;
+                        }
+                        manager.DeleteOption(args[1], args[2], int.Parse(args[3]));
+                        break;
+
                     case "update-form":
                         if (args.Length < 2)
                         {
@@ -1814,8 +1839,9 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                     case "register-step-only":
                         if (args.Length < 5)
                         {
-                            Console.WriteLine("用法: dotnet run register-step-only <PluginType类名> <实体名> <消息名> <阶段> [筛选属性]");
+                            Console.WriteLine("用法: dotnet run register-step-only <PluginType类名> <实体名> <消息名> <阶段> [筛选属性] [Assembly名]");
                             Console.WriteLine("  阶段: 10=PreValidation, 20=PreOperation, 40=PostOperation");
+                            Console.WriteLine("  [Assembly名]: 可选，同名 PluginType 存在于多个 Assembly 时按 assemblyname 精确匹配（2026-08-04 用户批准扩展）");
                             return;
                         }
                         string stepClassName = args[1];
@@ -1823,16 +1849,21 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
                         string stepMessageName = args[3];
                         int stepStageValue = int.Parse(args[4]);
                         string stepFilterAttr = args.Length >= 6 ? args[5] : null;
+                        string stepAssemblyName = args.Length >= 7 ? args[6] : null;
                         
-                        // 1. 查 PluginType ID
+                        // 1. 查 PluginType ID（可选按 Assembly 名精确匹配，避免同名 Type 绑错 Assembly）
                         var ptQuery = new QueryExpression("plugintype")
                         {
-                            ColumnSet = new ColumnSet("plugintypeid"),
+                            ColumnSet = new ColumnSet("plugintypeid", "assemblyname"),
                             Criteria = new FilterExpression { Conditions = { new ConditionExpression("typename", ConditionOperator.Equal, stepClassName) } }
                         };
+                        if (!string.IsNullOrEmpty(stepAssemblyName))
+                            ptQuery.Criteria.Conditions.Add(new ConditionExpression("assemblyname", ConditionOperator.Equal, stepAssemblyName));
                         var ptResult = service.RetrieveMultiple(ptQuery);
-                        if (ptResult.Entities.Count == 0) { Console.WriteLine($"错误: 找不到 PluginType: {stepClassName}"); return; }
+                        if (ptResult.Entities.Count == 0) { Console.WriteLine($"错误: 找不到 PluginType: {stepClassName}" + (string.IsNullOrEmpty(stepAssemblyName) ? "" : $"（Assembly={stepAssemblyName}）")); return; }
+                        if (ptResult.Entities.Count > 1) { Console.WriteLine($"错误: PluginType {stepClassName} 匹配到 {ptResult.Entities.Count} 条，请用第 6 参数指定 Assembly 名"); return; }
                         Guid stepPluginTypeId = ptResult.Entities[0].Id;
+                        Console.WriteLine($"  PluginType: {stepPluginTypeId}（Assembly={ptResult.Entities[0].GetAttributeValue<string>("assemblyname")}）");
                         
                         // 2. 查 SdkMessage ID
                         var msgQuery2 = new QueryExpression("sdkmessage")
@@ -3491,6 +3522,116 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
     /// <summary>
     /// 更新信用评估记录状态
     /// </summary>
+    /// <summary>
+    /// Bug #1576 配套：融资资源产品多选（mcs_fsm_institution_products）旧值 11(Others) → 10 数据修复。
+    /// 默认只读预检；传 apply 才真正更新。配合 D365_URL 切环境（UAT/生产导入删选项 11 前必须执行）。
+    /// </summary>
+    static void FixFsmResourceProduct11(ServiceClient service, bool apply)
+    {
+        Console.WriteLine($"=== mcs_fsm_resource 产品值 11→10 {(apply ? "修复执行" : "预检（只读）")} ===");
+
+        var query = new Microsoft.Xrm.Sdk.Query.QueryExpression("mcs_fsm_resource")
+        {
+            ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(
+                "mcs_fsm_resource_no", "mcs_fsm_institution_name", "mcs_fsm_institution_products", "statecode")
+        };
+        var all = service.RetrieveMultiple(query);
+
+        var targets = all.Entities.Where(e =>
+        {
+            var vals = e.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValueCollection>("mcs_fsm_institution_products");
+            return vals != null && vals.Any(v => v.Value == 11);
+        }).ToList();
+
+        if (targets.Count == 0)
+        {
+            Console.WriteLine("✅ 无含值 11 的记录，无需修复");
+            return;
+        }
+
+        foreach (var e in targets)
+        {
+            var vals = e.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValueCollection>("mcs_fsm_institution_products");
+            var before = string.Join(",", vals.Select(v => v.Value).OrderBy(x => x));
+            var afterVals = vals.Select(v => v.Value == 11 ? 10 : v.Value).Distinct().OrderBy(x => x).ToList();
+            var no = e.GetAttributeValue<string>("mcs_fsm_resource_no") ?? "(空)";
+            var name = e.GetAttributeValue<string>("mcs_fsm_institution_name") ?? "(空)";
+            var state = e.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("statecode")?.Value == 0 ? "启用" : "停用";
+            Console.WriteLine($"  {no}（{name}，{state}）: [{before}] → [{string.Join(",", afterVals)}]");
+
+            if (apply)
+            {
+                var update = new Entity("mcs_fsm_resource", e.Id);
+                var coll = new Microsoft.Xrm.Sdk.OptionSetValueCollection();
+                foreach (var v in afterVals) coll.Add(new Microsoft.Xrm.Sdk.OptionSetValue(v));
+                update["mcs_fsm_institution_products"] = coll;
+                service.Update(update);
+            }
+        }
+
+        Console.WriteLine(apply
+            ? $"✅ 已修复 {targets.Count} 条（建议再跑一次不带 apply 预检确认无残留）"
+            : $"共 {targets.Count} 条待修复，确认后执行: dotnet run fix-fsm-resource-product11 apply");
+    }
+
+    /// <summary>
+    /// 设置融资管理(mcs_fsm_data)审批状态 mcs_bppstatus，并同步清空审批状态码 mcs_bppstatuscode。
+    /// 用于 DEV/UAT 复测时解锁表单锁定字段（JS 锁定条件：bppstatus=2 或 bppstatuscode=Submitted 等）。
+    /// </summary>
+    static void SetFsmBppStatus(ServiceClient service, string fsmNo, string statusArg)
+    {
+        Console.WriteLine($"=== 设置融资记录审批状态: {fsmNo} -> {statusArg} ===");
+
+        var query = new Microsoft.Xrm.Sdk.Query.QueryExpression("mcs_fsm_data")
+        {
+            ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("mcs_fsm_no", "mcs_fsm_status", "mcs_bppstatus", "mcs_bppstatuscode"),
+            Criteria = new Microsoft.Xrm.Sdk.Query.FilterExpression()
+            {
+                Conditions =
+                {
+                    new Microsoft.Xrm.Sdk.Query.ConditionExpression("mcs_fsm_no", Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, fsmNo)
+                }
+            }
+        };
+
+        var records = service.RetrieveMultiple(query);
+        if (records.Entities.Count == 0)
+        {
+            Console.WriteLine($"❌ 记录不存在: {fsmNo}");
+            return;
+        }
+
+        var record = records.Entities[0];
+        Console.WriteLine($"  记录ID: {record.Id}");
+        Console.WriteLine($"  当前: mcs_fsm_status={record.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("mcs_fsm_status")?.Value.ToString() ?? "(空)"}, " +
+                          $"mcs_bppstatus={record.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("mcs_bppstatus")?.Value.ToString() ?? "(空)"}, " +
+                          $"mcs_bppstatuscode={record.GetAttributeValue<string>("mcs_bppstatuscode") ?? "(空)"}");
+
+        var update = new Microsoft.Xrm.Sdk.Entity("mcs_fsm_data", record.Id);
+        if (statusArg.Equals("clear", StringComparison.OrdinalIgnoreCase) || statusArg == "0")
+        {
+            update["mcs_bppstatus"] = null;
+        }
+        else if (int.TryParse(statusArg, out int st) && st >= 1 && st <= 4)
+        {
+            update["mcs_bppstatus"] = new Microsoft.Xrm.Sdk.OptionSetValue(st);
+        }
+        else
+        {
+            Console.WriteLine($"❌ 无效状态值: {statusArg}（允许 1|2|3|4|clear）");
+            return;
+        }
+        // 状态码同步清空，避免 JS 按 Submitted 等码继续锁定
+        update["mcs_bppstatuscode"] = null;
+
+        service.Update(update);
+
+        var after = service.Retrieve("mcs_fsm_data", record.Id,
+            new Microsoft.Xrm.Sdk.Query.ColumnSet("mcs_bppstatus", "mcs_bppstatuscode"));
+        Console.WriteLine($"✅ 已更新并回读: mcs_bppstatus={after.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("mcs_bppstatus")?.Value.ToString() ?? "(空)"}, " +
+                          $"mcs_bppstatuscode={after.GetAttributeValue<string>("mcs_bppstatuscode") ?? "(空)"}");
+    }
+
     static void UpdateCreditRecordStatus(ServiceClient service, string scoreId, int targetStatus)
     {
         Console.WriteLine($"=== 更新信用评估记录: {scoreId} ===");
@@ -4708,9 +4849,10 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
         }
     }
 
-    static void CreateFsmResourceTestData(ServiceClient service)
+    static void CreateFsmResourceTestData(ServiceClient service, int institutionType = 1)
     {
-        Console.WriteLine("=== 创建融资资源管理测试数据 ===");
+        var typeLabel = institutionType == 2 ? "保险" : institutionType == 9 ? "其他" : "银行";
+        Console.WriteLine($"=== 创建融资资源管理测试数据（机构类型: {typeLabel}） ===");
 
         try
         {
@@ -4744,9 +4886,9 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
 
             var resource = new Microsoft.Xrm.Sdk.Entity("mcs_fsm_resource");
             resource["mcs_fsm_resource_no"] = $"FSMR-TEST-{DateTime.Now:HHmmss}";
-            resource["mcs_fsm_institution_type"] = new Microsoft.Xrm.Sdk.OptionSetValue(1); // 银行
-            resource["mcs_fsm_institution_code"] = "TEST001";
-            resource["mcs_fsm_institution_name"] = "测试融资机构";
+            resource["mcs_fsm_institution_type"] = new Microsoft.Xrm.Sdk.OptionSetValue(institutionType);
+            resource["mcs_fsm_institution_code"] = $"TEST-{institutionType}-{DateTime.Now:HHmmss}";
+            resource["mcs_fsm_institution_name"] = $"测试{typeLabel}机构";
             resource["mcs_fsm_institution_country"] = new Microsoft.Xrm.Sdk.EntityReference("mcs_country", countries.Entities[0].Id);
             resource["mcs_fsm_institution_province"] = new Microsoft.Xrm.Sdk.EntityReference("mcs_state", states.Entities[0].Id);
             resource["mcs_fsm_institution_city"] = new Microsoft.Xrm.Sdk.EntityReference("mcs_city", cities.Entities[0].Id);
@@ -4770,8 +4912,8 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
             var url = $"https://dev1.crm5.dynamics.com/main.aspx?appid=&pagetype=entityrecord&etn=mcs_fsm_resource&id={resourceId}";
 
             Console.WriteLine($"✅ 融资资源管理测试记录创建成功: {resourceId}");
-            Console.WriteLine($"   机构名称: 测试融资机构");
-            Console.WriteLine($"   机构类型: 银行");
+            Console.WriteLine($"   机构名称: 测试{typeLabel}机构");
+            Console.WriteLine($"   机构类型: {typeLabel}({institutionType})");
             Console.WriteLine($"   金融产品: 1, 2");
             Console.WriteLine($"   记录链接: {url}");
         }
@@ -8263,6 +8405,62 @@ Console.WriteLine("  dotnet run set-masterdata-creditvalid <客户名称> <true|
             TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_data_url", "审批链接",
                 "BPP审批链接", 1000));
             Console.WriteLine("融资管理 BPP 审批字段添加完成！");
+
+            // Bug #1559（2026-08-04）：融资六要素/融资解决方案页面字段改造，新增 8 字段
+            Console.WriteLine("添加融资管理 #1559 页面字段...");
+            // 六要素「融资产品」单选下拉（仅银行类 1-11，编码与 mcs_fsm_institution_products 银行段一致）；
+            // 六要素 tab + 方案 tab（标签=金融产品）双单元格展示
+            TryCreateField(() => manager.CreatePicklistField("mcs_fsm_data", "mcs_fsm_product", "融资产品",
+                "Bug #1559：六要素融资产品单选下拉，仅银行类金融产品（1-11）；六要素/方案双单元格展示",
+                new Dictionary<string, int>
+                {
+                    { "Non-recourse Accounts Receivable Factoring", 1 },
+                    { "Recourse Accounts Receivable Factoring", 2 },
+                    { "Purchase Loan Financing", 3 },
+                    { "Inventory Financing", 4 },
+                    { "Dealer Financing", 5 },
+                    { "Retail Factoring", 6 },
+                    { "Leasing", 7 },
+                    { "Consortium", 8 },
+                    { "Investment Loan", 9 },
+                    { "wholesale", 10 },
+                    { "Others", 11 }
+                },
+                displayNameZh: "融资产品", displayNameEn: "Financing Product"));
+            // 方案页「融资资源机构」多选（Memo 存 GUID 逗号分隔，多选查找组件写值）
+            TryCreateField(() => manager.CreateMemoField("mcs_fsm_data", "mcs_fsm_resource_ids", "融资资源机构",
+                "Bug #1559：融资资源机构多选，存 GUID 逗号分隔；按融资产品过滤，带入机构名称/编码", 2000,
+                displayNameZh: "融资资源机构", displayNameEn: "Financing Institutions"));
+            // 银行/保险/其它机构名称+编码（按所选机构类型自动带入，逗号分隔，只读）
+            TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_bank_names", "银行机构名称",
+                "Bug #1559：机构类型=银行时自动带入机构名称，逗号分隔", 1000,
+                displayNameZh: "银行机构名称", displayNameEn: "Bank Names"));
+            TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_bank_codes", "银行机构编码",
+                "Bug #1559：机构类型=银行时自动带入机构编码，逗号分隔", 1000,
+                displayNameZh: "银行机构编码", displayNameEn: "Bank Codes"));
+            TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_insurance_names", "保险机构名称",
+                "Bug #1559：机构类型=保险时自动带入机构名称，逗号分隔", 1000,
+                displayNameZh: "保险机构名称", displayNameEn: "Insurance Institution Names"));
+            TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_insurance_codes", "保险机构编码",
+                "Bug #1559：机构类型=保险时自动带入机构编码，逗号分隔", 1000,
+                displayNameZh: "保险机构编码", displayNameEn: "Insurance Institution Codes"));
+            TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_other_names", "其它机构名称",
+                "Bug #1559：机构类型=其它时自动带入机构名称，逗号分隔", 1000,
+                displayNameZh: "其它机构名称", displayNameEn: "Other Institution Names"));
+            TryCreateField(() => manager.CreateStringField("mcs_fsm_data", "mcs_fsm_other_codes", "其它机构编码",
+                "Bug #1559：机构类型=其它时自动带入机构编码，逗号分隔", 1000,
+                displayNameZh: "其它机构编码", displayNameEn: "Other Institution Codes"));
+            Console.WriteLine("融资管理 #1559 页面字段添加完成！");
+
+            // Bug #1561（2026-08-04）：立项/方案两个提交审批各加一个备注字段（评审意见），提交时按 mcs_approve_type 推给 BPP（复用模板变量 mcs_remark）
+            Console.WriteLine("添加融资管理 #1561 提交审批备注字段...");
+            TryCreateField(() => manager.CreateMemoField("mcs_fsm_data", "mcs_fsm_initiation_remark", "立项提交审批备注",
+                "Bug #1561：融资立项提交审批备注（评审意见），状态2（融资立项）可填，提交立项审批时推给BPP", 2000,
+                displayNameZh: "立项提交审批备注", displayNameEn: "Initiation Submit Remark"));
+            TryCreateField(() => manager.CreateMemoField("mcs_fsm_data", "mcs_fsm_project_remark", "方案提交审批备注",
+                "Bug #1561：融资方案提交审批备注（评审意见），状态3（融资解决方案）可填，提交融资方案审批时推给BPP", 2000,
+                displayNameZh: "方案提交审批备注", displayNameEn: "Project Submit Remark"));
+            Console.WriteLine("融资管理 #1561 提交审批备注字段添加完成！");
         }
         else if (entityName == "mcs_credit_record")
         {

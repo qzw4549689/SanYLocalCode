@@ -229,10 +229,31 @@
       "displayName": "融资产品",
       "displayNameZh": "融资产品",
       "displayNameEn": "Financing Product",
-      "description": "融资产品描述",
+      "description": "【已弃用 2026-08-04，Bug #1559】原文本录入字段，表单已隐藏、非必填，保留字段不删除（防生产导入冲突）；替代字段=mcs_fsm_product（单选选项集）",
       "type": "string",
       "required": false,
       "maxLength": 200
+    },
+    {
+      "schemaName": "mcs_fsm_product",
+      "displayName": "融资产品",
+      "displayNameZh": "融资产品",
+      "displayNameEn": "Financing Product",
+      "description": "Bug #1559：六要素「融资产品」单选下拉，仅银行类金融产品（1-10，编码与融资资源 mcs_fsm_institution_products 银行段一致；#1576 新代码表，Others=10）；六要素 tab（仅状态1可写）与方案 tab（标签=金融产品，只读）双单元格同一字段展示",
+      "type": "picklist",
+      "required": false,
+      "options": {
+        "Insured Open Account Sales": 1,
+        "Non-recourse Accounts Receivable Factoring": 2,
+        "Recourse Accounts Receivable Factoring": 3,
+        "Buyer Credit": 4,
+        "Purchase Financing": 5,
+        "Leasing": 6,
+        "Equipment Financing": 7,
+        "Equity Investment": 8,
+        "Bond Issuance": 9,
+        "Others": 10
+      }
     },
     {
       "schemaName": "mcs_fsm_device_count",
@@ -310,10 +331,105 @@
       "displayName": "金融产品名称",
       "displayNameZh": "金融产品名称",
       "displayNameEn": "Financial Product",
-      "description": "金融产品多选，存逗号分隔代码",
+      "description": "【已弃用 2026-08-03，Bug #1507】原 Memo 方案字段，表单已隐藏、非必填，保留字段不删除（防生产导入冲突）；替代字段=mcs_fsm_resource_products",
       "type": "memo",
       "required": false,
       "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_fsm_resource_products",
+      "displayName": "金融产品名称（多选）",
+      "displayNameZh": "金融产品名称（多选）",
+      "displayNameEn": "Financial Products (MultiSelect)",
+      "description": "【已弃用 2026-08-04，Bug #1559】原方案页「金融产品名称（多选）」，表单已隐藏，保留字段不删除（防生产导入冲突）；方案页「金融产品」改为与六要素同一字段 mcs_fsm_product 双单元格展示。选项已随 #1576 同步为新代码表 1-10",
+      "type": "multiselectpicklist",
+      "required": false,
+      "options": {
+        "Insured Open Account Sales": 1,
+        "Non-recourse Accounts Receivable Factoring": 2,
+        "Recourse Accounts Receivable Factoring": 3,
+        "Buyer Credit": 4,
+        "Purchase Financing": 5,
+        "Leasing": 6,
+        "Equipment Financing": 7,
+        "Equity Investment": 8,
+        "Bond Issuance": 9,
+        "Others": 10,
+        "特险": 101,
+        "项目险": 102,
+        "投资险": 103,
+        "贸易险": 104
+      }
+    },
+    {
+      "schemaName": "mcs_fsm_resource_ids",
+      "displayName": "融资资源机构",
+      "displayNameZh": "融资资源机构",
+      "displayNameEn": "Financing Institutions",
+      "description": "Bug #1559：方案页融资资源机构多选，存 GUID 逗号分隔（无空格）；多选查找组件写值，候选=启用且机构产品包含所选融资产品的融资资源；选中变化按机构类型分组带入银行/保险/其它机构名称+编码 6 字段",
+      "type": "memo",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_fsm_bank_names",
+      "displayName": "银行机构名称",
+      "displayNameZh": "银行机构名称",
+      "displayNameEn": "Bank Names",
+      "description": "Bug #1559：融资资源机构多选所选机构类型=银行时自动带入机构名称，多个逗号分隔；只读",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_fsm_bank_codes",
+      "displayName": "银行机构编码",
+      "displayNameZh": "银行机构编码",
+      "displayNameEn": "Bank Codes",
+      "description": "Bug #1559：融资资源机构多选所选机构类型=银行时自动带入机构编码，多个逗号分隔；只读",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_fsm_insurance_names",
+      "displayName": "保险机构名称",
+      "displayNameZh": "保险机构名称",
+      "displayNameEn": "Insurance Institution Names",
+      "description": "Bug #1559：融资资源机构多选所选机构类型=保险时自动带入机构名称，多个逗号分隔；只读",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_fsm_insurance_codes",
+      "displayName": "保险机构编码",
+      "displayNameZh": "保险机构编码",
+      "displayNameEn": "Insurance Institution Codes",
+      "description": "Bug #1559：融资资源机构多选所选机构类型=保险时自动带入机构编码，多个逗号分隔；只读",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_fsm_other_names",
+      "displayName": "其它机构名称",
+      "displayNameZh": "其它机构名称",
+      "displayNameEn": "Other Institution Names",
+      "description": "Bug #1559：融资资源机构多选所选机构类型=其它时自动带入机构名称，多个逗号分隔；只读",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_fsm_other_codes",
+      "displayName": "其它机构编码",
+      "displayNameZh": "其它机构编码",
+      "displayNameEn": "Other Institution Codes",
+      "description": "Bug #1559：融资资源机构多选所选机构类型=其它时自动带入机构编码，多个逗号分隔；只读",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
     },
     {
       "schemaName": "mcs_fsm_credit_amount",
@@ -525,6 +641,26 @@
       "description": "BPP审批链接（对齐mcs_credit_record模板）",
       "type": "string",
       "maxLength": 500
+    },
+    {
+      "schemaName": "mcs_fsm_initiation_remark",
+      "displayName": "立项提交审批备注",
+      "displayNameZh": "立项提交审批备注",
+      "displayNameEn": "Initiation Submit Remark",
+      "description": "Bug #1561：融资立项提交审批备注（评审意见），状态2（融资立项）可填，提交立项审批时推给BPP（复用模板变量 mcs_remark）",
+      "type": "memo",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_fsm_project_remark",
+      "displayName": "方案提交审批备注",
+      "displayNameZh": "方案提交审批备注",
+      "displayNameEn": "Project Submit Remark",
+      "description": "Bug #1561：融资方案提交审批备注（评审意见），状态3（融资解决方案）可填，提交融资方案审批时推给BPP（复用模板变量 mcs_remark）",
+      "type": "memo",
+      "required": false,
+      "maxLength": 2000
     }
   ]
 }
