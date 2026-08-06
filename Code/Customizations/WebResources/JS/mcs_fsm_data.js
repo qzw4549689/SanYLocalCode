@@ -1138,6 +1138,10 @@ var FsmDataForm = (function () {
         });
         formContext.data.entity.addOnPostSave(function () { refreshFieldCache(formContext); });
 
+        // 授信金额默认值兜底：数据级 onLoad 在首次加载和「刷新」按钮重载数据时都会触发
+        // （表单 onLoad/字段 onChange 均不随刷新触发；BPP 审批回调服务端推进阶段时客户端也无任何事件）
+        formContext.data.addOnLoad(function () { defaultCreditAmount(formContext); });
+
         // 融资金额USD 自动折算：授信金额/融资币种变更时重算
         ["mcs_fsm_credit_amount", "mcs_fsm_currency"].forEach(function (f) {
             var attr = formContext.getAttribute(f);
@@ -1195,6 +1199,7 @@ var FsmDataForm = (function () {
                     applyStageControl(formContext);
                     lockBpfFields(formContext);
                     defaultManager(formContext); // Bug #1538：BPF 点「下一步」进入融资立项时带出融资经理
+                    defaultCreditAmount(formContext); // Bug #1507 兜底：BPF 点「下一步」进入融资解决方案时默认授信金额
                 });
             } catch (ex) {
                 console.error("[FSM] 注册 BPF 阶段事件失败:", ex);
