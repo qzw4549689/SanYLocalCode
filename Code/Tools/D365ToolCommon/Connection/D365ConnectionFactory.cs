@@ -17,9 +17,82 @@ namespace D365ToolCommon.Connection
         public static string DefaultAppId => Environment.GetEnvironmentVariable("D365_APPID") ?? "51f81489-12ee-4a9e-aaae-a2591f45987d";
 
         /// <summary>
-        /// 默认目标 URL，可通过 D365_URL 环境变量覆盖。
+        /// 默认目标 URL。解析优先级：D365_URL 环境变量 > D365_ENV 命名环境（查 environments.json）> 默认 dev1。
+        /// 默认环境固定为 dev1，绝不默认指向生产。
         /// </summary>
-        public static string DefaultUrl => Environment.GetEnvironmentVariable("D365_URL") ?? "https://dev1.crm5.dynamics.com";
+        public static string DefaultUrl => ResolveUrl();
+
+        /// <summary>
+        /// 解析当前目标环境 URL：D365_URL > D365_ENV（命名环境）> dev1 默认。
+        /// </summary>
+        public static string ResolveUrl()
+        {
+            var explicitUrl = Environment.GetEnvironmentVariable("D365_URL");
+            if (!string.IsNullOrWhiteSpace(explicitUrl))
+                return explicitUrl.TrimEnd('/');
+
+            var envName = Environment.GetEnvironmentVariable("D365_ENV");
+            if (!string.IsNullOrWhiteSpace(envName))
+            {
+                var url = LookupEnvironmentUrl(envName.Trim());
+                if (!string.IsNullOrWhiteSpace(url))
+                    return url.TrimEnd('/');
+                Console.WriteLine($"⚠️ D365_ENV={envName} 未在 environments.json 配置有效 URL，回退默认 dev1");
+            }
+
+            return "https://dev1.crm5.dynamics.com";
+        }
+
+        /// <summary>
+        /// 从 environments.json 查询命名环境的 URL。未配置或 URL 为空时返回 null。
+        /// </summary>
+        public static string? LookupEnvironmentUrl(string envName)
+        {
+            var file = FindEnvironmentsFile();
+            if (file == null) return null;
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(file));
+                if (doc.RootElement.TryGetProperty(envName, out var env) &&
+                    env.TryGetProperty("url", out var urlProp))
+                {
+                    var url = urlProp.GetString();
+                    return string.IsNullOrWhiteSpace(url) ? null : url;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ 读取 environments.json 失败：{ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 定位 environments.json：D365_ENV_FILE 指定 > 程序输出目录 > 从当前目录向上找 Code/Tools/environments.json。
+        /// </summary>
+        private static string? FindEnvironmentsFile()
+        {
+            var specified = Environment.GetEnvironmentVariable("D365_ENV_FILE");
+            if (!string.IsNullOrWhiteSpace(specified) && File.Exists(specified))
+                return specified;
+
+            var besideDll = Path.Combine(AppContext.BaseDirectory, "environments.json");
+            if (File.Exists(besideDll))
+                return besideDll;
+
+            var dir = new DirectoryInfo(Environment.CurrentDirectory);
+            while (dir != null)
+            {
+                var candidate = Path.Combine(dir.FullName, "Code", "Tools", "environments.json");
+                if (File.Exists(candidate))
+                    return candidate;
+                var candidate2 = Path.Combine(dir.FullName, "environments.json");
+                if (File.Exists(candidate2))
+                    return candidate2;
+                dir = dir.Parent;
+            }
+            return null;
+        }
 
         /// <summary>
         /// 构建同步连接字符串（ClientSecret 或 Username/Password）。
@@ -106,16 +179,17 @@ namespace D365ToolCommon.Connection
                 .WithRedirectUri("http://localhost")
                 .Build();
 
-            // 保持与原有工具（MetadataTool/DeployTool/CofaceConfigImporter）共享 token 缓存
+            // token 缓存按目标环境隔离（文件名带 host），不同环境/账号互不覆盖、互不顶号
+            var host = new Uri(url).Host;
             var cachePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "D365MetadataTool");
             Directory.CreateDirectory(cachePath);
 
             var storageProperties = new StorageCreationPropertiesBuilder(
-                "msal_cache.dat",
+                $"msal_cache_{host}.dat",
                 cachePath)
-                .WithMacKeyChain("D365MetadataTool", "msal_cache")
+                .WithMacKeyChain("D365MetadataTool", $"msal_cache_{host}")
                 .Build();
 
             var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
@@ -123,15 +197,24 @@ namespace D365ToolCommon.Connection
 
             var scopes = new[] { $"{url}/.default" };
 
-            AuthenticationResult result;
+            AuthenticationResult? result = null;
             var accounts = await app.GetAccountsAsync();
-            try
+            // 多账号时逐个尝试静默取 token，避免固定取第一个账号导致拿错/失败
+            foreach (var account in accounts)
             {
-                result = await app.AcquireTokenSilent(scopes, accounts.FirstOrDefault())
-                    .ExecuteAsync();
-                Console.WriteLine("✅ 使用缓存的 token 登录");
+                try
+                {
+                    result = await app.AcquireTokenSilent(scopes, account).ExecuteAsync();
+                    Console.WriteLine($"✅ 使用缓存的 token 登录（{account.Username}）");
+                    break;
+                }
+                catch (MsalUiRequiredException)
+                {
+                    // 该账号缓存失效，尝试下一个
+                }
             }
-            catch (MsalUiRequiredException)
+
+            if (result == null)
             {
                 result = await app.AcquireTokenWithDeviceCode(scopes, deviceCodeResult =>
                 {

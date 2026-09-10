@@ -12,6 +12,10 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
     /// 2. 融资方案审批通过（类型=2，融资状态=3）：融资状态→4（融资落实），mcs_is_valid=true，mcs_can_project=0
     /// 3. 驳回：融资状态不变，mcs_can_initiated=1（类型=1）或 mcs_can_project=1（类型=2）
     /// 4. 撤回/废弃：审批状态回到申请，清空 mcs_bppid、mcs_nextapprover
+    /// 5. 当前审批人快照同步（2026-09-08 飞书反馈）：BPP 框架在发起/节点流转/结束时统一回写
+    ///    mcs_nextapprover（不上表单），表单两个审批分组绑快照字段 mcs_init_approver/mcs_proj_approver；
+    ///    Target 含 mcs_nextapprover 时按 PreImage mcs_approve_type 同步到对应快照字段（含清空）。
+    ///    Step 过滤字段需含 mcs_nextapprover（框架节点流转 PATCH 只含 mcs_workflowid+mcs_nextapprover）。
     /// </summary>
     public class FsmDataBppCallbackPlugin : IPlugin
     {
@@ -63,6 +67,13 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
             {
                 tracer.Trace($"非融资管理实体，跳过: {target.LogicalName}");
                 return;
+            }
+
+            // 当前审批人快照同步：框架发起/节点流转/结束清空都会回写 mcs_nextapprover，
+            // 按当前审批类型同步到对应快照字段，让表单「当前审批人」实时跟随
+            if (target.Contains("mcs_nextapprover"))
+            {
+                SyncApproverSnapshot(service, tracer, context, target);
             }
 
             // 只处理 BPP 审批状态码字段变更
@@ -134,6 +145,43 @@ namespace SanyD365.Plugins.FinancingManagement.Bpp
                 tracer.Trace($"FsmDataBppCallbackPlugin 异常: {ex.Message}");
                 tracer.Trace($"异常堆栈: {ex.StackTrace}");
                 throw new InvalidPluginExecutionException($"BPP 回调处理失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 当前审批人快照同步：按审批类型（PreImage mcs_approve_type）把 mcs_nextapprover 新值
+        /// （含清空）写入对应快照字段 mcs_init_approver/mcs_proj_approver。
+        /// 审批类型未识别或同步失败仅记 Trace，不阻断主流程（PostOperation 抛错会波及框架回写）。
+        /// </summary>
+        private void SyncApproverSnapshot(IOrganizationService service, ITracingService tracer, IPluginExecutionContext context, Entity target)
+        {
+            try
+            {
+                int approveType = 0;
+                if (context.PreEntityImages.Contains("PreImage"))
+                {
+                    approveType = GetOptionSetValue(context.PreEntityImages["PreImage"], "mcs_approve_type");
+                }
+
+                string snapshotField = approveType == APPROVE_TYPE_INITIATION ? "mcs_init_approver"
+                    : approveType == APPROVE_TYPE_PROJECT ? "mcs_proj_approver"
+                    : null;
+
+                if (snapshotField == null)
+                {
+                    tracer.Trace($"审批类型({approveType})未识别，跳过当前审批人快照同步");
+                    return;
+                }
+
+                string newApprover = target.GetAttributeValue<string>("mcs_nextapprover");
+                var updateRecord = new Entity("mcs_fsm_data") { Id = target.Id };
+                updateRecord[snapshotField] = string.IsNullOrWhiteSpace(newApprover) ? null : newApprover;
+                service.Update(updateRecord);
+                tracer.Trace($"当前审批人快照已同步: {snapshotField} = {(string.IsNullOrWhiteSpace(newApprover) ? "(清空)" : newApprover)}");
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"当前审批人快照同步失败（不阻断主流程）: {ex.Message}");
             }
         }
 

@@ -159,6 +159,13 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 return PlaceIdentification(apiService, service, tracer, creditRecord, countryCode);
             }
 
+            // 1.15 icon# 归属国与记录国家编码一致性预校验（Bug #1898：错绑导致 POST 下单 400 Wrong match between countryCode and externalId）
+            string countryMismatchMsg = ValidateIconCountryMatch(apiService, tracer, cofaceId, countryCode);
+            if (countryMismatchMsg != null)
+            {
+                return PlaceFailed(service, tracer, creditRecord.Id, countryMismatchMsg);
+            }
+
             // 1.2 查已有 URBA 监控单（含在途）→ 复用
             using (var urbaOrdersDoc = apiService.GetUrbaMonitoringOrders(cofaceId, countryCode))
             {
@@ -201,7 +208,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             }
             catch (Exception ex)
             {
-                return PlaceFailed(service, tracer, creditRecord.Id, $"URBA 监控单下单失败: {ex.Message}");
+                return PlaceFailed(service, tracer, creditRecord.Id, $"URBA 监控单下单失败: {ToFriendlyCofaceError(ex.Message)}");
             }
         }
 
@@ -247,7 +254,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             }
             catch (Exception ex)
             {
-                return PlaceFailed(service, tracer, creditRecord.Id, $"调查单提交失败: {ex.Message}");
+                return PlaceFailed(service, tracer, creditRecord.Id, $"调查单提交失败: {ToFriendlyCofaceError(ex.Message)}");
             }
         }
 
@@ -351,21 +358,25 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 }
             }
 
-            // 下 Report 单（JSON）；双格式 39 国间隔 5 秒再下 PDF 单
+            // 下 Report 单：非双格式国家一单双格式（format=["json","pdf"]，2026-08-18 沙盒实测同一 publication 支持两种格式下载，bug1898 下单侧根因修复）；
+            // 双格式 39 国不支持一单双格式，JSON 单 + 间隔 5 秒再下 PDF 单（两单）
             string legitimateInterest = countryConfig.GetLegitimateInterest(countryCode);
             try
             {
                 string reportOrderId;
                 string reportPubId;
-                using (var orderDoc = apiService.PlaceReportOrder(cofaceId, countryCode, reportProduct.Slug, reportProduct.ProductCode, "json", legitimateInterest, scoreId))
+                bool isDualFormat = countryConfig.IsDualFormatCountry(countryCode);
+                using (var orderDoc = isDualFormat
+                    ? apiService.PlaceReportOrder(cofaceId, countryCode, reportProduct.Slug, reportProduct.ProductCode, "json", legitimateInterest, scoreId)
+                    : apiService.PlaceReportOrder(cofaceId, countryCode, reportProduct.Slug, reportProduct.ProductCode, new[] { "json", "pdf" }, legitimateInterest, scoreId))
                 {
                     reportOrderId = ExtractOrderId(orderDoc, tracer);
                     reportPubId = ExtractPublicationId(orderDoc, tracer);
-                    tracer.Trace($"Report 单（JSON）下单成功: orderId={reportOrderId}, publicationId={reportPubId}");
+                    tracer.Trace($"Report 单（{(isDualFormat ? "JSON" : "JSON+PDF 一单双格式")}）下单成功: orderId={reportOrderId}, publicationId={reportPubId}");
                 }
 
                 string msgExtra = null;
-                if (countryConfig.IsDualFormatCountry(countryCode))
+                if (isDualFormat)
                 {
                     // Coface 下单限流：单用户 10-12 次/分钟，两次下单间隔 5 秒
                     tracer.Trace("双格式国家，间隔 5 秒后下 PDF 单");
@@ -381,12 +392,12 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
                 }
 
                 return Advance(service, tracer, creditRecord.Id, ORDER_REPORT_PENDING,
-                    $"Report 单已提交（{(countryConfig.IsDualFormatCountry(countryCode) ? "JSON+PDF 两单" : "JSON 单")}，publicationId={reportPubId ?? "见订单列表"}），待就绪（约 6-7 个工作日）",
+                    $"Report 单已提交（{(isDualFormat ? "JSON+PDF 两单" : "一单双格式 JSON+PDF")}，publicationId={reportPubId ?? "见订单列表"}），待就绪（约 6-7 个工作日）",
                     $"reportOrderId={reportOrderId};reportPublicationId={reportPubId}" + (msgExtra != null ? ";" + msgExtra : ""));
             }
             catch (Exception ex)
             {
-                return PlaceFailed(service, tracer, creditRecord.Id, $"Report 单下单失败: {ex.Message}");
+                return PlaceFailed(service, tracer, creditRecord.Id, $"Report 单下单失败: {ToFriendlyCofaceError(ex.Message)}");
             }
         }
 
@@ -508,6 +519,117 @@ namespace SanyD365.Plugins.CofaceIntegration.Plugin
             public string Message { get; set; }
             public int? OrderStatus { get; set; }
             public string OrderStatusName { get; set; }
+        }
+
+        #endregion
+
+        #region 归属国预校验与错误翻译（Bug #1898）
+
+        /// <summary>
+        /// 校验 icon# 归属国与记录国家编码一致（GET /companies 只读查询，该接口不按国别过滤 externalId，返回公司真实归属国）。
+        /// 不一致返回中文提示；一致 / 查询不到 / 校验异常均返回 null 放行（下单接口自身会做最终校验，错误由兜底翻译处理）。
+        /// </summary>
+        private string ValidateIconCountryMatch(CofaceApiService apiService, ITracingService tracer, string cofaceId, string countryCode)
+        {
+            try
+            {
+                using (var doc = apiService.SearchCompanyByExternalId(cofaceId, countryCode))
+                {
+                    string actualCountry = ExtractCompanyCountryCode(doc, tracer);
+                    if (string.IsNullOrEmpty(actualCountry))
+                    {
+                        tracer.Trace($"归属国预校验：未查询到 {cofaceId} 的公司信息，跳过校验");
+                        return null;
+                    }
+                    if (!actualCountry.Equals(countryCode, StringComparison.OrdinalIgnoreCase))
+                    {
+                        tracer.Trace($"归属国预校验不通过：{cofaceId} 归属国={actualCountry}，记录国家编码={countryCode}");
+                        return $"科法斯客户代码与国家编码不匹配：{cofaceId} 在 Coface 系统中的归属国家为 {actualCountry}，而本记录国家编码为 {countryCode}。" +
+                            "请通过【搜索 Coface 企业】按正确国家重新搜索并绑定，或修正国家编码后重试。";
+                    }
+                    tracer.Trace($"归属国预校验通过：{cofaceId} 归属国={actualCountry}");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"归属国预校验异常（不阻断下单）: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 从 /companies 响应中提取第一家公司的归属国 countryCode（支持数组或对象包装）
+        /// </summary>
+        private string ExtractCompanyCountryCode(JsonDocument doc, ITracingService tracer)
+        {
+            try
+            {
+                var root = doc.RootElement;
+                JsonElement company;
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+                    if (root.GetArrayLength() == 0) return null;
+                    company = root[0];
+                }
+                else if (root.ValueKind == JsonValueKind.Object)
+                {
+                    if (root.TryGetProperty("companies", out var arr) && arr.ValueKind == JsonValueKind.Array && arr.GetArrayLength() > 0)
+                    {
+                        company = arr[0];
+                    }
+                    else if (root.TryGetProperty("countryCode", out _))
+                    {
+                        company = root;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+
+                if (company.TryGetProperty("countryCode", out var cc) && cc.ValueKind == JsonValueKind.String)
+                {
+                    return cc.GetString();
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"提取公司归属国异常: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 将 Coface API 英文错误翻译成中文友好提示（仅识别已知错误，未识别保留原文）
+        /// </summary>
+        private string ToFriendlyCofaceError(string rawError)
+        {
+            if (string.IsNullOrEmpty(rawError)) return rawError;
+
+            if (rawError.Contains("Wrong match between countryCode and externalId"))
+            {
+                return "科法斯客户代码与国家编码不匹配：该 Coface ID 在 Coface 系统中的归属国家与本记录的国家编码不一致。" +
+                    "请通过【搜索 Coface 企业】按正确国家重新搜索并绑定，或修正国家编码后重试。";
+            }
+
+            if (rawError.Contains("missing_or_invalid_param"))
+            {
+                return "Coface 接口参数校验未通过，请核对科法斯客户代码与国家编码是否正确后重试；仍失败请联系管理员。" +
+                    $"（原始错误：{Truncate(rawError, 200)}）";
+            }
+
+            return rawError;
+        }
+
+        private string Truncate(string text, int maxLength)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= maxLength) return text;
+            return text.Substring(0, maxLength) + "...";
         }
 
         #endregion

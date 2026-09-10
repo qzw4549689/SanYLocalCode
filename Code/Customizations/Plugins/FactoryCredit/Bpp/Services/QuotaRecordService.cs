@@ -30,9 +30,10 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp.Services
         /// 写入台账记录。
         /// 口径：初始化动作的调整金额=0（决策点B，PRD口径）；
         /// 调整后余额 = 调整后额度 - 当前占用（从额度表实时读取，不依赖前端传入的 tobeBalance）。
+        /// owner：台账负责人（#1643/#1856，申请人），为 null 时保持平台默认（调用账号）。
         /// </summary>
         public void AddQuotaRecord(EntityReference accountRef, string custName,
-            Money currentGrant, Money currentBalance, Money tobeGrant, Money tobeBalance)
+            Money currentGrant, Money currentBalance, Money tobeGrant, Money tobeBalance, EntityReference owner)
         {
             if (accountRef == null)
             {
@@ -59,6 +60,11 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp.Services
             ledger["mcs_asisbalance"] = new Money(currentBalanceValue);
             ledger["mcs_adjustamt"] = new Money(0m);
             ledger["mcs_tobebalance"] = new Money(tobeBalanceValue);
+            // #1856 台账负责人=申请人（#1643 漏赋值，owner 曾落为调用身份/系统账号）
+            if (owner != null)
+            {
+                ledger["ownerid"] = owner;
+            }
 
             Guid ledgerId = _service.Create(ledger);
             _tracer.Trace($"已创建台账记录: {ledgerId}");

@@ -1,0 +1,170 @@
+[
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "L",
+    "listName": "\u4F4E",
+    "cofaceValue": "A1,A2"
+  },
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "M",
+    "listName": "\u4E2D",
+    "cofaceValue": "A3,A4"
+  },
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "H",
+    "listName": "\u9AD8",
+    "cofaceValue": "B,C,D,E"
+  },
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "O",
+    "listName": "\u7F3A\u5931",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "L",
+    "listName": "\u4F4E",
+    "cofaceValue": "1,2"
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "M",
+    "listName": "\u4E2D",
+    "cofaceValue": "3"
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "H",
+    "listName": "\u9AD8",
+    "cofaceValue": "4"
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "O",
+    "listName": "\u7F3A\u5931",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "1",
+    "listName": "\u77FF\u4E1A\u3001\u6E2F\u52A1",
+    "cofaceValue": "\u77FF\u4E1A,\u6E2F\u52A1"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "2",
+    "listName": "\u5EFA\u5DE5\u3001\u540A\u88C5\u3001\u96C6\u88C5\u7BB1\u8FD0\u529B",
+    "cofaceValue": "\u5EFA\u5DE5,\u540A\u88C5,\u96C6\u88C5\u7BB1\u8FD0\u529B"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "3",
+    "listName": "\u79DF\u8D41\u3001\u5546\u6DF7",
+    "cofaceValue": "\u79DF\u8D41,\u5546\u6DF7"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "4",
+    "listName": "\u77FF\u4E1A\u3001\u6E2F\u52A1\u3001\u5EFA\u5DE5\u3001\u540A\u88C5\u3001\u79DF\u8D41\u3001\u5546\u6DF7\u3001\u96C6\u88C5\u7BB1\u8FD0\u529B",
+    "cofaceValue": "\u77FF\u4E1A,\u6E2F\u52A1,\u5EFA\u5DE5,\u540A\u88C5,\u79DF\u8D41,\u5546\u6DF7,\u96C6\u88C5\u7BB1\u8FD0\u529B"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "5",
+    "listName": "\u6797\u4E1A\u3001\u519C\u4E1A\u3001\u5236\u9020\u4E1A\u3001\u4EA4\u901A\u8FD0\u8F93",
+    "cofaceValue": "\u6797\u4E1A,\u519C\u4E1A,\u5236\u9020\u4E1A,\u4EA4\u901A\u8FD0\u8F93"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "6",
+    "listName": "\u5176\u4ED6\u884C\u4E1A",
+    "cofaceValue": "\u5176\u4ED6"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "O",
+    "listName": "\u7F3A\u5931",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "S",
+    "listName": "S\u7EA7",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "A",
+    "listName": "A\u7EA7",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "SH",
+    "listName": "S\u7EA7\u63A7\u80A1\u53C2\u80A1\u516C\u53F8",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "AH",
+    "listName": "A\u7EA7\u63A7\u80A1\u53C2\u80A1\u516C\u53F8",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "1",
+    "listName": "\u94BB\u77F3",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "2",
+    "listName": "\u94C2\u91D1",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "3",
+    "listName": "\u767D\u94F6",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "4",
+    "listName": "\u8BA4\u8BC1",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "5",
+    "listName": "\u610F\u5411",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "N",
+    "listName": "No negative experience",
+    "cofaceValue": "4"
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "S",
+    "listName": "Some negative experience",
+    "cofaceValue": "3"
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "C",
+    "listName": "Considerable negative experience",
+    "cofaceValue": "2"
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "O",
+    "listName": "\u7F3A\u5931",
+    "cofaceValue": "0,1"
+  }
+]

@@ -59,9 +59,10 @@ namespace DeployTool
                     "NI", "PA", "PY", "PE", "UY", "VE"
                 },
                 // 德国公司下单需附带 legitimateInterest（值域参考 GET /legitimateinterestcodes）
+                // 取值 102（发起业务）：静总决定 Sany 统一传 102，见《Coface业务分析文档》2.3 节（2026-08-27 由 100 修正为 102）
                 LegitimateInterestByCountry = new Dictionary<string, string>
                 {
-                    { "DE", "100" }
+                    { "DE", "102" }
                 }
             };
 

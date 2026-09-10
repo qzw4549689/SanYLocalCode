@@ -10,7 +10,7 @@ namespace FactoryCreditTest
 {
     class Program
     {
-        static readonly string ServiceUrl = Environment.GetEnvironmentVariable("D365_URL") ?? "https://dev1.crm5.dynamics.com";
+        static readonly string ServiceUrl = D365ConnectionFactory.ResolveUrl();
 
         static async Task Main(string[] args)
         {

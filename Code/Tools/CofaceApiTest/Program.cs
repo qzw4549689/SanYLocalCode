@@ -23,6 +23,12 @@ namespace CofaceApiTest
                 return;
             }
 
+            if (args.Length > 0 && args[0].Equals("giid-order", StringComparison.OrdinalIgnoreCase))
+            {
+                await TestGiidAndGermanOrder.Run(args);
+                return;
+            }
+
             Console.WriteLine("===== Coface API 测试 =====");
             
             // 1. 获取 Token

@@ -30,6 +30,11 @@ namespace SanyD365.Plugins.FactoryCredit.Calculation
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
             ITracingService tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
+            // 系统上下文：仅用于查询模型版本(mcs_fca_mdlversion)和模型参数配置(mcs_fca_mdlconfig)
+            // 禅道 #1854：当前用户只需具备 mcs_fca_proc 的增改查权限，模型版本/参数配置由系统(admin)代为查询，
+            // 其余基础数据（客户主数据/在外货款/客户标签等）由角色正常赋权，仍走用户上下文
+            IOrganizationService systemService = factory.CreateOrganizationService(null);
+
             tracer.Trace("FcaProcCalculationPlugin 开始执行");
 
             if (context.MessageName != "Update" || context.Stage != 40)
@@ -83,7 +88,7 @@ namespace SanyD365.Plugins.FactoryCredit.Calculation
 
             try
             {
-                ProcessCalculation(service, tracer, target.Id);
+                ProcessCalculation(service, systemService, tracer, target.Id);
             }
             catch (Exception ex)
             {
@@ -92,7 +97,7 @@ namespace SanyD365.Plugins.FactoryCredit.Calculation
             }
         }
 
-        private void ProcessCalculation(IOrganizationService service, ITracingService tracer, Guid procId)
+        private void ProcessCalculation(IOrganizationService service, IOrganizationService systemService, ITracingService tracer, Guid procId)
         {
             // 读取完整计算记录
             Entity proc = service.Retrieve("mcs_fca_proc", procId,
@@ -107,8 +112,8 @@ namespace SanyD365.Plugins.FactoryCredit.Calculation
             Guid masterDataId = accountRef.Id;
             tracer.Trace($"处理模型计算: procId={procId}, masterDataId={masterDataId}");
 
-            // 0. 前置校验：必须存在生效且在有效期内的模型版本，否则禁止模型计算
-            ModelVersionService versionService = new ModelVersionService(service, tracer);
+            // 0. 前置校验：必须存在生效且在有效期内的模型版本，否则禁止模型计算（#1854 系统身份查询）
+            ModelVersionService versionService = new ModelVersionService(systemService, tracer);
             Entity version = versionService.GetActiveVersion();
             if (version == null)
             {
@@ -129,13 +134,13 @@ namespace SanyD365.Plugins.FactoryCredit.Calculation
                 new ColumnSet("mcs_accounttype", "mcs_accountcategory", "mcs_kacategory", "mcs_dealerrank",
                               "mcs_creditgrade", "mcs_creditscore", "mcs_creditvalid"));
 
-            // 2. 计算客户分类
+            // 2. 计算客户分类（禅道#2189：改 #2147 聚合口径，系统身份查询关联客户记录，与信用评估同源）
             CustomerCategoryService categoryService = new CustomerCategoryService();
-            CategoryResult category = categoryService.CalculateCategory(customer);
+            CategoryResult category = categoryService.CalculateCategory(systemService, tracer, customer, masterDataId);
             tracer.Trace($"客户分类={category.BuyerGradeLabel}, 客户等级={category.CreditGradeLabel}");
 
-            // 3. 读取模型参数（系数和聚合方法）
-            ModelParameterService paramService = new ModelParameterService(service, tracer);
+            // 3. 读取模型参数（系数和聚合方法）（#1854 系统身份查询 mcs_fca_mdlconfig）
+            ModelParameterService paramService = new ModelParameterService(systemService, tracer);
             ModelParameterInfo param = paramService.GetModelParameters(category.BuyerGradeValue, category.CreditGradeValue);
             if (!param.HasModelParams)
             {
@@ -164,7 +169,7 @@ namespace SanyD365.Plugins.FactoryCredit.Calculation
 
             // 4. 三因子计算
             ThreeFactorCalculationService calcService = new ThreeFactorCalculationService(service, tracer);
-            DateTime? versionDate = ResolveVersionDate(proc, service, tracer);
+            DateTime? versionDate = ResolveVersionDate(proc, systemService, tracer);
             ThreeFactorCalculationService.CalculationResult calcResult = calcService.Calculate(masterDataId, accountId, param, versionDate);
 
             // 5. 逾期调整

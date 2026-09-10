@@ -83,7 +83,7 @@ namespace D365ToolCommon.Metadata
         /// <summary>
         /// 创建字符串字段（如果不存在），支持中英文显示名。
         /// </summary>
-        public bool CreateStringFieldIfNotExists(string entityName, string schemaName, string displayName, string description, int maxLength, bool required, string displayNameZh, string displayNameEn)
+        public bool CreateStringFieldIfNotExists(string entityName, string schemaName, string displayName, string description, int maxLength, bool required, string displayNameZh, string displayNameEn, string format = "")
         {
             var logicalName = schemaName.ToLower();
             if (FieldExists(entityName, logicalName))
@@ -96,18 +96,25 @@ namespace D365ToolCommon.Metadata
                 ? LabelHelper.Create(displayName)
                 : LabelHelper.Create(displayNameZh, displayNameEn);
 
+            var stringAttr = new StringAttributeMetadata
+            {
+                SchemaName = schemaName,
+                LogicalName = logicalName,
+                DisplayName = displayLabel,
+                RequiredLevel = new AttributeRequiredLevelManagedProperty(required ? AttributeRequiredLevel.ApplicationRequired : AttributeRequiredLevel.None),
+                Description = LabelHelper.Create(description),
+                MaxLength = maxLength
+            };
+            // 可选格式（如 Url，审批链接类字段），不指定则默认 Text
+            if (!string.IsNullOrWhiteSpace(format) && Enum.TryParse<StringFormat>(format, ignoreCase: true, out var stringFormat))
+            {
+                stringAttr.FormatName = new StringFormatName { Value = stringFormat.ToString() };
+            }
+
             var request = new CreateAttributeRequest
             {
                 EntityName = entityName,
-                Attribute = new StringAttributeMetadata
-                {
-                    SchemaName = schemaName,
-                    LogicalName = logicalName,
-                    DisplayName = displayLabel,
-                    RequiredLevel = new AttributeRequiredLevelManagedProperty(required ? AttributeRequiredLevel.ApplicationRequired : AttributeRequiredLevel.None),
-                    Description = LabelHelper.Create(description),
-                    MaxLength = maxLength
-                }
+                Attribute = stringAttr
             };
 
             _service.Execute(request);
@@ -716,6 +723,40 @@ namespace D365ToolCommon.Metadata
         }
 
         /// <summary>
+        /// 更新 Decimal 字段的最小值/最大值范围。
+        /// 保留现有标签（MergeLabels=true），仅修改取值范围。
+        /// </summary>
+        public void UpdateDecimalRange(string entityName, string fieldLogicalName, decimal minValue, decimal maxValue)
+        {
+            var logicalName = fieldLogicalName.ToLower();
+
+            var retrieveRequest = new RetrieveAttributeRequest
+            {
+                EntityLogicalName = entityName,
+                LogicalName = logicalName,
+                RetrieveAsIfPublished = true
+            };
+            var retrieveResponse = (RetrieveAttributeResponse)_service.Execute(retrieveRequest);
+
+            if (!(retrieveResponse.AttributeMetadata is DecimalAttributeMetadata decimalAttr))
+            {
+                throw new InvalidOperationException($"字段 {entityName}.{logicalName} 不是 Decimal 类型");
+            }
+
+            decimalAttr.MinValue = minValue;
+            decimalAttr.MaxValue = maxValue;
+
+            var request = new UpdateAttributeRequest
+            {
+                EntityName = entityName,
+                Attribute = decimalAttr,
+                MergeLabels = true
+            };
+            _service.Execute(request);
+            Console.WriteLine($"  ✓ 字段 {entityName}.{logicalName} 取值范围已更新为 [{minValue}, {maxValue}]");
+        }
+
+        /// <summary>
         /// 更新 String 字段的最大长度（如编码规则扩容）。
         /// 保留现有标签（MergeLabels=true），仅修改 MaxLength。
         /// </summary>
@@ -746,6 +787,46 @@ namespace D365ToolCommon.Metadata
             };
             _service.Execute(request);
             Console.WriteLine($"  ✓ 字段 {entityName}.{logicalName} 最大长度已更新为 {maxLength}");
+        }
+
+        /// <summary>
+        /// 更新 String 字段的格式（如 Text 改 Url，使字段在表单渲染为可点击超链接）。
+        /// 原地更新格式，字段与历史数据不受影响。保留现有标签（MergeLabels=true），仅修改 FormatName。
+        /// </summary>
+        public void UpdateStringFormat(string entityName, string fieldLogicalName, StringFormat format)
+        {
+            var logicalName = fieldLogicalName.ToLower();
+
+            var retrieveRequest = new RetrieveAttributeRequest
+            {
+                EntityLogicalName = entityName,
+                LogicalName = logicalName,
+                RetrieveAsIfPublished = true
+            };
+            var retrieveResponse = (RetrieveAttributeResponse)_service.Execute(retrieveRequest);
+
+            if (!(retrieveResponse.AttributeMetadata is StringAttributeMetadata stringAttr))
+            {
+                throw new InvalidOperationException($"字段 {entityName}.{logicalName} 不是 String 类型");
+            }
+
+            if (stringAttr.Format == format)
+            {
+                Console.WriteLine($"  - 字段 {entityName}.{logicalName} 格式已是 {format}，无需更新");
+                return;
+            }
+
+            // 注意：必须设置 FormatName 才会序列化进 UpdateAttributeRequest；只设置 Format 属性不会生效（已实测）
+            stringAttr.FormatName = new StringFormatName { Value = format.ToString() };
+
+            var request = new UpdateAttributeRequest
+            {
+                EntityName = entityName,
+                Attribute = stringAttr,
+                MergeLabels = true
+            };
+            _service.Execute(request);
+            Console.WriteLine($"  ✓ 字段 {entityName}.{logicalName} 格式已更新为 {format}");
         }
 
         /// <summary>

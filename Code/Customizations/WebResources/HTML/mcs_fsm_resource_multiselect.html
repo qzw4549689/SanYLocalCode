@@ -212,13 +212,22 @@
             // 2) 复用统一查找取控件盒
             var ctrlEl = sibling.ctrlEl;
             if (ctrlEl) {
-                var cRect = ctrlEl.getBoundingClientRect();
-                // 控件盒：锁图标在 input 左侧约 24px，右缘留约 6px 内边距
-                var boxLeft = cRect.left - 24;
-                var boxRight = cRect.right + 6;
-                var labelW = Math.round(boxLeft - labelRect.left);
+                // 兄弟控件可视盒：从 input 向外找第一个「有边框或有背景」的祖先容器（=可见盒本身），
+                // 找不到则退回 input 本身。替代 -24/+6 魔数与「爬到最外层」两种错误锚点。
+                var fieldBox = labelEl.closest('[data-id*="mcs_fsm_bank_codes"]');
+                var boxEl = ctrlEl, found = false, depth = 0;
+                while (depth < 8 && boxEl.parentElement && boxEl.parentElement !== fieldBox && !boxEl.parentElement.contains(labelEl)) {
+                    var p = boxEl.parentElement;
+                    var pcs = window.parent.getComputedStyle(p);
+                    var hasBorder = pcs.borderStyle !== "none" && pcs.borderWidth !== "0px";
+                    var hasBg = pcs.backgroundColor !== "rgba(0, 0, 0, 0)" && pcs.backgroundColor !== "transparent";
+                    boxEl = p; depth++;
+                    if (hasBorder || hasBg) { found = true; break; }
+                }
+                var boxRect = (found ? boxEl : ctrlEl).getBoundingClientRect();
+                var labelW = Math.round(boxRect.left - labelRect.left);
                 if (labelW > 60 && labelW < 400) fLabel.style.width = labelW + "px";
-                var w = Math.round(boxRight - boxLeft);
+                var w = Math.round(boxRect.right - boxRect.left);
                 if (w > 150) elControl.style.maxWidth = w + "px";
             }
             // 3) 复制锁定字段样式（基准字段可能被 #1559 显隐规则隐藏，按优先级依次尝试常显锁定字段）
@@ -369,9 +378,16 @@
             parentDoc.addEventListener("mousedown", onOutside, true);
             document.addEventListener("mousedown", onOwnDoc, true);
             window.parent.addEventListener("resize", closePanel);
-            window.parent.addEventListener("scroll", closePanel, true);
+            window.parent.addEventListener("scroll", onParentScroll, true);
         }, 0);
         search.focus();
+    }
+
+    // 父窗口滚动时收起面板，但滚动源在面板内部（列表拖动滚动条）则忽略——
+    // 捕获模式的 scroll 监听会把面板内部 .fsmp-list 自己的滚动也捕获，误触发收起
+    function onParentScroll(ev) {
+        if (_panel && ev.target && _panel.contains(ev.target)) return;
+        closePanel();
     }
 
     function onOwnDoc(ev) {
@@ -392,7 +408,7 @@
         parentDoc.removeEventListener("mousedown", onOutside, true);
         document.removeEventListener("mousedown", onOwnDoc, true);
         window.parent.removeEventListener("resize", closePanel);
-        window.parent.removeEventListener("scroll", closePanel, true);
+        window.parent.removeEventListener("scroll", onParentScroll, true);
         _panel.remove();
         _panel = null;
         elControl.classList.remove("open");

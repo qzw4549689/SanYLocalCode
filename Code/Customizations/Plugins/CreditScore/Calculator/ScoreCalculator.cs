@@ -78,14 +78,6 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 {
                     _tracer.Trace($"→ 定量评分: value={tag.DecimalValue}, Min={config.MinValue}, Max={config.MaxValue}");
                     itemScore = CalculateQuantitativeScore(config, tag.DecimalValue);
-
-                    // OverdueModel 特殊处理：按模型分比例计算，公式 = weight * value / 100
-                    if (itemCode == "OverdueModel" && itemScore > 0 && tag.DecimalValue >= 0)
-                    {
-                        int originalScore = itemScore;
-                        itemScore = (int)Math.Round(config.Weight * tag.DecimalValue / 100m);
-                        _tracer.Trace($"OverdueModel 按比例计算: weight={config.Weight}, value={tag.DecimalValue}, 原固定分={originalScore}, 比例分={itemScore}");
-                    }
                 }
                 else // 定性
                 {
@@ -334,12 +326,6 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                                 && !string.Equals(s.Trim(), "N/A", StringComparison.OrdinalIgnoreCase)
                                 && decimal.TryParse(s.Trim(), out _);
 
-                            // 判断是否有真实数据（value2 或 value1 任一字段有有效数值）
-                            bool hasValue2 = (record.Contains("mcs_itemintvalue2") && record["mcs_itemintvalue2"] != null)
-                                          || (record.Contains("mcs_itemvalue2") && IsValidDecimalString(record.GetAttributeValue<string>("mcs_itemvalue2")));
-                            bool hasValue1 = (record.Contains("mcs_itemintvalue1") && record["mcs_itemintvalue1"] != null)
-                                          || (record.Contains("mcs_itemvalue1") && IsValidDecimalString(record.GetAttributeValue<string>("mcs_itemvalue1")));
-
                             // 优先读复核值(value2)，空则回退读原始值(value1)
                             if (record.Contains("mcs_itemintvalue2") && record["mcs_itemintvalue2"] != null)
                             {
@@ -450,7 +436,14 @@ namespace SanyD365.Plugins.CreditScore.Calculator
         {
             if (value == -1)
             {
-                _tracer.Trace($"定量指标 {config.ItemCode} 缺失，得0分");
+                // 禅道 #2090：缺失值匹配 min/max 均为空的「缺失」档配置行取其权重（如注册资本缺失档 直销3/经销商2 分）；
+                // 未配置缺失档（min/max 有值的普通区间行）仍兜底 0 分
+                if (!config.MinValue.HasValue && !config.MaxValue.HasValue)
+                {
+                    _tracer.Trace($"定量指标 {config.ItemCode} 缺失，命中「缺失」档配置，得分={config.Weight}");
+                    return config.Weight;
+                }
+                _tracer.Trace($"定量指标 {config.ItemCode} 缺失，未配置缺失档，得0分");
                 return 0;
             }
 
@@ -468,10 +461,11 @@ namespace SanyD365.Plugins.CreditScore.Calculator
 
         private int CalculateQualitativeScore(ScoringCardConfig config, string value)
         {
-            if (string.IsNullOrEmpty(value) || value == "O")
+            // 禅道 #2090：缺失值（空/"O"）不再直接 0 分，统一按 "O" 参与正常匹配——
+            // 配置行若有「缺失」档（listvalue 归一化为 "O"）则取其权重；未配置缺失档的项目匹配落空仍兜底 0 分
+            if (string.IsNullOrEmpty(value))
             {
-                _tracer.Trace($"定性指标 {config.ItemCode} 缺失，得0分");
-                return 0;
+                value = "O";
             }
 
             // 归一化：把中文显示名统一转换为三一编码 L/M/H/O
@@ -521,6 +515,10 @@ namespace SanyD365.Plugins.CreditScore.Calculator
                 case "A级": return "A";
                 case "B级": return "B";
                 case "C级": return "C";
+                // 迟付指数（LatePaymentIndex）：Coface LPI 英文描述 → 三一编码 N/S/C
+                case "No negative experience": return "N";
+                case "Some negative experience": return "S";
+                case "Considerable negative experience": return "C";
                 default: return value.Trim();
             }
         }

@@ -71,10 +71,22 @@
             color: #0078d4;
             font-weight: bold;
         }
+        .contact-hint {
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            background-color: #fffbe6;
+            border: 1px solid #ffe58f;
+            color: #876800;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
     <h3 id="page-title">搜索 Coface 企业</h3>
+
+    <div id="contactHint" class="contact-hint">
+        如果没有搜索到Coface企业，可联系Coface，邮箱：cn.servicedesk@coface.com, christina.li@coface.com
+    </div>
 
     <div class="search-panel">
         <label><span id="label-company-name">英文名称: </span><input type="text" id="companyName" /></label>
@@ -128,6 +140,7 @@
             document.getElementById('label-country-code').textContent = L('CofaceSearch_LabelCountryCode', '国家编码: ');
             document.getElementById('btnSearch').textContent = L('CofaceSearch_BtnSearch', '搜索');
             document.getElementById('btnClose').textContent = L('CofaceSearch_BtnClose', '关闭');
+            document.getElementById('contactHint').textContent = L('CofaceSearch_ContactHint', '如果没有搜索到Coface企业，可联系Coface，邮箱：cn.servicedesk@coface.com, christina.li@coface.com');
         }
 
         var pageData = null;
@@ -288,7 +301,7 @@
                     '<td>' + escapeHtml(company.City) + '</td>' +
                     '<td>' + escapeHtml(company.RegistrationNumber) + '</td>' +
                     '<td>' + escapeHtml(company.TaxNumber) + '</td>' +
-                    '<td><button class="btn-bind" onclick="bindCofaceId(\'' + escapeHtml(company.CofaceId) + '\')">' + L('CofaceSearch_BtnBind', '绑定') + '</button></td>' +
+                    '<td><button class="btn-bind" onclick="bindCofaceId(\'' + escapeHtml(company.CofaceId) + '\', \'' + escapeHtml(company.CountryCode || '') + '\')">' + L('CofaceSearch_BtnBind', '绑定') + '</button></td>' +
                     '</tr>';
             });
 
@@ -297,7 +310,7 @@
             showMessage(L('CofaceSearch_FoundCount', '找到 {0} 个候选企业，请选择匹配项绑定').replace('{0}', companies.length), "info");
         }
 
-        function bindCofaceId(cofaceId) {
+        function bindCofaceId(cofaceId, companyCountryCode) {
             if (!cofaceId) {
                 showMessage(L('CofaceSearch_EmptyCofaceId', 'Coface ID 为空，无法绑定'), "error");
                 return;
@@ -306,6 +319,18 @@
             if (!recordId) {
                 showMessage(L('CofaceSearch_NoRecordId', '未获取到当前评估记录 ID'), "error");
                 return;
+            }
+
+            // Bug #1898：所选企业归属国与评估记录国家编码不一致时确认提示（错绑将导致 Coface 下单 400）
+            var recordCountry = ((pageData && pageData.countryCode) || document.getElementById("countryCode").value || "").trim().toUpperCase();
+            var companyCountry = (companyCountryCode || "").trim().toUpperCase();
+            if (companyCountry && recordCountry && companyCountry !== recordCountry) {
+                var confirmText = L('CofaceSearch_CountryMismatchConfirm',
+                    '所选企业的归属国家（{0}）与当前评估记录的国家编码（{1}）不一致，绑定后 Coface 下单将会报错失败。建议核对国家编码后重新搜索。是否仍要绑定？')
+                    .replace('{0}', companyCountry).replace('{1}', recordCountry);
+                if (!window.confirm(confirmText)) {
+                    return;
+                }
             }
 
             clearMessage();
@@ -324,30 +349,8 @@
                 }).then(handleFetchError)
             );
 
-            // 更新客户主数据（mcs_customermasterdata）
-            if (accountId) {
-                var plainAccountId = toPlainGuid(accountId);
-                promises.push(
-                    fetch(baseUrl + "/api/data/v9.2/accounts(" + plainAccountId + ")?$select=_mcs_customermasterdata_value", {
-                        method: "GET",
-                        headers: getApiHeaders(),
-                        credentials: "same-origin"
-                    })
-                    .then(handleFetchError)
-                    .then(function (response) { return response.json(); })
-                    .then(function (accountData) {
-                        if (accountData._mcs_customermasterdata_value) {
-                            var customerMasterDataId = toPlainGuid(accountData._mcs_customermasterdata_value);
-                            return fetch(baseUrl + "/api/data/v9.2/mcs_customermasterdatas(" + customerMasterDataId + ")", {
-                                method: "PATCH",
-                                headers: getApiHeaders(),
-                                body: JSON.stringify({ mcs_cofaceid: cofaceId }),
-                                credentials: "same-origin"
-                            }).then(handleFetchError);
-                        }
-                    })
-                );
-            }
+            // 禅道 #2092：客户主数据回写改由服务端 Plugin（CofaceBindWritebackPlugin，系统身份）完成，
+            // 前端不再直接 PATCH 客户主数据（操作者无 mcs_customermasterdata 写权限会 403）
 
             Promise.all(promises)
                 .then(function () {

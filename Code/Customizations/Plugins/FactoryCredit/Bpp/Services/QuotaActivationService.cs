@@ -26,8 +26,10 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp.Services
         /// 核心不变式：授信额度 = 授信余额 + 占用金额（sellergrant = sellerbalance + usedsellerbalance）。
         /// 余额按 tobeGrant - 现有占用 计算，不再使用前端传入的 tobeBalance；占用字段不重置。
         /// 不予授信归零场景（tobeGrant=0）：占用保持不变，余额 = -占用（负余额保留敞口，后续回款释放可加回）。
+        /// owner：新建额度记录的负责人（#1856，申请人），仅 Create 分支生效；Update 既有记录不动 owner。
+        /// procRef：模型计算序列号 Lookup（#2025），非空时同步写入 mcs_fca_procid（视图列绑定的字段）。
         /// </summary>
-        public void ActivateQuota(EntityReference accountRef, string custName, Money tobeGrant, Money tobeBalance, string doid)
+        public void ActivateQuota(EntityReference accountRef, string custName, Money tobeGrant, Money tobeBalance, string doid, EntityReference owner, EntityReference procRef)
         {
             if (accountRef == null)
             {
@@ -53,6 +55,10 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp.Services
             if (isNewQuota)
             {
                 quota["mcs_usedsellerbalance"] = new Money(0m);
+                if (owner != null)
+                {
+                    quota["ownerid"] = owner;
+                }
             }
             quota["mcs_isactive"] = new OptionSetValue(IS_ACTIVE_YES);
             quota["mcs_validfrom"] = DateTime.UtcNow;
@@ -60,6 +66,12 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp.Services
             if (!string.IsNullOrWhiteSpace(doid))
             {
                 quota["mcs_doid"] = doid;
+            }
+
+            // #2025 视图「模型计算序列号」列绑定的是 Lookup mcs_fca_procid，必须与文本 mcs_doid 同步写入，否则该列空白
+            if (procRef != null)
+            {
+                quota["mcs_fca_procid"] = procRef;
             }
 
             if (quota.Id != Guid.Empty)

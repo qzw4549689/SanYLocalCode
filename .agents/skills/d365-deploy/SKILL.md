@@ -53,6 +53,8 @@ description: D365 项目发布部署指南。适用于 Service 项目编译、D3
 
 > **硬性规定**：AI 在任何情况下都不得调用 `PublishAllXmlRequest`/`PublishAllXml`。即使多个组件需要发布，也应使用 `PublishXmlRequest` 列出具体实体/WebResource；如确需全局发布，必须向用户说明理由，由用户在工具外手动执行。
 
+> **JS/HTML 来源规定（2026-08-15 新增）**：部署到 DEV1 的我方 JS/HTML WebResource 必须取自 tx-windows 仓库合并后的 `uat`（路径 `D365/SanyD365.D365WebResource/WebResource/mcs_/Scripts|Htmls/Sales/CreditAssessment/`），禁止用本地未入仓版本直连部署；流程见 `/skill:d365-dev` 第 8.5.2 节。
+
 ```csharp
 // ✅ 正确：只发布当前操作的实体
 var request = new PublishXmlRequest
@@ -328,6 +330,38 @@ dotnet run --no-build -- check-webresource-release AllComponent_Peter_NoUAT --ta
 
 ---
 
+## 5.5 生产直连核对策略（Frank 账号只读，2026-09-01 新增）
+
+> **背景**：此前核对生产基线只能靠「归档包推测 / UAT 当镜子 / PRE 镜像」三类间接证据，都已踩过坑（820 缺 Assembly 事故 = 「以为生产有」；PRE 设备码易失效）。2026-09-01 起有**生产只读直连通道**：Frank 账号 `gw_zhangf68@sanyglobal.onmicrosoft.com`（OAuth 用户名密码、无 MFA），密码不落盘，用时向用户索取。首次实证：4 次轻查询即闭环「ExtensionApi.Sales/Extension.Sales 均已在生产」这一关键假设。
+>
+> **红线**：① **只读**，禁止任何写操作；② 上班时间**轻量查询**（单条记录/单 Assembly 级，禁止全量元数据扫描，生产有真实用户在用）；③ 三个生产数据中心组织独立，核对前确认目标（prod=新加坡 crm5 / prod-eu=crm4 / prod-na=crm）；④ **🚨 逐步请示铁律（2026-09-01 用户明确，强制执行）：该账号在生产环境的任何使用——无论查询还是其他动作——都必须先询问用户，每一小步动作都要单独请示，获批准后才可执行，严禁一次性连发多个查询或自作主张跳过请示**。
+
+**连接方式（用完即焚，勿写入任何文件）**：
+
+```bash
+cd Code/Tools/MetadataTool
+export D365_URL="https://sany.crm5.dynamics.com"   # 生产-新加坡（亚太）
+export D365_USERNAME="gw_zhangf68@sanyglobal.onmicrosoft.com"
+export D365_PASSWORD='<向用户索取>'
+```
+
+**发版前（直接读生产基线，替代推测）：**
+
+| 核对项 | 命令 | 判定 |
+|---|---|---|
+| 字段类型冲突终核（防 80041A06） | `list-fields <实体>` 读生产字段类型，与发版包字段 diff | 🚨 同名字段类型不一致必须=0；可替代「请三一生成产全量包」，分实体轻量抽核 |
+| 跨包 Step 实现 Assembly 在场（防 820 缺依赖） | `query-assembly-version <Assembly名>` | 必须在场，ID 与 DEV1 一致；不在场则对应包必须先发 |
+| Custom API 在场/形态 | `query-records customapi "uniquename,createdon" 1 "uniquename=<API名>"` | ⚠️ 各环境 customapi/plugintype **ID 独立**，发布管道按唯一名就地更新；DEV 重建/换绑不影响目标环境，无需同步换绑 |
+| 角色在场 | `list-security-roles <关键字>` | 本批 role 包外已存在的角色权限基线 |
+
+**发版后（每包必做，替代「n8n 成功截图」——Assembly 导入成功≠代码新，8/31 教训）：**
+
+1. `query-assembly-version <Assembly名>` —— ModifiedOn 已刷新为本次发布时间；
+2. 新组件在场抽查：字段 `list-fields` / Custom API `query-records customapi` / 角色 `list-security-roles <关键字>`；
+3. 功能实证：真实调用本批 Custom API、触发本批 Plugin 路径（冒烟 1 条即走）。
+
+---
+
 ## 6. DEV 环境测试-UAT发布流程
 
 > 适用于本地代码与远程服务器代码存在结构/命名空间差异，需要先在 DEV 环境验证 Plugin 的场景。
@@ -349,8 +383,9 @@ msbuild Code/Customizations/Plugins/SanyD365.Plugins.csproj /p:Configuration=Rel
 cd Code/Tools/MetadataTool
 export D365_URL="https://dev1.crm5.dynamics.com"
 
-# 注册/更新 Plugin Assembly
+# 注册/更新 Plugin Assembly（不传实体名：仅注册 Assembly+Type，不创建 Step）
 dotnet run register-plugin <dll路径> <Plugin类名>
+# ⚠️ 2026-08-20 起：传实体名才会建 Create Step；被 Custom API 绑定的类一律禁止建实体 Step（#1641 幽灵 Step 防线）
 ```
 
 ### 6.3 DEV 测试验证

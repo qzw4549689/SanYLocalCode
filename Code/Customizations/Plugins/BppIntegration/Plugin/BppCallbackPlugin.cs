@@ -1,6 +1,7 @@
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System;
+using System.Linq;
 
 namespace SanyD365.Plugins.BppIntegration.Plugin
 {
@@ -89,6 +90,9 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
 
                         // 同步客户主数据信用信息
                         UpdateCustomerMasterDataCreditInfo(service, tracer, target.Id);
+
+                        // 禅道 #1645：一个客户永远只能存在一条有效评估，将同客户其他有效记录及其名下标签置否
+                        DeactivateOtherActiveRecords(service, tracer, target.Id);
                         break;
 
                     case "rejected":
@@ -150,8 +154,21 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                     return;
                 }
 
-                // 与限额申请保持一致：orgId=3（UAT/生产均为3）
-                string bppLink = $"https://sanybpp-portal-uat.sany.com.cn/approval-form?orgId=3&instanceId={workflowId}";
+                // 与限额申请保持一致：审批门户基础地址从系统配置 Bpp_ApprovalFlowBaseUrl 读取（各环境独立配置）
+                // 2026-09-03 修复：原硬编码 uat 门户地址，会把服务端 UpdateEntityStatusForStart 按配置写入的正确链接覆盖成 uat 链接
+                var configQuery = new QueryExpression("ms_systemconfiguration")
+                {
+                    ColumnSet = new ColumnSet("ms_content")
+                };
+                configQuery.Criteria.AddCondition("ms_name", ConditionOperator.Equal, "Bpp_ApprovalFlowBaseUrl");
+                var configEntity = service.RetrieveMultiple(configQuery).Entities.FirstOrDefault();
+                var baseUrl = configEntity?.GetAttributeValue<string>("ms_content");
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    tracer.Trace("系统配置 Bpp_ApprovalFlowBaseUrl 不存在或内容为空，跳过更新BPP链接");
+                    return;
+                }
+                string bppLink = $"{baseUrl}{workflowId}";
 
                 var existingLink = creditRecord.GetAttributeValue<string>("mcs_bpplink");
                 if (!string.Equals(existingLink, bppLink, StringComparison.OrdinalIgnoreCase))
@@ -207,6 +224,92 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
         }
 
         /// <summary>
+        /// 禅道 #1645：审批通过后，将同客户其他有效评估记录置为无效（mcs_active=false），
+        /// 并将其名下客户信用标签联动置否，保证一个客户永远只有一条有效评估。
+        /// 说明：仅更新 mcs_active，Target 不含 mcs_bppstatus，不会递归触发本 Plugin。
+        /// </summary>
+        private void DeactivateOtherActiveRecords(IOrganizationService service, ITracingService tracer, Guid approvedRecordId)
+        {
+            try
+            {
+                var approved = service.Retrieve("mcs_credit_record", approvedRecordId,
+                    new ColumnSet("mcs_accountid"));
+                var accountRef = approved.GetAttributeValue<EntityReference>("mcs_accountid");
+                if (accountRef == null)
+                {
+                    tracer.Trace("客户为空，跳过旧有效记录失效处理");
+                    return;
+                }
+
+                var query = new QueryExpression("mcs_credit_record")
+                {
+                    ColumnSet = new ColumnSet("mcs_scoreid"),
+                    Criteria =
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression("mcs_accountid", ConditionOperator.Equal, accountRef.Id),
+                            new ConditionExpression("mcs_active", ConditionOperator.Equal, true),
+                            new ConditionExpression("statecode", ConditionOperator.Equal, 0),
+                            new ConditionExpression("mcs_credit_recordid", ConditionOperator.NotEqual, approvedRecordId)
+                        }
+                    }
+                };
+
+                var others = service.RetrieveMultiple(query);
+                if (others.Entities.Count == 0)
+                {
+                    tracer.Trace("同客户无其他有效评估记录，无需失效处理");
+                    return;
+                }
+
+                foreach (var oldRecord in others.Entities)
+                {
+                    var deactivate = new Entity("mcs_credit_record") { Id = oldRecord.Id };
+                    deactivate["mcs_active"] = false;
+                    service.Update(deactivate);
+                    tracer.Trace($"旧有效评估已置否: {oldRecord.GetAttributeValue<string>("mcs_scoreid")}({oldRecord.Id})");
+
+                    // 名下客户信用标签联动置否（用户确认口径：画像页/厂端授信按客户查标签，不能读到旧评估标签）
+                    DeactivateTagsOfRecord(service, tracer, oldRecord.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"失效旧有效评估记录失败: {ex.Message}");
+                // 不阻断主流程，但记录异常
+            }
+        }
+
+        /// <summary>
+        /// 将指定评估记录名下所有有效客户信用标签联动置否（禅道 #1645）
+        /// </summary>
+        private void DeactivateTagsOfRecord(IOrganizationService service, ITracingService tracer, Guid creditRecordId)
+        {
+            var tagQuery = new QueryExpression("mcs_customer_tag")
+            {
+                ColumnSet = new ColumnSet(false),
+                Criteria =
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("mcs_credit_record", ConditionOperator.Equal, creditRecordId),
+                        new ConditionExpression("mcs_active", ConditionOperator.Equal, true)
+                    }
+                }
+            };
+
+            var tags = service.RetrieveMultiple(tagQuery);
+            foreach (var tag in tags.Entities)
+            {
+                var updateTag = new Entity("mcs_customer_tag") { Id = tag.Id };
+                updateTag["mcs_active"] = false;
+                service.Update(updateTag);
+            }
+            tracer.Trace($"评估记录 {creditRecordId} 名下 {tags.Entities.Count} 个有效标签已联动置否");
+        }
+
+        /// <summary>
         /// 审批通过后同步客户主数据信用信息
         /// 目标实体: mcs_customermasterdata（通过 account.mcs_customermasterdata 关联）
         /// </summary>
@@ -245,7 +348,10 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                 }
 
                 var customerMasterDataId = customerMasterDataRef.Id;
-                string creditGrade = CalculateCreditGrade(creditScore);
+                // 禅道 #2091：信用等级映射改配置化（ms_systemconfiguration.CreditGradeMapping），
+                // 配置缺失/解析失败时用内置新口径默认值兜底，不阻断流程
+                var gradeConfig = CreditGradeMappingHelper.GetConfig(service, tracer);
+                string creditGrade = CreditGradeMappingHelper.CalculateGrade(gradeConfig, creditScore);
                 int? creditGradeValue = MapCreditGradeToOptionSetValue(creditGrade);
 
                 var updateCustomerMasterData = new Entity("mcs_customermasterdata", customerMasterDataId);
@@ -264,21 +370,6 @@ namespace SanyD365.Plugins.BppIntegration.Plugin
                 tracer.Trace($"更新客户主数据失败: {ex.Message}");
                 // 不阻断主流程，但记录异常
             }
-        }
-
-        /// <summary>
-        /// 计算信用等级
-        /// TODO: 具体分值区间需业务确认
-        /// </summary>
-        private string CalculateCreditGrade(decimal? score)
-        {
-            if (!score.HasValue) return "";
-            decimal s = score.Value;
-            if (s >= 80) return "A0";
-            if (s >= 70) return "A1";
-            if (s >= 60) return "A2";
-            if (s >= 50) return "A3";
-            return "A4";
         }
 
         /// <summary>

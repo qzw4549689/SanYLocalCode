@@ -296,10 +296,10 @@ public class EntityManager
 		Console.WriteLine(indent + "(空)");
 	}
 
-	public void CreateStringField(string entityName, string schemaName, string displayName, string description, int maxLength = 100, bool required = false, string displayNameZh = "", string displayNameEn = "")
+	public void CreateStringField(string entityName, string schemaName, string displayName, string description, int maxLength = 100, bool required = false, string displayNameZh = "", string displayNameEn = "", string format = "")
 	{
 		var fieldService = new MetadataFieldService(_service);
-		fieldService.CreateStringFieldIfNotExists(entityName, schemaName, displayName, description, maxLength, required, displayNameZh, displayNameEn);
+		fieldService.CreateStringFieldIfNotExists(entityName, schemaName, displayName, description, maxLength, required, displayNameZh, displayNameEn, format);
 		Console.WriteLine($"  ✓ {schemaName} ({displayName}) - 字符串({maxLength})");
 	}
 
@@ -820,10 +820,13 @@ public class EntityManager
 		idPrefix ??= "mcs." + entityName + ".";
 		Console.WriteLine($">>> 部署 RibbonDiffXml: {entityName}（载体 Solution={solutionName}，幂等前缀 {idPrefix}）");
 
-		// 1. 导出 Solution 并解包
+		// 1. 导出 Solution 并解包（2026-08-15 优化：30 分钟内已有导出则复用，避免重试在 Solution History 产生多条导出记录）
 		Directory.CreateDirectory(workDir);
 		var zipPath = Path.Combine(workDir, solutionName + ".zip");
-		ExportSolution(solutionName, zipPath);
+		if (File.Exists(zipPath) && File.GetLastWriteTime(zipPath) > DateTime.Now.AddMinutes(-30))
+			Console.WriteLine($"  ♻️ 复用 30 分钟内的已有导出（跳过重复导出）: {zipPath}");
+		else
+			ExportSolution(solutionName, zipPath);
 		var extractDir = Path.Combine(workDir, "unpacked");
 		if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
 		System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractDir);
@@ -847,15 +850,16 @@ public class EntityManager
 		bool HasPrefix(XElement el) => ((string)el.Attribute("Id"))?.StartsWith(idPrefix, StringComparison.OrdinalIgnoreCase) == true;
 
 		// 3. 合入平铺节（CustomActions / CommandDefinitions / LocLabels）：先删同前缀旧节点再追加
+		// 2026-08-15 修复：片段节存在但元素为空（如 #1834 全注释=隐藏场景）时也必须清理旧节点，否则隐藏不生效
 		foreach (var sectionName in new[] { "CustomActions", "CommandDefinitions", "LocLabels" })
 		{
 			var snippetSection = snippetRoot.Element(sectionName);
-			if (snippetSection == null || !snippetSection.Elements().Any()) continue;
+			if (snippetSection == null) continue;
 			var section = ribbonEl.Element(sectionName);
 			if (section == null) { section = new XElement(sectionName); ribbonEl.Add(section); }
 			section.Elements().Where(HasPrefix).Remove();
 			foreach (var child in snippetSection.Elements()) section.Add(new XElement(child));
-			Console.WriteLine($"  ✓ {sectionName}: 合入 {snippetSection.Elements().Count()} 个节点");
+			Console.WriteLine($"  ✓ {sectionName}: 合入 {snippetSection.Elements().Count()} 个节点（已清理同前缀旧节点）");
 		}
 
 		// 4. 合入 RuleDefinitions（二级容器：TabDisplayRules/DisplayRules/EnableRules）
@@ -866,12 +870,12 @@ public class EntityManager
 			if (rules == null) { rules = new XElement("RuleDefinitions"); ribbonEl.Add(rules); }
 			foreach (var container in snippetRules.Elements())
 			{
-				if (!container.Elements().Any()) continue;
+				// 2026-08-15 修复：容器为空（全注释=隐藏场景）同样先清同前缀旧节点
 				var currentContainer = rules.Element(container.Name);
 				if (currentContainer == null) { currentContainer = new XElement(container.Name); rules.Add(currentContainer); }
 				currentContainer.Elements().Where(HasPrefix).Remove();
 				foreach (var child in container.Elements()) currentContainer.Add(new XElement(child));
-				Console.WriteLine($"  ✓ RuleDefinitions/{container.Name.LocalName}: 合入 {container.Elements().Count()} 个节点");
+				Console.WriteLine($"  ✓ RuleDefinitions/{container.Name.LocalName}: 合入 {container.Elements().Count()} 个节点（已清理同前缀旧节点）");
 			}
 		}
 
@@ -1400,6 +1404,80 @@ public class EntityManager
 		}
 		idx += "<labels>".Length;
 		return cell.Substring(0, idx) + replacement + cell.Substring(idx);
+	}
+
+	/// <summary>
+	/// 原位替换主窗体字段：保留旧字段所在单元格的位置/布局，仅把单元格内控件替换为新字段（文本控件），
+	/// 并设置 2052/1033 标签，最后发布实体。
+	/// 用于「字段类型不可直接改、新建字段替代旧字段」场景（如禅道 #2138 城市 Lookup 改手工输入文本字段），
+	/// 避免 RemoveFieldsFromForm+UpdateMainForm 导致新字段落位错误需手动拖拽。
+	/// 2026-09-03 新增（禅道 #2138，经用户批准扩展公共方法）。
+	/// </summary>
+	public void ReplaceFormField(string entityName, string oldFieldName, string newFieldName, string zhLabel, string enLabel = null)
+	{
+		Console.WriteLine($"原位替换 {entityName} 主窗体字段: {oldFieldName} -> {newFieldName}");
+		QueryExpression query = new QueryExpression("systemform");
+		query.ColumnSet = new ColumnSet("formxml", "name", "type");
+		query.Criteria = new FilterExpression
+		{
+			Conditions =
+			{
+				new ConditionExpression("objecttypecode", ConditionOperator.Equal, entityName),
+				new ConditionExpression("type", ConditionOperator.Equal, 2)
+			}
+		};
+		EntityCollection forms = _service.RetrieveMultiple(query);
+		if (forms.Entities.Count == 0)
+		{
+			Console.WriteLine("  ✗ 未找到 type=2 的主窗体");
+			return;
+		}
+		string stringClassId = GetControlClassId(AttributeTypeCode.String);
+		foreach (Entity form in forms.Entities)
+		{
+			string formXml = form.GetAttributeValue<string>("formxml");
+			string formName = form.GetAttributeValue<string>("name");
+			if (formXml.Contains("datafieldname=\"" + newFieldName + "\""))
+			{
+				Console.WriteLine($"  ⊘ 窗体 {formName} 中新字段 {newFieldName} 已存在，跳过");
+				continue;
+			}
+			string marker = "datafieldname=\"" + oldFieldName + "\"";
+			int fieldIndex = formXml.IndexOf(marker, StringComparison.Ordinal);
+			if (fieldIndex < 0)
+			{
+				Console.WriteLine($"  ⊘ 窗体 {formName} 中未找到旧字段 {oldFieldName}，跳过");
+				continue;
+			}
+			int cellStart = formXml.LastIndexOf("<cell ", fieldIndex, StringComparison.Ordinal);
+			int cellEnd = formXml.IndexOf("</cell>", fieldIndex, StringComparison.Ordinal);
+			if (cellStart < 0 || cellEnd < 0)
+			{
+				Console.WriteLine($"  ✗ 窗体 {formName} 中未定位到旧字段所在单元格，跳过");
+				continue;
+			}
+			cellEnd += "</cell>".Length;
+			string cell = formXml.Substring(cellStart, cellEnd - cellStart);
+			// 替换单元格内控件为新字段文本控件（保留单元格外壳：id/locklevel/colspan/rowspan 不变）
+			var controlRx = new System.Text.RegularExpressions.Regex("<control [^>]*/>");
+			if (!controlRx.IsMatch(cell))
+			{
+				Console.WriteLine($"  ✗ 窗体 {formName} 旧字段单元格内未找到控件节点，跳过");
+				continue;
+			}
+			string newControl = $"<control id=\"{newFieldName}\" classid=\"{stringClassId}\" datafieldname=\"{newFieldName}\" disabled=\"false\" />";
+			string newCell = controlRx.Replace(cell, newControl, 1);
+			newCell = SetCellLabelDescription(newCell, 2052, zhLabel);
+			if (enLabel != null)
+			{
+				newCell = SetCellLabelDescription(newCell, 1033, enLabel);
+			}
+			Entity update = new Entity("systemform", form.Id);
+			update["formxml"] = formXml.Substring(0, cellStart) + newCell + formXml.Substring(cellEnd);
+			_service.Update(update);
+			Console.WriteLine($"  ✓ 窗体 {formName} 字段已原位替换: {oldFieldName} -> {newFieldName}");
+		}
+		PublishEntity(entityName);
 	}
 
 	public void RemoveFieldsFromForm(string entityName, params string[] fieldNames)
@@ -2033,6 +2111,7 @@ public class EntityManager
 			"mcs_fca_proc" => "FcaProcForm",
 			"mcs_fca_quotaapp" => "FcaQuotaAppForm",
 			"mcs_fca_records" => "FcaRecordsForm",
+			"mcs_fsm_detail_data" => "FsmDetailDataForm",
 			_ => "ScoringCardForm", 
 		};
 		if (1 == 0)
@@ -2207,6 +2286,29 @@ public class EntityManager
 		return formXml.Substring(0, match.Index) + stringBuilder.ToString() + formXml.Substring(match.Index + match.Length);
 	}
 
+	/// <summary>
+	/// 检查 PluginType 是否已被 Custom API 绑定（customapi.plugintypeid）。
+	/// 2026-08-20 新增：#1641 幽灵 Step/跨包依赖事故防线——API 实现类禁止再挂实体 Step。
+	/// </summary>
+	public bool IsPluginTypeBoundToCustomApi(Guid pluginTypeId, out List<string> apiNames)
+	{
+		apiNames = new List<string>();
+		var q = new QueryExpression("customapi")
+		{
+			ColumnSet = new ColumnSet("uniquename"),
+			Criteria = new FilterExpression
+			{
+				Conditions =
+				{
+					new ConditionExpression("plugintypeid", ConditionOperator.Equal, pluginTypeId)
+				}
+			}
+		};
+		foreach (var e in _service.RetrieveMultiple(q).Entities)
+			apiNames.Add(e.GetAttributeValue<string>("uniquename"));
+		return apiNames.Count > 0;
+	}
+
 	public void RegisterPlugin(string dllPath, string className, string entityName, string messageName, int stage, int mode)
 	{
 		Console.WriteLine("注册Plugin: " + className + "...");
@@ -2277,6 +2379,13 @@ public class EntityManager
 			entity3["name"] = className.Split('.').Last();
 			guid2 = _service.Create(entity3);
 			Console.WriteLine($"  ✓ Plugin Type已创建 (ID: {guid2})");
+		}
+		// 2026-08-20 #1641 防线：Custom API 实现类禁止再挂实体 Step（幽灵 Step/跨包依赖事故教训）
+		if (IsPluginTypeBoundToCustomApi(guid2, out var boundApis))
+		{
+			Console.WriteLine($"  ✗ 禁止注册实体 Step：该类已被 Custom API 绑定（{string.Join(", ", boundApis)}）");
+			Console.WriteLine("    API 实现类不得兼职实体触发；确需实体触发逻辑请在主插件程序集新建独立类。");
+			return;
 		}
 		queryExpression = new QueryExpression("sdkmessage");
 		queryExpression.ColumnSet = new ColumnSet("sdkmessageid");
@@ -2412,7 +2521,19 @@ public class EntityManager
 		entity3["typename"] = className;
 		entity3["friendlyname"] = className.Split('.').Last();
 		entity3["name"] = className.Split('.').Last();
-		Guid guid2 = _service.Create(entity3);
+		Guid guid2;
+		try
+		{
+			guid2 = _service.Create(entity3);
+		}
+		catch (Exception)
+		{
+			// 短名与其他 Assembly 的 PluginType 撞 Default Solution 唯一索引（2601）时，用全限定名注册避开（CreditPool 同款解法）
+			entity3["friendlyname"] = className;
+			entity3["name"] = className;
+			guid2 = _service.Create(entity3);
+			Console.WriteLine($"  ℹ 短名冲突，已改用全限定名注册 Plugin Type");
+		}
 		Console.WriteLine($"  ✓ Plugin Type已创建 (ID: {guid2})");
 		return guid2;
 	}
@@ -2488,6 +2609,13 @@ public class EntityManager
 			entity3["name"] = className.Split('.').Last();
 			guid2 = _service.Create(entity3);
 			Console.WriteLine($"  ✓ Plugin Type已创建 (ID: {guid2})");
+		}
+		// 2026-08-20 #1641 防线：Custom API 实现类禁止再挂实体 Step（幽灵 Step/跨包依赖事故教训）
+		if (IsPluginTypeBoundToCustomApi(guid2, out var boundApis2))
+		{
+			Console.WriteLine($"  ✗ 禁止注册实体 Step：该类已被 Custom API 绑定（{string.Join(", ", boundApis2)}）");
+			Console.WriteLine("    API 实现类不得兼职实体触发；确需实体触发逻辑请在主插件程序集新建独立类。");
+			return;
 		}
 		queryExpression = new QueryExpression("sdkmessage");
 		queryExpression.ColumnSet = new ColumnSet("sdkmessageid");
@@ -2635,7 +2763,7 @@ public class EntityManager
 			("CountryRisk", "国别风险", "国别风险（低、中、高）", 100000001, 100000002, 100000001, false, true),
 			("SectorRisk", "行业风险", "行业风险（低、中、高）", 100000001, 100000002, 100000001, false, true),
 			("Sectors", "行业属性", "行业属性", 100000001, 100000002, 100000001, false, true),
-			("OverdueModel", "逾期未回收率模型分", "逾期未回收率模型分（0-100）", 100000000, 100000003, 100000000, true, false),
+			("OverdueModel", "内部交易等级", "内部交易等级（S01~S10，人工复核选择；禅道#2009改名/#2090改定性）", 100000001, 100000003, 100000000, true, false),
 			("BigAccount", "客户评级", "客户评级 S/A/S或A级控股参股公司", 100000001, 100000003, 100000000, false, false),
 			("SalesAmount", "历史采购金额", "累计采购金额,单位元,货币USD", 100000000, 100000003, 100000000, false, false),
 			("ARAmount", "历史逾期金额", "最大逾期付款金额（过去两年）USD/元", 100000000, 100000003, 100000000, false, false),
@@ -2741,7 +2869,7 @@ public class EntityManager
 	public void CreateQualitativeEnumRecords()
 	{
 		Console.WriteLine("创建定性评分项目枚举值记录...");
-		(string, string, string, int)[] array = new(string, string, string, int)[48]
+		(string, string, string, int)[] array = new(string, string, string, int)[59]
 		{
 			("CountryRisk", "A1", "低风险", 5),
 			("CountryRisk", "A2", "低风险", 5),
@@ -2790,7 +2918,18 @@ public class EntityManager
 			("DealerRating", "Platinum", "铂金", 8),
 			("DealerRating", "Silver", "白银", 6),
 			("DealerRating", "Certified", "认证", 4),
-			("DealerRating", "Intention", "意向", 2)
+			("DealerRating", "Intention", "意向", 2),
+			("OverdueModel", "S01", "S01", 0),
+			("OverdueModel", "S02", "S02", 0),
+			("OverdueModel", "S03", "S03", 0),
+			("OverdueModel", "S04", "S04", 0),
+			("OverdueModel", "S05", "S05", 0),
+			("OverdueModel", "S06", "S06", 0),
+			("OverdueModel", "S07", "S07", 0),
+			("OverdueModel", "S08", "S08", 0),
+			("OverdueModel", "S09", "S09", 0),
+			("OverdueModel", "S10", "S10", 0),
+			("OverdueModel", "O", "缺失", 0)
 		};
 		Dictionary<string, Guid> dictionary = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 		QueryExpression queryExpression = new QueryExpression("mcs_credit_items");
@@ -3441,35 +3580,63 @@ public class EntityManager
 		string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dllPath);
 		Console.WriteLine("更新Assembly: " + fileNameWithoutExtension);
 		Console.WriteLine($"DLL大小: {array.Length / 1024} KB");
+
+		// 读取 DLL 的 AssemblyName，按真实名称查询并写入 D365 记录
+		string asmNameStr = fileNameWithoutExtension;
+		string asmVersion = "1.0.0.0";
+		string asmCulture = "neutral";
+		string asmToken = "null";
+		try
+		{
+			var asmName = System.Reflection.AssemblyName.GetAssemblyName(dllPath);
+			asmNameStr = asmName.Name;
+			asmVersion = asmName.Version?.ToString() ?? "1.0.0.0";
+			asmCulture = string.IsNullOrEmpty(asmName.CultureName) ? "neutral" : asmName.CultureName;
+			byte[] tokenBytes = asmName.GetPublicKeyToken();
+			asmToken = (tokenBytes == null || tokenBytes.Length == 0) ? "null" : BitConverter.ToString(tokenBytes).Replace("-", "").ToLowerInvariant();
+			Console.WriteLine($"DLL AssemblyName: {asmName.FullName}");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"⚠️ 读取 DLL AssemblyName 失败，使用文件名作为 Assembly 名: {ex.Message}");
+		}
+
 		QueryExpression queryExpression = new QueryExpression("pluginassembly");
-		queryExpression.ColumnSet = new ColumnSet("pluginassemblyid");
+		queryExpression.ColumnSet = new ColumnSet("pluginassemblyid", "name", "version", "culture", "publickeytoken");
 		queryExpression.Criteria = new FilterExpression
 		{
 			Conditions = 
 			{
-				new ConditionExpression("name", ConditionOperator.Equal, fileNameWithoutExtension)
+				new ConditionExpression("name", ConditionOperator.Equal, asmNameStr)
 			}
 		};
 		QueryExpression query = queryExpression;
 		EntityCollection entityCollection = _service.RetrieveMultiple(query);
+		if (entityCollection.Entities.Count > 1)
+		{
+			Console.WriteLine($"⚠️ 发现 {entityCollection.Entities.Count} 个名为 '{asmNameStr}' 的 Assembly，将更新第一个 (ID: {entityCollection.Entities[0].Id})");
+		}
 		if (entityCollection.Entities.Count > 0)
 		{
 			Guid id = entityCollection.Entities[0].Id;
 			Entity entity = new Entity("pluginassembly", id);
 			entity["content"] = value;
+			entity["version"] = asmVersion;
+			entity["culture"] = asmCulture;
+			entity["publickeytoken"] = asmToken;
 			_service.Update(entity);
-			Console.WriteLine($"✓ Assembly已更新 (ID: {id})");
+			Console.WriteLine($"✓ Assembly已更新 (ID: {id}, version={asmVersion}, culture={asmCulture}, token={asmToken})");
 		}
 		else
 		{
 			Entity entity2 = new Entity("pluginassembly");
-			entity2["name"] = fileNameWithoutExtension;
+			entity2["name"] = asmNameStr;
 			entity2["content"] = value;
 			entity2["sourcetype"] = new OptionSetValue(0);
 			entity2["isolationmode"] = new OptionSetValue(2);
-			entity2["culture"] = "neutral";
-			entity2["version"] = "1.0.0.0";
-			entity2["publickeytoken"] = "null";
+			entity2["culture"] = asmCulture;
+			entity2["version"] = asmVersion;
+			entity2["publickeytoken"] = asmToken;
 			Guid value2 = _service.Create(entity2);
 			Console.WriteLine($"✓ Assembly已创建 (ID: {value2})");
 		}

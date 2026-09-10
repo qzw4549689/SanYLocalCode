@@ -154,6 +154,16 @@
       "description": "事业部名称",
       "type": "string",
       "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_active",
+      "displayName": "有效状态",
+      "displayNameZh": "有效状态",
+      "displayNameEn": "Active Status",
+      "description": "有效状态（禅道 #1644：一个客户仅一条有效厂端授信，新生效后旧记录置否）",
+      "type": "boolean",
+      "trueLabel": "是",
+      "falseLabel": "否"
     }
   ]
 }

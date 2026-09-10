@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>合同编号多选</title>
+<style>
+    body { margin: 0; padding: 0; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; font-size: 13px; }
+    /* 行内布局：标签列（与表单 labelwidth=115 对齐）+ 控件 */
+    .rowline { display: flex; align-items: center; min-height: 32px; }
+    .fLabel { flex: none; width: 115px; color: #605e5c; font-size: 12px; font-weight: 400; padding-right: 8px; box-sizing: border-box; margin-left: 150px; }
+    /* 收起态：与相邻字段一致的单行输入框 */
+    .control { display: flex; align-items: center; min-height: 30px; border: 1px solid #d1d1d1; border-radius: 2px;
+               background: #fff; cursor: text; padding: 1px 6px; box-sizing: border-box; overflow: hidden; flex: 1; margin-right: 4px; }
+    .control:hover { border-color: #8a8886; }
+    .control.open { border-color: #0078d4; }
+    .control.disabled { cursor: default; pointer-events: none; background: #f5f5f5; border-color: transparent; }
+    .control.disabled .tags { color: #605e5c; }
+    #lockIcon { display: none; flex: none; margin-right: 4px; font-size: 11px; color: #605e5c; filter: grayscale(1); }
+    .tags { display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; overflow: hidden; white-space: nowrap; flex: 1; }
+    .tag { background: #edebe9; border-radius: 2px; padding: 2px 4px; display: inline-flex; align-items: center; gap: 4px; }
+    .tag .x { cursor: pointer; color: #605e5c; font-weight: bold; }
+    .tag .x:hover { color: #a80000; }
+    .placeholder { color: #757575; }
+    .arrow { color: #605e5c; margin-left: 4px; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="rowline">
+    <span class="fLabel" id="fLabel">合同编号</span>
+    <div class="control disabled" id="control">
+        <span id="lockIcon">🔒</span>
+        <div class="tags" id="tags"><span class="placeholder" id="ph"></span></div>
+        <span class="arrow">▾</span>
+    </div>
+</div>
+<script>
+(function () {
+    "use strict";
+
+    /**
+     * 禅道 #2169（#2150 后续）：合同编号多选 picker（平台 PCF mcs_common.control.lookup.multiplechoice
+     * 无过滤参数，业务要求按线索/报价单过滤候选合同，故参照融资资源机构 picker 自制）。
+     * 存储：mcs_contract_ids（Memo，GUID 逗号分隔，隐藏单元格），写值后 fireOnChange 触发表单
+     * mcs_fsm_data.js onContractIdsChanged（编号文本同步 + 以第一个合同级联带出）。
+     * 过滤：线索（mcs_leadmain_id）有值 → mcs_contract.mcs_leadmain = 线索；
+     *       否则报价单（mcs_quoter_id）有值 → 报价单→报价主表→其线索过滤；均无 → 不过滤显示全部。
+     * 可编辑状态：直接读 mcs_contract_ids 属性控件 disabled（表单阶段控制 setFieldDisabled 同源）。
+     */
+
+    // ==================== 多语言（自包含 L()，英文用户加载 1033 语言包） ====================
+    var _langDict = null;
+    function L(key, defaultText) {
+        if (_langDict && _langDict[key]) return _langDict[key];
+        return defaultText;
+    }
+    function getXrm() {
+        try {
+            if (typeof Xrm !== "undefined" && Xrm.Utility) return Xrm;
+            if (window.parent && window.parent.Xrm) return window.parent.Xrm;
+        } catch (e) {}
+        return null;
+    }
+
+    /**
+     * 取真实表单上下文（Xrm.Page 已绑定且含 mcs_fsm_status 属性）。
+     * 背景（#2169 DEV1 实锤）：存量记录 parent.Xrm.Page 已绑定可用；但**新建表单**顶层 Xrm.Page 是 stub
+     * （永不绑定），真实表单在顶层子 frame（uclient/blank.htm，含 FsmDataForm + 已绑定 Page）。
+     * 故按 自身→父级→顶层→顶层子 frame 顺序找第一个绑定到本表单的 Page。
+     */
+    var _formPageWin = null; // 真实上下文所在 frame（FsmStageChanged 事件也分发在该 window）
+    function getFormPage() {
+        var candidates = [];
+        try { if (window.Xrm && window.Xrm.Page) candidates.push({ p: window.Xrm.Page, w: window }); } catch (e) {}
+        try { if (window.parent && window.parent.Xrm && window.parent.Xrm.Page) candidates.push({ p: window.parent.Xrm.Page, w: window.parent }); } catch (e) {}
+        try {
+            var top = window.top;
+            if (top && top.Xrm && top.Xrm.Page) candidates.push({ p: top.Xrm.Page, w: top });
+            if (top && top.frames) {
+                for (var i = 0; i < top.frames.length; i++) {
+                    try {
+                        var f = top.frames[i];
+                        if (f.Xrm && f.Xrm.Page) candidates.push({ p: f.Xrm.Page, w: f });
+                    } catch (e) {}
+                }
+            }
+        } catch (e) {}
+        for (var c = 0; c < candidates.length; c++) {
+            try {
+                var p = candidates[c].p;
+                if (p && p.data && p.data.entity && p.getAttribute && p.getAttribute("mcs_fsm_status")) {
+                    _formPageWin = candidates[c].w;
+                    return p;
+                }
+            } catch (e) {}
+        }
+        return null;
+    }
+    function loadLanguagePack() {
+        return new Promise(function (resolve) {
+            var langId = 2052;
+            try {
+                var x = getXrm();
+                if (x && x.Utility && x.Utility.getGlobalContext) {
+                    langId = x.Utility.getGlobalContext().userSettings.languageId;
+                }
+            } catch (e) {}
+            if (langId !== 1033) { resolve(); return; }
+            var req = new XMLHttpRequest();
+            req.open("GET", "/WebResources/ms_languagefile_1033", true);
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) { try { _langDict = JSON.parse(req.responseText); } catch (e) {} }
+                    resolve();
+                }
+            };
+            req.send();
+        });
+    }
+
+    // ==================== 状态 ====================
+    var _editable = false;
+    var _allContracts = [];
+    var _filtered = [];
+    var _selected = [];
+    var _page = null;
+    var _panel = null;          // 父文档中的下拉浮层
+    var _lockedStyle = null;    // 从兄弟锁定字段复制的计算样式（灰底/无边框，与系统锁定字段一致）
+    var _quoterLeadId = null;   // 报价单→报价主表→线索 缓存
+    var _quoterLeadResolvedFor = null; // 已解析过的报价单 Id（防重复查询）
+
+    var elControl = document.getElementById("control");
+    var elTags = document.getElementById("tags");
+    var elPh = document.getElementById("ph");
+
+    function getAttr(name) {
+        try { return _page ? _page.getAttribute(name) : null; } catch (e) { return null; }
+    }
+    function getLookupId(name) {
+        var a = getAttr(name);
+        var v = a ? a.getValue() : null;
+        return (v && v.length && v[0].id) ? ("" + v[0].id).replace(/[{}]/g, "").toLowerCase() : null;
+    }
+    function getSelectedIds() {
+        var a = getAttr("mcs_contract_ids");
+        var raw = a ? a.getValue() : null;
+        return raw ? String(raw).split(",").map(function (x) { return x.trim(); }).filter(function (x) { return x.length > 0; }) : [];
+    }
+
+    /** 写回多选值 + fireOnChange 触发表单 JS（编号文本同步/第一个合同带出/重复校验脏标记） */
+    function writeSelectedIds() {
+        var a = getAttr("mcs_contract_ids");
+        if (!a) return;
+        a.setValue(_selected.length > 0 ? _selected.join(",") : null);
+        if (a.fireOnChange) a.fireOnChange();
+    }
+
+    /** 在父文档按标签文本+字段名找兄弟字段的标签/控件元素（用于对齐与复制锁定样式） */
+    function findSiblingField(labelText, fieldName) {
+        try {
+            var parentDoc = window.parent.document;
+            var all = parentDoc.querySelectorAll("*");
+            var labelEl = null;
+            for (var i = 0; i < all.length; i++) {
+                var el = all[i];
+                if (el.children.length === 0 && el.offsetParent && (el.textContent || "").trim() === labelText
+                    && el.closest('[data-id*="' + fieldName + '"]')) {
+                    labelEl = el;
+                    break;
+                }
+            }
+            if (!labelEl) {
+                for (var j = 0; j < all.length; j++) {
+                    var el2 = all[j];
+                    if (el2.children.length === 0 && el2.offsetParent && (el2.textContent || "").trim() === labelText) {
+                        labelEl = el2;
+                        break;
+                    }
+                }
+            }
+            if (!labelEl) return null;
+            var fieldBox = labelEl.closest('[data-id*="' + fieldName + '"]');
+            var ctrlEl = null;
+            if (fieldBox) ctrlEl = fieldBox.querySelector("input, [role='textbox'], [role='combobox'], [contenteditable='true']");
+            if (!ctrlEl && fieldBox) ctrlEl = fieldBox;
+            return { labelEl: labelEl, ctrlEl: ctrlEl };
+        } catch (e) { return null; }
+    }
+
+    /** 锁定态样式对齐：复制兄弟锁定字段的灰底/无边框样式 + 显示锁图标 */
+    function applyLockedStyle() {
+        var lockEl = document.getElementById("lockIcon");
+        if (lockEl) lockEl.style.display = _editable ? "none" : "";
+        if (_editable) {
+            elControl.style.background = "";
+            elControl.style.border = "";
+            elControl.style.borderRadius = "";
+            return;
+        }
+        if (!_lockedStyle) return;
+        elControl.style.background = _lockedStyle.background;
+        elControl.style.border = _lockedStyle.border;
+        elControl.style.borderRadius = _lockedStyle.borderRadius;
+    }
+
+    /** 与右列兄弟字段「线索编号」动态对齐（标签/控件三针点实测校准） */
+    var _alignDone = false;
+    function alignWithSiblings() {
+        try {
+            var fr = window.frameElement;
+            if (!fr) return;
+            var frLeft = fr.getBoundingClientRect().left;
+            var sibling = findSiblingField("线索编号", "mcs_leadmain_id");
+            if (!sibling) return;
+            var labelEl = sibling.labelEl;
+            var labelRect = labelEl.getBoundingClientRect();
+            var fLabel = document.querySelector(".fLabel");
+            var cs = window.parent.getComputedStyle(labelEl);
+            fLabel.style.fontFamily = cs.fontFamily;
+            fLabel.style.fontSize = cs.fontSize;
+            fLabel.style.fontWeight = cs.fontWeight;
+            fLabel.style.fontStyle = cs.fontStyle;
+            fLabel.style.color = cs.color;
+            fLabel.style.lineHeight = cs.lineHeight;
+            fLabel.style.letterSpacing = cs.letterSpacing;
+            var delta = Math.round(labelRect.left - frLeft);
+            if (delta >= 0 && delta < 800) { fLabel.style.marginLeft = delta + "px"; _alignDone = true; }
+            var ctrlEl = sibling.ctrlEl;
+            if (ctrlEl) {
+                // 兄弟控件可视盒：从 input 向外找第一个「有边框或有背景」的祖先容器（=可见盒本身），
+                // 找不到则退回 input 本身。覆盖可编辑态（边框盒）与锁定态（锁图标+灰底盒），
+                // 不用 -24 魔数（可编辑态偏左 24px）、也不爬到最外层（会偏左 ~60px，两轮用户反馈）。
+                var fieldBox = labelEl.closest('[data-id*="mcs_leadmain_id"]');
+                var boxEl = ctrlEl, found = false, depth = 0;
+                while (depth < 8 && boxEl.parentElement && boxEl.parentElement !== fieldBox && !boxEl.parentElement.contains(labelEl)) {
+                    var p = boxEl.parentElement;
+                    var pcs = window.parent.getComputedStyle(p);
+                    var hasBorder = pcs.borderStyle !== "none" && pcs.borderWidth !== "0px";
+                    var hasBg = pcs.backgroundColor !== "rgba(0, 0, 0, 0)" && pcs.backgroundColor !== "transparent";
+                    boxEl = p; depth++;
+                    if (hasBorder || hasBg) { found = true; break; }
+                }
+                var boxRect = (found ? boxEl : ctrlEl).getBoundingClientRect();
+                var labelW = Math.round(boxRect.left - labelRect.left);
+                if (labelW > 60 && labelW < 400) fLabel.style.width = labelW + "px";
+                // 右缘同样按可视盒实测对齐（不复制宽度，窗口缩放恒跟随）
+                var mRight = Math.round(fr.getBoundingClientRect().right - boxRect.right);
+                if (mRight < 300) elControl.style.marginRight = Math.max(0, mRight) + "px";
+                elControl.style.maxWidth = "none";
+            }
+            var styleSources = [
+                ["线索编号", "mcs_leadmain_id"],
+                ["国区", "mcs_country_area"],
+                ["事业部", "mcs_division_id"],
+                ["客户名称", "mcs_customer_name"]
+            ];
+            for (var s = 0; s < styleSources.length; s++) {
+                var src = findSiblingField(styleSources[s][0], styleSources[s][1]);
+                if (src && src.ctrlEl) {
+                    var scs = window.parent.getComputedStyle(src.ctrlEl);
+                    _lockedStyle = { background: scs.background, border: scs.border, borderRadius: scs.borderRadius };
+                    break;
+                }
+            }
+            applyLockedStyle();
+        } catch (e) { console.warn("[FsmContractPicker] align 异常:", e); }
+    }
+
+    /** 可编辑状态：读 mcs_contract_ids 属性全部控件 disabled（表单阶段控制同源，单一事实源） */
+    function isEditable() {
+        var a = getAttr("mcs_contract_ids");
+        if (!a) return false;
+        var disabled = false;
+        try {
+            a.controls.forEach(function (c) {
+                try { if (c.getDisabled && c.getDisabled()) disabled = true; } catch (e) {}
+            });
+        } catch (e) {}
+        return !disabled;
+    }
+    function applyEditable() {
+        _editable = isEditable();
+        elControl.classList.toggle("disabled", !_editable);
+        document.querySelector(".arrow").style.display = _editable ? "" : "none";
+        applyLockedStyle();
+        if (!_editable) closePanel();
+        renderTags();
+    }
+
+    // ==================== 数据 ====================
+    function loadContracts() {
+        var x = getXrm();
+        if (!x || !x.WebApi) return Promise.resolve();
+        return x.WebApi.retrieveMultipleRecords("mcs_contract",
+            "?$select=mcs_contractid,mcs_name,_mcs_leadmain_value&$top=5000")
+            .then(function (result) {
+                _allContracts = result.entities;
+                applyContractFilter();
+            })
+            .catch(function (e) { console.error("[FsmContractPicker] 查询合同失败:", e); });
+    }
+
+    /** 报价单 → 报价主表 → 线索（缓存，换报价单重新解析） */
+    function resolveQuoterLead() {
+        var quoterId = getLookupId("mcs_quoter_id");
+        if (!quoterId) { _quoterLeadId = null; _quoterLeadResolvedFor = null; return Promise.resolve(); }
+        if (_quoterLeadResolvedFor === quoterId) return Promise.resolve();
+        var x = getXrm();
+        if (!x || !x.WebApi) return Promise.resolve();
+        return x.WebApi.retrieveRecord("mcs_quoter", quoterId, "?$select=_mcs_quote_mainid_value").then(function (q) {
+            if (!q || !q._mcs_quote_mainid_value) { _quoterLeadId = null; _quoterLeadResolvedFor = quoterId; return; }
+            return x.WebApi.retrieveRecord("mcs_quote_main", q._mcs_quote_mainid_value, "?$select=_mcs_leadmainid_value").then(function (qm) {
+                _quoterLeadId = qm && qm._mcs_leadmainid_value ? ("" + qm._mcs_leadmainid_value).toLowerCase() : null;
+                _quoterLeadResolvedFor = quoterId;
+            });
+        }).catch(function (e) {
+            console.warn("[FsmContractPicker] 报价单线索解析失败:", e);
+            _quoterLeadId = null; _quoterLeadResolvedFor = quoterId;
+        });
+    }
+
+    /** 过滤候选合同：线索优先，其次报价单线索；均无 → 全部 */
+    function applyContractFilter() {
+        var leadId = getLookupId("mcs_leadmain_id");
+        var effectiveLead = leadId || _quoterLeadId;
+        if (!effectiveLead) {
+            _filtered = _allContracts;
+        } else {
+            _filtered = _allContracts.filter(function (c) {
+                return c._mcs_leadmain_value && ("" + c._mcs_leadmain_value).toLowerCase() === effectiveLead;
+            });
+        }
+        renderTags();
+        if (_panel) renderPanelList(_panel, getPanelKeyword());
+    }
+
+    /** 线索/报价单变化 → 重新过滤（报价单需先异步解析其线索） */
+    function onSourceChanged() {
+        closePanel();
+        resolveQuoterLead().then(applyContractFilter);
+    }
+
+    function findContract(id) {
+        for (var i = 0; i < _allContracts.length; i++) {
+            if ((_allContracts[i].mcs_contractid || "").toLowerCase() === id.toLowerCase()) return _allContracts[i];
+        }
+        return null;
+    }
+
+    // ==================== 收起态标签 ====================
+    function renderTags() {
+        _selected = getSelectedIds();
+        elTags.querySelectorAll(".tag").forEach(function (t) { t.remove(); });
+        if (_selected.length === 0) {
+            elPh.style.display = _editable ? "" : "none";
+            elPh.textContent = L("FsmContractPicker_Placeholder", "请选择…");
+            return;
+        }
+        elPh.style.display = "none";
+        _selected.forEach(function (id) {
+            var r = findContract(id);
+            var tag = document.createElement("span");
+            tag.className = "tag";
+            tag.appendChild(document.createTextNode(r ? (r.mcs_name || id) : id));
+            if (_editable) {
+                var x = document.createElement("span");
+                x.className = "x";
+                x.textContent = "✕";
+                x.onclick = function (ev) {
+                    ev.stopPropagation();
+                    _selected = _selected.filter(function (g) { return g !== id; });
+                    writeSelectedIds();
+                    renderTags();
+                    if (_panel) renderPanelList(_panel, getPanelKeyword());
+                };
+                tag.appendChild(x);
+            }
+            elTags.appendChild(tag);
+        });
+    }
+
+    // ==================== 下拉浮层（渲染在父文档，浮层覆盖不撑开布局） ====================
+    function openPanel() {
+        if (!_editable || _panel) return;
+        var parentDoc;
+        try { parentDoc = window.parent.document; } catch (e) { return; }
+        var fr = window.frameElement;
+        if (!fr) { console.warn("[FsmContractPicker] frameElement 为 null，无法定位浮层"); return; }
+
+        var rect = fr.getBoundingClientRect();
+        var ctrlRect = elControl.getBoundingClientRect();
+        var panelLeft = Math.round(rect.left + ctrlRect.left);
+        var panelTop = Math.round(rect.top + ctrlRect.bottom + 1);
+        var panelWidth = Math.max(Math.round(ctrlRect.width), 260);
+        var panel = parentDoc.createElement("div");
+        panel.setAttribute("style",
+            "position:fixed;left:" + panelLeft + "px;top:" + panelTop + "px;" +
+            "width:" + panelWidth + "px;max-height:320px;display:flex;flex-direction:column;" +
+            "background:#fff;border:1px solid #d1d1d1;border-radius:2px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" +
+            "z-index:999999;font-family:'Segoe UI','Microsoft YaHei',sans-serif;font-size:13px;");
+        panel.innerHTML =
+            '<input type="text" class="fsmp-search" style="border:none;border-bottom:1px solid #edebe9;padding:7px 9px;outline:none;font-size:13px;" />' +
+            '<div class="fsmp-list" style="overflow-y:auto;flex:1;"></div>';
+        parentDoc.body.appendChild(panel);
+        _panel = panel;
+
+        var search = panel.querySelector(".fsmp-search");
+        search.placeholder = L("FsmContractPicker_SearchPlaceholder", "搜索合同编号");
+        search.oninput = function () { renderPanelList(panel, search.value); };
+
+        renderPanelList(panel, "");
+        elControl.classList.add("open");
+
+        setTimeout(function () {
+            parentDoc.addEventListener("mousedown", onOutside, true);
+            document.addEventListener("mousedown", onOwnDoc, true);
+            window.parent.addEventListener("resize", closePanel);
+            window.parent.addEventListener("scroll", onParentScroll, true);
+        }, 0);
+        search.focus();
+    }
+
+    // 父窗口滚动时收起面板，但滚动源在面板内部（列表拖动滚动条）则忽略——
+    // 捕获模式的 scroll 监听会把面板内部 .fsmp-list 自己的滚动也捕获，误触发收起
+    function onParentScroll(ev) {
+        if (_panel && ev.target && _panel.contains(ev.target)) return;
+        closePanel();
+    }
+
+    function onOwnDoc(ev) {
+        // 点击自身输入框不收起；输入框 click 已 stopPropagation 控制开合
+    }
+    function onOutside(ev) {
+        if (_panel && !_panel.contains(ev.target)) closePanel();
+    }
+    function getPanelKeyword() {
+        if (!_panel) return "";
+        var s = _panel.querySelector(".fsmp-search");
+        return s ? s.value : "";
+    }
+
+    function closePanel() {
+        if (!_panel) return;
+        var parentDoc = window.parent.document;
+        parentDoc.removeEventListener("mousedown", onOutside, true);
+        document.removeEventListener("mousedown", onOwnDoc, true);
+        window.parent.removeEventListener("resize", closePanel);
+        window.parent.removeEventListener("scroll", onParentScroll, true);
+        _panel.remove();
+        _panel = null;
+        elControl.classList.remove("open");
+    }
+
+    function renderPanelList(panel, keyword) {
+        var list = panel.querySelector(".fsmp-list");
+        list.innerHTML = "";
+        var kw = (keyword || "").toLowerCase();
+        var shown = _filtered.filter(function (r) {
+            if (!kw) return true;
+            return (r.mcs_name || "").toLowerCase().indexOf(kw) >= 0;
+        });
+        if (shown.length === 0) {
+            var h = window.parent.document.createElement("div");
+            h.setAttribute("style", "color:#757575;padding:10px;text-align:center;");
+            h.textContent = L("FsmContractPicker_NoMatch", "无匹配合同（已按线索/报价单过滤）");
+            list.appendChild(h);
+            return;
+        }
+        shown.forEach(function (r) {
+            var id = r.mcs_contractid;
+            var row = window.parent.document.createElement("label");
+            row.setAttribute("style", "display:flex;align-items:center;gap:6px;padding:6px 9px;cursor:pointer;");
+            row.onmouseover = function () { row.style.background = "#f3f2f1"; };
+            row.onmouseout = function () { row.style.background = ""; };
+            var cb = window.parent.document.createElement("input");
+            cb.type = "checkbox";
+            cb.checked = _selected.indexOf(id) >= 0;
+            cb.onchange = function () {
+                if (cb.checked) {
+                    if (_selected.indexOf(id) < 0) _selected.push(id);
+                } else {
+                    _selected = _selected.filter(function (g) { return g !== id; });
+                }
+                writeSelectedIds();
+                renderTags();
+            };
+            row.appendChild(cb);
+            row.appendChild(window.parent.document.createTextNode(r.mcs_name || id));
+            list.appendChild(row);
+        });
+    }
+
+    // ==================== 初始化 ====================
+    var _initDone = false;
+    function init() {
+        // 上下文就绪等待：新建表单真实 Page 在顶层子 frame 且绑定较晚，轮询至找到（最多 40s）
+        _page = getFormPage();
+        if (!_page) {
+            elPh.textContent = L("FsmPicker_Loading", "加载中…");
+            setTimeout(init, 500);
+            return;
+        }
+        if (_initDone) return;
+        _initDone = true;
+        // 来源变化 → 重新过滤
+        var leadAttr = getAttr("mcs_leadmain_id");
+        if (leadAttr) leadAttr.addOnChange(onSourceChanged);
+        var quoterAttr = getAttr("mcs_quoter_id");
+        if (quoterAttr) quoterAttr.addOnChange(onSourceChanged);
+        // 值被其他途径改写（如清空联动）→ 刷新标签
+        var idsAttr = getAttr("mcs_contract_ids");
+        if (idsAttr) idsAttr.addOnChange(function () { renderTags(); if (_panel) renderPanelList(_panel, getPanelKeyword()); });
+        // 可编辑状态：初始化 + 阶段相关属性变更 + 表单阶段控制自定义事件 + 延时补算（onLoad 时序兜底）
+        applyEditable();
+        ["mcs_fsm_status", "mcs_fsm_bppstatus", "mcs_bppstatuscode"].forEach(function (f) {
+            var a = getAttr(f);
+            if (a) a.addOnChange(applyEditable);
+        });
+        try {
+            var eventWin = _formPageWin || window.parent;
+            eventWin.addEventListener("FsmStageChanged", applyEditable);
+        } catch (e) {}
+        setTimeout(applyEditable, 1000);
+        setTimeout(applyEditable, 3000);
+        elControl.addEventListener("click", function () {
+            if (!_editable) return;
+            if (_panel) closePanel(); else openPanel();
+        });
+        document.getElementById("fLabel").textContent = L("FsmContractPicker_Label", "合同编号");
+        elPh.textContent = L("FsmContractPicker_Placeholder", "请选择…");
+        // 对齐：立即一次 + 轮询直至成功（新建表单右列渲染较晚）
+        alignWithSiblings();
+        var alignTries = 0;
+        var alignTimer = setInterval(function () {
+            if (_alignDone || ++alignTries > 20) { clearInterval(alignTimer); return; }
+            alignWithSiblings();
+        }, 500);
+        renderTags();
+        resolveQuoterLead().then(loadContracts);
+    }
+
+    loadLanguagePack().then(init);
+})();
+</script>
+</body>
+</html>

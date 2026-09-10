@@ -1,0 +1,252 @@
+{
+  "env": "prod-eu",
+  "stats": {
+    "updated": 0,
+    "already": 0,
+    "conflict": 0,
+    "no_account": 5,
+    "no_md": 3,
+    "multi_md": 0,
+    "no_coface": 9,
+    "failed": 15
+  },
+  "report": [
+    {
+      "sap": "200000156",
+      "excelName": "Sunway Marketing Sdn Bhd",
+      "target": "icon#164031956",
+      "mdId": "38e4cb6e-5c69-4d2c-b1f9-bb5caf341cf9",
+      "mdName": "SUNWAY MARKETING SDN BHD",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200001366",
+      "excelName": "Civic Merchandising,, Inc..",
+      "target": "icon#164031539",
+      "mdId": "b54c78d2-3326-4954-82e8-b65de2b92dea",
+      "mdName": "CIVIC MERCHANDISING, INC.",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200001384",
+      "excelName": "TCE Service and Equipment JSC",
+      "target": "icon#164275062",
+      "mdId": "6a7dd061-9095-460a-87f7-41d0d50e273f",
+      "mdName": "TCE Service and Equipment JSC",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200006456",
+      "excelName": "LTE Concrete solutions inc",
+      "target": "icon#161516017",
+      "mdId": "fe18a5d2-dda3-4e7c-914a-d30553e3611c",
+      "mdName": "LTE Concrete solutions inc",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200024682",
+      "excelName": "Turbo Fly Machine Engineering limited",
+      "target": "icon#164275061",
+      "mdId": "64964923-ebc4-48de-ab52-8e91762abb9e",
+      "mdName": "SANY TURBO FLY MACHINE LIMITED",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200025219",
+      "excelName": "ENTER Engineering PTE. LTD Olmaliq",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200036176",
+      "excelName": "MaxCrane Machinery Co., Ltd.",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200037577",
+      "excelName": "Pt.sany Makmur Perkasa",
+      "target": "icon#159454536",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200045258",
+      "excelName": "Leadway Heavy Machinery Co., Ltd.",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200045272",
+      "excelName": "China Wealth Hongkong Machine Limit",
+      "target": "icon#164063843",
+      "mdId": "b385baae-7919-ef11-9f8a-6045bd8c9cf2",
+      "mdName": "China Wealth Hongkong Machine Limit",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200047079",
+      "excelName": "Zhongwang Machineries Philippines Inc.",
+      "target": "icon#161500451",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200047692",
+      "excelName": "Ten-league Engineering && Technology",
+      "target": "icon#161500645",
+      "mdId": "09ef20eb-f37b-4513-ba72-dd27ec33dbfb",
+      "mdName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200051662",
+      "excelName": "Vietnam Fuli Machinery Company Limited",
+      "target": "icon#161542725",
+      "mdId": "775edb30-5b23-4ed2-b0ea-7e7ce28b5f69",
+      "mdName": "VIETNAM FULI MACHINERY CO.,LTD",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200054124",
+      "excelName": "Civic Merchandising,, Inc..",
+      "target": "icon#164031539",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200054880",
+      "excelName": "Minmetals Kazakhstan LLP",
+      "target": "icon#111510231",
+      "mdId": "005a75af-0780-4924-b2a8-d13cca4739fc",
+      "mdName": "MINMETALS KAZAKHSTAN LLC-冻结",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200058542",
+      "excelName": "PREMIER HEAVY EQUIPMENT INC",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200058684",
+      "excelName": "Anteng Heavy Machinery Corp.",
+      "target": "icon#161516020",
+      "mdId": "181e3527-5ebf-49f4-a84e-68df5cfae419",
+      "mdName": "ANTENG HEAVY MACHINERY CORP",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200068077",
+      "excelName": "JT Machinery Sdn. Bhd.",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200074014",
+      "excelName": "Zhongwang Machineries Philippines Inc.",
+      "target": "icon#161500451",
+      "mdId": "779bdb65-8fce-4ad3-acb8-8767a0248889",
+      "mdName": "ZhongWang Machineries Philippines Inc",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200075521",
+      "excelName": "Enter Machinaries Service",
+      "target": "icon#164069505",
+      "mdId": "896cf832-769d-476e-87d5-0d5c940c1b93",
+      "mdName": "ENTER MACHINARIES SERVICE",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200102328",
+      "excelName": "Pt.. Jakarta International Machine Centre",
+      "target": "icon#164034482",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200106522",
+      "excelName": "PT. Karunia Permai Sentosa",
+      "target": "icon#156438784",
+      "mdId": "7b0dc16a-92c7-4112-afcd-12172310e47c",
+      "mdName": "PT. Karunia Permai Sentosa",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200123135",
+      "excelName": "Pt Lixing Labour Service",
+      "target": "icon#164041398",
+      "mdId": "4f572b05-a25f-4a0f-8379-106c2ab1fd55",
+      "mdName": "PT LIXING LABOUR SERVICE",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200124091",
+      "excelName": "Farovon-yol Servis",
+      "target": "icon#164069390",
+      "mdId": "215f74c9-06bc-4680-9fcf-90fd4e28891b",
+      "mdName": "FAROVON-YOL SERVIS",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200125466",
+      "excelName": "Pt Buka Bumi Konstruksi",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200125567",
+      "excelName": "Pt.. Sinar Bintang Mulia",
+      "target": "icon#164034827",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200139217",
+      "excelName": "PREMIER HEAVY EQUIPMENT INC",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "210031820",
+      "excelName": "Pt.. Malachite International Mining",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "210032955",
+      "excelName": "HLM Machinery Sdn. Bhd.",
+      "target": "icon#161534781",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "210036332",
+      "excelName": "Pt.. Trans Layanan Halmahera",
+      "target": "icon#145364870",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "210088045",
+      "excelName": "Pt.. Cahaya Mitra Perkasa",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "210115228",
+      "excelName": "Pt.. Sinar Bintang Mulia",
+      "target": "icon#164034827",
+      "action": "skip:no_account"
+    }
+  ]
+}

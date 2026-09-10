@@ -250,6 +250,23 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 clearRecord.Attributes.Add("mcs_bppid", string.Empty);
                 clearRecord.Attributes.Add("mcs_bppstatuscode", string.Empty);
                 clearRecord.Attributes.Add("mcs_fsm_data_url", string.Empty);
+
+                // Bug #1713：重提的是立项审批时，同步清空「立项审批信息」快照组（方案审批重提不动立项快照）
+                var approveType = await GetApproveTypeAsync(EntityId);
+                if (approveType == APPROVE_TYPE_INITIATION)
+                {
+                    clearRecord.Attributes.Add("mcs_init_bppid", string.Empty);
+                    clearRecord.Attributes.Add("mcs_init_bppstatuscode", string.Empty);
+                    clearRecord.Attributes.Add("mcs_init_bpplink", string.Empty);
+                }
+                // Bug #1754/#1756：重提的是方案审批时，同步清空「方案审批信息」快照组（立项审批重提不动方案快照）
+                else if (approveType == APPROVE_TYPE_PROJECT)
+                {
+                    clearRecord.Attributes.Add("mcs_proj_bppid", string.Empty);
+                    clearRecord.Attributes.Add("mcs_proj_bppstatuscode", string.Empty);
+                    clearRecord.Attributes.Add("mcs_proj_bpplink", string.Empty);
+                }
+
                 await crmService.Update(clearRecord);
             }
             catch (Exception ex)
@@ -272,10 +289,12 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 updateEntity.Attributes.Add("mcs_bpperrormsg", string.Empty);
 
                 // 拼接 BPP 审批链接并回写表单字段，供用户点击跳转 BPP 审批界面
+                string approvalLink = string.Empty;
                 var config = await _d365ConfigRepository.QueryByName("Bpp_ApprovalFlowBaseUrl");
                 if (config != null && !string.IsNullOrWhiteSpace(config.Content))
                 {
-                    updateEntity.Attributes.Add("mcs_fsm_data_url", $"{config.Content}{flowId}");
+                    approvalLink = $"{config.Content}{flowId}";
+                    updateEntity.Attributes.Add("mcs_fsm_data_url", approvalLink);
                 }
 
                 // 取当前审批人并回写 mcs_nextapprover（与 BPP 框架通用回写字段一致）
@@ -283,6 +302,38 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 if (!string.IsNullOrWhiteSpace(currentApprover))
                 {
                     updateEntity.Attributes.Add("mcs_nextapprover", currentApprover);
+                }
+
+                // Bug #1713：立项审批时同步写「立项审批信息」快照组，防止后续方案审批覆盖立项信息。
+                // mcs_init_bppid 直接取 flowId（与 BPP 框架回写的 mcs_bppid 同值，即审批链接 instanceId）
+                var approveType = await GetApproveTypeAsync(EntityId);
+                if (approveType == APPROVE_TYPE_INITIATION)
+                {
+                    updateEntity.Attributes.Add("mcs_init_bppstatuscode", "Submitted");
+                    updateEntity.Attributes.Add("mcs_init_bppid", flowId ?? string.Empty);
+                    if (!string.IsNullOrWhiteSpace(approvalLink))
+                    {
+                        updateEntity.Attributes.Add("mcs_init_bpplink", approvalLink);
+                    }
+                    if (!string.IsNullOrWhiteSpace(currentApprover))
+                    {
+                        updateEntity.Attributes.Add("mcs_init_approver", currentApprover);
+                    }
+                }
+                // Bug #1754/#1756：方案审批时同步写「方案审批信息」快照组，防止与立项审批共用通用组互相覆盖。
+                // 通用组（mcs_bppstatuscode 等）继续无条件写（FsmDataBppCallbackPlugin 流转依赖），但不再上表单
+                else if (approveType == APPROVE_TYPE_PROJECT)
+                {
+                    updateEntity.Attributes.Add("mcs_proj_bppstatuscode", "Submitted");
+                    updateEntity.Attributes.Add("mcs_proj_bppid", flowId ?? string.Empty);
+                    if (!string.IsNullOrWhiteSpace(approvalLink))
+                    {
+                        updateEntity.Attributes.Add("mcs_proj_bpplink", approvalLink);
+                    }
+                    if (!string.IsNullOrWhiteSpace(currentApprover))
+                    {
+                        updateEntity.Attributes.Add("mcs_proj_approver", currentApprover);
+                    }
                 }
 
                 await crmService.Update(updateEntity);
@@ -334,12 +385,49 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 }
 
                 // 每次回调都取当前审批人回写 mcs_nextapprover（与 BPP 框架通用回写字段一致）
+                string currentApprover = string.Empty;
                 if (request.FlowId.HasValue)
                 {
-                    var currentApprover = await GetCurrentApprover(request.FlowId.Value.ToString());
+                    currentApprover = await GetCurrentApprover(request.FlowId.Value.ToString());
                     if (!string.IsNullOrWhiteSpace(currentApprover))
                     {
                         updateEntity.Attributes.Add("mcs_nextapprover", currentApprover);
+                    }
+                }
+
+                // Bug #1713：立项审批回调同步写「立项审批信息」快照组，与共享组写入值完全一致
+                var approveType = await GetApproveTypeAsync(entityId);
+                if (approveType == APPROVE_TYPE_INITIATION)
+                {
+                    updateEntity.Attributes.Add("mcs_init_bppstatuscode", bppStatusString);
+                    if (!string.IsNullOrWhiteSpace(request.Reason))
+                    {
+                        updateEntity.Attributes.Add("mcs_init_rejectreason", request.Reason);
+                    }
+                    if (request.Status == 30 || request.Status == 11)
+                    {
+                        updateEntity.Attributes.Add("mcs_init_approvedate", DateTime.Now);
+                    }
+                    if (!string.IsNullOrWhiteSpace(currentApprover))
+                    {
+                        updateEntity.Attributes.Add("mcs_init_approver", currentApprover);
+                    }
+                }
+                // Bug #1754/#1756：方案审批回调同步写「方案审批信息」快照组，与共享组写入值完全一致
+                else if (approveType == APPROVE_TYPE_PROJECT)
+                {
+                    updateEntity.Attributes.Add("mcs_proj_bppstatuscode", bppStatusString);
+                    if (!string.IsNullOrWhiteSpace(request.Reason))
+                    {
+                        updateEntity.Attributes.Add("mcs_proj_rejectreason", request.Reason);
+                    }
+                    if (request.Status == 30 || request.Status == 11)
+                    {
+                        updateEntity.Attributes.Add("mcs_proj_approvedate", DateTime.Now);
+                    }
+                    if (!string.IsNullOrWhiteSpace(currentApprover))
+                    {
+                        updateEntity.Attributes.Add("mcs_proj_approver", currentApprover);
                     }
                 }
 
@@ -350,6 +438,28 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                 var errMsg = $"[CallBack] 处理回调失败: Status={request.Status}, Reason={request.Reason}, Exception={ex.GetType().Name}: {ex.Message}";
                 await WriteErrorToFsmDataAsync(entityId, errMsg);
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// 查询融资管理记录的审批类型（Bug #1713）：1立项/2方案；异常或查不到返回 0
+        /// </summary>
+        private async Task<int> GetApproveTypeAsync(Guid entityId)
+        {
+            try
+            {
+                var crmService = await _crmServiceGenerateService.Generate();
+                if (crmService == null) return 0;
+
+                var result = await crmService.RetrieveMultiple("mcs_fsm_data",
+                    $"$select=mcs_approve_type&$filter=mcs_fsm_dataid eq '{entityId}'");
+                if (result == null || result.Results.Count == 0) return 0;
+                return result.Results[0].GetOptionSetValue("mcs_approve_type");
+            }
+            catch (Exception ex)
+            {
+                LoggerMainHelper.LogInformation($"BPPHandlerServiceForFsmData.GetApproveTypeAsync 失败", ex.Message);
+                return 0;
             }
         }
 

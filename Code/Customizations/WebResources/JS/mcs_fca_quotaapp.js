@@ -35,6 +35,10 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         return defaultText;
     }
 
+    // 「安全交易基线额度调整为」的默认基准值（禅道 #1637）：带出默认值时记录，
+    // 用户手工改为其他值视为「发生调整」，此时调整原因必填；与基准值一致视为未调整
+    var defaultTobeGrant = null;
+
     // 客户等级选项集值 → 标签映射（mcs_customermasterdata.mcs_creditgrade）
     var CREDIT_GRADE_MAP = {
         100000000: "A0",
@@ -59,6 +63,16 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
 
         registerFieldEvents(formContext);
 
+        // 禅道 #1855：保存时后端可能回填序列号/模型额度/当前额度并默认「调整为」，
+        // 保存完成后刷新调整基准值，保证 #1637 调整原因必填校验基准准确
+        formContext.data.entity.addOnPostSave(function () {
+            defaultTobeGrant = getMoneyValue(formContext, "mcs_tobegrant") || 0;
+            updateReasonRequired(formContext);
+        });
+
+        // 调整后安全交易基线余额为公式计算字段，始终只读（禅道 #1637，值随「调整为」自动计算）
+        setControlReadOnly(formContext, "mcs_tobebalance");
+
         if (formContext.ui.getFormType() === 1) {
             setDefaultValues(formContext);
             // 新建记录时，从当前系统用户带出申请组织信息
@@ -66,6 +80,9 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         } else {
             // 已有记录：审批中/审批通过时全表单只读（禅道 #1283）
             applyBppStatusLockAsync(formContext);
+            // 已有记录以保存值为调整基准：用户打开后未改动视为未调整（禅道 #1637）
+            defaultTobeGrant = getMoneyValue(formContext, "mcs_tobegrant") || 0;
+            updateReasonRequired(formContext);
         }
 
         // 初始化附件页签（通用上传组件）
@@ -142,17 +159,12 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
             });
         }
 
-        var doidAttr = formContext.getAttribute("mcs_doid");
-        if (doidAttr) {
-            doidAttr.addOnChange(function () {
-                onDoidChanged(formContext);
-            });
-        }
-
         var tobeGrantAttr = formContext.getAttribute("mcs_tobegrant");
         if (tobeGrantAttr) {
             tobeGrantAttr.addOnChange(function () {
                 calculateAdjustedBalance(formContext);
+                // 禅道 #1637：手工改动「调整为」后联动调整原因必填
+                updateReasonRequired(formContext);
             });
         }
     }
@@ -163,19 +175,11 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         // 审批状态 = 申请
         setPicklistIfNull(formContext, "mcs_bppstatus", 1);
 
-        // 调整后额度、调整后余额默认 0
-        setMoneyIfNull(formContext, "mcs_tobegrant", 0);
-        setMoneyIfNull(formContext, "mcs_tobebalance", 0);
+        // 禅道 #1855：「调整为/调整后余额」不再默认 0，保持空值由后端保存时按基准值回填
+        // （空 = 用户未手工调整；若默认 0，后端无法区分「未动」与「故意调 0」）
     }
 
     function setPicklistIfNull(formContext, field, value) {
-        var attr = formContext.getAttribute(field);
-        if (attr && attr.getValue() === null) {
-            attr.setValue(value);
-        }
-    }
-
-    function setMoneyIfNull(formContext, field, value) {
         var attr = formContext.getAttribute(field);
         if (attr && attr.getValue() === null) {
             attr.setValue(value);
@@ -187,8 +191,9 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
     /**
      * 客户编码变更时：
      * 1. 带出客户名称、客户等级
-     * 2. 查询厂端授信额度表，带出当前额度和余额
-     * 3. 自动带出该客户最新生效的模型计算序列号和模型计算额度
+     * 2. 带出中信保额度信息
+     * 禅道 #1855：厂端授信额度(mcs_fca_quota)/模型计算(mcs_fca_proc)属基础数据，
+     * 前端不再实时带出，统一在保存时由后端 FcaQuotaAppProcSyncPlugin 以系统身份回填
      */
     function onAccountChanged(formContext) {
         var accountAttr = formContext.getAttribute("mcs_accountid");
@@ -203,14 +208,8 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         // 带出客户名称、客户等级、中信保买方代码
         retrieveCustomerInfo(formContext, accountId);
 
-        // 带出当前厂端授信额度和余额
-        retrieveCurrentQuota(formContext, accountId);
-
         // 带出中信保额度信息
         retrieveSinosureQuota(formContext, accountId);
-
-        // 自动带出该客户最新生效的模型计算序列号和额度
-        retrieveLatestEffectiveProc(formContext, accountId);
     }
 
     function clearAccountRelatedFields(formContext) {
@@ -326,98 +325,15 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         );
     }
 
-    /**
-     * 查询厂端授信额度表：当前额度、余额和占用金额
-     */
-    function retrieveCurrentQuota(formContext, accountId) {
-        var filter = "_mcs_accountid_value eq " + accountId + " and mcs_isactive eq 1";
-        var query = "?$select=mcs_sellergrant,mcs_sellerbalance&$filter=" + filter + "&$orderby=createdon desc&$top=1";
-
-        Xrm.WebApi.retrieveMultipleRecords("mcs_fca_quota", query).then(
-            function (result) {
-                // 已选模型计算序列号时，「调整为/调整后余额」以模型计算额度为默认（由
-                // retrieveLatestEffectiveProc/onDoidChanged 写入），此处只更新当前额度/余额展示字段，
-                // 避免异步回调把模型额度默认值覆盖回当前厂端授信额度
-                var hasModelProc = formContext.getAttribute("mcs_doid") && formContext.getAttribute("mcs_doid").getValue() !== null;
-                if (result.entities.length > 0) {
-                    var quota = result.entities[0];
-                    var sellerGrant = quota.mcs_sellergrant || 0;
-                    var sellerBalance = quota.mcs_sellerbalance || 0;
-                    setMoneyValue(formContext, "mcs_sellergrant", sellerGrant);
-                    setMoneyValue(formContext, "mcs_sellerbalance", sellerBalance);
-                    if (!hasModelProc) {
-                        // 默认值：厂端授信额度调整为 = 厂端授信额度；调整后厂端授信余额 = 厂端授信余额
-                        setMoneyValue(formContext, "mcs_tobegrant", sellerGrant);
-                        setMoneyValue(formContext, "mcs_tobebalance", sellerBalance);
-                    }
-                } else {
-                    setMoneyValue(formContext, "mcs_sellergrant", 0);
-                    setMoneyValue(formContext, "mcs_sellerbalance", 0);
-                    if (!hasModelProc) {
-                        setMoneyValue(formContext, "mcs_tobegrant", 0);
-                        setMoneyValue(formContext, "mcs_tobebalance", 0);
-                    }
-                }
-                calculateAdjustedBalance(formContext);
-            },
-            function (error) {
-                console.error("查询厂端授信额度失败:", error);
-            }
-        );
-    }
-
-    // ==================== 模型计算序列号变更 ====================
-
-    /**
-     * 模型计算序列号变更时：
-     * 1. 带出模型计算额度（mcs_fca_proc.mcs_initigrant）
-     * 2. 同步默认「厂端授信额度调整为」= 模型计算额度（不调整时直接以模型额度申请，
-     *    用户仍可手工修改，审批以调整后金额优先）；清空序列号时回退默认 = 当前厂端授信额度
-     */
-    function onDoidChanged(formContext) {
-        var doidAttr = formContext.getAttribute("mcs_doid");
-        if (!doidAttr || doidAttr.getValue() === null) {
-            setMoneyValue(formContext, "mcs_initigrant", 0);
-            setMoneyValue(formContext, "mcs_tobegrant", getMoneyValue(formContext, "mcs_sellergrant") || 0);
-            calculateAdjustedBalance(formContext);
-            return;
-        }
-
-        var doidRef = doidAttr.getValue()[0];
-        var procId = doidRef.id.replace(/[{}]/g, "");
-
-        Xrm.WebApi.retrieveRecord("mcs_fca_proc", procId, "?$select=mcs_initigrant,mcs_accountid").then(
-            function (result) {
-                var modelGrant = result.mcs_initigrant !== null && result.mcs_initigrant !== undefined ? result.mcs_initigrant : 0;
-                setMoneyValue(formContext, "mcs_initigrant", modelGrant);
-                // 默认带到「厂端授信额度调整为」，可手工修改
-                setMoneyValue(formContext, "mcs_tobegrant", modelGrant);
-                calculateAdjustedBalance(formContext);
-
-                // 校验模型计算记录的客户是否与当前申请单客户一致
-                var accountAttr = formContext.getAttribute("mcs_accountid");
-                if (accountAttr && accountAttr.getValue() !== null && result._mcs_accountid_value) {
-                    var currentAccountId = accountAttr.getValue()[0].id.replace(/[{}]/g, "").toLowerCase();
-                    var procAccountId = result._mcs_accountid_value.replace(/[{}]/g, "").toLowerCase();
-                    if (currentAccountId !== procAccountId) {
-                        Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_CustomerMismatch", "所选模型计算序列号的客户与当前申请单客户不一致，请重新选择。") });
-                        clearLookup(formContext, "mcs_doid");
-                        setMoneyValue(formContext, "mcs_initigrant", 0);
-                        setMoneyValue(formContext, "mcs_tobegrant", getMoneyValue(formContext, "mcs_sellergrant") || 0);
-                        calculateAdjustedBalance(formContext);
-                    }
-                }
-            },
-            function (error) {
-                console.error("查询模型计算记录失败:", error);
-            }
-        );
-    }
+    // ==================== 模型计算/额度数据带出（禅道 #1855） ====================
+    // 厂端授信额度/余额（mcs_fca_quota）与模型计算（mcs_fca_proc）属基础数据，前端不再直查，
+    // 统一保存时由后端 FcaQuotaAppProcSyncPlugin 以系统身份回填（序列号/模型额度/当前额度/余额），
+    // 无模型计算/额度表读权限的角色保存后即可看到回填值
 
     // ==================== 调整后余额计算 ====================
 
     /**
-     * 调整后厂端授信余额 = 厂端授信额度调整为 - 厂端授信额度 + 厂端授信余额
+     * 调整后安全交易基线余额 = 安全交易基线额度调整为 - 安全交易基线额度 + 安全交易基线余额
      */
     function calculateAdjustedBalance(formContext) {
         var tobeGrant = getMoneyValue(formContext, "mcs_tobegrant") || 0;
@@ -426,6 +342,34 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
 
         var adjustedBalance = tobeGrant - sellerGrant + sellerBalance;
         setMoneyValue(formContext, "mcs_tobebalance", adjustedBalance);
+    }
+
+    // ==================== 调整原因必填联动（禅道 #1637） ====================
+
+    /**
+     * 调整原因必填联动：「安全交易基线额度调整为」≠ 默认基准值（模型计算额度或当前安全交易基线额度）
+     * 视为发生调整，调整原因设为必填；一致（未调整）时非必填。字段始终显示，仅控必填星号。
+     */
+    function updateReasonRequired(formContext) {
+        var reasonAttr = formContext.getAttribute("mcs_reason");
+        if (!reasonAttr) return;
+        var tobeGrant = getMoneyValue(formContext, "mcs_tobegrant") || 0;
+        var adjusted = defaultTobeGrant !== null && tobeGrant !== defaultTobeGrant;
+        reasonAttr.setRequiredLevel(adjusted ? "required" : "none");
+    }
+
+    /**
+     * 设置字段只读且随表单提交（禁用控件默认不提交，公式计算字段需始终提交）
+     */
+    function setControlReadOnly(formContext, field) {
+        var control = formContext.getControl(field);
+        if (control && control.setDisabled) {
+            control.setDisabled(true);
+        }
+        var attr = formContext.getAttribute(field);
+        if (attr) {
+            attr.setSubmitMode("always");
+        }
     }
 
     // ==================== 保存前校验 ====================
@@ -439,27 +383,16 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
             return;
         }
 
-        // 厂端授信额度调整为必填且 ≥ 0
+        // 安全交易基线额度调整为 ≥ 0（为空时由后端按基准值默认回填，禅道 #1855）
         var tobeGrantAttr = formContext.getAttribute("mcs_tobegrant");
-        if (!tobeGrantAttr || tobeGrantAttr.getValue() === null) {
+        if (tobeGrantAttr && tobeGrantAttr.getValue() !== null && tobeGrantAttr.getValue() < 0) {
             eventArgs.preventDefault();
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequired", "厂端授信额度调整为必填。") });
-            return;
-        }
-        if (tobeGrantAttr.getValue() < 0) {
-            eventArgs.preventDefault();
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaNegative", "厂端授信额度调整为不能小于 0。") });
+            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaNegative", "安全交易基线额度调整为不能小于 0。") });
             return;
         }
 
-        // 校验：如果当前额度为 0/空，必须选择模型计算序列号
-        var sellerGrant = getMoneyValue(formContext, "mcs_sellergrant") || 0;
-        var doidAttr = formContext.getAttribute("mcs_doid");
-        if (sellerGrant === 0 && (!doidAttr || doidAttr.getValue() === null)) {
-            eventArgs.preventDefault();
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_ZeroQuotaNeedModel", "当前厂端授信额度为 0，必须选择模型计算序列号。") });
-            return;
-        }
+        // 禅道 #1855：「额度为 0 必须选序列号」校验移至服务端 FcaQuotaAppProcSyncPlugin
+        // （无额度/模型计算读权限的角色前端取不到数据，前端校验会在后端回填前误拦截）
     }
 
     // ==================== 辅助方法 ====================
@@ -489,47 +422,6 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
         if (attr) {
             attr.setValue(null);
         }
-    }
-
-    // ==================== 最新生效模型计算序列号带出 ====================
-
-    /**
-     * 查询客户最新生效的厂端授信模型计算记录
-     * 条件：mcs_accountid = 当前客户 AND mcs_status = 3（生效启用）
-     * 取 createdon 最新的一条，回填 mcs_doid 和 mcs_initigrant
-     */
-    function retrieveLatestEffectiveProc(formContext, accountId) {
-        var filter = "_mcs_accountid_value eq " + accountId + " and mcs_status eq 3";
-        var query = "?$select=mcs_fca_procid,mcs_doid,mcs_initigrant&$filter=" + filter + "&$orderby=createdon desc&$top=1";
-
-        Xrm.WebApi.retrieveMultipleRecords("mcs_fca_proc", query).then(
-            function (result) {
-                if (result.entities.length > 0) {
-                    var proc = result.entities[0];
-                    var doidAttr = formContext.getAttribute("mcs_doid");
-                    if (doidAttr) {
-                        doidAttr.setValue([{
-                            id: proc.mcs_fca_procid,
-                            name: proc.mcs_doid || "",
-                            entityType: "mcs_fca_proc"
-                        }]);
-                    }
-                    setMoneyValue(formContext, "mcs_initigrant", proc.mcs_initigrant || 0);
-                    // 默认带到「厂端授信额度调整为」（与 onDoidChanged 同口径，可手工修改）
-                    setMoneyValue(formContext, "mcs_tobegrant", proc.mcs_initigrant || 0);
-                } else {
-                    clearLookup(formContext, "mcs_doid");
-                    setMoneyValue(formContext, "mcs_initigrant", 0);
-                }
-                calculateAdjustedBalance(formContext);
-            },
-            function (error) {
-                console.error("查询最新生效模型计算记录失败:", error);
-                clearLookup(formContext, "mcs_doid");
-                setMoneyValue(formContext, "mcs_initigrant", 0);
-                calculateAdjustedBalance(formContext);
-            }
-        );
     }
 
     // ==================== 申请组织信息带出 ====================
@@ -861,7 +753,16 @@ var FcaQuotaAppForm = FcaQuotaAppForm || {};
 
         var tobeGrantAttr = formContext.getAttribute("mcs_tobegrant");
         if (!tobeGrantAttr || tobeGrantAttr.getValue() === null || tobeGrantAttr.getValue() < 0) {
-            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequiredSubmit", "厂端授信额度调整为必填且不能小于 0。") });
+            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustQuotaRequiredSubmit", "安全交易基线额度调整为必填且不能小于 0。") });
+            return;
+        }
+
+        // 禅道 #1637：发生调整（调整为 ≠ 默认基准值）时调整原因必填
+        var submitAdjusted = defaultTobeGrant !== null && (tobeGrantAttr.getValue() || 0) !== defaultTobeGrant;
+        var reasonAttr = formContext.getAttribute("mcs_reason");
+        var reasonValue = reasonAttr ? reasonAttr.getValue() : null;
+        if (submitAdjusted && (!reasonValue || !reasonValue.trim())) {
+            Xrm.Navigation.openAlertDialog({ text: t("FcaQuotaApp_AdjustReasonRequired", "已调整安全交易基线额度，请填写调整原因。") });
             return;
         }
 

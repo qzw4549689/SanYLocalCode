@@ -2,6 +2,7 @@ using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System.Linq;
+using System.Text.Json;
 
 namespace D365MetadataTool;
 
@@ -146,13 +147,60 @@ public class SyncAccountProfileHelper
         Console.WriteLine("\n=== 完成 ===");
     }
 
+    /// <summary>
+    /// 计算信用等级（禅道 #2091）：阈值改从 ms_systemconfiguration 配置 CreditGradeMapping 读取，
+    /// 配置缺失/解析失败时用内置新口径默认值（70/58/49/40/0）兜底；下限含，按阈值从高到低匹配首个命中档
+    /// </summary>
     private string CalculateCreditGrade(decimal score)
     {
-        if (score >= 80) return "A0";
-        if (score >= 70) return "A1";
-        if (score >= 60) return "A2";
-        if (score >= 50) return "A3";
+        var thresholds = LoadCreditGradeThresholds();
+        foreach (var kv in thresholds.OrderByDescending(kv => kv.Value))
+        {
+            if (score >= kv.Value) return kv.Key;
+        }
         return "A4";
+    }
+
+    /// <summary>
+    /// 读取信用等级映射配置（CreditGradeMapping），缺失/异常时返回内置新口径默认值，不阻断
+    /// </summary>
+    private Dictionary<string, decimal> LoadCreditGradeThresholds()
+    {
+        var defaults = new Dictionary<string, decimal>
+        {
+            { "A0", 70m }, { "A1", 58m }, { "A2", 49m }, { "A3", 40m }, { "A4", 0m }
+        };
+        try
+        {
+            var query = new QueryExpression("ms_systemconfiguration")
+            {
+                ColumnSet = new ColumnSet("ms_content"),
+                Criteria = new FilterExpression
+                {
+                    Conditions = { new ConditionExpression("ms_name", ConditionOperator.Equal, "CreditGradeMapping") }
+                }
+            };
+            var entity = _service.RetrieveMultiple(query).Entities.FirstOrDefault();
+            var json = entity?.GetAttributeValue<string>("ms_content");
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                Console.WriteLine("ℹ 未配置 CreditGradeMapping，使用内置默认口径（A0>=70/A1>=58/A2>=49/A3>=40/A4）");
+                return defaults;
+            }
+            var mapping = JsonSerializer.Deserialize<Dictionary<string, decimal>>(json);
+            if (mapping == null) return defaults;
+            foreach (var grade in new[] { "A0", "A1", "A2", "A3", "A4" })
+            {
+                if (mapping.TryGetValue(grade, out var v)) defaults[grade] = v;
+            }
+            Console.WriteLine($"ℹ 已读取 CreditGradeMapping 配置: {json}");
+            return defaults;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠ CreditGradeMapping 配置读取失败，使用内置默认口径: {ex.Message}");
+            return defaults;
+        }
     }
 
     private int? MapCreditGradeToOptionSetValue(string creditGrade)

@@ -45,11 +45,16 @@ NAMESPACE_MAP = {
     "SanyD365.Plugins.CofaceIntegration.Token": "SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration.Token",
     "SanyD365.Plugins.CofaceIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CofaceIntegration",
     "SanyD365.Plugins.CofaceIntegration": "SanyD365.D365Extension.Sales.Application.Sales.CofaceIntegration",
+    "SanyD365.Plugins.CreditScore.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditScore",
+    "SanyD365.Plugins.CreditScore.Calculator": "SanyD365.D365Extension.Sales.Application.Sales.CreditScore",
     "SanyD365.Plugins.BppIntegration.Plugin": "SanyD365.D365Extension.Sales.Plugins.CreditRecord",
+    "SanyD365.Plugins.BppIntegration": "SanyD365.D365Extension.Sales.Plugins.CreditRecord",
     "SanyD365.Plugins.Account": "SanyD365.D365Extension.Sales.Plugins.Account",
     "SanyD365.Plugins.CustomerMasterData.Validation": "SanyD365.D365Extension.Sales.Plugins.Account",
     "SanyD365.Plugins.TradeStPayTerm.Api": "SanyD365.D365ExtensionApi.Sales.Apis.TradeStPayTerm",
     "SanyD365.Plugins.FactoryCredit.Api": "SanyD365.D365ExtensionApi.Sales.Apis.FactoryCredit",
+    "SanyD365.Plugins.CreditPool.Api": "SanyD365.D365ExtensionApi.Sales.Apis.CreditPool",
+    "SanyD365.Plugins.RiskExposure.Api": "SanyD365.D365ExtensionApi.Sales.Apis.RiskExposure",
     "SanyD365.Plugins.TradeStPayTerm": "SanyD365.D365Extension.Sales.Plugins.TradeStPayTerm",
     "SanyD365.Plugins.CustomerTag": "SanyD365.D365Extension.Sales.Plugins.CustomerTag",
     "SanyD365.Plugins.FactoryCredit": "SanyD365.D365Extension.Sales.Plugins.FactoryCredit",
@@ -78,9 +83,18 @@ FILE_MAP = {
     "CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs": r"Plugins\CofaceIntegration\CofaceIntegrationDataSyncPlugin.cs",
     "CofaceIntegration/Plugin/CofaceSearchCompanyPlugin.cs": r"Plugins\CofaceIntegration\CofaceSearchCompanyPlugin.cs",
     "CofaceIntegration/Plugin/CofacePlaceOrderPlugin.cs": r"Plugins\CofaceIntegration\CofacePlaceOrderPlugin.cs",
+    "CofaceIntegration/Plugin/CofaceBindWritebackPlugin.cs": r"Plugins\CofaceIntegration\CofaceBindWritebackPlugin.cs",
 
     # BPP Callback Plugin
     "BppIntegration/Plugin/BppCallbackPlugin.cs": r"Plugins\CreditRecord\CreditRecordBppCallbackPlugin.cs",
+    # 信用等级映射配置读取（禅道 #2091，BPP 回调回写客户主数据用）
+    "BppIntegration/CreditGradeMappingConfig.cs": r"Plugins\CreditRecord\CreditGradeMappingConfig.cs",
+
+    # 信用分计算 Plugin
+    "CreditScore/Calculator/ScoreCalculator.cs": r"Application\Sales\CreditScore\ScoreCalculator.cs",
+    "CreditScore/Plugin/CreditScorePlugin.cs": r"Plugins\CreditScore\CreditScoreCalculationPlugin.cs",
+    "CreditScore/Plugin/BpfStageSyncPlugin.cs": r"Plugins\CreditScore\CreditScoreBpfStageSyncPlugin.cs",
+    "CreditScore/Plugin/BpfSyncHelper.cs": r"Plugins\CreditScore\CreditScoreBpfSyncHelper.cs",
 
     # Account 字段校验 Plugin（8 字段校验已移除，仅保留 blacklist/creditgrant）
     "Account/AutoNumber/AccountValidationPlugin.cs": r"Plugins\Account\AccountCreditValidationPlugin.cs",
@@ -92,6 +106,7 @@ FILE_MAP = {
     "TradeStPayTerm/AutoNumber/TradeStPayTermAutoNumberPlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermAutoNumberPlugin.cs",
     "TradeStPayTerm/Validation/TradeStPayTermValidationPlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermValidationPlugin.cs",
     "TradeStPayTerm/Sharing/TradeStPayTermSharePlugin.cs": r"Plugins\TradeStPayTerm\TradeStPayTermSharePlugin.cs",
+    "TradeStPayTerm/Sync/TradePtGroupTypeProductLineSyncPlugin.cs": r"Plugins\TradeStPayTerm\TradePtGroupTypeProductLineSyncPlugin.cs",
 
     # 客户信用标签 Plugin
     "CustomerTag/AutoNumber/CustomerTagInitPlugin.cs": r"Plugins\CustomerTag\CustomerTagInitPlugin.cs",
@@ -101,6 +116,8 @@ FILE_MAP = {
     "FactoryCredit/Calculation/FcaProcCalculationPlugin.cs": r"Plugins\FactoryCredit\FcaProcCalculationPlugin.cs",
     "FactoryCredit/Bpp/FcaQuotaAppBppIntegrationPlugin.cs": r"Plugins\FactoryCredit\Bpp\FcaQuotaAppBppIntegrationPlugin.cs",
     "FactoryCredit/Bpp/FcaQuotaAppBppCallbackPlugin.cs": r"Plugins\FactoryCredit\Bpp\FcaQuotaAppBppCallbackPlugin.cs",
+    # 厂端授信额度申请-模型计算/额度数据带出（禅道 #1855）
+    "FactoryCredit/QuotaApp/FcaQuotaAppProcSyncPlugin.cs": r"Plugins\FactoryCredit\QuotaApp\FcaQuotaAppProcSyncPlugin.cs",
     # FinancingManagement BPP
     "FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs": r"Plugins\FinancingManagement\Bpp\FsmDataBppIntegrationPlugin.cs",
     "FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs": r"Plugins\FinancingManagement\Bpp\FsmDataBppCallbackPlugin.cs",
@@ -111,6 +128,14 @@ FILE_MAP = {
     "FinancingManagement/Resource/FsmResourceDuplicationCheckPlugin.cs": r"Plugins\FinancingManagement\Resource\FsmResourceDuplicationCheckPlugin.cs",
     # FinancingManagement 融资落实订单号唯一校验（禅道 #1511）
     "FinancingManagement/Detail/FsmDetailDataDuplicationCheckPlugin.cs": r"Plugins\FinancingManagement\Detail\FsmDetailDataDuplicationCheckPlugin.cs",
+    # FinancingManagement 融资落实单据完成守卫（禅道 #1816）
+    "FinancingManagement/Detail/FsmDetailDataCompletedGuardPlugin.cs": r"Plugins\FinancingManagement\Detail\FsmDetailDataCompletedGuardPlugin.cs",
+    # FinancingManagement 进入融资落实阶段小铃铛通知（禅道 #1654）
+    "FinancingManagement/Notify/FsmDataStage4NotifyPlugin.cs": r"Plugins\FinancingManagement\Notify\FsmDataStage4NotifyPlugin.cs",
+    # FinancingManagement 阶段流转共享+通知（禅道 #1727 融资方案接口人 / #1712 贷后管理人）
+    "FinancingManagement/Notify/FsmDataHandoverShareNotifyPlugin.cs": r"Plugins\FinancingManagement\Notify\FsmDataHandoverShareNotifyPlugin.cs",
+    # FinancingManagement BPF 实例完成时共享+通知贷后管理人（禅道 #1759，原 #1712 后移）
+    "FinancingManagement/Notify/FsmDataBpfCompleteShareNotifyPlugin.cs": r"Plugins\FinancingManagement\Notify\FsmDataBpfCompleteShareNotifyPlugin.cs",
     "FactoryCredit/Bpp/Services/QuotaActivationService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaActivationService.cs",
     "FactoryCredit/Bpp/Services/QuotaRecordService.cs": r"Plugins\FactoryCredit\Bpp\Services\QuotaRecordService.cs",
     "FactoryCredit/Calculation/Services/CalculationLogService.cs": r"Plugins\FactoryCredit\Calculation\Services\CalculationLogService.cs",
@@ -135,6 +160,15 @@ FILE_MAP_API = {
     # 厂端授信余额调整 Custom API
     "FactoryCredit.Api/AdjustFcaQuotaBalancePlugin.cs": r"Apis\FactoryCredit\AdjustFcaQuotaBalancePlugin.cs",
     "FactoryCredit.Api/FcaQuotaAdjustService.cs": r"Apis\FactoryCredit\FcaQuotaAdjustService.cs",
+    # 使用授信 Custom API（816 授信池·哑记账）
+    "CreditPool.Api/RecordCreditDetailPlugin.cs": r"Apis\CreditPool\RecordCreditDetailPlugin.cs",
+    "CreditPool.Api/RecordCreditDetailService.cs": r"Apis\CreditPool\RecordCreditDetailService.cs",
+    "CreditPool.Api/SinosureUpliftConfig.cs": r"Apis\CreditPool\SinosureUpliftConfig.cs",
+    "CreditPool.Api/QueryCreditBalancePlugin.cs": r"Apis\CreditPool\QueryCreditBalancePlugin.cs",
+    "CreditPool.Api/QueryCreditBalanceService.cs": r"Apis\CreditPool\QueryCreditBalanceService.cs",
+    # 风险敞口计算 Custom API
+    "RiskExposure.Api/CalculateRiskExposurePlugin.cs": r"Apis\RiskExposure\CalculateRiskExposurePlugin.cs",
+    "RiskExposure.Api/RiskExposureService.cs": r"Apis\RiskExposure\RiskExposureService.cs",
 }
 
 # csproj 中 Compile 引用的排序分组（可选，保持 csproj 可读性）
@@ -146,6 +180,8 @@ PLUGIN_RENAME_MAP = {
     "CofaceDataSyncPlugin": "CofaceIntegrationDataSyncPlugin",
     "AccountValidationPlugin": "AccountCreditValidationPlugin",
     "CustomerMasterDataValidationPlugin": "CustomerMasterDataCreditValidationPlugin",
+    "BpfStageSyncPlugin": "CreditScoreBpfStageSyncPlugin",
+    "BpfSyncHelper": "CreditScoreBpfSyncHelper",
 }
 
 # 远程保持原生 IPlugin 运行的插件（不做 PluginBase 转换）
@@ -155,6 +191,7 @@ PLUGINBASE_SKIP_FILES = {
     "FactoryCredit/Bpp/FcaQuotaAppBppCallbackPlugin.cs",
     "FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs",
     "FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs",
+    "TradeStPayTerm/Sharing/TradeStPayTermSharePlugin.cs",
 }
 
 # ==================== 工具函数 ====================
@@ -248,9 +285,11 @@ def assert_pluginbase_transform(local_rel: str, content: str):
     if re.search(r":\s*IPlugin\b", content):
         problems.append("类声明未转换为 PluginBase")
     for i, line in enumerate(content.splitlines(), 1):
-        if "serviceProvider" in line:
+        # 忽略行注释内容（保留字符串常量中的注释符号不处理，实际场景足够）
+        code_part = re.sub(r"//.*", "", line)
+        if "serviceProvider" in code_part:
             problems.append(f"第 {i} 行残留 serviceProvider: {line.strip()}")
-        if re.search(r"\bfactory\.CreateOrganizationService", line):
+        if re.search(r"\bfactory\.CreateOrganizationService", code_part):
             problems.append(f"第 {i} 行残留 factory.CreateOrganizationService: {line.strip()}")
     if "ContextContainer.GetValue<IOrganizationService>(ContextTypes.OrgService)" not in content:
         problems.append(

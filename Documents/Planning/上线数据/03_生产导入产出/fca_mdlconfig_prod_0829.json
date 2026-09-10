@@ -1,0 +1,762 @@
+[
+  {
+    "mcs_argid": "S-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 50.0,
+    "mcs_adjust1": 0.068,
+    "mcs_adjust2": 13.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "S-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 40.0,
+    "mcs_adjust1": 0.068,
+    "mcs_adjust2": 11.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "S-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 40.0,
+    "mcs_adjust1": 0.054,
+    "mcs_adjust2": 9.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "S-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.036,
+    "mcs_adjust2": 5.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "S-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.018,
+    "mcs_adjust2": 2.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "A-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 50.0,
+    "mcs_adjust1": 0.065,
+    "mcs_adjust2": 14.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "A-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 40.0,
+    "mcs_adjust1": 0.065,
+    "mcs_adjust2": 13.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "A-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 40.0,
+    "mcs_adjust1": 0.052,
+    "mcs_adjust2": 9.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "A-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.034,
+    "mcs_adjust2": 6.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "A-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.017,
+    "mcs_adjust2": 2.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "B-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 20.0,
+    "mcs_adjust1": 0.061,
+    "mcs_adjust2": 12.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "B-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 20.0,
+    "mcs_adjust1": 0.061,
+    "mcs_adjust2": 11.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "B-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 20.0,
+    "mcs_adjust1": 0.049,
+    "mcs_adjust2": 7.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "B-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 20.0,
+    "mcs_adjust1": 0.033,
+    "mcs_adjust2": 4.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "B-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 10.0,
+    "mcs_adjust1": 0.016,
+    "mcs_adjust2": 2.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D5-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 10
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 40.0,
+    "mcs_adjust1": 0.831,
+    "mcs_adjust2": 8.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D5-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 10
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.738,
+    "mcs_adjust2": 7.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D5-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 10
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.646,
+    "mcs_adjust2": 5.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D5-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 10
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 30.0,
+    "mcs_adjust1": 0.462,
+    "mcs_adjust2": 4.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D5-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 10
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 20.0,
+    "mcs_adjust1": 0.277,
+    "mcs_adjust2": 2.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D4-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 9
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 100.0,
+    "mcs_adjust1": 0.872,
+    "mcs_adjust2": 6.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D4-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 9
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 90.0,
+    "mcs_adjust1": 0.775,
+    "mcs_adjust2": 6.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D4-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 9
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 80.0,
+    "mcs_adjust1": 0.678,
+    "mcs_adjust2": 5.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D4-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 9
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 70.0,
+    "mcs_adjust1": 0.485,
+    "mcs_adjust2": 4.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D4-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 9
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 60.0,
+    "mcs_adjust1": 0.291,
+    "mcs_adjust2": 3.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D3-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 8
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 400.0,
+    "mcs_adjust1": 1.0,
+    "mcs_adjust2": 7.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D3-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 8
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 360.0,
+    "mcs_adjust1": 0.928,
+    "mcs_adjust2": 6.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D3-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 8
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 330.0,
+    "mcs_adjust1": 0.812,
+    "mcs_adjust2": 6.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D3-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 8
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 280.0,
+    "mcs_adjust1": 0.58,
+    "mcs_adjust2": 5.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D3-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 8
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 230.0,
+    "mcs_adjust1": 0.348,
+    "mcs_adjust2": 3.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D2-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 7
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 900.0,
+    "mcs_adjust1": 1.0,
+    "mcs_adjust2": 6.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D2-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 7
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 830.0,
+    "mcs_adjust1": 0.95,
+    "mcs_adjust2": 6.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D2-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 7
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 750.0,
+    "mcs_adjust1": 0.857,
+    "mcs_adjust2": 5.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D2-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 7
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 640.0,
+    "mcs_adjust1": 0.612,
+    "mcs_adjust2": 4.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D2-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 7
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 530.0,
+    "mcs_adjust1": 0.367,
+    "mcs_adjust2": 3.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D1-A0",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 6
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 960.0,
+    "mcs_adjust1": 1.0,
+    "mcs_adjust2": 7.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D1-A1",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 6
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 880.0,
+    "mcs_adjust1": 0.98,
+    "mcs_adjust2": 6.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D1-A2",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 6
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 3
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 1
+    },
+    "mcs_countryname": 800.0,
+    "mcs_adjust1": 0.9,
+    "mcs_adjust2": 6.0,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D1-A3",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 6
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 4
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 680.0,
+    "mcs_adjust1": 0.643,
+    "mcs_adjust2": 4.5,
+    "mcs_adjust3": 1.0
+  },
+  {
+    "mcs_argid": "D1-A4",
+    "mcs_buyergrade": {
+      "type": "OptionSetValue",
+      "value": 6
+    },
+    "mcs_creditgrade": {
+      "type": "OptionSetValue",
+      "value": 5
+    },
+    "mcs_aggfunc": {
+      "type": "OptionSetValue",
+      "value": 2
+    },
+    "mcs_countryname": 560.0,
+    "mcs_adjust1": 0.386,
+    "mcs_adjust2": 3.5,
+    "mcs_adjust3": 1.0
+  }
+]

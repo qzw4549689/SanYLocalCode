@@ -30,6 +30,10 @@ namespace SanyD365.Plugins.FactoryCredit
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
             ITracingService tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
+            // 系统上下文：仅用于查询厂端授信额度表(mcs_fca_quota)（禅道 #1855：额度走系统查询）；
+            // mcs_fca_proc 本身操作及其余数据保留用户上下文
+            IOrganizationService systemService = factory.CreateOrganizationService(null);
+
             tracer.Trace("FcaProcActivationPlugin 开始执行");
 
             if (context.MessageName != "Update" || context.Stage != 40)
@@ -62,12 +66,6 @@ namespace SanyD365.Plugins.FactoryCredit
             int newStatus = GetOptionSetValue(target, "mcs_status");
             tracer.Trace($"新状态: {newStatus}");
 
-            if (newStatus != STATUS_ACTIVE)
-            {
-                tracer.Trace("新状态不是生效启用，跳过");
-                return;
-            }
-
             // 获取旧状态，避免重复触发
             int oldStatus = 0;
             if (context.PreEntityImages.Contains("PreImage"))
@@ -75,6 +73,27 @@ namespace SanyD365.Plugins.FactoryCredit
                 Entity preImage = context.PreEntityImages["PreImage"];
                 oldStatus = GetOptionSetValue(preImage, "mcs_status");
                 tracer.Trace($"旧状态: {oldStatus}");
+            }
+
+            // 禅道 #1644：从生效启用退回（退回计算等）时，有效状态联动置否
+            if (oldStatus == STATUS_ACTIVE && newStatus != STATUS_ACTIVE)
+            {
+                try
+                {
+                    ClearActiveFlag(service, tracer, target.Id);
+                }
+                catch (Exception ex)
+                {
+                    tracer.Trace($"退回置否处理失败: {ex.Message}");
+                    throw new InvalidPluginExecutionException($"退回置否处理失败: {ex.Message}");
+                }
+                return;
+            }
+
+            if (newStatus != STATUS_ACTIVE)
+            {
+                tracer.Trace("新状态不是生效启用，跳过");
+                return;
             }
 
             if (oldStatus == STATUS_ACTIVE)
@@ -85,7 +104,10 @@ namespace SanyD365.Plugins.FactoryCredit
 
             try
             {
-                ProcessActivation(service, tracer, target.Id);
+                ProcessActivation(service, systemService, tracer, target.Id);
+                // 禅道 #1644：一个客户永远只能存在一条有效厂端授信，
+                // 本记录置为有效，同客户其他有效记录置否
+                SetActiveAndDeactivateOthers(service, tracer, target.Id);
             }
             catch (Exception ex)
             {
@@ -94,7 +116,77 @@ namespace SanyD365.Plugins.FactoryCredit
             }
         }
 
-        private void ProcessActivation(IOrganizationService service, ITracingService tracer, Guid procId)
+        /// <summary>
+        /// 禅道 #1644：生效启用时本记录 mcs_active=true，并将同客户其他有效记录置否，
+        /// 保证一个客户永远只有一条有效厂端授信（参照 #1645 BppCallbackPlugin.DeactivateOtherActiveRecords）。
+        /// 说明：仅更新 mcs_active，Target 不含 mcs_status，不会递归触发本 Plugin。
+        /// </summary>
+        private void SetActiveAndDeactivateOthers(IOrganizationService service, ITracingService tracer, Guid procId)
+        {
+            Entity proc = service.Retrieve("mcs_fca_proc", procId, new ColumnSet("mcs_accountid", "mcs_doid"));
+            EntityReference accountRef = proc.GetAttributeValue<EntityReference>("mcs_accountid");
+            if (accountRef == null)
+            {
+                tracer.Trace("客户编码为空，跳过唯一有效处理");
+                return;
+            }
+
+            // 本记录置为有效
+            Entity activate = new Entity("mcs_fca_proc", procId);
+            activate["mcs_active"] = true;
+            service.Update(activate);
+            tracer.Trace($"本记录已置为有效: {proc.GetAttributeValue<string>("mcs_doid")}({procId})");
+
+            // 同客户其他有效记录置否
+            // mcs_active 为新增字段，存量记录为空值：null 视同有效一并置否（运行时口径，非存量数据修复）
+            QueryExpression query = new QueryExpression("mcs_fca_proc")
+            {
+                ColumnSet = new ColumnSet("mcs_doid"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("mcs_accountid", ConditionOperator.Equal, accountRef.Id),
+                        new ConditionExpression("statecode", ConditionOperator.Equal, 0),
+                        new ConditionExpression("mcs_fca_procid", ConditionOperator.NotEqual, procId)
+                    },
+                    Filters =
+                    {
+                        new FilterExpression(LogicalOperator.Or)
+                        {
+                            Conditions =
+                            {
+                                new ConditionExpression("mcs_active", ConditionOperator.Equal, true),
+                                new ConditionExpression("mcs_active", ConditionOperator.Null)
+                            }
+                        }
+                    }
+                }
+            };
+
+            EntityCollection others = service.RetrieveMultiple(query);
+            foreach (Entity oldRecord in others.Entities)
+            {
+                Entity deactivate = new Entity("mcs_fca_proc", oldRecord.Id);
+                deactivate["mcs_active"] = false;
+                service.Update(deactivate);
+                tracer.Trace($"旧有效记录已置否: {oldRecord.GetAttributeValue<string>("mcs_doid")}({oldRecord.Id})");
+            }
+            tracer.Trace($"同客户其他有效记录置否完成，共 {others.Entities.Count} 条");
+        }
+
+        /// <summary>
+        /// 禅道 #1644：从生效启用退回（退回计算等）时，本记录有效状态联动置否
+        /// </summary>
+        private void ClearActiveFlag(IOrganizationService service, ITracingService tracer, Guid procId)
+        {
+            Entity deactivate = new Entity("mcs_fca_proc", procId);
+            deactivate["mcs_active"] = false;
+            service.Update(deactivate);
+            tracer.Trace($"退回计算，记录有效状态已置否: {procId}");
+        }
+
+        private void ProcessActivation(IOrganizationService service, IOrganizationService systemService, ITracingService tracer, Guid procId)
         {
             // 读取完整计算记录（含组织字段，一并带出到申请单）
             Entity proc = service.Retrieve("mcs_fca_proc", procId,
@@ -125,8 +217,8 @@ namespace SanyD365.Plugins.FactoryCredit
                 return;
             }
 
-            // 读取客户当前生效额度（无额度记录时按 0 处理）
-            GetCurrentQuota(service, tracer, accountRef, out decimal sellerGrant, out decimal sellerBalance);
+            // 读取客户当前生效额度（无额度记录时按 0 处理）（#1855 系统身份查 mcs_fca_quota）
+            GetCurrentQuota(systemService, tracer, accountRef, out decimal sellerGrant, out decimal sellerBalance);
 
             // 需求公式：调整后厂端授信余额 = 厂端授信额度调整为 - 厂端授信额度 + 厂端授信余额
             decimal tobeBalance = initGrant.Value - sellerGrant + sellerBalance;

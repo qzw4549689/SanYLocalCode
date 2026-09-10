@@ -1,7 +1,8 @@
 /**
  * 成交条件样板库 - 表单逻辑
  * 实体: mcs_trade_stpayterm
- * 功能: 克隆新增、表单默认值、Lookup 与文本字段同步、批量申请/审批/拒绝
+ * 功能: 克隆新增、表单默认值、Lookup 与文本字段同步
+ * 说明: 2026-08-14 Bug #1834 取消审批功能，批量申请/审批/拒绝相关代码已注释（按钮直接隐藏，不删除组件）
  */
 
 // 同步加载多语言帮助类（实验阶段，验证通过后可改为窗体依赖库）
@@ -45,8 +46,9 @@ TradeStPayTermForm.L = function (key, defaultText) {
 // CREATOR  = 成交条件制定人（发起配置/申请审批）
 // APPROVER = 成交条件审批人（审核配置数据）
 // ADMIN    = 系统管理员（放行，便于管理与测试）
+// 2026-08-21 禅道 #1989：制定人角色按基线库口径由 Risk Control 改为 Business Control
 TradeStPayTermForm.ROLES = {
-    CREATOR: "LTC Risk Control Configuration Admin",
+    CREATOR: "LTC Business Control Configuration Admin",
     APPROVER: "LTC Regional Overseas Risk Director",
     ADMIN: "System Administrator"
 };
@@ -155,7 +157,7 @@ TradeStPayTermForm.onLoad = function (executionContext) {
 
 /**
  * 判断当前用户是否有克隆新增按钮权限
- * 成交条件制定人（LTC Risk Control Configuration Admin）或系统管理员可见
+ * 成交条件制定人（LTC Business Control Configuration Admin）或系统管理员可见
  */
 TradeStPayTermForm.hasCloneButtonPermission = function () {
     return TradeStPayTermForm.currentUserHasAnyRole([
@@ -199,15 +201,15 @@ TradeStPayTermForm.hideCloneButtonIfNoPermission = function () {
 /**
  * 设置只读字段
  * 标准条件编码由系统自动生成，生效状态由批量按钮控制流转。
- * 待审批（1）/ 生效（2）状态下全表单只读：
- * 防止审批中的内容被修改导致审批不一致，生效记录不允许直接变更（应克隆新建）。
+ * 生效（2）状态下全表单只读：生效记录不允许直接变更（应克隆新建）。
+ * 2026-08-14 Bug #1834：取消审批功能，待审批状态（1）已停用，不再只读锁定。
  */
 TradeStPayTermForm.setReadOnlyFields = function (formContext) {
     var statusAttr = formContext.getAttribute("mcs_status");
     var status = statusAttr ? statusAttr.getValue() : null;
 
-    // 待审批（1）或生效（2）：禁用全部字段
-    if (status === 1 || status === 2) {
+    // 生效（2）：禁用全部字段
+    if (status === 2) {
         formContext.data.entity.attributes.forEach(function (attr) {
             attr.controls.forEach(function (control) {
                 if (control.setDisabled) {
@@ -754,6 +756,8 @@ TradeStPayTermForm.parseUrlParams = function (url) {
 };
 
 // ==================== 列表视图批量操作（阶段 3） ====================
+// 2026-08-14 Bug #1834：取消审批功能，以下批量申请/审批/拒绝入口已注释。
+// 保留空壳函数防止 Ribbon/AppAction 残留引用时报错；按钮通过 Ribbon XML 注释直接隐藏。
 
 /**
  * 批量申请：将选中记录状态更新为 1（待审批）
@@ -762,10 +766,11 @@ TradeStPayTermForm.parseUrlParams = function (url) {
  * @param {object} selectedControl - 列表控件（SelectedControl 参数，用于成功后刷新列表）
  */
 TradeStPayTermGrid.apply = function (selectedIds, selectedControl) {
-    if (!TradeStPayTermGrid.checkBatchPermission([TradeStPayTermForm.ROLES.CREATOR, TradeStPayTermForm.ROLES.ADMIN], TradeStPayTermForm.L("TradeStPayTerm_ActionApply", "申请"))) {
-        return;
-    }
-    TradeStPayTermGrid.batchUpdateStatus(selectedIds, 1, TradeStPayTermForm.L("TradeStPayTerm_ActionApply", "申请"), 0, selectedControl);
+    // 2026-08-14 Bug #1834：取消审批功能，批量申请已停用
+    // if (!TradeStPayTermGrid.checkBatchPermission([TradeStPayTermForm.ROLES.CREATOR, TradeStPayTermForm.ROLES.ADMIN], TradeStPayTermForm.L("TradeStPayTerm_ActionApply", "申请"))) {
+    //     return;
+    // }
+    // TradeStPayTermGrid.batchUpdateStatus(selectedIds, 1, TradeStPayTermForm.L("TradeStPayTerm_ActionApply", "申请"), 0, selectedControl);
 };
 
 /**
@@ -775,10 +780,11 @@ TradeStPayTermGrid.apply = function (selectedIds, selectedControl) {
  * @param {object} selectedControl - 列表控件（SelectedControl 参数，用于成功后刷新列表）
  */
 TradeStPayTermGrid.approve = function (selectedIds, selectedControl) {
-    if (!TradeStPayTermGrid.checkBatchPermission([TradeStPayTermForm.ROLES.APPROVER, TradeStPayTermForm.ROLES.ADMIN], TradeStPayTermForm.L("TradeStPayTerm_ActionApprove", "审批"))) {
-        return;
-    }
-    TradeStPayTermGrid.batchUpdateStatus(selectedIds, 2, TradeStPayTermForm.L("TradeStPayTerm_ActionApprove", "审批"), 1, selectedControl);
+    // 2026-08-14 Bug #1834：取消审批功能，批量审批已停用
+    // if (!TradeStPayTermGrid.checkBatchPermission([TradeStPayTermForm.ROLES.APPROVER, TradeStPayTermForm.ROLES.ADMIN], TradeStPayTermForm.L("TradeStPayTerm_ActionApprove", "审批"))) {
+    //     return;
+    // }
+    // TradeStPayTermGrid.batchUpdateStatus(selectedIds, 2, TradeStPayTermForm.L("TradeStPayTerm_ActionApprove", "审批"), 1, selectedControl);
 };
 
 /**
@@ -788,10 +794,11 @@ TradeStPayTermGrid.approve = function (selectedIds, selectedControl) {
  * @param {object} selectedControl - 列表控件（SelectedControl 参数，用于成功后刷新列表）
  */
 TradeStPayTermGrid.reject = function (selectedIds, selectedControl) {
-    if (!TradeStPayTermGrid.checkBatchPermission([TradeStPayTermForm.ROLES.APPROVER, TradeStPayTermForm.ROLES.ADMIN], TradeStPayTermForm.L("TradeStPayTerm_ActionReject", "拒绝"))) {
-        return;
-    }
-    TradeStPayTermGrid.batchUpdateStatus(selectedIds, 0, TradeStPayTermForm.L("TradeStPayTerm_ActionReject", "拒绝"), 1, selectedControl);
+    // 2026-08-14 Bug #1834：取消审批功能，批量拒绝已停用
+    // if (!TradeStPayTermGrid.checkBatchPermission([TradeStPayTermForm.ROLES.APPROVER, TradeStPayTermForm.ROLES.ADMIN], TradeStPayTermForm.L("TradeStPayTerm_ActionReject", "拒绝"))) {
+    //     return;
+    // }
+    // TradeStPayTermGrid.batchUpdateStatus(selectedIds, 0, TradeStPayTermForm.L("TradeStPayTerm_ActionReject", "拒绝"), 1, selectedControl);
 };
 
 /**
@@ -817,7 +824,8 @@ TradeStPayTermGrid.checkBatchPermission = function (allowedRoles, actionName) {
 TradeStPayTermGrid.getStatusName = function (status) {
     switch (status) {
         case 0: return TradeStPayTermForm.L("TradeStPayTerm_Status_0", "未生效");
-        case 1: return TradeStPayTermForm.L("TradeStPayTerm_Status_1", "待审批");
+        // 2026-08-14 Bug #1834：取消审批功能，待审批状态（1）已停用
+        // case 1: return TradeStPayTermForm.L("TradeStPayTerm_Status_1", "待审批");
         case 2: return TradeStPayTermForm.L("TradeStPayTerm_Status_2", "生效");
         default: return TradeStPayTermForm.L("TradeStPayTerm_StatusUnknown", "未知");
     }

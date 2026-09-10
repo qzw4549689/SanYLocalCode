@@ -46,6 +46,7 @@
 - 复制窗体时必须同步修改 `functionName`、JS 对象名、文件名
 - `cell id` 必须使用 `Guid.NewGuid().ToString("B")`
 - **🚨 绝对禁止覆盖公共语言包等通用 WebResource（2026-06-27 新增）**：`ms_languagefile_1033/2052` 等被多模块共用的通用文件，AI 严禁直接覆盖其全部内容。新增 key 时必须在原文件基础上追加，避免冲掉其他模块 key。
+- **🚨 JS/HTML 修改必须走仓库（2026-08-15 新增）**：本目录 JS/HTML 与远程仓库 `D365/SanyD365.D365WebResource/WebResource/mcs_/Scripts|Htmls/Sales/CreditAssessment/` 一一对应。修改流程：本地改 → 推分支+PR → 用户合并 → tx-windows 拉取 uat → 用仓库版部署 DEV1；禁止直连部署 DEV1。详见 `/skill:d365-dev` 第 8.5.2 节。
 
 ### 2.3 实体/字段
 

@@ -1,0 +1,35 @@
+{
+  "entityName": "mcs_fsm_data",
+  "displayName": "融资管理",
+  "displayNameZh": "融资管理",
+  "displayNameEn": "Financing Management",
+  "primaryAttribute": "mcs_fsm_no",
+  "primaryAttributeDisplayName": "融资管理编号",
+  "primaryAttributeDisplayNameZh": "融资管理编号",
+  "primaryAttributeDisplayNameEn": "FSM No",
+  "primaryAttributeLength": 100,
+  "solutionName": "",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_contract_ids",
+      "displayName": "合同编号（多选）",
+      "displayNameZh": "合同编号（多选）",
+      "displayNameEn": "Contracts (Multi-select)",
+      "description": "禅道#2150：合同编号多选，平台公共PCF控件 mcs_common.control.lookup.multiplechoice 绑值字段，存 mcs_contract GUID 逗号分隔。替代单选 mcs_contract_id（保留隐藏不删，用户拍板存量不迁移）",
+      "type": "memo",
+      "required": false,
+      "maxLength": 4000
+    },
+    {
+      "schemaName": "mcs_contract_nos",
+      "displayName": "合同编号文本",
+      "displayNameZh": "合同编号文本",
+      "displayNameEn": "Contract Numbers",
+      "description": "禅道#2150：合同编号（mcs_contract.mcs_name，LTC-xxx）逗号分隔文本，由 mcs_fsm_data.js 多选 onChange 同步带出，供展示与合同交易风险接口匹配",
+      "type": "string",
+      "required": false,
+      "maxLength": 2000
+    }
+  ]
+}

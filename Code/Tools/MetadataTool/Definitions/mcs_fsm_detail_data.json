@@ -37,10 +37,21 @@
       "displayName": "订单编号",
       "displayNameZh": "订单编号",
       "displayNameEn": "Order",
-      "description": "关联销售订单，按主表合同号过滤",
+      "description": "【已废弃-表单隐藏】误指标准订单 salesorder（无合同关联字段），2026-09-02 起由 mcs_orderid 替代，字段与数据保留不删",
       "type": "lookup",
       "required": true,
       "targetEntity": "salesorder",
+      "targetEntityDisplayName": "订单"
+    },
+    {
+      "schemaName": "mcs_orderid",
+      "displayName": "订单编号",
+      "displayNameZh": "订单编号",
+      "displayNameEn": "Order",
+      "description": "关联自定义订单（mcs_order），按主表合同号过滤。2026-09-02 新建替代误指 salesorder 的 mcs_order_id",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_order",
       "targetEntityDisplayName": "订单"
     },
     {

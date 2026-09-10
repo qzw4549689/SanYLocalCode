@@ -91,15 +91,14 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 {
                     decimal? maxValue = null;
 
-                    // 尝试取 nominalCapitalAmount
-                    // 尝试取 nominalCapitalAmount
+                    // 尝试取 nominalCapitalAmount（币种在各自的 xxxCapitalCurrency 子节点，2026-09-08 修复：原误在 shareCapital 上找 currency 导致未换算）
                     if (shareCapital.TryGetProperty("nominalCapitalAmount", out var nominalAmount))
                     {
                         decimal? value = nominalAmount.GetDecimalSafe();
                         if (value.HasValue)
                         {
                             decimal convertedValue = ApplyDimension(shareCapital, value.Value);
-                            convertedValue = ConvertCurrency(shareCapital, convertedValue);
+                            convertedValue = ConvertCurrencyByChildNode(shareCapital, "nominalCapitalCurrency", convertedValue);
                             _tracer.Trace($"shareCapital.nominalCapitalAmount={convertedValue}");
                             if (!maxValue.HasValue || convertedValue > maxValue.Value)
                                 maxValue = convertedValue;
@@ -113,7 +112,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                         if (value.HasValue)
                         {
                             decimal convertedValue = ApplyDimension(shareCapital, value.Value);
-                            convertedValue = ConvertCurrency(shareCapital, convertedValue);
+                            convertedValue = ConvertCurrencyByChildNode(shareCapital, "issuedCapitalCurrency", convertedValue);
                             _tracer.Trace($"shareCapital.issuedCapitalAmount={convertedValue}");
                             if (!maxValue.HasValue || convertedValue > maxValue.Value)
                                 maxValue = convertedValue;
@@ -127,7 +126,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                         if (value.HasValue)
                         {
                             decimal convertedValue = ApplyDimension(shareCapital, value.Value);
-                            convertedValue = ConvertCurrency(shareCapital, convertedValue);
+                            convertedValue = ConvertCurrencyByChildNode(shareCapital, "paidUpCapitalCurrency", convertedValue);
                             _tracer.Trace($"shareCapital.paidUpCapitalAmount={convertedValue}");
                             if (!maxValue.HasValue || convertedValue > maxValue.Value)
                                 maxValue = convertedValue;
@@ -233,75 +232,17 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
         /// JSON Path: icon.creditReport.additionalInsolvencies (数组或对象)
         /// 返回: 诉讼记录条数
         /// </summary>
+        /// <summary>
+        /// 诉讼债权金额
+        /// 业务口径（2026-05-15 确认）：诉讼债权标的金额由人工读 PDF 判断补录，系统不自动取值。
+        /// 历史问题：旧实现读 additionalInsolvencies/litigations 节点，该节点在真实报文中恒为 Object
+        /// （内含 additionalInsolvencyList），被「Object 按 1 条处理」误写为恒 1.00，且条数≠金额语义。
+        /// 返回: -1（缺失值哨兵，标签写 N/A，交人工复核补录）
+        /// </summary>
         private int ParseLitigationCount(JsonElement creditReport)
         {
-            try
-            {
-                // 路径1: additionalInsolvencies (可能是Array或Object)
-                if (creditReport.TryGetProperty("additionalInsolvencies", out var insolvencies))
-                {
-                    if (insolvencies.ValueKind == JsonValueKind.Array)
-                    {
-                        int count = 0;
-                        foreach (var item in insolvencies.EnumerateArray())
-                        {
-                            count++;
-                        }
-                        _tracer.Trace($"additionalInsolvencies为Array, 数量: {count}");
-                        return count;
-                    }
-                    else if (insolvencies.ValueKind == JsonValueKind.Object)
-                    {
-                        // Object类型，通常表示有1条记录（或包含记录信息的对象）
-                        _tracer.Trace("additionalInsolvencies为Object, 按1条记录处理");
-                        return 1;
-                    }
-                }
-
-                // 路径2: litigations (可能是Array或Object)
-                if (creditReport.TryGetProperty("litigations", out var litigations))
-                {
-                    if (litigations.ValueKind == JsonValueKind.Array)
-                    {
-                        int count = 0;
-                        foreach (var item in litigations.EnumerateArray())
-                        {
-                            count++;
-                        }
-                        _tracer.Trace($"litigations为Array, 数量: {count}");
-                        return count;
-                    }
-                    else if (litigations.ValueKind == JsonValueKind.Object)
-                    {
-                        _tracer.Trace("litigations为Object, 按1条记录处理");
-                        return 1;
-                    }
-                }
-
-                // 路径3: legalProceedings
-                if (creditReport.TryGetProperty("legalProceedings", out var legalProceedings))
-                {
-                    if (legalProceedings.ValueKind == JsonValueKind.Array)
-                    {
-                        int count = 0;
-                        foreach (var item in legalProceedings.EnumerateArray()) count++;
-                        _tracer.Trace($"legalProceedings为Array, 数量: {count}");
-                        return count;
-                    }
-                    else if (legalProceedings.ValueKind == JsonValueKind.Object)
-                    {
-                        _tracer.Trace("legalProceedings为Object, 按1条记录处理");
-                        return 1;
-                    }
-                }
-
-                _tracer.Trace("未找到任何诉讼记录字段");
-            }
-            catch (Exception ex)
-            {
-                _tracer.Trace($"解析诉讼记录异常: {ex.Message}");
-            }
-            return 0; // 无记录返回0
+            _tracer.Trace("诉讼债权金额按业务口径(5/15)不自动取值，置缺失由人工复核补录");
+            return -1;
         }
 
         #endregion
@@ -350,26 +291,51 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 if (indicator.TryGetProperty("currency", out var currency) &&
                     currency.TryGetProperty("value", out var currencyValue))
                 {
-                    string currencyCode = currencyValue.GetString();
-                    if (string.IsNullOrEmpty(currencyCode) || currencyCode == "USD")
-                        return amount;
-
-                    decimal rate = CofaceExchangeRateHelper.GetRateToUsd(_service, _tracer, currencyCode);
-                    if (rate > 0)
-                    {
-                        _tracer.Trace($"货币转换: {currencyCode} => USD, 汇率={rate}, 原金额={amount}, 转换后={amount * rate}");
-                        return amount * rate;
-                    }
-                    else
-                    {
-                        _tracer.Trace($"货币转换: {currencyCode} 汇率未配置，保持原值");
-                    }
+                    return ConvertCurrencyByCode(currencyValue.GetString(), amount);
                 }
             }
             catch (Exception ex)
             {
                 _tracer.Trace($"货币转换异常: {ex.Message}");
             }
+            return amount;
+        }
+
+        /// <summary>
+        /// 按指定的子币种节点转换货币（如 shareCapital 的 nominalCapitalCurrency/issuedCapitalCurrency/paidUpCapitalCurrency）
+        /// </summary>
+        private decimal ConvertCurrencyByChildNode(JsonElement parent, string currencyNodeName, decimal amount)
+        {
+            try
+            {
+                if (parent.TryGetProperty(currencyNodeName, out var currencyNode) &&
+                    currencyNode.TryGetProperty("value", out var currencyValue))
+                {
+                    return ConvertCurrencyByCode(currencyValue.GetString(), amount);
+                }
+            }
+            catch (Exception ex)
+            {
+                _tracer.Trace($"货币转换异常[{currencyNodeName}]: {ex.Message}");
+            }
+            return amount;
+        }
+
+        /// <summary>
+        /// 按币种代码转换（统一转USD）
+        /// </summary>
+        private decimal ConvertCurrencyByCode(string currencyCode, decimal amount)
+        {
+            if (string.IsNullOrEmpty(currencyCode) || currencyCode == "USD")
+                return amount;
+
+            decimal rate = CofaceExchangeRateHelper.GetRateToUsd(_service, _tracer, currencyCode);
+            if (rate > 0)
+            {
+                _tracer.Trace($"货币转换: {currencyCode} => USD, 汇率={rate}, 原金额={amount}, 转换后={amount * rate}");
+                return amount * rate;
+            }
+            _tracer.Trace($"货币转换: {currencyCode} 汇率未配置，保持原值");
             return amount;
         }
 

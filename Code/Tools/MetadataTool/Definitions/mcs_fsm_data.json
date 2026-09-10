@@ -85,7 +85,7 @@
       "displayName": "合同编号",
       "displayNameZh": "合同编号",
       "displayNameEn": "Contract",
-      "description": "关联合同，按线索/报价单过滤",
+      "description": "关联合同，按线索/报价单过滤【禅道#2150 已停用】合同改多选 mcs_contract_ids（平台公共PCF控件），本字段表单隐藏保留，存量数据不迁移（用户拍板）",
       "type": "lookup",
       "required": false,
       "targetEntity": "mcs_contract",
@@ -278,10 +278,21 @@
     },
     {
       "schemaName": "mcs_fsm_manager",
-      "displayName": "融资经理",
-      "displayNameZh": "融资经理",
-      "displayNameEn": "Financing Manager",
+      "displayName": "融资方案接口人",
+      "displayNameZh": "融资方案接口人",
+      "displayNameEn": "Financing Solution Contact Person",
       "description": "融资经理，系统用户",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "systemuser",
+      "targetEntityDisplayName": "用户"
+    },
+    {
+      "schemaName": "mcs_fsm_postloan_manager",
+      "displayName": "贷后管理人",
+      "displayNameZh": "贷后管理人",
+      "displayNameEn": "Post-loan Manager",
+      "description": "贷后管理人，系统用户。融资需求阶段由融资经理填写；融资完成（进入融资落实阶段）时记录共享给该用户并发送消息通知（禅道 #1712）",
       "type": "lookup",
       "required": false,
       "targetEntity": "systemuser",
@@ -659,6 +670,148 @@
       "displayNameEn": "Project Submit Remark",
       "description": "Bug #1561：融资方案提交审批备注（评审意见），状态3（融资解决方案）可填，提交融资方案审批时推给BPP（复用模板变量 mcs_remark）",
       "type": "memo",
+      "required": false,
+      "maxLength": 2000
+    },
+    {
+      "schemaName": "mcs_init_bppstatuscode",
+      "displayName": "立项审批状态",
+      "displayNameZh": "立项审批状态",
+      "displayNameEn": "Initiation Approval Status",
+      "description": "Bug #1713：立项审批信息快照。BPP回调状态码（Submitted/Approved/Rejected），mcs_approve_type=1 时由 BPPHandlerServiceForFsmData 写入，避免被方案审批覆盖",
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    {
+      "schemaName": "mcs_init_bppid",
+      "displayName": "立项BPP工作流ID",
+      "displayNameZh": "立项BPP工作流ID",
+      "displayNameEn": "Initiation BPP Workflow ID",
+      "description": "Bug #1713：立项审批信息快照。立项审批的BPP工作流实例ID（=审批链接 instanceId），mcs_approve_type=1 时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_init_bpplink",
+      "displayName": "立项审批链接",
+      "displayNameZh": "立项审批链接",
+      "displayNameEn": "Initiation Approval Link",
+      "description": "Bug #1713：立项审批信息快照。立项审批的BPP审批链接，mcs_approve_type=1 时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "format": "url",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_init_approver",
+      "displayName": "立项当前审批人",
+      "displayNameZh": "立项当前审批人",
+      "displayNameEn": "Initiation Current Approver",
+      "description": "Bug #1713：立项审批信息快照。立项审批的当前审批人，mcs_approve_type=1 时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_init_approvedate",
+      "displayName": "立项审批完成日期",
+      "displayNameZh": "立项审批完成日期",
+      "displayNameEn": "Initiation Approval Completion Date",
+      "description": "Bug #1713：立项审批信息快照。立项审批完成日期，mcs_approve_type=1 审批通过/驳回回调时由 BPPHandlerServiceForFsmData 写入",
+      "type": "datetime",
+      "required": false,
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_init_rejectreason",
+      "displayName": "立项BPP驳回原因",
+      "displayNameZh": "立项BPP驳回原因",
+      "displayNameEn": "Initiation BPP Reject Reason",
+      "description": "Bug #1713：立项审批信息快照。立项审批驳回原因，mcs_approve_type=1 驳回回调时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_proj_bppstatuscode",
+      "displayName": "方案审批状态",
+      "displayNameZh": "方案审批状态",
+      "displayNameEn": "Project Approval Status",
+      "description": "Bug #1754/#1756：方案审批信息快照。BPP回调状态码（Submitted/Approved/Rejected），mcs_approve_type=2 时由 BPPHandlerServiceForFsmData 写入，避免被立项审批覆盖（通用组不直接上表单）",
+      "type": "string",
+      "required": false,
+      "maxLength": 30
+    },
+    {
+      "schemaName": "mcs_proj_bppid",
+      "displayName": "方案BPP工作流ID",
+      "displayNameZh": "方案BPP工作流ID",
+      "displayNameEn": "Project BPP Workflow ID",
+      "description": "Bug #1754/#1756：方案审批信息快照。方案审批的BPP工作流实例ID（=审批链接 instanceId），mcs_approve_type=2 时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "schemaName": "mcs_proj_bpplink",
+      "displayName": "方案审批链接",
+      "displayNameZh": "方案审批链接",
+      "displayNameEn": "Project Approval Link",
+      "description": "Bug #1754/#1756：方案审批信息快照。方案审批的BPP审批链接，mcs_approve_type=2 时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "format": "url",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_proj_approver",
+      "displayName": "方案当前审批人",
+      "displayNameZh": "方案当前审批人",
+      "displayNameEn": "Project Current Approver",
+      "description": "Bug #1754/#1756：方案审批信息快照。方案审批的当前审批人，mcs_approve_type=2 时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    {
+      "schemaName": "mcs_proj_approvedate",
+      "displayName": "方案审批完成日期",
+      "displayNameZh": "方案审批完成日期",
+      "displayNameEn": "Project Approval Completion Date",
+      "description": "Bug #1754/#1756：方案审批信息快照。方案审批完成日期，mcs_approve_type=2 审批通过/驳回回调时由 BPPHandlerServiceForFsmData 写入",
+      "type": "datetime",
+      "required": false,
+      "dateOnly": true
+    },
+    {
+      "schemaName": "mcs_proj_rejectreason",
+      "displayName": "方案BPP驳回原因",
+      "displayNameZh": "方案BPP驳回原因",
+      "displayNameEn": "Project BPP Reject Reason",
+      "description": "Bug #1754/#1756：方案审批信息快照。方案审批驳回原因，mcs_approve_type=2 驳回回调时由 BPPHandlerServiceForFsmData 写入",
+      "type": "string",
+      "required": false,
+      "maxLength": 1000
+    },
+    {
+      "schemaName": "mcs_contract_ids",
+      "displayName": "合同编号（多选）",
+      "displayNameZh": "合同编号（多选）",
+      "displayNameEn": "Contracts (Multi-select)",
+      "description": "禅道#2150：合同编号多选，平台公共PCF控件 mcs_common.control.lookup.multiplechoice 绑值字段，存 mcs_contract GUID 逗号分隔。替代单选 mcs_contract_id（保留隐藏不删，用户拍板存量不迁移）",
+      "type": "memo",
+      "required": false,
+      "maxLength": 4000
+    },
+    {
+      "schemaName": "mcs_contract_nos",
+      "displayName": "合同编号文本",
+      "displayNameZh": "合同编号文本",
+      "displayNameEn": "Contract Numbers",
+      "description": "禅道#2150：合同编号（mcs_contract.mcs_name，LTC-xxx）逗号分隔文本，由 mcs_fsm_data.js 多选 onChange 同步带出，供展示与合同交易风险接口匹配",
+      "type": "string",
       "required": false,
       "maxLength": 2000
     }

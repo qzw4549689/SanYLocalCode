@@ -2,7 +2,39 @@
 
 > **项目：** 三一重工 D365 客户信用评估系统
 > **技术栈：** Dynamics 365 (Dataverse) + C# Plugin + JavaScript WebResource
-> **最后更新：** 2026-08-05（#1576 配套：UAT 融资资源产品值 11→10 数据修复完成（3 条，fix-fsm-resource-product11 apply，预检无残留）；生产导入 entity 包前需对生产再执行同一命令，上线核对清单 2.4.13 / 看板 rowid 44 已标注）；此前：2026-08-05（Bug #1559 补充：方案页签机构名称/编码 6 字段按值显隐（空组隐藏）已部署 DEV1 发布，mcs_fsm_data.js MD5 `ae167df6` + picker html MD5 `b47a6f6b`，看板发布清单 rowid 45/46，用户 DEV1 界面验证已通过；配套：DEV1 新增保险/其他类型测试机构各 1 条，FSM202608010001 审批状态改 1 解锁；MetadataTool 新增 `set-fsm-bppstatus` 命令、`create-fsm-resource-testdata` 支持类型参数。另：当日上午 Zed 侧栏线程条目丢失事故——kimi 会话数据在 `~/.kimi/sessions/` 完好，已修复 Zed db 条目+会话标题恢复，Bug-1559 完整对话提取至 `Documents/Tests/BugReports/Bug-1559-会话记录-恢复.md`）；此前：2026-08-05（待发布登记迁移任务看板：原《待发布内容清单.md》废弃删除，统一登记看板「发布清单」`http://122.51.232.70:8100/`；看板新增发布清单视图+按包归档+逐项登记 API）；此前：2026-08-05（发版核对策略按截图固定 14 环节顺序固化）；此前：2026-08-04（Bug #1559 融资六要素/解决方案页面字段改造：8 新字段+表单+JS 已部署 DEV1 并发布，Node 仿真 40/40，待用户界面验证；entity 发版包 entity_20260727_peter 发版前必须重新导出；Bug #1576 金融产品新代码表：三字段选项 1-10 改新标签+删旧值 11 已生效 DEV1，mcs_fsm_resource.js 同步已部署，UAT 3 条值 11 数据已登记发版前修复，待用户界面验证；Bug #1561 融资立项/方案提交审批备注：2 新字段 mcs_fsm_initiation_remark/project_remark（Memo 2000 双语）+表单 tab_3/tab_4+JS 阶段控制与提交 payload+BPP Handler 按 approve_type 分流映射 mcs_remark，DEV1 已全部部署发布，BPP Handler **PR 6847 已合并 uat**（merge `747ac65eb1b`），⏸️ 待用户 n8n 发布 Messagehandler 后验证；⚠️ 2026-08-05 修正：评审意见改放平台级 ApproveOpn/RetryApproveOpn（审批记录-起草人节点意见，FundClaim 先例），不走 formVars mcs_remark（模板无此 Code 静默丢弃），BPP 模板侧零改动；已同步 tx-windows 编译 0 错误，✅ 分支 `uat-20260805-peter-fsm-remark-approveopn` 已推送（commit `8ad1181a5a8`），**PR 6916 已合并 uat**（merge `05bb25c9b5e`），合并后重编译 0 错误，✅ MessageHandler 已发布 UAT（2026-08-05），⏸️ 待用户 UAT 新提交一次验证起草人节点意见；配套无编号修复（UAT 反馈）：必填提示架构名→中文标签+提交前 refreshFieldCache 免手动刷新，DEV1 已部署 70485 bytes，看板 rowid 47，待 n8n 发 McsWebResource 到 UAT；语言 key FsmData_Field_CreditAmountUsd 待授权走仓库推送）
+> **最后更新：** 2026-09-01（🔄 Coface 凭据 Key Vault 改造进行中，等 IT 授权，详见 7.5 节。前次 2026-08-25：**🆕 816授信池·使用授信API开发完成，待发UAT**：方案收敛为2接口（飞书《营销风控接口》表 shtk5GPWvgI3Mmsjzh73DEvfF8d）：使用授信 `mcs_recordCreditDetail`（交货单/订单/解款记录调用）+查询授信 `mcs_queryCreditBalance`（合同模块调用）。**两接口均已完成**：①DEV1 `mcs_fca_records` 新增6字段（credit_type/usebalance_cny/delivery_no/settle_no/settle_id/idempotency_key，MetadataTool公共方法，实体随主清单整体管理）；②本地独立 Assembly `SanyD365.Plugins.CreditPool.Api`（RecordCreditDetailPlugin/Service+SinosureUpliftConfig）DEV1验证 12/12 通过（占用/释放/幂等重放/红冲/SINOSURE/超额负数/缺省FACTORY/信保初始化拦截），修复点=释放超累计占用时占用金额按0兜底（元数据下限0）；③Custom API 注册**零实体Step**（#1641红线实证：仅平台自动 implementation step）；④分支 `uat-20260825-peter-creditpool-recordapi` PR 8361 已合并uat，DEV1主Assembly `SanyD365.D365ExtensionApi.Sales`（3aa32db6）已更新+重绑+临时Assembly已注销+回归4/4+check-step-assembly干净（同名Type冲突解法：主Assembly Type 用全限定名注册避开默认解决方案唯一索引）；⑤看板 rowid 119/120/121+任务T-0051 pending_release。**查询授信API**：QueryCreditBalancePlugin/Service，22业务字段+2结果字段，批复限额/批复余额读 `mcs_approvedquota`、净占用台账聚合、厂端读 `mcs_fca_quota`、CNY 按 transactioncurrency 汇率实时换算；出参命名用 mcs_sinosure_uplift_limit/netused/uplift_balance 区分表格重名描述；**合同授信金额（mcs_contract 无 mcs_credit_limit_usd/cny 字段）与客户签约占用暂返 0**（待确认点④⑥）；DEV1验证 6/6（含两接口联动：占用5000→查询净占用5000→释放→归零）；分支 `uat-20260825-peter-creditpool-queryapi` PR 8371 已合并uat，主Assembly已更新+重绑+临时Assembly已注销+check-step-assembly干净；看板 rowid 122/123+任务T-0052。**6个新字段已加入 entity_20260821_peter**（字段级组件6个，实体壳behavior=2原本就在包内，用户指定包、严格未夹带其他组件）。**设计要点（v3方案 `Documents/Planning/授信池816/两接口实施方案v3.md`）**：哑记账（金额对方算好传入）；FACTORY走 `mcs_fca_quota` 不变式（额度=余额+占用）；SINOSURE不落库、台账聚合净占用、余额=上浮限额−净占用；批复限额读 `mcs_approvedquota`（quotastate=1+生效失效区间，mcs_buyername Lookup直挂 `mcs_customermasterdata`）；上浮=min(批复×1.5,8M) 走 `ms_systemconfiguration` JSON（配置名 SinosureUpliftConfig，含 excludedCountries，客户国家取 mcs_countrycode，缺省也能跑）。入参 `mcs_delivery ordid` 带空格笔误按 `mcs_deliveryordid` 实现。**✅ UAT已发布并验收通过（2026-08-25 17:00）**：ExtensionAPI管道16:20部署完成+两API定义在UAT；验收=①两API定义及参数在②两实现类在UAT主Assembly③查询接口实测读数正确（Kedai Kek 0214006316，基线额度/CNY换算✓）④使用接口占用→幂等→释放走通⑤零实体Step⑥测试台账已清、额度复原；看板rowid 119-123已按包归档、任务T-0051/T-0052已置released。⚠️ UAT `SinosureUpliftConfig` 配置记录未建（暂按默认×1.5/8M跑，需上浮国家清单时手动建）。待确认项（联调用）：合同授信金额字段、签约占用来源。**架构变更（8-25下午，调用方要求）**：对方调不了Custom API（D365内部接口），两接口逻辑**下沉Service层 `SanyD365.Main/Application/Sales/CreditPool/`（IAppCreditPoolService+AppCreditPoolService+DTO，[Injection]自动注册）**，逻辑从Plugin版逐条移植；调用方式=同进程注入调用（合同模块王明明经ClientAPI、交货单/订单/解款同步直接调类），合并uat管道自动部署，无Solution发布；分支 `uat-20260825-peter-creditpool-appsvc` PR 8519 已合并（057d77ff76d），主项目编译通过。已发UAT的两个Custom API废弃不用（零调用）。测试：SanyD365.Test/CreditPoolTest.cs（4个NUnit用例）**因 local-db-uat SQL 防火墙拦截 tx-windows IP 未能实测**（既有测试同样失败，环境既有问题，待放行后补跑）；小数位数统一两位（汇率 transactioncurrency.exchangerate precision=12）；接口文档 v2.1=`Documents/BusinessAnalysis/816授信池接口调用说明.xlsx`；看板 rowid 126/128（ClientAPI组）+任务T-0054。**追加（8-26）**：查询授信返回新增 3 个可用标志 FinancingAvailable（mcs_fsm_data.mcs_is_valid 存在有效记录）/SinosureAvailable（mcs_approvedquota 存在 quotastate=1 且生效区间内记录）/FactoryBaselineAvailable（mcs_fca_quota.mcs_isactive=1），对齐《营销风控字段对齐一览表》；分支 `uat-20260826-peter-creditpool-available-flags` PR 8544 已合并（5e66792c47e）；**类型修正**：按王明明要求以《营销风控字段对齐一览表》字段定义为准返回原始类型（融资 bool / 中信保 int quotastate 1有效2预批0无效 / 基线 int isactive 1是0否），PR 8546 已合并（a42d7dd0d50）；文档 v2.3。⚠️ uat 分支 SanyD365.Test 他方 SweeHoeTest.cs 引用不存在类编译报错（India 39fd6feb804，与我方无关）。**历史更新：** 2026-08-20（**新任务·营销风控授信池（816方案）评估完成**：依据飞书《营销风控授信额度确认方案816》（doxk50yfFAGro8Dtt0xe2usKONb，8/12创建，持续修订中），客户授信池=厂端授信+中信保授信双池统一占用/释放管理。**会议结论（8/19用户明确，v2.2）**：①尽量复用现有 `mcs_fca_quota`（额度表）+ `mcs_fca_records`（台账表）实现，对方设计往已有表靠；②区别字段一律新增不改旧（拟增 credit_type/biz_type/source_type/source_no/快照A·R·S/CNY/汇率/红冲溯源等）；③**哑记账**：金额对方算好传入，我方只校验+幂等保存+更新余额，不做 F=max(0,A−R−S) 计算；④旧 `mcs_AdjustFcaQuotaBalance` **保留复用**（哑记账天然吻合，未发UAT零调用，看板 pending_release 维持）。**中信保摸底（8/19 DEV1/UAT实查）**：批复限额取 `mcs_approvedquota`（LTC新中信保模块·他人开发，T+1同步，quotastate=1+生效失效区间；`mcs_quotabalance` 是中信保按出运申报扣减的动态余额·可负·UAT实证-371万，池校验只用CRM自己的净占用、中信保余额仅T+1参考对账）；老 `mcs_sinosure_*`（2025存量）不取值；买方代码经 `mcs_sinosure_buyercode` 客户Lookup关联；已发货未投保清单可用 `mcs_shipmentdeclare_applyinfo.mcs_ordernum` 闭环。**上浮规则以816最新版为准**（当前批复限额×1.5封顶8M部分国家不上浮，对方出运投保PRD的×1.8/12M归对方不管），配置全参数化（ms_systemconfiguration JSON）。**实施材料全部在 `Documents/Planning/授信池816/`**：评估v2_实施方案.md（主文档，含6接口草案+待下版PRD确认清单）、中信保模块摸底.md、816全文提取+截图。⏸️ 阻塞：等下一版PRD（字段清单/信保落点/幂等键/A4校验A5判定职责划分）；风险敞口口径待拍板（1641 已上UAT公式=签约占用+厂端已用+风险赊销−厂端额度−信保限额余额 vs 816 客户维度上浮口径，详见方案§6）。**实施时遵守红线**：元数据用MetadataTool公共方法、新组件加主清单+看板发布清单登记、JS/HTML走仓库PR流程）；**历史更新：** 2026-08-20（**#1641 幽灵 Step 事故复盘闭环**：McsPlugin 导入生产报缺依赖 `CalculateRiskExposurePlugin`——根因=8-14 通用命令 `register-plugin` 默认实体 mcs_credit_scoringcard 副产品创建的幽灵 Step（GUID 时序佐证），类代码无任何 Create 逻辑、触发即拦截评分卡创建（UAT 实测复现「类型不能为空」），UAT 8-14 起启用但零触发零影响；DEV1 Step 已被对方删除、API 绑定完好，UAT Step 仍启用待处置。已整改：①`register-plugin` 去默认实体+五个 Step 注册入口拦截「Custom API 绑定类建实体 Step」；②新只读命令 `check-step-assembly`（跨包依赖检查，实测揪出 McsPlugin 既有 2 条他方跨包 Step）；③上线核对清单 2.2 跨包依赖闭合校验挂钩该命令；④我方 5 个 Custom API 双环境复查干净；⑤新增 `Code/Tools/release-diff/simulate_import.py` 离线导入仿真（UAT 在线精确/prod 归档台账+UAT 镜像基线，实测复现 #1641 场景揪出 2 条既有跨包依赖），已挂钩上线核对清单 2.2 并强化归档纪律（n8n 产物包必须归档）。**收尾：UAT Step 已停用（statecode=1 回读实锤，停用后创建评分卡实测成功、测试记录已删无残留）；主清单/包内组件行随 DEV 删除自动清除；已登记上线核对清单 2.4.23；看板服务 8100 已修复并加固：根因=计划任务默认 3 天执行时限到点强杀长驻进程，已改 PT0S 不限时+RestartOnFailure+新增 KanbanBoard-Watchdog 每 5 分钟自愈（实测 kill 后 4 分钟自动恢复）；rowid 94/95 经查已于 8-15 随批归档（released），无需改状态**）；**历史更新：** 2026-08-18（**Bug #1898 关联·Coface Report 双格式根因修复（下单侧），待 UAT**：根因=非双格式 36 国（SK/HU/CZ 等）Report 下单 format 只传 `["json"]`，PDF 从未订购（沙盒 curl 实锤：旧单 PDF 400「doesn't exist」，`format=["json","pdf"]` 新单同一 publicationId JSON/PDF 均 200；Coface Cathy 确认「SK 支持双格式订单」；注意订单列表 publications 仅显示主格式 json 有迷惑性）。修复 3 文件：`CofaceApiService.PlaceReportOrder` 加 string[] formats 重载、`CofacePlaceOrderPlugin` 非 36 国改传 `["json","pdf"]` 一单双格式（36 国两单不变）、`CofaceDataSyncPlugin` 步骤3.5 无 PDF publication 时用 JSON pubId 尝试下载 PDF（400 doesn't exist 记「JSON单无PDF附件」不算失败）。分支 `uat-20260818-peter-coface-dualfmt`（commit `339e579015e`，3 文件 +43/-8），PR 7969 已合并（merge `a7a823397d0`）；DEV1 主 Assembly 已更新（9d6ff315，8597KB）；DEV1 验证通过：测试记录 SCO202608180001 数据集成 PDF 附件保存成功（publicationId=98a05c8a，55323 bytes），该测试记录因验证插件拦截删除暂时保留。看板 rowid 112/T-0046 已更新（pending_release）。⏸️ 待用户 n8n 发 McsPlugin 到 UAT 后新单全链路复核。**开口项：C3 双格式费用（36 国两单是否两份钱、一单双格式如何计费）待 Coface 书面确认（上线核对清单 9.13）**）；**历史更新：** 2026-08-16（**Bug #1854/#1855 授信模型计算/额度申请基础数据改系统身份查询，已闭环发布 UAT**：1854=FcaProcCalculationPlugin 仅模型版本(mdlversion)/参数配置(mdlconfig)三处查询改 `CreateOrganizationService(null)`；1855=新增插件 `FcaQuotaAppProcSyncPlugin`（quotaapp Create/Update PreOp 系统身份回填序列号/模型额度/当前额度余额+服务端校验：客户不一致/额度0无序列号/调整无原因拦截），JS 三处前端直查删除（保存后带出替代实时带出），回调插件额度/台账、生效启用读额度表改系统身份。分支 `uat-20260815-peter-fca-1854-1855`（commit `09fff76390f`），PR 7679 已合并；DEV1 独立 Assembly 8/8 + 主 Assembly 回归通过；UAT：McsPlugin+McsWebResource n8n 发布 + entity_20260727_peter 手动导入（含 mcs_tobegrant 降非必填——平台 ApplicationRequired 校验先于插件，留空默认设计必须降必填，教训记下）；UATUser19（无模型计算模块权限）浏览器终验通过含「调整为」留空自动默认。看板 T-0040 released、rowid 82/100/101/102 归档。1854 待业务侧合适角色终验后关闭。**教训：① Money/选项集以外字段清空用 update-record 无后缀传 null（#bool 不支持 null）；② 表单平台必填校验先于 PreOp 插件执行，「后端默认填充」设计必须先把字段降非必填；③ PreImage 是 Step 子组件随包走，平台拒绝单独加 Solution**）；**历史更新：** 2026-08-15（①Bug 修复：信用评估 12→13 补录校验定性标签恒误报——`mcs_credit_record.js` 的 `validateTagsCompleted` 读 `tag.mcs_credititem_value` 而 WebAPI 返回 Lookup 属性名为 `_mcs_credititem_value_value`，恒 undefined 导致定性标签永远误报缺失；已改读法+提示改中文评分项目名，Node 仿真 5/5，已部署 DEV1（67934 bytes）；登记禅道Bug修复记录（无编号）+看板 rowid 97/T-0039；待 n8n 发 McsWebResource 后 UAT 终验 SCO202608140001。②**我方 JS/HTML 已补入远程仓库** `D365/SanyD365.D365WebResource/WebResource/mcs_/Scripts|Htmls/Sales/CreditAssessment/`（25 文件与 DEV1 逐字节一致，分支 `uat-20260815-peter-webresource-creditassessment` 已推送待合并 PR；csproj 为 SDK 风格隐式包含无需登记；教训：macOS tar 会带 `._*` AppleDouble 垃圾文件，已 amend 清除）。③**🚨 新流程红线（用户明确）：今后 JS/HTML 修改一律先推分支+PR → 合并 → tx-windows 拉取 uat → 用仓库版部署 DEV1，禁止直连部署 DEV1**（已写入 AGENTS.md、Code/Customizations/AGENTS.md、d365-dev 8.5.2、d365-deploy））；**历史更新：** 2026-08-14（变更-1641 风险敞口接口收尾完成：DEV1 A/B 两类测试通过，临时 Assembly SanyD365.Plugins.RiskExposure.Api 已注销，Custom API mcs_CalcContractRiskExposure（含 5 入参/2 出参）已加主清单 AllComponent_Peter_NoUAT 及 McsCustomAPI，Plugin Step 已加 McsPlugin；看板 T-0037 置 pending_release，发布清单 rowid 94/95）；**历史更新：** 2026-08-14（Bug #1834 取消成交条件样板库审批功能收尾：PR 已合并 uat，DEV1 主 Assembly 已用合并后 uat 重新编译的 Release DLL 更新；DEV1/UAT `TradePtGroupTypeProductLineSyncPlugin` Type/Step GUID 一致（`40f9c14e`/`4ff9c14e`/`b9fb3ecf`），`TradeStPayTermSharePlugin` Step 保持禁用；上线核对清单 2.4.17 已登记；Bug #1816+#1817 单据完成后全锁：主单字段层实测本就全锁，真实缺口=落实子网格可新建/落实表单无锁/附件可传删；修复=新插件 FsmDetailDataCompletedGuardPlugin（主单BPF完成后落实 Create/Update/Delete/SetState 拦截，主Assembly 5/5 回归过+4 Step 2 PreImage 已注册启用+加 McsPlugin/主清单，临时 Assembly FinancingManagement1816 已注销零残留）+新JS mcs_fsm_detail_data.js 落实表单只读+Uploader.html hostReadOnly 附件只读+mcs_fsm_data.js 完成后隐藏子网格新建/添加现有按钮（aria=「添加新融资落实」渲染晚于事件→500ms×12 轮询）；**三连踩坑：①mcs_fsm_data_id 未上落实表单→回读服务端兜底 ②UCI 客户端缓存旧表单/旧JS→需清缓存 ③BindJsToForm 把 events 块插进 cell 内→onLoad 不触发，已修表单 XML 归位（教训：bind-js 后必须验证 onLoad 真触发）**；PR 7444 已合并 uat（d08628c8e15），Uploader 二次改动 PR 7470 已合并 uat（605c1a5d17f）；DEV1 UI 实测全过（截图 Backups/Tests/bug1816/）；看板 rowid 77/78/79/80+T-0033 pending_release，rowid 80 落实表单 entity 包归属待用户指定；测试单 FSM202608110001 已置融资落实态供用户测点完成）；2026-08-11 晚（**📌 8/19 有一次 UAT 发版，届时主动提醒用户**——待发布清单以看板 pending_release 为准：McsPlugin（rowid 68/70，含 #1759/#1764/#1766 全部 Plugin 变更+PreOp Step 733a7fa5）、McsWebResource（rowid 65）、entity 包（rowid 66）、MessageHandler（rowid 67，#1754/#1756 待推送分支合入后）、**UAT 手动项 rowid 69=发布 McsPlugin 后手动停用「融资落实提醒」Step ba705d8d**；上线日 8/30 不变）；2026-08-11 晚（Bug #1766 融资落实阶段控制：①#1654 融资落实提醒取消=DEV1 Step ba705d8d 已停用+上线清单 2.4.14 登记 UAT/生产手动停用；②完成时给贷后接口人发消息=#1759 已覆盖；③贷后管理人移至融资落实页签 tab_5+状态4可编辑+完成后锁死+点完成必填——关键教训：本环境 OnPreProcessStatusChange 的 eventArgs **无 preventDefault**（活体探针实锤），前端阻断不可行，改服务端 PreOp 插件抛 InvalidPluginExecutionException 回滚（0x80040265 对话框）；DEV1 全链路验证过（阻断/放行/锁死/级联共享），主 Assembly 回归 HTTP 400 阻断+正常完成双过；临时 Assembly 已注销零残留；看板 rowid 65/66/68/69+T-0027 pending_release；新规则：停用/删除组件必须登记上线清单 2.4 章）；2026-08-11（Bug #1764 共享级联：根因=#1727/#1759 共享 Plugin 仅共享主记录+关系级联 Share=NoCascade；修复=Handover 插件立项共享接口人时级联 线索/报价/合同/客户主数据/客户account 只读（account 按 account.mcs_customermasterdata 反查 Top1），BpfComplete 插件完成共享贷后时追加 落实/落实附件(mcs_customer_file) RW+订单(salesorder)只读；级联用系统身份 GrantAccess 幂等；口径=用户确认不做增量补共享插件、只在两个共享时点扫存量；PR 7349 已合并 uat（与 #1766 联合分支 5eee7b45f4f），DEV1 主 Assembly 已更新+双场景 POA 回归全过，临时 Assembly 已注销零残留，主 Step 52ff3acd/6b186ece 均启用；看板 rowid 68（合并）+70+任务卡 T-0028 pending_release；⏸️ 待用户 n8n 发布 McsPlugin 到 UAT；⚠️ 教训：并行会话共用同一工作目录+同名临时 Assembly 会互相覆盖/误停 Step，多会话并行时临时 Assembly 名应加 Bug 号后缀区分）；2026-08-11（Bug #1754/#1756 融资管理审批信息两 section 错乱：根因=用户整体移动 section 顺序致绑定与标签互换（立项 section 绑通用组/方案 section 绑 mcs_init_*）+Handler 通用组无条件写（流转插件依赖不可停）；修复=新建 mcs_proj_* 方案快照组 6 字段（DEV1 已建+双语+发布+主清单幂等覆盖）、表单绑定归位（立项→init 组/方案→proj 组/通用组含 BPP错误信息撤出，DEV1 已发布回读实锤）、Handler type=2 双写 proj 组（PreStart/Start/CallBack 三处，远程已同步编译 0 错误 git diff +45/-3）；看板 rowid 66/67+任务卡 T-0025 pending_release；⏸️ 待用户授权推送分支 uat-20260811-peter-fsm-bpp-1754 →PR→n8n 发布 MessageHandler+entity 包到 UAT→存量 FSM202608110006 通用组→proj 组数据拷贝→端到端验证；教训：表单 section 整体移动会连带字段绑定，审批信息类多快照组表单调整后必须核对绑定）；2026-08-06（Bug #1656+#1652 融资立项阶段字段控制/回退，同版修复：①#1656 状态=2 未提交立项审批前六要素可编辑（提交审批后锁/驳回解锁/通过锁死），取代 #1540 全锁口径，报价/合同编码仍按 #1540 可编辑；②#1652 提交立项审批前允许 BPF 回退融资需求（状态同步回 1+自动保存防刷新反弹），审批中/立项已通过禁回退。仅改 mcs_fsm_data.js，DEV1 已部署发布 74827 bytes（MD5 `6b9a4d7e`），Node 仿真 34/34，待用户 DEV1 界面验证（候选记录 FSM202608030002/FSM202607250005）；看板发布清单 rowid 47（合并且更新）+54（语言 key FsmData_NoRollbackAfterSubmit 待授权走仓库推送），任务卡片 T-0016/T-0017 pending_release）；⚠️ 2026-08-07 UAT 验证发现回退脚本错误：`formContext.data.entity.save()` 真实 API 不返回 Promise（undefined），`.then` 报脚本错误，已改 `formContext.data.save()`+守卫，仿真 mock 同步修正为真实行为 34/34，DEV1 重部署 75161 bytes（MD5 `efe71032`），待用户重发 McsWebResource 到 UAT 复验（教训：entity.save() 无返回值，只有 data.save() 返回 Promise）；⚠️ 2026-08-07 UAT 复验「先退回又弹回立项」——真正根因（#1652 原始根因）：onSaveValidate 来源重复校验异步 preventDefault 模式会中止 BPF 阶段导航保存（来源字段脏时平台内部导航保存被拦→阶段弹回），已改同步 XMLHttpRequest 重复校验（无重复不再 preventDefault，语义不变），仿真 40/40，DEV1 重部署 76044 bytes（MD5 `7c412c52`），待用户重发 McsWebResource 到 UAT 复验（教训：BPF 挂表单的 onSave 绝不能有异步 preventDefault 等待，导航保存会被中止）；⚠️ 2026-08-09 UAT 复验「首次回退提示正在保存→弹回，第二次才成功」——OnStageChange 里立即 data.save() 与平台导航保存并发冲突，改 PreStageChange 置脏由平台导航保存落库+4s 兜底，仿真 43/43+DEV1 Playwright 实测通过，DEV1 重部署 76836 bytes（MD5 `c66ce141`），待用户重发 McsWebResource 到 UAT 复验（教训：不与平台导航保存并发，字段落库搭平台保存便车））；此前：2026-08-05（#1576 配套：UAT 融资资源产品值 11→10 数据修复完成（3 条，fix-fsm-resource-product11 apply，预检无残留）；生产导入 entity 包前需对生产再执行同一命令，上线核对清单 2.4.13 / 看板 rowid 44 已标注）；此前：2026-08-05（Bug #1559 补充：方案页签机构名称/编码 6 字段按值显隐（空组隐藏）已部署 DEV1 发布，mcs_fsm_data.js MD5 `ae167df6` + picker html MD5 `b47a6f6b`，看板发布清单 rowid 45/46，用户 DEV1 界面验证已通过；配套：DEV1 新增保险/其他类型测试机构各 1 条，FSM202608010001 审批状态改 1 解锁；MetadataTool 新增 `set-fsm-bppstatus` 命令、`create-fsm-resource-testdata` 支持类型参数。另：当日上午 Zed 侧栏线程条目丢失事故——kimi 会话数据在 `~/.kimi/sessions/` 完好，已修复 Zed db 条目+会话标题恢复，Bug-1559 完整对话提取至 `Documents/Tests/BugReports/Bug-1559-会话记录-恢复.md`）；此前：2026-08-05（待发布登记迁移任务看板：原《待发布内容清单.md》废弃删除，统一登记看板「发布清单」`http://122.51.232.70:8100/`；看板新增发布清单视图+按包归档+逐项登记 API）；此前：2026-08-05（发版核对策略按截图固定 14 环节顺序固化）；此前：2026-08-04（Bug #1559 融资六要素/解决方案页面字段改造：8 新字段+表单+JS 已部署 DEV1 并发布，Node 仿真 40/40，待用户界面验证；entity 发版包 entity_20260727_peter 发版前必须重新导出；Bug #1576 金融产品新代码表：三字段选项 1-10 改新标签+删旧值 11 已生效 DEV1，mcs_fsm_resource.js 同步已部署，UAT 3 条值 11 数据已登记发版前修复，待用户界面验证；Bug #1561 融资立项/方案提交审批备注：2 新字段 mcs_fsm_initiation_remark/project_remark（Memo 2000 双语）+表单 tab_3/tab_4+JS 阶段控制与提交 payload+BPP Handler 按 approve_type 分流映射 mcs_remark，DEV1 已全部部署发布，BPP Handler **PR 6847 已合并 uat**（merge `747ac65eb1b`），⏸️ 待用户 n8n 发布 Messagehandler 后验证；⚠️ 2026-08-05 修正：评审意见改放平台级 ApproveOpn/RetryApproveOpn（审批记录-起草人节点意见，FundClaim 先例），不走 formVars mcs_remark（模板无此 Code 静默丢弃），BPP 模板侧零改动；已同步 tx-windows 编译 0 错误，✅ 分支 `uat-20260805-peter-fsm-remark-approveopn` 已推送（commit `8ad1181a5a8`），**PR 6916 已合并 uat**（merge `05bb25c9b5e`），合并后重编译 0 错误，✅ MessageHandler 已发布 UAT（2026-08-05），⏸️ 待用户 UAT 新提交一次验证起草人节点意见；配套无编号修复（UAT 反馈）：必填提示架构名→中文标签+提交前 refreshFieldCache 免手动刷新，DEV1 已部署 70485 bytes，看板 rowid 47，待 n8n 发 McsWebResource 到 UAT；语言 key FsmData_Field_CreditAmountUsd 待授权走仓库推送）
+
+> **2026-08-25 补充（上线数据导入方案规划）**：上线时需将用户提供的①新评分卡数据②客户ID↔CofaceID 对应表（各几百条）导入生产。经三轮讨论**首选方案定为 Playwright 浏览器真实操作**（用户提出：虽慢但零程序直写风险，顺带测流程；AI 走到 BPP 提交 → 用户 BPP 批 → AI 走完后续），风控账号程序直跑与 Excel 手工导作为备选保留。生产安全按最高等级（dry-run 签字→小批量首跑→跑前快照）。⏸️ 未动工，等示例数据+风控账号；届时先核对 6 项关键问题（客户类型列、指标值来源、Coface 生产计费、BPP 批量审批、导出范围、评分卡格式）。详见 2.31 节。
+
+> **2026-09-08 补充④（✅ B 类枚举配置五环境同步完成 + 2 提交追加进批次分支）**：行业风险/客户评级依赖实锤后执行：①**客户评级枚举**实查 UAT/prod/prod-eu/prod-na 均已在位（S=4/A=3/SH=4_JV/AH=3_JV+缺失档 O），零改动；②**行业风险枚举纠偏**（L←1/M←2/H←3,4）UAT 3 行+三生产各 3 行 update-record（UAT gw_qiuzw、生产 pans14 用户授权），回读实锤全对；③B 类两提交 cherry-pick 进 `bugfix-20260903-peter-backend-batch`（`d53777fd8b3`→`83a7a6dca99`、`512ed8837b2`→`fc97d7037ef`，自动合并无冲突），**分支现共 7 个提交，Coface 插件+解析器与 uat 逐字节一致**，Sales Release 编译通过已推送。看板 rowid 162/173 已更新为已同步。B 类仅剩 `83162f2676a`（审批人快照，依赖 Step 配置变更）未合。⚠️ 生产枚举纠偏在旧代码下不被读取（旧码行业风险恒缺失），行为无即时变化，9/10 补丁 DLL 上线后生效。
+>
+> **2026-09-08 补充③（✅ A 类后端批次已推送待发版 PR，分支 `bugfix-20260903-peter-backend-batch`）**：用户定 9/10 发版，要求将 0902 发版点后「重要且零组件依赖」的后端修复合入发版分支。全量梳理 uat 未同步提交分三类：A 类 5 个零依赖已 cherry-pick（全部干净落上、三项目 Release 编译通过、涉及文件与 uat 逐字节一致）：`c654f1a966b` BPP三Handler补DataCenter路由→`1a7f1bd6af6`、`b34a9156dca` 成交条件客户编码改mcs_sapnumber→`044122fae23`、`6dac6e9a790` 注册资本分币种换算→`c16f4f41eae`、`4fd46828a27` 诉讼债权缺失口径+无配置国家兜底→`ffb18dc47d6`、`a6b7e5ca353` 资产负债率按配置公式描述×100→`ac53661303c`。**PR 目标分支=Bugfix-20260903，待用户创建**。B 类 3 个未合：`512ed8837b2` 行业风险+`d53777fd8b3` 客户评级配置化（依赖枚举映射配置，看板 rowid 173/162 实锤仅 DEV1 已配、UAT/生产未同步，released_at=null）；`83162f2676a` 审批人快照（依赖 Step 配置变更，DLL 单上不生效且 PreImage 缺失会抛异常）。C 类排除：授信池×3（新字段+API）、#2150（新字段+JS）、前端 JS/HTML×7。
+>
+> **2026-09-08 补充②（✅ 量纲修正已并入生产补丁发版分支 Bugfix-20260903，PR 9209）**：王明明合并其 `Bugfix-20260903-wmm`→`wmmuat` 时撞冲突来询。根因：`CofaceIntegrationDataSyncPlugin.cs` 量纲块在 uat 已是 0908 最新口径（`6ac55bafb39` 量纲对齐+`78495976050` 二次修正），发版分支停留在 0907 cherry-pick 旧版（`7eb697df3ed`），任何人从发版分支切分支合回 uat 都会撞同一段。处理：从 `Bugfix-20260903` 切 `bugfix-20260903-peter-ratio-scale`，cherry-pick 两提交（自动合并无冲突），编译通过，**PR 9209 已合并**（merge `bc61595b45b`）。验证：发版分支与 uat 量纲块逐行一致；剩余差异仅客户评级配置化（`d53777fd8b3`，未带入补丁，合回 uat 自动取 uat 侧不冲突）。**经验：①他人分支冲突先查两边提交血缘再定取舍；②cherry-pick 同步发版分支时 PR 目标分支必须选发版分支而非 uat（两提交本就在 uat 上）。** 王明明侧已答复：冲突取 uat（当前）版本即可。⏸️ 补丁 DLL 重编+PRE/生产更新随本次发版流程走。
+>
+> **2026-09-07 补充②（✅ 成交条件查询接口客户编码字段修复，DEV1 验证通过，待 UAT 发布）**：生产 CPQ 实测反馈「三一汽车制造 ACN202405160001 返回 3 条基线」。根因链：CPQ 按文档传关系流水号 → 接口 `TradeStPayTermQueryService.GetBuyerInfo` 按**流水号**（mcs_accountnumber）查主数据 → 查不到 → 客户等级空 → NA 通配 → D1-D5/S,A/B,C,I 三组全命中 → CPQ 侧聚合（首付取高/账期周期取短）预警失真。**口径实锤：客户编码统一=客户编号 `mcs_sapnumber`（SAP 编码）**，主数据表另有流水号/ERP客户代码/历史印度编号 3 个易混字段；816 使用授信/查询授信/风险敞口/厂端授信 4 接口全部按 mcs_sapnumber 查，仅成交条件接口用错（6 月文档误选字段+示例错用 ACN）。修复：查询字段改 mcs_sapnumber（+3/-1），分支 `uat-20260907-peter-tradestpayterm-sapnumber` **PR 9132 已合并 uat**（`862bf009a46`），DEV1 主 Assembly `SanyD365.D365ExtensionApi.Sales`（3aa32db6）已更新；回归三场景全过（正例 0000016233 命中 C 组/反例 BMW0001 S 级过滤为空/不存在编码通配兼容）。接口文档 6.1 示例已按新口径重测更新。看板 rowid 165（ExtensionApi）+ T-0084（pending_release）；禅道记录已登记（无编号）。⏸️ 待：用户 n8n 发 ExtensionApi 管道到 UAT/生产；**CPQ 改传客户编号（SAP 编码）待用户对齐**；生产该客户主数据等级为空（缺省落 C），等级维护另案。
+
+> **2026-09-08 补充（✅ 禅道 #2169 融资合同多选后续 开发完成+DEV1 验证通过）**：三问题：①合同下拉按线索/报价单过滤——平台 PCF 无过滤参数，自制 `mcs_fsm_contract_multiselect.html`（机构 picker 同款：线索→mcs_leadmain 过滤/报价单→报价主表→其线索/均无不过滤，写回 mcs_contract_ids+fireOnChange 复用 #2150 逻辑），表单单元格换 picker（PCF 移除、ids 转隐藏存储）；②Active 融资管理视图删旧合同列+补合同编号文本列（已入 entity_20260907_peter）；③提交按钮排查=按 #1788 仅接口人可见（接口人≠登录人），用户拍板不处理。**关键经验（返工根因）：D365 HTML WebResource 取表单上下文——新建表单顶层 Xrm.Page 是 stub 永不绑定，真实上下文在顶层子 frame（uclient/blank.htm），须跨 frame 找+轮询；存量记录顶层直连可用**。PR 9165（picker+语言key）/9174（上下文与对齐修复）均已合并 uat；DEV1 已用仓库 uat 版部署（MD5 `1a0df47b` 一致）+表单发布；UI 实测全过（新建原生观感/线索过滤 4 张/多选 tag/第一个合同带出/重复校验/存量渲染/无线索提示，截图 Backups/Tests/bug2169/ui1~3）；实体包已重导待用户导 UAT；看板 rowid 168-170+任务 T-0086。
+>
+> **2026-09-07 补充（✅ 禅道 #2150 融资合同多选 开发完成+DEV1 验证通过，待 UAT 发布）**：融资需求「合同编号」由单选 Lookup `mcs_contract_id` 改多选——`mcs_fsm_data` 新增 `mcs_contract_ids`（Memo 存 GUID 逗号分隔）+ `mcs_contract_nos`（编号文本），表单换平台公共 PCF `mcs_common.control.lookup.multiplechoice`（同成交条件基线库；控件无过滤参数，原按线索过滤合同能力取消）；旧字段隐藏保留、存量不迁移（用户拍板）。四处联动：①`mcs_fsm_data.js` 多选 onChange 同步 nos+以**第一个合同**带出，重复校验 contains；②`mcs_fsm_detail_data.js` 订单放大镜 `mcs_order.mcs_contract IN 多选合同`，无合同按客户主数据兜底（link-entity account）；③风险接口 `RiskExposureService.GetFinancingAmount` 匹配改 contains+授信金额=合同总金额(美元 `mcs_totalcontractamount_base`)×(1−首付比例)；④816 `AppCreditPoolService` 合同授信金额匹配同步 contains（用户拍板一并改）。PR 9094 已合并 uat（`ded15061ef8`）；DEV1 全验证：UI 实测（测试单 FSM202609070001）+仿真 35/35+风险接口实证 596,000=7,000,000−8,005,000×0.8 精确；ExtensionApi 主 Assembly 已更新+2 JS 已按仓库流程部署；实体包 `entity_20260907_peter` 用户已导 UAT 并手动发布；看板 rowid 156-160+任务 T-0078（pending_release）。⏸️ 待：用户 DEV1 界面验证；UAT 的 ExtensionAPI 管道+McsWebResource 按用户节奏 n8n；816 由合同模块拉取部署 ClientApi。**经验：Web API 读 Lookup FormattedValue 必须带 `Prefer: odata.include-annotations` 头，否则拿到 null 误判数据为空**。
+>
+> **2026-09-07 补充（✅ 额度参数配置表飞书0907版五环境导入完成）**：来源=飞书《授信模型参数&内部交易等级》（shtk5DcLf4s6r0pPzTTDsjtBfFd）Sheet1「额度参数配置表」40行（业务当日更新，用户拍板「全部以今天版本为准、金额用美元列」）。目标实体=**安全交易基线模型配置表** `mcs_fca_mdlconfig`（本地定义名「厂端授信模型参数配置表」已过时）。映射：直销S/A/B→buyergrade 1/2/3、经销商 钻石/铂金/白银/认证/意向→D1~D5=6~10、综合资信等级A0~A4→creditgrade 1~5、F财务系数→系数1、R回款倍数→系数2、系数3统一1、组合方式→MAX=1/MIN=2、**B基准额度用美元列**（万元÷6.8628，如S-A0=72,856.56）→`mcs_countryname`、argid按`S-A0`/`D3-A2`。与生产0829旧口径差异=基准额度（旧=万元原值）+系数1共20行新值。**五环境执行**（均清空旧测试数据后导入+回读逐字段比对全对）：DEV1删10导40挂V20260830、UAT删36导40挂V20260811（⚠️该版本2026-09-30到期需业务续期，插件读参数不过滤版本不影响计算）、prod/prod-eu/prod-na按用户指示「**Frank（gw_zhangf68）删、pan（pans14）导**」各删40导40挂V20260829（prod-eu/na版本表原0条，pans14补建V1.0版本，自动编号覆盖成V20260907→update-record改回V20260829；prod-eu=d9eeeda5/prod-na=7b08d1c8）。证据件全在 `Backups/TempTest/quota_param_20260907/`（截图/payloads/各环境备份与回读件）。登记：配置数据清单+变更记录、看板 rowid 164、任务 T-0081（released）。**Sheet2「本次上线客户的内部交易等级」18行实锤=人工复核参照清单**（OverdueModel S01~S10复核手选、无自动逻辑、不存主数据、生产主数据无权限改），不导入。**✅ 同日晚 PRD 口径修正（五环境已完成，T-0082 已关闭）**：核对 PRD《厂端授信管理》表 6 实锤——历史基准额度应配在「客户分类+等级=ALL」行（场景二，用户明确「PRD是唯一标准，数据违反PRD是数据问题」，代码无 bug）。方案经客户沟通确认按我方建议执行（确认稿 `额度参数配置表-PRD口径调整建议_20260907.xlsx`）：①每环境新增 8 条 ALL 行（S/A/B/D1~D5，基准=该分类A0档美元值、兜底系数=中档A2值、系数3=1、MAX，挂各环境生效版本）；②40 参数行系数3 改折算值（=原行B÷A0行B，如直销S=1/0.8/0.8/0.6/0.6）+B 值清空——**计算结果与原表完全一致**（基准调整=ALL基准×系数3=原行B）。DEV1/UAT（gw_qiuzw）+三生产（pans14，用户授权）均 8 建+40 更新零失败、回读 48 条逐字段比对全对（`*_after_prd_fix.txt`）。工具小改：create/update-record 的 #decimal 支持 null 置空。看板 rowid 164 已更新。
+>
+> **2026-09-01 补充（🔄 Coface 凭据 Key Vault 改造，进行中）**：Coface 生产凭据明文存 `ms_systemconfiguration.CofaceApiConfig`（该表全公司可读）→ 定方案迁移 Azure Key Vault（Secret 类型环境变量，插件经 `RetrieveEnvironmentVariableSecretValue` 取值）。IT（刘泞）已在 `SanyD365KV-uat` 建好 3 个 Secret（`coface-username/password/apikey`，沙盒值）；DEV1/UAT 保存环境变量均卡在设计时权限校验。**阻塞=等 IT 三项：①qiuzw 授 Key Vault Secrets User ②Dataverse 一方应用授权 ③订阅注册 Microsoft.PowerPlatform**。另：刘泞要求 Coface 调用日志进 Application Insights（参考 ExtensionApi 现成方法，等示例，上线后做）。2026-09-02 上线封板不动。详见 7.5 节。
+
+> **2026-09-03 补充②（客户画像页签生产显示——🚨 生产发布暂定等下次发版，用户明确）**：生产客户表单不显示「客户画像」页签，根因=`mcs_account_tag_tab_hide.js`（0713 上线过渡期部署）在生产环境隐藏 tab_16；窗体「三一客户表单1」和 `mcs_credit_profile.html` 生产均在位。修复=JS 改空操作，分支 `uat-20260903-peter-account-profile-tab`（`7dadba3cc3e`），**PR 9009 已合并 uat**（merge `026b3fa5fdd`），DEV1 已用仓库 uat 版部署发布（MD5 `0824da48` 一致）。看板 rowid 145+任务 T-0065（pending_release），禅道记录已登记（无编号）。**⏸️ UAT/生产发布节奏：用户 2026-09-03 明确暂定等下次发版走 McsWebResource，不加急**。**✅ PRE 已直接更新（2026-09-03，用户授权）**：IT 明确 PRE 是昨天 DEV 副本、可当 dev 直接改不走解决方案，已以 DEV1 现版为准更新+发布该 JS（MD5 一致，改前备份 `Backups/TempTest/account_profile_tab_20260903/pre_current.js`）。
+
+> **2026-09-03 补充④（✅ 融资管理生产首次 BPP 实证通过——非 Bug，异步回写时间差）**：用户 22:08（北京）生产提交 FSM202609030002【提交立项审批】后立刻看「审批信息」页签全空，误以为提交失败。实查生产（pans14 缓存，用户授权单步）：`mcs_bppstatus=2`/`mcs_bppstatuscode=Submitted`/`mcs_init_bppid=883473363405127680`/`mcs_init_bpplink` 均已回写，BPP 流程实例发起成功；页签 6 字段由 Azure MessageHandler **异步**回写，提交后需几秒~几十秒，刷新表单即见。「当前审批人」待 BPP 平台解析节点后写入。至此融资管理 FSM 链路生产实证闭环（同日 17:31 已实证信用评估链路；两链路均受当日 ~17:00 BPP_WorkFlowTemplateCode 生产漏配 4 key 事故影响，事故与修复详见《上线核对清单》2.4.24、《D365配置数据清单》）。**经验：BPP 提交类「页签无值」先刷新表单等异步回写，再排查；`mcs_bpperrormsg`（隐藏字段）是 MessageHandler 失败的唯一落点。**
+>
+> **2026-09-03 补充③（📌 待办记录：Coface 下单状态机一次推进到位，看板 T-0066）**：生产实测反馈（潘舜，SCO202609030001 / SUNWAY / icon#164031956）：下单状态（mcs_cofaceorderstatus）是每条记录自己的字段、从 0 起步点击逐步推进（0→2→3→4），即使 Coface 侧报告已就绪（其他记录已用过），新记录也要点 2-3 次【Coface 下单】+刷新才到已就绪；【下一阶段】未就绪时也只自动推进一步就弹确认框（#1850 设计）。改进方向（用户明确回头再改，已建看板任务 T-0066，pending）：调用状态机时按 Coface 实际订单状态（URBA/Report 单及就绪度）直接落到对应状态，一次到位。涉及 `CofacePlaceOrderPlugin`（FirstPlaceFlow 起步分支）。
+
+> **🔄 会话交接摘要（2026-09-04 下午，新会话先读这里）**：**②③详见下方 09-03 两条。当前待办：** ①**JS 国家编码改造**（Lookup 优先+文本兑底，修复 21 家文本写 Thailand/Vietnam 全称致 Coface 查不到国家配置；已仿真 6/6）——分支 `uat-20260904-peter-countrycode-lookup`（`245ce5224f3`，mcs_credit_record.js +18/-3）**已推送待用户建 PR**；合并后：tx-windows 拉 uat→部署 DEV1 发布→找泰国客户验证带出 TH→再做 PRE 特殊修复直改生产（用户明确流程）。②**Bugfix-20260903 发版**（复用为今日发版包，含：新老客户修复（已产）、用户自己的 BPP 链接修复 `6fe87a2901d`、算分插件+SalesAmount `4db6ecd35b3`）——⏸️ 待发版窗口：最新分支重编 DLL→三项校验（分支在场/DLL 特征串/PRE 未被覆盖）→更新 PRE→生产；**生产后须删三中心类别 4 复制卡 3×60（停用中）**。③**生产测试数据已全清**（10+张测试单/标签/附件全删，两表=0）；SUNWAY 主数据 creditscore=5.0 残留无权限清（等级/有效状态已清）。④**已交付客户的核对表**：32 行客户（计划 vs 实际匹配/绑定/订单/在外/回款），28 家主数据口径不符待整改（重复档 LTE×6/HLM×2/VietnamFuli×3、SAP 编码对不上 200051662/200024682/200054880、0200740140 无档案）。⑤**内部交易等级溯源结论**：PRD=「人工补入」（风控初始化），代码从未自动带出，现行口径=人工复核选 S01~S10；**待问业务：S01~S10 是否=模型分分档**（是→风控初始化 mcs_overduemodel+开发自动映射；否→维持人工选）。⑥已改 5 环境「迟付指数」说明=「是否有迟付情况」。⑦国家审计（生产 5000 主数据）：99.6% 一致、21 家文本全称、Lookup 填充率 100%、仅 1 家 Lookup 指向脏码——授信池两处读文本字段本次未改（用户定只做信用评估）。
+
+> **2026-09-03 补充（新老客户判断生产 Bug 修复，09-03 晚 22:01 已随补丁到生产）**：生产潘舜建单 SCO202609020001 排查链：①同名客户 11 条=客户表按「客户×大区关系」建档+查找视图无业务过滤，可见范围由角色数据范围决定（正常）；②标签 0 项=该客户（终端/无等级）命中 BC 级新客户，而 0828 新评分卡口径只有 SA+经销商两套卡（BC/个人业务明确暂不配置，**生产配置不缺**，但 BC/个人客户上线后无卡可评待业务决策）；③顺带实锤真 Bug：**新老客户判断查 salesorder（生产空表）且只查所选区域记录，生产所有老客户误判为新客户**（真实订单在 mcs_order，SUNWAY 法人 8 单挂泵路系 3 条记录下）。按用户拍板口径修复：当前客户→客户主数据→主数据关联全部客户记录→查 `mcs_order.mcs_contractbuyer`，任一有一单即老客户（`CofaceDataSyncPlugin.IsOldCustomerByMasterDataOrders`）。DEV1 临时+主 Assembly 双验证通过（trace 实锤聚合判老）；PR 9001 已合并 uat；**生产补丁走 Frank 建的 `Bugfix-20260903`（基于 0902 发布点，仅带本修复，cherry-pick `8a95cac3490`）**；DEV1 主 Assembly 已更新+回归通过；看板 rowid 143+任务 T-0064。**PRE 已更新**（2026-09-03 11:38 北京时间，Bugfix-20260903 重编 DLL，刘泞指示补丁先传 PRE 晚上凑批发）。⏸️ 待晚上专人发生产；UAT 按用户节奏 n8n。禅道修复记录已登记（无编号）。**生产补丁分支规范已固化（AGENTS.md）：下次必须从发版分支切 `bugfix-<日期>-peter-xxx` 修复分支再合回发版分支；补丁 DLL 不进 DEV**。
+
+> **2026-09-03 深夜补充（✅ 第二处同病+SalesAmount 已修复推送，待 PR）**：晚间生产续测发现：①王唯一 SCO202609030004 算分报「未配置评分卡」——**CreditScorePlugin 自带一份判新老也查 salesorder**（全库排查确认判新老仅 2 处、匹配规则无第三副本，已一次性扫清）；②历史采购金额 SalesAmount 同读 salesorder 生产恒 0。修复：CreditScorePlugin 改 `IsOldCustomerByMasterDataOrders` 同口径；SalesAmount 改读 mcs_order（总额=预付款 downpaymentamount2+分期款 installmentamount（totalorderamount 生产全空），仅活动订单，主数据聚合，联查 isocurrencycode 折 USD——EntityReference.Name 是显示名非 ISO 码的坑已踩）。DEV1 正负例+金额实证全过。分支 `uat-20260903-peter-oldcustomer-score-salesamount`（`8a11c05632b`，2 文件 +106/-27）已推送待用户 PR；看板 rowid 150+T-0070。⏸️ 待：PR 合并→DEV1 主 Assembly→生产补丁走下一批发版分支（待 Frank 建）。**用户交代（2026-09-03 睡前）：明天如果有 bugfix 包（发版分支），要把这两个修复合并到修复包里**。另：**三个生产数据中心已各建类别 4 评分卡 60 条并全部停用**（2026-09-04 凌晨，镜像各环境 SA新客户，临时解锁算分拦截；插件查询不过滤 statecode 故停用不影响逻辑、用户视图不可见；**算分修复到生产后需用户/IT 物理删除这批 3×60 复制卡**）。另：①生产 BC老客户评分卡已镜像 60 条（类别 3，SA老同款，用户指示）；②上线客户主数据口径大面积不符（表格经销商→主数据多为 20/30/50 无等级，几乎全部落 BC）已反馈待主数据方整改；③可测客户=PT.SANY MAKMUR PERKASA（钻级→SA）。
+
+> **2026-09-05 补充（816授信池 按《910授信池接口调用说明》v2.3 调整——中信保上浮公式已改，待用户建 PR）**：最新接口文档（飞书表 shtk5e2fYNh32Gci5T4UbrhehQh，原文提取存 `Documents/Planning/授信池816/910授信池接口调用说明_提取.md`）确认：①接口形态已从 Custom API 下沉 `SanyD365.Main` Application 服务 `IAppCreditPoolService`（RecordCreditDetail/QueryCreditBalance，合并 uat 管道自动部署），参数字段（DTO）与现网代码完全对齐；②**唯一实质差异=中信保上浮公式**：旧 `min(批复×1.5,8M)`（总额封顶）→ 新 `批复+min(批复×0.5,8M)`（上浮部分封顶 8M，批复 20M 时旧 8M/新 28M）。已改 `AppCreditPoolService.CalcUpliftLimit`+DTO 注释（2 文件 +13/-6），SanyD365.Main 编译通过（uat 既有 CPQ CS0173 报错为他人提交遗留，与本改动无关）；分支 `uat-20260905-peter-creditpool-uplift`（`e629f037359`）已推送**待用户建 PR**；看板 rowid 154（section=manual/package=ExtensionApi）+任务 T-0075（pending_release）。**待与对方确认的口径（未改，保持现状）**：①客户风险敞口/交易基线余额读 mcs_fca_quota 字段 vs 文档「数据湖厂端占用−释放每次计算」——超额释放 0 兜底场景两口径会分叉；②中信保净占用 CRM 台账实时聚合 vs 文档「调数据湖查询」（源同一台账，CRM 更实时）。另：合同授信金额代码已按 816 外部融资口径实现（mcs_fsm_data 求和，commit 68379aa），领先于文档「暂返 0」；客户签约占用双方一致暂返 0。**同日追加（欠费口径，张烽反馈+用户拍板）**：客户 0214003958 占用报错「厂端授信额度不存在」——调用方场景未做厂端授信前置校验，口径=没有/未生效厂端授信也允许占用（余额负数即欠费，「未生效也放行」用户拍板）；已改 `ProcessFactory` 去两道拦截+无额度自动补建零额度记录（未生效/owner客户负责人），分支 `uat-20260905-peter-creditpool-overdraft`（`2abd0d1bf22`，+47/-21）已推送**待用户建 PR**；看板 rowid 154 合并登记+T-0076；禅道记录已登记（无编号）。**2026-09-07 追加（授信池自动判断，910 文档 0907 版+张烽口径）**：使用授信返回新增 `CreditType` 字段；CreditType 未传时：①推交货单占用（环节7+Adjust3）按中信保批复限额上浮余额>本次占用金额判定（够→SINOSURE 否则 FACTORY，单池不二分）②释放/红冲类（环节7释放/9/10）跟随之前占用池（发货类按交货单查最新占用，其余按订单最新交货单占用），查不到厂端兜底③其余场景厂端保底；幂等重放从台账 credit_type 带回。分支 `uat-20260907-peter-creditpool-pooljudge`（`a33e1f311f4`，2 文件 +92/-14）已推送，**PR 9201 已合并 uat**（merge `1d755404c58`，用户操作 2026-09-07）；编译 0 错误（uat CPQ 报错已被他人 PR 9126 修复）；看板 rowid 154 合并登记+T-0083（pending_release）。
 
 ---
 
@@ -30,6 +62,7 @@
 - [6. 外部系统集成](#6-外部系统集成)
   - [BPP审批对接详情（2026-06-08）](#bpp审批对接详情2026-06-08)
 - [7. 待确认 / 待处理事项](#7-待确认--待处理事项)
+  - [7.5 Coface 凭据迁移 Azure Key Vault（2026-09-01，进行中）](#75-coface-凭据迁移-azure-key-vault2026-09-01-记录-进行中)
   - [7.2 Coface 汇率改用 D365 标准汇率评估（2026-06-21 记录）](#72-coface-汇率改用-d365-标准汇率评估2026-06-21-记录)
   - [7.1 客户主数据表与 Account 表架构变更（2026-06-16 记录）](#71-客户主数据表与-account-表架构变更2026-06-16-记录)
 - [8. AI 协作指南](#8-ai-协作指南)
@@ -345,7 +378,7 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 13. **前端语言包先独立测试再合并公共文件**：为避免污染现有公共语言包，先新建 `ms_languagefile_credit_test_*` 测试 WebResource 在 DEV1 验证；验证通过后，再将 key 合并到 `ms_languagefile_1033/2052`；测试 WebResource 保留作为本地版本翻译文件备份，不删除。
 14. **🚨 绝对禁止覆盖公共/通用文件**：AI 严禁直接覆盖任何文件内容，尤其是多人共用的通用文件（如 `ms_languagefile_1033/2052`、`1033.json`、`2052.json` 等）。只允许在已有内容后追加；如需修改通用文件，必须先获得用户逐字明确授权。
 15. **本地语言文件是唯一数据源（2026-07-20 新增）**：`Code/Customizations/WebResources/Language/1033.json` 和 `2052.json` 只放我们自己的翻译 key（当前 23 个），作为唯一真相源。任何翻译修改必须**先改本地文件，再以本地为准**逐条核对、只更新 DEV 语言包 WebResource 中有差异的 key（严禁整包覆盖 `ms_languagefile_1033/2052`）；同步前先导出 DEV 现有文件备份。新增 key 时同样先落地本地文件再同步。
-16. **🚨 语言包修改的唯一通道（2026-08-01 用户两次强调，强制）**：**禁止直连修改任何环境（含 DEV1）的语言文件 WebResource**；唯一通道 = **修改远程服务器 tx-windows（C:\Projects\D365）仓库里的语言文件，走 git 分支 + PR 合并发布，发布后 DEV 和 UAT 都生效**。完整顺序：①先改本地唯一数据源 `Language/1033.json`+`2052.json`（纯追加）→ ②scp 下载远程仓库语言文件 → 本地纯追加 → scp 回传（保持 CRLF）→ ③远程建分支 `uat-YYYYMMDD-peter-langfile-xxx` commit + push（必须等用户说「提交/推送」）→ ④用户 PR 合并 → ⑤发布后 DEV/UAT 自动生效，**无需也不允许再单独动环境 WebResource**。误改环境必须立即用备份回滚（2026-08-01 已执行一次回滚并 MD5 验证复原）。
+16. **🚨 语言包修改的唯一通道（2026-08-01 用户两次强调，强制）**：**禁止直连修改任何环境（含 DEV1）的语言文件 WebResource**；唯一通道 = **修改远程服务器 tx-windows（C:\Projects\D365）仓库里的语言文件，走 git 分支 + PR 合并发布，发布后 DEV 和 UAT 都生效**。完整顺序：①先改本地唯一数据源 `Language/1033.json`+`2052.json`（纯追加）→ ②scp 下载远程仓库语言文件 → 本地纯追加 → scp 回传（保持 CRLF）→ ③远程建分支 `uat-YYYYMMDD-peter-langfile-xxx` commit + push（必须等用户说「提交/推送」）→ ④用户 PR 合并 → ⑤DEV 用仓库最新语言文件更新、UAT 随 n8n 发布 McsWebResource 带上（⚠️ 2026-08-12 用户明确：无自动管道、不要叫用户手动传 UAT），**无需也不允许再单独动环境 WebResource**。误改环境必须立即用备份回滚（2026-08-01 已执行一次回滚并 MD5 验证复原）。
 
 
 ---
@@ -668,6 +701,130 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | 验证 | Node 仿真 40/40（必填/锁定/分组带入/过滤）；部署前 diff DEV1=本地 `04295acc`，部署回读逐字节一致；用户界面验证：①「金融产品可修改」=浏览器缓存旧 JS，强刷后正常 ✅；②机构下拉过滤→v2 常开面板样式被用户否决（未先报方案，批评接受）→v3 重写为原 PCF 同款 UX（收起单行输入框、点击弹浮层下拉、勾选写回多行文本）→v4 标准化清理（bppstatus 隐藏字段上表单，picker 直读属性自算可编辑，删除推送/拉取/轮询/兜底；CustomEvent 通知；字体 getComputedStyle 拷贝系统标签；对齐实测兄弟字段盒），表单恢复成对布局，已部署发布回读全绿；③减选后带入不更新→v5 修复：picker 勾选时**同步直写** 6 字段（本地 `_allResources` 零异步），表单 JS 异步带入仅作导入/API 兜底；✅ 用户 DEV 确认通过（增删多选/字段一致性/DB 核对一致）。⚠️ 后续注意：#1576（另一会话）已将 `mcs_fsm_product` 选项改为新代码表 1-10 并删值 11，`mcs_fsm_data.js` 已被后续会话推进至 68084 bytes（#1578/无编号新建误放开/#1561 增量，均含本 #1559 变更） |
 | 收尾 | ✅ 禅道登记+《待发布内容清单》（entity 包 8 字段+表单、McsWebResource JS、语言 key 待推送）+数据表定义 v1 已更新；⏸️ 语言 key `FsmData_ResourceFiltered`（379→380）本地已追加，仓库分支推送待用户授权；⚠️ entity_20260727_peter 08-04 已导出 zip 早于本次字段创建，**发版前必须重新导出** |
 
+### 2.29 进行中（Coface 数据缺失时不阻断流程 + 搜索弹窗联系提示）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-14 |
+| 需求 | ① 客户信用评估流程中，无 Coface 代码/未下单/下单未就绪等场景不再阻断流程；② 数据集成拿不到 Coface 数据时自动创建空标签（定量 `N/A`、定性 `缺失`），人工复核阶段强制补录；③「搜索 Coface 企业」弹窗增加联系提示 |
+| 修改文件 | `Customizations/Plugins/CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs`（Coface ID/国家编码为空时不抛异常，跳过 API 调用，创建空标签）<br>`Customizations/Plugins/CreditScore/Plugin/CreditScorePlugin.cs`（计算前校验空标签，未补录则阻断）<br>`Customizations/WebResources/JS/mcs_credit_record.js`（10→11 移除阻断，12→13 强制补录校验）<br>`Customizations/WebResources/HTML/mcs_coface_company_search.html`（搜索条件上方增加联系提示）<br>`Customizations/WebResources/Language/1033.json`、`2052.json`（新增 6 个 key + CofaceSearch_ContactHint） |
+| 本地编译 | ✅ `CofaceIntegration.csproj` 0 错误 0 警告<br>✅ `CreditScore.csproj` 0 错误 0 警告 |
+| JS/JSON 检查 | ✅ `mcs_credit_record.js` `node --check` 通过<br>✅ `1033.json` / `2052.json` JSON 格式校验通过 |
+| 关键规则 | 空标签默认值与当前规则一致；缺失项评分与当前规则一致（0 分）；`account` 保持必填；存量在途记录不批量处理 |
+| 远程同步 | ✅ 已用 `sync-plugin-to-remote.py` 同步到远程主项目并编译通过（0 错误）；`CreditScore` 模块已补入同步映射 |
+| Git 推送 | ✅ 代码分支 `uat-20260814-peter-coface-no-block`（commit `22d8474e537`）已推送并合并 uat<br>✅ 语言包分支 `uat-20260814-peter-langfile-coface-no-block`（commit `3bf3cb24419`）已推送并合并 uat |
+| DEV1 Assembly | ✅ 已用合并后 uat 重编并更新 `SanyD365.D365Extension.Sales`（ID `9d6ff315`），DLL 8579 KB |
+| DEV1 WebResource | ✅ `mcs_credit_record.js`（67455 bytes）、`mcs_coface_company_search.html`（15369 bytes）已更新 |
+| 看板登记 | ✅ 发布清单 rowid 96-99（plugin/webresource×3）+ 任务卡片 T-0038（pending_release） |
+| 语言包 DEV1 发布 | ✅ `ms_languagefile_1033`（498458 bytes）、`ms_languagefile_2052`（432993 bytes）已按红线用仓库最新文件更新 DEV1 |
+| 下一步 | 1. DEV1 功能验证（无 Coface ID / 未下单 / 未就绪 / 强制补录 / 搜索弹窗提示）<br>2. UAT 发布（McsPlugin + McsWebResource） |
+
+---
+
+### 2.30 进行中（819/820 生产发版：增量包模式 — entity_20260818_peter）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-18 |
+| 背景 | 三一（牛同达）要求本次生产发版**只放 805 之后有新增/更新的组件**，不全量；三一会导出生产全量包提前对比（主要看冲突+依赖缺失）。包名 `entity_20260818_peter`（DEV1 已建，ID `1e7e470f-979a-f111-b8dc-6045bd1c0eeb`） |
+| 增量判定方法（纯系统层面，不看板） | 新建只读工具 `Code/Tools/_DeltaScan`（dump DEV1/UAT 元数据：字段全维度/实体标签/窗体formxml/视图fetch+layout/ribbon publishedon/BPF/AppAction/CustomAPI）+ `Code/Tools/release-diff/delta_scan.py`（基线 zip vs dump diff，含 formxml 去 labels 噪音、fetch/layout 语义摘要、RequiredLevel 归一）。基线：`entity_20260727_peter_uat_20260805.zip`（8/5 包，9 实体）+ `entity_all_0720_peter_exported20260724.zip`（7/24，9 实体）+ UAT dump 三方交叉。产物存档 `Backups/TempTest/deltascan_20260818/` |
+| 关键平台认知（本次实测固化的经验） | ① 字段无 modifiedon，`systemform` 连 createdon/modifiedon 都没有，窗体变更只能靠 formxml 内容 diff；`savedquery` 有 modifiedon 但发布会刷新（假阳性多）须内容 diff 佐证；② Solution 导出 XML 的 `<RequiredLevel>required</RequiredLevel>` **有损**——ApplicationRequired/BusinessRequired 都序列化为 required，必填性差异包级核对不可见；③ 实体加字段进 Solution 会自动把父实体加为壳（behavior=2）；ribbon 随实体块**无条件**带出（连壳都带）；④ 移除实体组件会级联移除其字段组件（fca_quota 字段曾因此被带走，已补回）；⑤ ribbon 组件不能用 add-solution-component type=6 加（报 ViewAttribute does not exist），随实体块走即可；⑥  Money 字段的 `_base` 伴随字段会随主字段自动入包 |
+| 包内容（已回读核对 + 导出 zip 与 DEV1 dump 正向比对全一致 ✅） | **改名实体（behavior=1 含元数据）**：fca_quota/quotaapp/proc/records/mdlversion/mdlconfig（安全交易基线改名 + 主键标签）；**字段**：credit_record.mcs_bpplink(url)、quotaapp 7 字段（含 mcs_reason/tobegrant 降必填、_url 改 url）、proc（mcs_active 新字段+creditreject 选项标签）、fsm_data 14 字段（13 新+manager 改名）、account.mcs_creditgrade（壳）；**窗体**：fsm_data/fsm_detail_data/mdlversion 主窗体；**视图**：quotaapp/fsm_data/fca_proc Active 视图；**Ribbon**：fsm_data（#1788）、stpayterm（#1834 三个 HideCustomAction）随实体块带；fsm_data 新 Lookup 关系自动带入 ✅ |
+| 导出后必做 | **剥除 account Ribbon**（平台把 DEV1 全量 account ribbon 430KB 随壳带出，含他团队按钮，进生产会覆盖）：`python3 Code/Tools/release-diff/strip_entity_ribbon.py <zip> Account`；已登记上线核对清单 2.4.22 |
+| 核对结果 | 🚨 字段类型冲突=0（diff_solution_packages vs 8/5 zip）；check-solution-deps 82 项 ❌ 均为增量模式噪音（引用字段/关系 805 已在生产），真实依赖（新字段/新关系/JS 库）全部覆盖 |
+| 扫描揪出的真问题 | ① **DEV1 `mcs_trade_stpayterm.mcs_status` 三选项 2052 标签丢失（空）**（UAT 有 2052 旧值）——**用户决策（2026-08-18）：该字段本次不改不进包**，生产的旧选项标签（待审批/Pending Approval）保持不动，无影响（按钮已由 Ribbon 隐藏+appaction 停用）；DEV1 的 2052 空标签缺陷留待后续处理；② 选项集选项 11 元数据不被非托管导入删除（UAT 至今有 11）——已登记 2.4.21 手动删除项；③ UAT 环境存在 6 个 DEV1 从未有的视图（6/18 UAT 直接建的漂移），与我方无关不处理 |
+| 看板 | 发布清单 rowid 73/76/110 包名已定为 **entity_20260819**（三一共享发版大包，我方 0818 为 staging 小包） |
+| 0819 镜像（2026-08-18 完成） | 三一通知：实体大包 entity_20260819 明天上午检查，要求只加新增/修改的字段、关系。已把 0818 全部组件镜像进去：6 改名实体（behavior=1）+ 33 字段 + 3 窗体 + 3 视图 + BPF + stpayterm/mcs_credit 壳（mcs_credit 从 BPF 自动带入的 behavior=0 已改为 1 符合要求）。**闭环验证：0818（61 组件，已剔除界面加 BPF 时被平台拖入的 Sany CRM Sales SiteMap 杂项）与 0819 逐组件比对 = 一个不少、一个没有多**；account 在 0819 中是他队所加（behavior=1），导出会带全量 account ribbon——**用户 2026-08-18 明确：别人加的不管**，不再跟进 |
+| 待办 | 1. ~~stpayterm 2052 修复+mcs_status 入包~~（用户决策：本次不改不进包）；2. 等三一生产全量包做终核（冲突+依赖，用 delta_scan.py）；3. 发版清单 JSON 与 check-release 按增量口径适配；4. 固定包（McsPlugin/McsWebResource/McsCustomAPI）照旧全量发 |
+
+---
+
+### 2.31 规划中（上线数据导入：评分卡 + 客户CofaceID + 评估记录造数，方案已定向未动工）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-25 |
+| 背景 | 上线时用户提供 Excel：①新评分卡数据 ②客户ID↔CofaceID 对应关系（均几百条），需导入生产。我方无法接触生产，围绕「怎么把数据弄进生产」做了三轮方案讨论 |
+| 场景流程（用户描述） | 1. 用户提供 Excel → 2. 解析并导入评分卡数据 → 3. 按对应表创建信用评估记录（DEV 可能无该客户 → **直接新建最小化客户**，与第 5 步合并为前置建档步骤）→ 4. 触发生成评分项（模拟人工评估，不走审批）→ 5. 评分结果回写客户属性，导出生产用数据 |
+| 方案对比结论 | ①IT 执行程序导入：需生产凭证+IT 排期，链路长；②DEV 生成 Excel 用户手工导：几百条可行但绕（且按客户ID更新需 Alternate Key）；③**Playwright 浏览器真实操作（用户提出，定为首选）**：与真人操作完全一致，JS/Plugin/BPF 自然触发，留痕完整，顺带大规模端到端流程测试；几百条×2~5 分钟，无人值守分天跑，速度不是硬伤 |
+| 首选方案要点 | Excel 当工单队列（状态列：待处理/已建客户/已提交BPP/已审批/已完成/失败原因，逐条回写、断点续跑）；分工：AI 走到 BPP 提交 → 用户 BPP 审批 → AI 走完后续状态流转直到结果回写客户；三级演练 DEV1 跑通 → UAT 彩排 → 生产；风控账号若有 MFA 用持久化浏览器会话（用户手动登录一次后接管）；DEV1 新建客户/记录统一打「上线造数」标记便于识别 |
+| 风控账号 | 用户表示可拿到具风控数据权限的账号直跑。届时需确认：账号形态（用户/应用账号）、MFA、权限边界（Account/评估记录/评分项/评分卡写入权）、指向环境；到手后先做小样试探（建 1 条再删） |
+| 安全红线（用户原话「生产跑出问题我们就是死罪」） | 生产风险按最高等级：先只读核对→dry-run 清单用户签字→小批量首跑 3~5 条人工验收→放量；更新客户前导出跑前快照可精确回滚；全程日志落盘；程序绝不能误触发生产 Coface API（真实计费）。备选始终保留：程序直跑（幂等+快照）或 Excel 手工导 |
+| 关键待确认（示例数据到位后逐项核对） | ①用户 Excel 必须含**客户类型**（评分卡按 SA/BC/个人/经销商匹配，缺了评分项生成为空）；②**评分指标值来源**：Excel 自带（最干净，程序直接填入）vs 走真实 Coface 同步（生产计费不现实）——大概率前者；③**生产 Coface 同步是否产生费用**：已有 CofaceID 复用已有报告应零费用（DEV 实测全程只读 GET 零新单），需与 Coface 侧确认；④BPP 是否支持**批量审批**（几百条逐条批用户负担大）；⑤生产是否只需更新客户属性，还是评估记录/评分项本身也要进生产；⑥评分卡数据格式是否与《评分卡因子.xlsx》一致 |
+| 状态 | ⏸️ 未动工，等用户示例数据 + 风控账号。届时第一步：写解析脚本做数据核对（上述 6 项），数据质量过关再开发 Playwright 自动化并在 DEV1 演练 |
+
+---
+
+### 2.32 已关闭（额度表「模型计算序列号」为空 — 禅道 #2025）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-27（当天闭环：排查→修复→DEV/UAT 验证→发布） |
+| 根因 | UAT「Active Factory Credit Quota」视图「模型计算序列号」列绑定的是 **Lookup `mcs_fca_quota.mcs_fca_procid`**（layoutxml 实锤），而非文本 `mcs_doid`；7/30 需求变更（2.23）后 BPP 审批链路 `QuotaActivationService.ActivateQuota` **只写文本 mcs_doid、从不写 Lookup** → 凡走「proc生效→申请单→BPP通过」链路的额度记录该列必空（Lalitesh Test/Kedai Kek/PAWANSUT 3 条实证）；7/30 前旧直写链路记录 Lookup 有值显示正常 |
+| 修复（方案A，用户定） | `FcaQuotaAppBppCallbackPlugin.cs`+`QuotaActivationService.cs`（2 文件 +14/-5）：ActivateQuota 新增 procRef 参数同步写 `mcs_fca_procid`；proc 已删除致 doid 文本为空时不传 procRef 防失效引用。分支 `uat-20260827-peter-fca-procid-2025`（commit `1f02e9048c2`）→ **PR 8532 已合并 uat**（merge `44a50f7f021`） |
+| 验证 | ✅ DEV1 临时子类 Assembly 双分支（新建/更新）+ 主 Assembly 正式链路回归均通过（Lookup 写入实锤）；✅ UAT n8n 发布 McsPlugin 后端到端验证通过（FCM202608270001 Lookup 有值）；测试数据均全清、临时 Assembly 红线执行完毕 |
+| 看板 | rowid 127（McsPlugin 组已归档）、任务 T-0055（released） |
+| 存量口径 | UAT 3 条空 Lookup 历史记录**用户明确不处理**；其中 Kedai（FCM202608170002）/PAWANSUT（FCM202607180001）的 proc 已删除本来就补不了 |
+| 经验教训 | ①额度表 mcs_doid 有两个同名字段易混淆：quota 上是**文本**、quotaapp 上是 **Lookup→proc**，视图列绑的是 Lookup；②**视图列绑定字段必须看 layoutxml 实锤**，不能凭字段显示名猜（文本/Lookup 同名「模型计算序列号」）；③sync-plugin-to-remote `--only` 必须传**相对 Plugins 根目录**路径，误传仓库根路径会静默同步 0 文件仍报「编译成功」（防呆警告已补进同步指南）；④UAT/DEV1 编号配置均为 FCM 前缀，截图「ECM」系形近误读 |
+
+---
+
+### 2.33 已关闭（信用等级映射配置化 + 新口径 — 禅道 #2091）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-29（当天闭环：修复→DEV1 验证→推送→PR 合并→DEV1 部署回归） |
+| 需求 | 信用分→等级（A0-A4）映射写死代码且为旧口径（A0≥80/70/60/50），业务一周内两次调区间；改配置化 `ms_systemconfiguration.CreditGradeMapping`（`{"A0":70,"A1":58,"A2":49,"A3":40,"A4":0}`，下限含降序匹配首个命中档），新口径 A0≥70/58-69/49-57/40-48/0-39 |
+| 改动 | 🆕 `Plugins/BppIntegration/CreditGradeMappingConfig.cs`（读配置，缺失/解析失败用内置新口径默认值兜底不阻断，模式同 SinosureUpliftConfigHelper）；`BppCallbackPlugin.cs`（删写死 CalculateCreditGrade 改读配置）；`mcs_credit_profile.html`（getGradeByScore 配置化，init 并行加载，静默兜底）；`MetadataTool/Services/SyncAccountProfileHelper.cs`（第三处重复实现一并配置化）；sync-plugin-to-remote.py 加映射 |
+| DEV1 验证 | ✅ 61 分→A1（旧口径 A2）；✅ 临时 Assembly 全回调链路（预置 A2→回写 A1）；✅ 改配置即生效（A1 阈值 58→62→A2，恢复 58→A1，零发版）；✅ 配置缺失兜底不阻断；✅ 临时 Assembly 已注销、主 Step 恢复启用 |
+| 合并部署 | 分支 `uat-20260829-peter-creditgrade-2091`（commit `cc70c30b1fb`，4 文件 +165/-23）→ **PR 8665 已合并 uat**（merge `7fdaf5bf9c1`）→ DEV1 主 Assembly（ID `9d6ff315`）已用合并后 uat 编译更新 + HTML 仓库流程部署发布（内容规范化比对一致）→ 主 Assembly 回归通过（SCO202607020010，58 分预置 A3→回写 A1） |
+| 环境配套 | DEV1 `CreditGradeMapping` 配置已创建（ID `833c68d2`）；`mcs_fca_mdlconfig.mcs_creditgrade` 字段描述旧口径文字已改新口径并发布 |
+| 顺带 | HTML 同文件带上 08-28「终端客户无级别显示普通客户」修复（无禅道号，林昌旺反馈，同分支同 PR） |
+| 看板 | rowid 129/133/134 + 任务 T-0059；**2026-08-29 UAT 已发布（McsPlugin+McsWebResource 两组已归档），T-0059=released** |
+| UAT 验证（08-29） | ✅ Assembly 当日更新；✅ 功能实证 SCO202608210001（56 分预置 A3→回写 A2 新口径）；✅ HTML 与仓库 uat 版一致；✅ UAT 配置在场（`9f20a112`，DEV/UAT 配置均 08-29 就位） |
+| 发布注意 | ①McsPlugin（Plugin 代码+新类）②McsWebResource（HTML）③`CreditGradeMapping` 配置三生产数据中心 IT 导入（《上线核对清单》4.1 已登记，《D365配置数据清单》已登记）；后续业务调区间只改配置无需发版 |
+| 经验教训 | ①DEV1 更新 Assembly/部署 WR 撞他人 Solution 导入锁（timeout）是常态，后台轮询重试即可；②Publish 撞 `LanguageProvision` 锁同样重试可过（工具内重试第 3 次成功）；③HTML 推送前必须 diff 远程 uat 版实锤增量（CRLF 规范化后比对），防夹带未授权改动 |
+
+### 2.34 已修复待验证（绑定 Coface ID 回写客户主数据改系统身份 — 禅道 #2092）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-29（当天闭环：修复→DEV1 验证→推送→PR 合并→DEV1 部署回归） |
+| 需求 | 生产收紧客户主数据写权限后，绑定弹窗前端直接 PATCH 客户主数据 `mcs_cofaceid` 按操作者权限执行 403，绑定报错、主数据无法回写；改为服务端系统身份回写 |
+| 改动 | 🆕 `Plugins/CofaceIntegration/Plugin/CofaceBindWritebackPlugin.cs`（Update of mcs_credit_record PostOperation，Filter=mcs_cofaceid；系统身份 CreateOrganizationService(null) 沿 评估记录.mcs_accountid→account.mcs_customermasterdata→主数据 链路回写 mcs_cofaceid；空才写、有值不覆盖、记 Trace；回写失败不阻断绑定主流程）；`mcs_coface_company_search.html`（删除前端直接 PATCH 客户主数据逻辑，绑定只写评估记录）；sync-plugin-to-remote.py 加映射；Code/INDEX.md 索引 |
+| 关键决策 | 系统身份用代码内 systemService（#1854 同款），Step 默认 Calling User；只写客户主数据不同步 account.mcs_cofaceid（Bug 期望原文口径，前端现状也不写 account） |
+| DEV1 验证 | ✅ 临时 Assembly 3/3：空才写（SELVI 绑定 icon#2092001 实锤回写）/有值不覆盖（换绑主数据保持原值）/清空不处理；临时 Assembly 已注销（红线）；✅ 主 Assembly 冒烟通过（icon#2092003 实锤回写）；测试数据均已复原 |
+| 合并部署 | 分支 `uat-20260829-peter-cofacebind-2092`（commit `f34bd0c3eb5`，3 文件 +104/-24）→ PR 已合并 uat（merge 后 uat=`f39a04d98cf`）→ 远程重编 Release 0 错误 → DEV1 主 Assembly（ID `9d6ff315`，8659 KB）已更新 → 平台未自动扫新 Type，register-plugin-advanced 显式创建 Type（`01adea6e`）+Step（`2fadea6e`）→ 仓库 uat 版 HTML 部署 DEV1 并发布（15667 bytes，回读 MD5 `02b5ab1c` 与仓库逐字节一致） |
+| 新增组件 | Plugin Step `2fadea6e`（Update of mcs_credit_record，Filter=mcs_cofaceid）——已加 McsPlugin（`519a55da`）+主清单 `AllComponent_Peter_NoUAT`（`3f140bdb`）；PluginType 随 Step 隐式入包；WebResource 无新增（既有 HTML 变更，已在 McsWebResource） |
+| 看板 | 发布清单 rowid 137（plugin→McsPlugin，in_package=true）/138（webresource→McsWebResource，in_package=true）+ 任务 T-0061 pending_release |
+| UAT 发布核对（2026-08-29） | ✅ 已发布并核对通过：PluginType+Step ID 与 DEV1 一致、功能实测 2/2（空才写/不覆盖）；⚠️ 首轮 UAT HTML 为旧版（McsWebResource 未生效），用户重发后回读 MD5 `02b5ab1c` 与仓库 uat 版一致、前端 PATCH 主数据 0 残留。教训：UAT 发布后 HTML 类组件必须回读 MD5 核对，不能只看导入成功 |
+
+### 2.35 已关闭（Coface URBA partially_ready 误判就绪推进 Report 单 — 无禅道编号）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-08-31（当天闭环：Coface 确认口径→修复→DEV1 验证→推送→PR 合并→DEV1 部署回归） |
+| 根因 | 2026-08-27 沙盒验证 Coface 邮件 demo 公司时发现：URBA 订单 `partially_ready`（财务未交付）时下 Report 单被 400 拒，而 `CofaceOrderInfoHelper.ExtractUrbaOrderInfo` 把 `ready`/`partially_ready` 都判 Ready，状态机会提前推进反复吃 400 置失败。2026-08-31 Cathy-Coface 确认口径：**partially_ready 不算 ready，Report 下单必须等财务交付（ready）** |
+| 修复 | `CofaceOrderInfoHelper.cs`（1 文件 +14/-2）：`UrbaOrderStatus` 新增 `PartiallyReady` 枚举，仅 `ready` 判 Ready；partially_ready 单列不 return 继续扫描。调用方影响：下单插件推进 Report 判定 `!=Ready` → partially_ready 等待不推进（修复点），复用判定 `!=NotFound` 不变；数据集成插件仅拦截 NotFound/NotReady → PartiallyReady 落取数分支=原行为不变 |
+| DEV1 验证 | ✅ 临时 Assembly 双用例（记录 SCO202606170006 临改 DE）：①Lear icon#127687874 新下 URBA 单（e6ca462f）partially_ready → 返回「URBA 监控数据准备中」状态保 2 不推进（旧逻辑必吃 400 置失败）；②icon#127687875（Cathy 已处理 ready）→ Report 单提交成功（JSON+PDF 双格式）状态 3，legitimateInterest=102 生效；✅ 主 Assembly 回归通过；测试记录已复原；✅ Cathy 手动完成两 URBA 单后重试（主 Assembly 直连）：icon#127701278（ac6cd349 ready）0→2→3→4 全链通过，icon#127687875（bc3ddc41 ready）复用 URBA/Report 无重复下单全链通过，测试记录已复原 |
+| 合并部署 | 分支 `uat-20260831-peter-coface-partialready`（commit `e20ab5051c5`）→ PR 用户已合并（uat=`7c72841e5bc`）→ 远程重编 0 错误 → DEV1 主 Assembly（ID `9d6ff315`）已更新（合并拉平把他团队 `HostExtensionReturnApplication` 新 Type 一并带入，08-29 后产生的 Assembly 差异消除） |
+| 清理/组件 | 临时 Assembly `SanyD365.Plugins.CofaceIntegration` 已注销无残留；Custom API `mcs_CofacePlaceOrder` 重建重绑主 Type 28ec7f7c（**新 ID 83358c22**+参数 d7358c22+响应 04368c22，旧 ID 平台级联清除），三组件已加 McsCustomAPI+主清单 |
+| 工具加固 | `EntityManager.RegisterPluginAssemblyOnly` 短名撞 2601 自动改全限定名注册（CreditPool 同款）；MetadataTool 新增 `rebind-cofaceorder-api`（只重绑不动 Assembly，规避 Assembly 差异红线） |
+| 看板 | 发布清单 rowid 139 + 任务 T-0062（均已 released，2026-09-01 McsPlugin 组归档） |
+| UAT 验证（2026-09-01） | ✅ 重发 McsPlugin 后功能实证通过：SCO202606110001 临改 DE/Lear/状态2 → 返回「URBA 监控数据准备中（partially_ready），请稍后再试」状态保 2，记录已复原。⚠️ 教训：08-31 11:16 首轮发布 n8n 显示「成功」实为旧 DLL（功能实证才暴露），**Assembly 发布「成功」≠代码是新，发后必须功能实证不能只看导入结果** |
+| 经验教训 | ①重绑 Custom API 若用旧 DLL 更新主 Assembly 会撞 Assembly 差异红线（DEV1 主 Assembly 可能已被他团队更新），只重绑用 `rebind-cofaceorder-api`/`bind-customapi`；②沙盒 URBA 单新下后数分钟内即达 partially_ready 并长期停留，是现成的负向测试素材 |
+
+### 2.36 已完成（9-3 生产发版备包：组件放入共享大包 entity_20260902 / role_20260902）
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-09-01 |
+| 背景 | 刘泞群通知：各项目组把自己小包的实体加入共享大包 `entity_20260902`，只加新增/修改的字段、关系，次日点检清理多加项；用户指示 AI 检查并放好实体包与角色包，点检表文档由用户填写 |
+| 实体包（entity_20260902，我方 +9 组件，回读验证在场） | 镜像 staging 小包 `entity_20260821_peter`+`entity_20260829_peter`：① mcs_fca_records 6 新字段（credit_type/usebalance_cny/delivery_no/settle_no/settle_id/idempotency_key，816授信池，_base 自动带入）② mcs_fsm_resource.mcs_fsm_institution_code（#2072 必填性变更）③ mcs_fca_quota 主窗体（#1985，form f2d30a62）④ mcs_credit_record 快速查找视图（b38169df，用户 8/22 修改）；4 个父实体壳（behavior=2）自动带入 |
+| 角色包（role_20260902，最终口径 2026-09-01 用户定） | **RiskRole20260830（DEV 暂存包）21 个风控角色全部放入发版包 role_20260902，回读 21/21 在包**：含新建 2 个（LTC Business Control Configuration Admin 8/20、LTC Risk Sales Representative 8/25）+ 8/20 发版前后有权限调整的 19 个（CRM Default Role 他队已先加）；中信保 4 角色用户明确非我方不加；`LTC Area Risk Control Manager`（黄文燕 8/25 建）不在 RiskRole20260830、用户未让加=仍悬空已提醒。⚠️ 发现 RiskRole20260830 引用失效/非根 GUID：Post-Financing Manager 包内引用 …7ced8db4dd60 加包报 does not exist，实际根角色 …6045bd1c0e3b 已按根角色加入，RiskRole20260830 失效引用需风控组修复。⚠️ CRM Default Role 是全局默认角色（8/29 有修改），导入生产会覆盖生产同名角色权限，已提醒用户确认。教训：发版包是共享大包（entity_20260902/role_20260902），RiskRole20260830 只是 DEV 暂存包，「在暂存包里」≠「发版不会漏」 |
+| 注意 | 大包多团队并发添加中（备包期间他队新增 mcs_contracttemplate×2/mcs_representativebusinessconfig 等非我方组件，与我方操作无关）；固定包 McsPlugin/McsWebResource/McsCustomAPI 按惯例全量随 n8n 发，不在本次备包范围 |
+| 交叉验证（2026-09-01 六角度，产物 `Backups/TempTest/deltascan_20260901/`） | ①看板 entity 分区 8/20 后仅 rowid 116/120/132 三项，全部在包；②delta_scan 8/18 dump vs 9/1 dump（24 实体）：我方增量=6+1 字段+1 必填性+1 视图+2 表单（fca_quota=#1985 已在包；mcs_credit 表单 isrequired=rowid 110  BPF 配套，8/20 已发生产），account 变更全为他队（PEPPOL/VAT 等）；③主清单：fca_records/fsm_resource 整体管理字段自动覆盖，mcs_approvedquota 不在主清单=非我方实体；④依赖检查我方相关仅 2 条（fca_quota 的 mcs_accountid/mcs_fca_procid 关系）均为 8/18 前已存在=噪音；⑥ McsPlugin 成分中含 `ms_systemconfiguration` 实体——**查明为 2026-08-27 16:16（北京）由 UATUser01 加入**（非长年组件，疑似平台「添加必需组件」提示带入）；9/1 UAT McsPlugin 已带其发布成功、生产该实体本就在场，无导入风险，按红线不动、仅提示用户转告责任团队；⑤我方实体 ribbon 8/19 后零变更、3 个 BPF 8/19 后零变更；⑥角色排查发现风控组 DEV 暂存包 `RiskRole20260830`（21 角色）——初判「角色已在其中不会漏」**被用户纠正：发版载体是共享大包 role_20260902，暂存包不作数**；⑦按用户口径「RiskRole20260830 里 820 发版后新增/更新的都要放」将 21 个风控角色全量放入 role_20260902 并回读验证 21/21；⑧生产实证（4 次轻查询）：ExtensionApi.Sales（3aa32db6，8/26 更新）/Extension.Sales（9d6ff315，8/28 更新）均在生产→跨包 Step 缺 Assembly 风险闭环；授信池 2 API 生产 0 条（预期 9/3 首发）；**Custom API 各环境 ID 独立**（DEV 83358c22/UAT f41c5e31/生产 a512d7ff，发布管道按唯一名就地更新），8/31 DEV 重建换绑不影响 UAT/生产，9/3 无 ID 冲突无换绑需求；⑨**1.6 反向审计抓到真缺口并修复（2026-09-01）**：授信池 2 个 Custom API（mcs_recordCreditDetail/mcs_queryCreditBalance）本体+13 参数+35 响应共 50 个组件漏加主清单（在 McsCustomAPI 发版包中，不影响 9/3 发布），当日已全部补入（主清单 166→216，回读验证 50 个在场）；**当日复核：53 个组件（50 授信池+3 CofacePlaceOrder）在 McsCustomAPI 发版包与主清单双侧逐 ID 全量比对=53/53 全在场，Custom API 维度零遗漏**；其余审计 ❌ 均为预期假阳性；⑩**生产只读核对通道固化（2026-09-01 用户授权）**：Frank 账号 gw_zhangf68 登记入 `/skill:d365-system-access`（只登记用途不登记密码，密码用时向用户索取 env 临时传入）；**🚨 逐步请示铁律（同日用户明确，已写入 AGENTS.md 第 4 节 + 两个 skill）：该账号在生产的任何使用——无论查询还是其他动作——每一小步都必须先请示、批准后才可执行，严禁连发**；新增**生产直连核对策略**——`/skill:d365-deploy` 新增第 5.5 节（发版前：list-fields 生产字段终核可替代三一生成产全量包/query-assembly-version 跨包 Assembly 在场/Custom API 在场；发版后：每包 ModifiedOn 刷新+新组件抽查+功能实证），《发版检查清单》同步新增阶段 2.5（生产字段终核）与 6.5（产后直连实证），9/3 清单副本已刷新；⑪**生产终核 2.5（逐条请示制）**：①mcs_fca_records 已核（用户批准）——生产 21 字段 vs DEV1 29，同名 21 个类型全一致 🚨=0，差异 8 个恰为本次 6 新字段+typename/_base 伴随，生产无同名字段零冲突；②mcs_fsm_resource 已核（用户批准）——生产 28=DEV1 28 字段类型全一致 🚨=0，机构代码两侧均 String，必填性变更可安全导入；**阶段 2.5 全部闭环**；⑩**9/2 两 Bug 变更组件核对（2026-09-02）**：融资落实订单编号重建（新字段 mcs_orderid+主窗体×2+关系）与客户编码只读（mcs_fsm_data.js）——staging 小包 entity_20260902_peter 4 组件齐；**共享大包 entity_20260902 原本没有，已镜像补入字段+窗体（实体壳/关系自动带入，回读全在）**；两 JS 在 McsWebResource ✅；主清单实体 behavior=0 自动覆盖 ✅；大包当日已涨至 886 组件（各团队并发添加）；⑬**Coface 生产接入与连通性（2026-09-02）**：生产 `CofaceApiConfig` 已配（五值全对，11:52 写入）；本机直连 Coface 生产 API 实测认证+企业搜索全通（apiKey=uSQu0gtmT6900TqIt3NR44zTBU59vpIl2WfhOMtX / pans14@sany.com.cn / 密码 5252$Hun；⚠️ 门户改密=API 密码同步失效需同步更新配置）；**但生产侧连通测试暴露【搜索 Coface 企业】在生产坏掉**：根因=6/22 非托管时期老 Custom Action「CofaceSearchCompany」被建两次（dd74503d/11972537，激活态）→ sdkmessage 重名「not unique」，UI/SDK 两路实锤；**官方文档实锤 sdkmessage 仅支持 Retrieve/RetrieveMultiple/Associate/Disassociate，改名/直接删都不可能**，唯一正路=删宿主 workflow 级联，孤儿 Step 15a18fe4 需 prvDeleteSdkMessageProcessingStep（Frank/pans14 均无）卡住；**用户最终决策（9/2 晚）**：不删历史对象、拟 9/3 DEV 改名重建——**后被当晚路线 A 成功取代（见③）**：①DEV1 删旧 Custom API 按新唯一名重建+重绑 CofaceSearchCompanyApi（组件换 ID，同步 McsCustomAPI/主清单）②搜索弹窗 mcs_coface_company_search.html 调用名同步改（仓库分支+PR）③**✅ 已于 2026-09-03 00:15（北京）修复**：IT 给 System Maintenance 角色补「SDK 消息处理步骤」Delete=组织后，AI 依次删孤儿 Step `15a18fe4` → 删 `dd74503d`（此前已停用）→ 停用并删 `11972537`（平台级联清走老消息 `e074503d`）→ 回读同名 sdkmessage 仅剩正主 `ded0fb5b` → `test-coface-search-api Sany DE` 生产实测**调用成功返回真实企业列表**（消息解析/托管 API 执行/生产出站网络/CofaceApiConfig 凭证/真实数据五项全通）；**原定 9/3 DEV 改名重建取消**（路线 A 已走通，零代码改动）；CreditGradeMapping 三数据中心待 IT 导入（内容已交付用户）；CRM Default Role 保留不管；⑫**上线配置生产核查（Frank 账号，用户批准批量）13 项全过**：CofaceCountryConfig（36 双格式+DE=102）/SinosureUpliftConfig/UploadFileTypeMapping（5 实体全覆盖）/自动编号 6 系列/财务对照 510/NACE 11/两新角色各 1637 BU 副本/BuTeam 51 全挂载全绿；CreditGradeMapping 与 CofaceApiConfig 缺失均为用户已知待发布项；**评分卡 DEV1=UAT=生产=246 三方一致（8/29 业务新数据），AI 曾以 8/27 UAT 旧导出 383 为基线误报「缺 137 条」已更正**；UAT 定性枚举 63 vs DEV1/生产 39 多 24 条旧残留（**查实：UAT 启用 39 条与 DEV1 业务键全一致，多出 24 条全为已停用的定性化前旧口径**，功能层面三环境一致；用户决策：停用即可不删除） |
+
 ---
 
 ## 3. 核心资产清单
@@ -691,8 +848,8 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | `ScoringCardAutoNumberPlugin` | `mcs_credit_scoringcard` | Create/PreOp | 编码生成 `SCYYYYMMDD####` |
 | `CreditScoringCardValidationPlugin` | `mcs_credit_scoringcard` | Create/Update/PreOp | 同一评分项目下定性值不重复、定量区间不重叠 |
 | `CreditRecordAutoNumberPlugin` | `mcs_credit_record` | Create/PreOp | 编码生成 `SCOYYYYMMDD####` |
-| `CreditScorePlugin` | `mcs_credit_record` | Update/PostOp | 信用分计算（遍历标签×权重） |
-| `CofaceDataSyncPlugin` | `mcs_credit_record` | Update/PostOp | 调用 Coface API 获取企业数据 |
+| `CreditScorePlugin` | `mcs_credit_record` | Update/PostOp | 信用分计算（遍历标签×权重）；**状态 13 触发前校验所有空标签已补录** |
+| `CofaceDataSyncPlugin` | `mcs_credit_record` | Update/PostOp | 调用 Coface API 获取企业数据；**Coface ID/国家编码为空时创建空标签，不阻断流程** |
 | `BppIntegrationPlugin` | `mcs_credit_record` | Update/PostOp | BPP 审批提交（调用mcs_bppstartapi） |
 | `AccountValidationPlugin` | `account` | Create/Update/PreOp | Account 字段校验 |
 | `CreditItemsValidationPlugin` | `mcs_credit_items` | Create/Update/PreOp | 评分项目校验 |
@@ -703,9 +860,9 @@ msbuild SanyD365.D365Extension.Sales.csproj /p:Configuration=Release /p:Platform
 | 脚本 | 绑定实体 | 核心功能 |
 |------|---------|---------|
 | `mcs_credit_scoringcard.js` | 评分卡配置 | 编码只读、自动带出、显隐控制、下拉联动、数值校验 |
-| `mcs_credit_record.js` | 评估记录 | 编码只读、客户信息带出、状态锁定、保存校验、【搜索 Coface 企业】弹窗命令 |
+| `mcs_credit_record.js` | 评估记录 | 编码只读、客户信息带出、状态锁定、保存校验、【搜索 Coface 企业】弹窗命令；**状态 10→11 不因 Coface 缺失阻断，状态 12→13 强制校验标签补录** |
 | `mcs_account.js` | Account | Coface ID 校验、信用状态提示 |
-| `mcs_coface_company_search.html` | 弹窗 | Coface 企业搜索与 Coface ID 绑定（fetch + Web API） |
+| `mcs_coface_company_search.html` | 弹窗 | Coface 企业搜索与 Coface ID 绑定（fetch + Web API）；**搜索条件上方显示 Coface 联系邮箱提示** |
 | `mcs_credit_items.js` | 评分项目 | 数据类型变更提示、必填校验 |
 | `mcs_credititem_value.js` | 枚举值 | 项目类型校验、编码唯一性 |
 | `mcs_customer_tag.js` | 标签 | 复核字段显隐、评估状态锁定 |
@@ -1058,6 +1215,47 @@ Coface API 关键文档：
 ---
 
 ## 7. 待确认 / 待处理事项
+
+### 7.5 Coface 凭据迁移 Azure Key Vault（2026-09-01 记录，🔄 进行中）
+
+> 状态：方案已定、IT 已建 Secret，**阻塞于 IT 三项授权/注册**；2026-09-02 上线封板不动，上线后跟进
+
+**背景**：Coface 生产连接配置（apiKey/username/password）以 JSON 明文存 `ms_systemconfiguration.CofaceApiConfig` 的 `ms_content` 字段。该表是平台公共配置表（130+ 项配置，业务角色均有组织级读权限），等于凭据全公司可读；字段级安全（FLS）锁不了 JSON 内的 key，权限也收不紧（收紧则平台附件/等级映射等功能全挂）。插件目前以**调用用户身份**读配置（`CreateOrganizationService(context.UserId)`），仅 Token 回写用系统账号。
+
+**已定方案**：Secret 类型环境变量 + Key Vault（符合《Dynamics365定制规范与约束》「密钥走环境变量」条款）。备选回落方案=专用实体 `mcs_cofaceapiconfig` + 角色收紧 + 插件系统账号读（插件读取不通时启用）。
+
+**目标架构**：
+
+```
+插件 CofaceConfigHelper.GetConfig（改造点集中这一处）
+  → 调平台 unbound action RetrieveEnvironmentVariableSecretValue("mcs_CofaceXxx")
+  → Dataverse 服务主体去 Key Vault 取值返回插件（值不落库）
+各环境环境变量同名、代码一致；差异靠环境变量指向不同 Vault：
+  DEV1 → SanyD365KV-dev（sanyglobal-crm-dev，订阅 Non-Prod）
+  UAT  → SanyD365KV-uat（sanyglobal-crm-uat，订阅 Non-Prod）
+  生产 → SanyD365KV-prod（sanyglobal-crm-prod，订阅 Enterprise）
+Secret 名三库一致：coface-username / coface-password / coface-apikey（不带环境前缀，刘泞定）
+baseUrl/authUrl 不敏感，留 ms_systemconfiguration 不动
+```
+
+**订阅信息**：D365 Enterprise Non-Prod = `3015e8c4-d4be-45de-a08f-66c2fb5bf854`（dev/uat 库）；D365 Enterprise = `c4cbdd88-aa58-4b9b-8425-2ba713f8287c`（prod 库）。
+
+**已完成**：
+- IT（刘泞）已在 `SanyD365KV-uat` 建好 3 个 Secret（沙盒值：`tangys12@sany.com.cn` / `1qaz!QAZ` / `0vneRg8vLjzPQlIfSkzO8kIDg04kfaKafTzg5sX1`）；生产凭据下来后 IT 直接在 Vault 更新同名 Secret，D365 零改动
+- DEV1 + UAT 均实测创建 Secret 环境变量：表单可填，保存被设计时校验拦截（报错 `Could not verify the user permission on .../secrets/coface-username`，两环境报错一致，实锤是 Azure 侧账号/订阅级问题）
+- qiuzw 账号权限实锤：订阅读（能看到订阅名）、无资源组/Key Vault 可见性、不能自建 Vault
+
+**阻塞（等 IT 刘泞，可一次办完）**：
+1. `SanyD365KV-uat`（后续 dev/prod 同）IAM 授权：`gw_qiuzw@sanyglobal.onmicrosoft.com` →「Key Vault Secrets User」；`Dataverse` 一方应用（App ID `00000007-0000-0000-c000-000000000000`）→「Key Vault Secrets User」（Vault 权限模型须为 Azure RBAC）
+2. 订阅 D365 Enterprise Non-Prod（生产订阅同）注册资源提供程序 `Microsoft.PowerPlatform`
+
+**授权后步骤（AI）**：重建环境变量（DEV1 先）→ ①API 级验证（curl 调 RetrieveEnvironmentVariableSecretValue）→ ②插件级验证（临时独立 Assembly，测完即注销，微软官方只承诺 Flow/连接器场景，插件读取属社区先例必须实测）→ 改造 `CofaceConfigHelper.GetConfig`（读环境变量 3 个值，其余配置不动）→ 清理 `ms_systemconfiguration.CofaceApiConfig` 敏感字段（先查后合并，红线#7）→ 清理 `Code/Tools/CofaceApiTest/` 硬编码沙盒凭据（移 appsettings + gitignore）→ 生产上线前轮换一次 Coface 密码（已明文落库过）→ 登记清单（配置数据清单/上线核对清单/看板）。
+
+**关联待办**：Coface 调用日志进 Application Insights（AI-uat）——刘泞 2026-09-01 会议提出，`SanyD365.D365ExtensionApi` 有现成日志方法（如 `AILoggerController.cs`），等他给示例，上线后评估接入。
+
+**教训（2026-09-01 实证）**：Secret 环境变量在权限未就绪时**不要走保存**——定义会落库但密钥引用存不上，处于缺值状态的变量会向**所有打开解决方案页的制作者**弹「需要更新 1 个环境变量」横幅（当天已扰民一次）。已清理 DEV1+UAT 残留的 `mcs_CofaceUsername` 定义（UAT 的删除疑似触发服务端回连 Key Vault 校验，任务挂死约 40 分钟后自愈完成）。两个环境的 `TempCofaceSecretTest` 空解决方案保留，作重试容器。
+
+**微软文档**：https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables-azure-key-vault-secrets
 
 ### 7.2 Coface 汇率改用 D365 标准汇率评估（2026-06-21 记录）
 
@@ -1448,6 +1646,10 @@ dotnet run --execute
 2. 修复后更新「修复记录」和「状态」
 3. 关联的功能编号确保一致
 4. 更新 `开发计划.md` 中的 Bug 关联表
+5. **排查方法论（2026-08-07 用户明确指示，Bug #1686 教训）**：
+   - **从可能性最高的原因开始排查，不做无用排查**——Bug 单若已含关键线索（如“某账号特有”），先围绕该差异变量（账号/角色权限/数据）直接对比验证，不要从 JS 版本等通用层慢慢剥；
+   - **优先后台查数据验证**：能用 MetadataTool/WebAPI 后台查数据佐证的（记录创建/修改时间、审计日志、字段值），就不要先开浏览器；浏览器验证只用于必须走 UI 的场景（表单交互、按钮、渲染）。
+   - MetadataTool `query-records` 已扩展可选等值过滤参数：`query-records <实体> <字段> [条数] [字段=值]`（SDK 逻辑名，GUID/int 自动转型），审计表可查 `audit` 实体 `objectid=<记录GUID>`（前提：实体+字段已开审计）。
 5. **更新 Memory 中的进度**
 6. **🚨 禅道 Bug 登记（2026-07-24 新增，强制）**：凡修 Bug 先在 `Documents/Tests/BugReports/禅道Bug修复记录.md` 登记禅道编号并全过程更新；commit message 关联编号；详见根目录 `AGENTS.md` 第 5 节
 
@@ -2921,3 +3123,70 @@ dotnet run --execute
 | 核对口径 | 每次发版建立 14 环节「发布顺序矩阵」，逐项标记 `✅ 发布` 或 `⏭️ 跳过+原因`（本批次无变更/我方无组件/非我方维护/客户IT 确认不走该包）；截图中的 `role_20260722`、`entity_20260722` 为日期示例，实际替换为当批次包名 |
 | 已更新文档 | ✅ `.agents/skills/d365-deploy/SKILL.md`：新增 4.1 固定发布顺序，5.1 自检流程与组件映射按固定顺序改造；✅ `Documents/Planning/Releases/发版检查清单.md`：0.2 包构成改为 14 环节矩阵，新增 0.3 强制生成发布顺序矩阵，1.5 依赖检查只传本次发布包，5.1/6.1/6.2 改为固定顺序；✅ `Documents/Planning/上线核对清单.md`：2.1 Solution 包构成、2.3 Azure 发布顺序、3.5.4、T0 步骤 4-6 全部按截图顺序更新；✅ `.agents/skills/d365-dev/SKILL.md` 8.3.3 与 `Documents/Planning/Releases/待发布内容清单.md` 规则 8：明确登记分区顺序不代表发布顺序；✅ `.agents/skills/d365-tools/SKILL.md`：补充工具只核对归属不核对顺序的说明 |
 | 注意 | `app_allcomponents`、`sln_Import` 通常非我方维护，但固定保留核对环节；`McsOptionSet`、`McsAutomate`、`role_XX` 无变更时同样保留跳过记录；Azure 代码无改动的服务也保留 `⏭️ 跳过：无代码变更` |
+
+---
+
+## 会话更新（2026-08-06）— 禅道 #1645 客户资信评估唯一有效/未生效唯一
+
+| 项目 | 内容 |
+|---|---|
+| 需求 | ①一客户永远只有一条有效评估：新评估生效（BPP 审批通过）后，旧有效记录 `mcs_active` 置否，**名下 `mcs_customer_tag` 联动置否**（用户确认口径）；②同客户只允许一条未生效（状态 9-14）记录：新建表单选客户时弹窗「检测到该客户下有一条正在编辑中的数据（编号），是否需要为你打开？」确认→navigateTo 跳转（不保存当前新建表单），取消→继续编辑但 onSave 兜底阻断保存 |
+| 影响面评估结论 | A 类按客户查最新（画像页记录区 `mcs_active=1+status=15`、客户主数据 creditscore/grade/valid、失效服务）自动跟随；B 类按记录 ID 引用（BPP 链路/ScoreCalculator/Coface 同步/附件/BPF 实例）不改动、子数据不跨记录转移；C 类高风险=旧记录标签不会联动失效（全系统此前无任何代码置标签 `mcs_active=false`），会被画像页标签区（按客户+标签 active 查、不过滤所属记录）和 `ThreeFactorCalculationService.GetNetAssets` 误读 → 由本次联动置否解决；存量数据不修复（未上线） |
+| 改动 | `BppIntegration/Plugin/BppCallbackPlugin.cs`（新增 `DeactivateOtherActiveRecords`+`DeactivateTagsOfRecord`，审批通过分支调用；仅改 mcs_active 不会递归触发本 Plugin）；`mcs_credit_record.js`（新增 `queryInFlightRecord`/`checkInFlightRecordOnCreate`，onSave 阻断文案升级带记录编号）；本地 `Language/1033.json`/`2052.json` 纯追加 2 key×2（391 keys） |
+| Git | 代码分支 `uat-20260806-peter-creditrecord-active-1645`（commit `b9c9589b538`，+89）**PR 7031 已合并 uat**（merge `b746d8164a6`）；语言分支 `uat-20260806-peter-langfile-creditrecord-1645`（commit `b53fede0865`，4 key 含 #1652/#1635 同批）**PR 7030 已合并 uat**（merge `409ab54e192`），语言文件随仓库发布管道自动生效 DEV/UAT（⚠️ 2026-08-12 用户两次纠正口径：①不存在自动管道；②机制=仓库语言文件是唯一真相源，**DEV 用仓库最新语言文件更新，UAT 随 n8n 发布 McsWebResource 带上**，禁止再宣称「自动生效」、禁止叫用户手动传 UAT） |
+| DEV1 | ✅ JS 已部署发布（64555 bytes 回读一致）；✅ 主 Assembly `SanyD365.D365Extension.Sales`（ID `9d6ff315`）已用合并后 uat 重编更新；✅ 主 Assembly 回归通过（B 审批通过→B 生效/A 置否/A 标签置否）；✅ 前端 Playwright+用户亲测：弹窗文案/确认跳转/取消后保存阻断全过；测试数据已清理，临时 Assembly 已注销（红线执行完毕） |
+| 看板 | 发布清单 rowid 55（McsWebResource 新增）/52（McsPlugin 并入 #1643 项）/54（语言 key 已推送）；任务卡片 T-0018（pending_release） |
+| 经验 | ①`simulate-bpp-callback <scoreid> Approved` 可直接触发 BppCallbackPlugin 走真实回调链路；②造「审批通过」测试数据需先临时停用 StatusTransition-Update Step（9→15 直跳非法）和 BppIntegration Step（防真发起 BPP），测后恢复；③主 Assembly 同插件验证用临时子类 Assembly 避短名 2601，无需停用主 Step（失效逻辑只在新代码，结果可归因） |
+| 下一步 | 用户 n8n 发布 UAT（McsPlugin+McsWebResource）→ 发布清单按包归档、T-0018 置已发布 |
+
+
+---
+
+## 会话更新（2026-08-14）— 禅道 #1834 取消成交条件样板库审批功能
+
+| 项目 | 内容 |
+|---|---|
+| 需求 | 业务要求取消成交条件样板库（`mcs_trade_stpayterm`）审批流程：新增/导入数据直接生效；状态只保留生效/未生效（去掉待审批）；隐藏批量申请/审批/拒绝按钮 |
+| 改动 | `Code/Customizations/WebResources/JS/mcs_trade_stpayterm.js`（注释批量申请/审批/拒绝函数及状态相关文案，生效记录表单锁定）<br>`Code/Customizations/Plugins/TradeStPayTerm/Validation/TradeStPayTermValidationPlugin.cs`（注释状态流转校验，创建默认状态改为 2 生效）<br>`Code/Customizations/Plugins/TradeStPayTerm/Sharing/TradeStPayTermSharePlugin.cs`（注释审批共享逻辑，保留空壳）<br>`Code/Customizations/Ribbon/mcs_trade_stpayterm.ribbon.xml`（注释批量按钮 CustomAction/CommandDefinition）<br>`Code/Customizations/WebResources/Language/1033.json` / `2052.json`（状态 1 标签改为 Disabled/已停用）<br>`Code/Tools/MetadataTool/Definitions/mcs_trade_stpayterm.json`（状态字段描述更新为生效/未生效两态，选项 1 标签改为待审批(已停用)）<br>`Code/Tools/DeployTool/AppActionDeployer.cs`（注释批量按钮创建代码）<br>`Code/Tools/DeployTool/Program.cs`（停用 `stpayterm-display-rules` 命令入口）<br>`Code/Tools/MetadataTool/Program.cs`（注释测试中的状态流转用例，帮助文案同步更新） |
+| Git | 分支 `uat-20260814-peter-cancel-tradestpayterm-approval` 已推送并 **PR 合并到 `uat`**；远程 `tx-windows` 已切回 `uat` 并重新编译 `SanyD365.D365Extension.Sales` Release DLL（0 错误，1 警告 CS2002） |
+| DEV1 部署 | ✅ WebResource 已更新发布（`mcs_trade_stpayterm.js`、语言包 1033/2052）<br>✅ 选项集标签已更新（`mcs_status` 选项 1 改为「待审批(已停用)」）<br>✅ `TradeStPayTermSharePlugin` Update PostOperation Step 已停用（GUID `5b627677-3e87-f111-ab0e-6045bd1c0925`）<br>✅ 主 Assembly `SanyD365.D365Extension.Sales` 已用远程 Release DLL 更新；`TradeStPayTermAutoNumberPlugin`/`TradeStPayTermValidationPlugin` Create/Update Steps 已更新<br>✅ `TradePtGroupTypeProductLineSyncPlugin` Create/Update PreOperation Steps 已重新注册到 `mcs_trade_ptgrouptype`；两个 Step 已加入 `McsPlugin` 与 `AllComponent_Peter_NoUAT` |
+| UAT 部署 | ✅ `TradeStPayTermSharePlugin` Update PostOperation Step 已停用（GUID `5b627677-3e87-f111-ab0e-6045bd1c0925`，回读实锤 State=Inactive）；`TradePtGroupTypeProductLineSyncPlugin` 两个 Step 状态正常启用 |
+| Type/Step ID 对齐（2026-08-14 追加） | 修复命名空间不一致：本地代码 `TradePtGroupTypeProductLineSyncPlugin` 命名空间由 `SanyD365.Plugins.TradeStPayTerm.Sync` 改为 `SanyD365.Plugins.TradeStPayTerm`；DEV1 已删除误创建的 `.Sync` Type/Step（`2024b16b`/`2324b16b`/`356276ea`），按 UAT 原 GUID 重建（Type `40f9c14e`，Create Step `4ff9c14e`，Update Step `b9fb3ecf`）；DEV1/UAT Type/Step ID 现已一致；两个 Step 已重新加入 `McsPlugin` 与 `AllComponent_Peter_NoUAT`；看板 rowid 92 已更新 |
+| DEV1 验证 | ✅ 列表页批量申请/审批/拒绝按钮已隐藏<br>✅ 新建记录默认状态 = 2（生效）<br>✅ 生效记录表单字段锁定<br>⚠️ `test-tradestpayterm` 自动化命令因测试脚本中 `mcs_creditgrade` 仍按 `OptionSetValueCollection` 赋值而报错（实际字段为 Picklist，应传 `OptionSetValue`），该问题与本次修改无关，不影响功能验证 |
+| 新增组件登记 | 新增/重建 `TradePtGroupTypeProductLineSyncPlugin` Create/Update Step（GUID `2324b16b`/`356276ea`），已加主清单 `AllComponent_Peter_NoUAT` 与发布包 `McsPlugin` |
+| 看板 | 发布清单 rowid 85~91（#1834 原始内容）+ rowid 92（TradePtGroupTypeProductLineSyncPlugin Step，包 McsPlugin）；任务卡 T-0035 状态 `pending_release` |
+| 上线核对清单 | 已新增 2.4.17：UAT/生产导入 `McsPlugin` 后需核对 `TradeStPayTermSharePlugin` Step 保持停用 |
+| 注意 | 所有代码不删除只注释；按钮直接隐藏；不删除任何组件；`mcs_status` 选项值 1 保留但标签改为「待审批(已停用)」 |
+
+
+---
+
+## 会话更新（2026-08-15）— 禅道 #1834 收尾：批量按钮「可见不可点」修复
+
+| 项目 | 内容 |
+|---|---|
+| 起因 | 用户反馈 DEV1 列表页批量申请/审批/拒绝按钮仍显示、点了没反应，要求应为隐藏 |
+| 实查根因 | ①注释后的 `mcs_trade_stpayterm.ribbon.xml` **8/14 从未导入 DEV1**（`get-entity-ribbon` 实锤生效 Ribbon 仍有 3 按钮；8/14 记录的「DEV1 验证按钮已隐藏」不属实）；②3 个旧 appaction（apply/approve/reject）在 DEV1 复活为「启用」——它们仍是主清单 `AllComponent_Peter_NoUAT`、`entity_20260603_peter`、`entity_20260805` 的组件，这些包任何一次导入都会复活；③8/14 曾对 appaction 设 `isdisabled=true`，但实测**只禁用点击、按钮仍渲染**，不能当隐藏用。「不能点」的另一层原因是 8/14 JS 已部署为空壳函数 |
+| 修复动作（用户指定载体包 entity_20260727_peter，红线「不删组件只隐藏」） | ①用户已将 `mcs_trade_stpayterm` 实体加入 `entity_20260727_peter`；②手工清理包内实体 RibbonDiffXml 同前缀旧节点（28 处→0）重打包导入 DEV1 + 发布实体，回读生效 Ribbon 按钮引用=0 ✅；③`update-record appaction <GUID> '{"statecode#optionset":1}'` 停用 3 个 appaction（apply `024c5d83-088e-f111-8077-6045bd1d22ee`/approve `0a4c5d83-...`/reject `124c5d83-...`），回读 3 个均「停用」、克隆新增保持启用 |
+| 工具修复（用户要求导出一次成功、杜绝重试记录） | `MetadataTool/Services/EntityManager.cs` `DeployRibbonDiff`：①修复**空片段不清理旧节点 bug**（片段节全注释=隐藏场景时跳过清理导致隐藏不生效，本次手工补刀根因）；②导出改为**30 分钟内复用已有导出 zip**，重试不再产生多条 Solution History 导出记录。编译 0 错误 |
+| 经验教训 | ①「注释隐藏」类 ribbon 变更部署后必须 `get-entity-ribbon` 回读实锤，不能只看 UI（UI 有缓存且验证记录可能不实）；②appaction 隐藏只能 statecode=Inactive，isdisabled 无效；③组件停用不随非托管包同步，且含该组件的包再次导入会复活为启用——发版必须按 2.4.19 核对；④长耗时命令（导出/导入 2~5 分钟）必须后台任务+轮询，前台 60s 强杀会留下孤儿进程继续操作环境 |
+| 登记 | 上线核对清单：新增 2.4.19（3 个 appaction 随包复活问题，UAT/生产手动停用，含 GUID 与命令）、3.6.3 按 #1834 修订为「按钮应全部隐藏」、变更记录 2026-08-15；禅道Bug修复记录 #1834 行已追加；看板 rowid 88（ribbon → 📁 entity_20260727_peter，in_package=true）/ rowid 90（appaction 改 section=manual 手动项）已 PATCH 并归组核对 |
+| 待用户验证 | DEV1 列表页清缓存重开（或 `&ribbondebug=true` → Regenerate ribbon metadata，2.4.16），确认 3 个批量按钮不再显示 |
+| 追加决策（2026-08-15 用户明确） | 3 个退休 appaction **禁止加入任何发版包**；`entity_20260727_peter` 实查不含、无需移除；主清单/`entity_20260603_peter`/`entity_20260805` 残留不动（用户明确这些包不再使用）；已记入上线核对清单 2.4.19 + 变更记录，看板 rowid 90 同步 |
+| UAT 收尾（2026-08-15 当日晚） | 用户 n8n 导 UAT 后按钮仍在，实查两个根因：①**n8n 导入后 Publish/PublishAll 撞导入锁两次失败**（ribbon 元数据必须发布成功才生效，「不发布代码也一样」对 ribbon 不成立）——用户手动发布 `mcs_trade_stpayterm` 后回读实锤 UAT 生效 Ribbon 按钮引用=0（与 DEV1 一致 527208 字符）；②UAT 3 个 appaction 历史残留为启用且 **GUID 与 DEV1 不同**（导入重建），`update-record` 按 GUID 更新报 Does Not Exist → DeployTool 新增公共方法 `SetButtonInactive`（命令 `set-appaction-inactive <uniquename> <true|false>`，按 uniquename 跨环境通用），UAT 3 个已停用（回读实锤，clone 未动）；教训：**n8n 发版后必须核对 Publish 是否成功**（撞锁会失败需重发）
+| 终极根因与修复（2026-08-15 深夜，DEV1 端到端实证通过） | **上午「空 diff 导入」方案证伪**：注释/清空 RibbonDiffXml 后导入，RetrieveEntityRibbon 虽显示 0 引用，但 DEV1/UAT UI 按钮仍在——UCI 渲染自预计算 ribbon 元数据 blob，与该 API 读的存储不一致（API 验证不可靠的铁证）；命令检查器实锤按钮=经典 ribbon `mcs.mcs_trade_stpayterm.GridApply.Button`、SolutionUniqueName=Active。**修复=ribbon.xml 改 HideCustomAction×3 显式隐藏**（`entity_20260727_peter_hide.zip`）；DEV1 17:15 导入成功→17:30 发布成功→17:35 触发 Regenerate ribbon metadata→17:54 完成→清站点数据后实证：主命令栏与溢出菜单均无 3 按钮（截图 `Backups/Tests/bug1834/dev1-verified-clean.png`）；下午 DEV1 长时间导不进去=微软第一方 OmnichannelPrime 导入卡 56% 锁环境 + 两笔失败 importjob 被误读为「卡住」（教训：progress<100 不等于进行中，须看 completedon/结果列） |
+
+## 会话更新（2026-09-04）— 成交条件基线库生产初始化数据导入（193 条）+ 产品分类关系视图补列
+
+| 项目 | 内容 |
+|---|---|
+| 日期 | 2026-09-04 |
+| 背景1 | 用户 Excel 导入「成交条件产品分类关系」（mcs_trade_ptgrouptype）报错：默认视图缺「产品线/成交条件产品分类」两 Lookup 列，导出模板只有 4 文本列，导入时 Lookup 为空被产品线同步插件（#1839）拦截 |
+| 修复1 | DEV1 默认视图加 `mcs_productlineid`+`mcs_trade_pttypeid` 两列并发布（update-view 工具清单同步补 mcs_productlineid）；看板 rowid 152 + 任务 T-0072（pending_release），用户自行发 UAT 不到 PRE；Bug 记录已登记（无禅道） |
+| 背景2 | 用户《成交条件基线库初始化数据.xlsx》（238 行）导生产失败 |
+| 数据体检 | 35 行数据问题被服务端插件拦截：频次45/70非30倍数×27、客户分类「不区分」×2、产品分类「沥青站」×1、客户分类空×5、首付/账期/频次全空×1；文件内部无组合重复 |
+| 导入方案（用户逐项拍板） | **程序直导**（标准向导不可行：事业部「泵路」在生产无此名记录=泵路海外营销公司 BU-1018；大区名称 15 个中 OE项目部→泵路OE自营项目部 A001113 映射，哈萨克-吉尔吉斯 10 行生产无记录挂起）；自定义多选控件不受影响——服务端「名称→GUID」解析插件覆盖，程序 Create 与向导同管线 |
+| 执行 | MetadataTool 新增 `import-tradestpayterm <json> [--dry-run] [--pilot N]`（逐行 Create、Lookup 预解析 GUID、客户分类直传选项值）；pans14 生产：dry-run 193 ✓ → 试导 001 回读验证（名称→GUID/编码带出/状态=2 全对）→ 全量 **192/192 成功**；生产共 **193 条**，抽查 068/200 类型编码带出正确 |
+| 产物 | `Backups/TempTest/成交条件基线库导入_20260904/`：合格193条.xlsx、问题45条_待业务确认.xlsx（含问题说明列）、import_193.json/import_192.json |
+| 补导（2026-09-04 下午，昊南改数+逐项拍板） | ✅ 又导入 17 条（生产累计 **210 条**）：①吉尔吉斯 10 行=大区改「泵路哈萨克项目部」+国家「吉尔吉斯斯坦」（生产只有此名，导入映射转换，GUID/KG 已落值）②阿尔及利亚 5 行（209-213）大区→泵路阿尔及利亚自营项目部 A001374+全量客户分类 ③欧洲 2 行（192/193）大区→泵路欧洲项目部 A001160，192 沥青站→摊铣沥；`import-tradestpayterm` 命令已支持 countryName 可选字段；201 南非行业务确认不导入 |
+| 待办 | ①**剩 27 行频次 45/70**（沙特15+菲律宾5+吉尔吉斯5+哈萨克2）：业务在考虑**改 30 倍数限制**本身，用户决定先不动（备选：A 临时停 ValidationPlugin Create Step 导入/B 改插件走发布，均已汇报用户）；②视图补列随下次发版到 UAT |

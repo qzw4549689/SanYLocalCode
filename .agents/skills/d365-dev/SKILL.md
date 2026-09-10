@@ -63,6 +63,8 @@ PRD 中的状态顺序（1-8）是**业务编号**，D365 选项集实际值为 
 | **"ISV code reduced the open transaction count"** | Plugin 吞掉了 OrganizationService 异常，破坏事务 | **确保 catch 后必须 rethrow；DEV 正常 UAT 报错先查版本偏差** |
 | **用 RibbonDiff.xml 创建按钮**（2026-07-27 规则修订） | 生成 Legacy Ribbon（UI 只读，无法编辑/删除）；但 appaction 的经典显隐规则（N:N 关联）不随 Solution 导入 | **默认用 C# AppActionDeployer 创建按钮；仅当按钮需要「显隐规则随包走」（如列表批量按钮 SelectionCountRule）时改用 RibbonDiffXml**（案例：`Code/Customizations/Ribbon/mcs_trade_stpayterm.ribbon.xml`，生产零手动步骤） |
 | **直接覆盖公共语言包等通用 WebResource** | 冲掉其他模块 key，导致大面积功能异常 | **🚫 绝对禁止！必须在原文件基础上追加 key，严禁覆盖** |
+| **翻译导入改 BPF 阶段名的基础语言（1033）**（2026-08-19 #1928 实锤） | 导入成功、回读 1033 仍是旧文本，英文用户依旧看到旧标签 | **BPF 阶段/步骤名的基础语言归 xaml `mcwo:StepLabel` 所有**，翻译导入和 customizations.xml steplabels 只能改非基础语言；必须改 xaml：`LanguageCode="1033"` 的 Description 改为英文，并追加同 LabelId 的 `LanguageCode="2052"` 条目（xaml 支持同 LabelId 多语言条目），随 Solution 导入即双语且随包走。BPF **名称**不受此限（普通标签存储，翻译导入即可） |
+| **sitemap 随包导入后「发布成功但导航没变」**（2026-08-19 #1928 实锤） | 误判导入/发布失败，反复重试 | sitemap 导入后进 App **未发布草稿**（App 设计器可见新内容）；对单个 App 点「发布」即可物化，**无需 PublishAll**；但**服务端导航缓存有 5-10 分钟延迟**，发布成功后立刻验证会误判没生效——等几分钟硬刷再看。托管基底的 sitemap 记录 modifiedon/sitemapxml 不会因为非托管层发布而更新，**别用回读记录当验证依据，只认运行时导航 UI**<br>🆕 程序化直改 sitemap（2026-09-08 #2172 实锤）：`update-record sitemap`/Web API PATCH 写 sitemapxml **返回成功但回读永远旧值**——直改进的是 App 未发布草稿（诊断写入会全部累积进草稿，慎做），必须再调 Web API action `POST /api/data/v9.2/PublishAppModule {"AppModuleId":"<appmoduleid>"}` 才物化到 sitemap 记录并生效；改 App 菜单就是改该 App 的 isappaware sitemap（集合查询默认隐藏，需按 ID 直取或 filter isappaware eq true） |
 
 ---
 
@@ -439,15 +441,16 @@ dotnet run --no-build -- add-manifest-to-solution <清单.json> AllComponent_Pet
 
 ### 8.3.3 🚨 开发完成必须登记任务看板「发布清单」（2026-08-03 用户明确，2026-08-05 起改为看板登记，强制执行）
 
-> **每次开发/修 Bug 在 DEV 验证通过后、完成汇报前，必须把本次待发布内容逐项登记到任务看板发布清单（`http://122.51.232.70:8100/`，📦 发布清单 Tab），不等发版前补。**
+> **每次开发/修 Bug，在开发内容就绪（DEV 元数据/代码部署完毕、远程分支已推送）后、完成汇报前，必须把本次待发布内容逐项登记到任务看板发布清单（`http://122.51.232.70:8100/`，📦 发布清单 Tab）——不得等 DEV 端到端验证通过才登记**（2026-08-10 #1713 教训：AI 以「等 DEV 验证」为由推迟登记被用户批评；验证阻塞时照常登记，验证状态写在任务卡片 description 里）。
+> 看板服务运维（2026-08-20 加固）：tx-windows 计划任务 `KanbanBoard`（已改 ExecutionTimeLimit=PT0S 不限时+RestartOnFailure；原为默认 3 天限时，到点被杀是「经常不能访问」根因）+ 看门狗 `KanbanBoard-Watchdog`（每 5 分钟检测 8100 未监听自动拉起，实测 kill 后约 4 分钟自愈）。仍不可访问时手动：`ssh tx-windows "schtasks /run /tn KanbanBoard"`，README 见 `C:\Projects\KanbanBoard\README.md`。
 > 历史教训：AI 多次漏登（如 2026-08-03 #1507/#1508 改 `mcs_fsm_data.js` 未登记，被用户发现并批评）。
 > 原《待发布内容清单.md》已于 2026-08-05 按用户指示废弃删除（历史见 git），**看板是唯一登记处**。
 
 **登记节点（开发流程固定一步，不得跳过）：**
 
 ```
-本地开发 → 本地验证 → DEV 部署/验证通过 → ①加主清单(8.3.1) → ②通知用户(8.3.2)
-         → ③登记看板发布清单(本节) → 完成汇报
+本地开发 → 本地验证 → DEV 部署（元数据/代码就绪、分支推送）→ ①加主清单(8.3.1) → ②通知用户(8.3.2)
+         → ③登记看板发布清单+任务卡片(本节) → 完成汇报 → DEV 端到端验证（阻塞不影响③）
 ```
 
 **登记 API（逐项登记，幂等性由 AI 自查 GET 后判断）：**
@@ -466,16 +469,48 @@ curl -X POST http://122.51.232.70:8100/api/release-items/item \
 # 发版后按包归档：           POST /api/release-items/release {"package":"McsWebResource"}
 ```
 
+**同步创建任务卡片（T-xxxx，2026-08-06 用户发现漏建后补充）：**
+
+> 看板有两个列表：**📦 发布清单**（按组件，上表）和**任务卡片**（按 Bug/任务，「待发布」Tab 展示）。每个 Bug 修复除登记发布清单外，还必须同步建任务卡片并置「待发布」，否则用户在任务 Tab 看不到。
+
+```bash
+# 建卡（默认 status=pending）
+curl -X POST http://122.51.232.70:8100/api/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"禅道#1635 标题 [用例#546]","description":"反馈来源/根因/修复/验证/发布清单 rowid"}'
+# 置「待发布」（DEV 验证通过后）
+curl -X PATCH http://122.51.232.70:8100/api/tasks/T-0013 \
+  -H 'Content-Type: application/json' -d '{"status":"pending_release"}'
+# 状态取值：pending / pending_release（待发布）/ released（已发布）；删除：DELETE /api/tasks/<id>
+```
+
 | 要求 | 说明 |
 |---|---|
-| 登记时机 | DEV 验证通过后立即登记，是完成汇报的**前置条件**（汇报中须复述登记情况） |
+| 登记时机 | 开发内容就绪（DEV 部署完毕+分支推送）后立即登记，**不等端到端验证**；是完成汇报的**前置条件**（汇报中须复述登记情况） |
 | 登记范围 | **一切待发布内容都要登记，不止新组件**：①新增组件（实体/字段/Step/Custom API/App Action 等）②既有组件的代码/内容变更（JS 改动、Plugin 代码改动、语言包 key 变更）③元数据变更（必填级别/字段范围/标签）④配置数据（各环境手动项）⑤手动步骤（Command Designer/角色/BPP 模板） |
-| section 取值 | `entity`（实体/字段/表单/视图/关系/BPF/Ribbon/App Action）/ `webresource`（McsWebResource）/ `plugin`（McsPlugin）/ `customapi`（McsCustomAPI）/ `config`（配置数据，不随 Solution）/ `manual`（手动步骤） |
+| section 取值 | `entity`（实体/字段/表单/视图/关系/BPF/Ribbon/App Action）/ `webresource`（McsWebResource）/ `plugin`（McsPlugin）/ `customapi`（McsCustomAPI）/ `config`（配置数据，不随 Solution）/ `manual`（手动步骤 + **Azure 发布环节**） |
+| 🚨 看板归组规则（2026-08-10 #1713 教训，登错过一次） | 看板前端 FIXED_PACKAGES 写死：`webresource→McsWebResource`、`plugin→McsPlugin`、`customapi→McsCustomAPI`，**这三个 section 的 package 字段会被忽略**；`entity` 按 package 归组（空=默认新包）。**Azure 环节（MessageHandler/ClientAPI/ExtensionAPI/InnerAPI/CommonMessageHandle）必须用 `section=manual` + `package=环节名`** 才能独立成组（如 📁 MessageHandler）；误用 section=plugin 会被错误并入 McsPlugin 组。**登记后必须 GET 回读并模拟归组核对**（核对脚本见下） |
 | 登记口径 | 每项：component（组件名）+ summary（变更内容/原因）+ ref（禅道号）+ package + in_package；**同一文件/组件被多个 Bug 改动时合并为一项**（PATCH 更新 summary/ref），ref 并列所有禅道号 |
 | entity 类 package | 用户已指定发版包名（如 `entity_20260727_peter`）则填指定名；未指定留空，看板自动归入「entity_当天日期_peter」默认新包 |
 | Step 类组件 | 登记时同步由 AI 直接 `add-solution-component` 加入 McsPlugin（8.3.2 用户指示），in_package 标 true |
 | 不需要登记 | 本地临时独立 Assembly、纯测试组件、他人组件（红线，同样不得加主清单） |
 | 发版闭环 | 用户发布某包后告知 AI → AI 调 `POST /api/release-items/release` 按包归档 + 任务看板对应任务置「已发布」 |
+
+**登记后强制核对（防归组错误，2026-08-10 新增）：**
+
+```bash
+# 登记/修改后必须跑一次，确认每项的看板归组符合预期
+curl -s http://122.51.232.70:8100/api/release-items | python3 -c "
+import json,sys
+FIXED={'webresource':'McsWebResource','plugin':'McsPlugin','customapi':'McsCustomAPI'}
+for i in json.load(sys.stdin)['items']:
+    sec=i['section']; pkg=i.get('package') or ''
+    if sec=='entity': g='📁 '+(pkg or 'entity_当天_peter(默认新包)')
+    elif sec in FIXED: g='📁 '+FIXED[sec]
+    elif pkg: g='📁 '+pkg
+    else: g='sec:'+sec
+    print(f\"rowid {i['rowid']}: section={sec} package={pkg or '(空)'} -> {g}\")"
+```
 
 > 看板发布清单是「本次发什么」的视角，主清单是「全部资产」的视角，两者都要维护；发版核对统一按 `/skill:d365-deploy` 4.1 的 14 环节固定顺序矩阵执行，配合《发版检查清单.md》逐项核对。
 
@@ -539,9 +574,44 @@ git commit -m "修复 Coface 数据同步 Plugin 的行业风险映射逻辑"
 # 5. 推送到远程
 git push -u origin uat-260610-peter-coface-fix
 
-# 6. 去 Azure DevOps 网页创建 PR → 合并到 uat
+# 6. 🚨 PR 由用户创建（2026-08-25 用户明确）：AI 只推分支，禁止 API/任何方式自建 PR；
+#    推送后把分支名告知用户，用户在 Azure DevOps 网页创建 PR → 合并到 uat
 #    https://dev.azure.com/SanyGlobalCRM/D365/_git/D365
 ```
+
+#### 8.5.1 推送判断标准（2026-08-15 固化，禁止再逐次询问用户）
+
+**一句话标准：远程仓库（tx-windows）是否跟踪该文件、该资产的发布是否以合并后 uat 代码为准。拿不准时先用 `git ls-files | findstr <文件名>` 在 tx-windows 核实，不要问用户。**
+
+| 改动类型 | 是否推送远程仓库 | 原因 |
+|---|---|---|
+| C# Plugin / Custom API 代码 | ✅ 必须（用户说「提交/推送」后执行分支+PR） | DEV Assembly 必须用合并后 uat 编译（红线） |
+| 语言包 `ms_languagefile_*.json` | ✅ 必须 | 仓库是语言包修改的唯一通道（红线 16） |
+| 远程仓库已跟踪的其他文件 | ✅ 同上 | 随仓库发布 |
+| **表单 JS / HTML WebResource（`mcs_*.js`、`mcs_*.html` 等）** | ✅ **需要（2026-08-15 起，且流程变更见 8.5.2）** | 2026-08-15 用户决策：我方模块 JS/HTML 全部补入仓库 `D365/SanyD365.D365WebResource/WebResource/mcs_/Scripts\|Htmls/Sales/CreditAssessment/`（分支 `uat-20260815-peter-webresource-creditassessment`，25 文件与 DEV1 逐字节一致），与其他团队惯例一致（Sales 320/Service 172/PC 108 均在仓）。注意该 csproj 为 SDK 风格隐式包含，新文件无需登记 csproj |
+| 元数据 / 配置数据 | ❌ 不涉及代码仓库 | 走 Solution / 配置清单 |
+
+- 完成汇报中如实说明是否涉及仓库推送；推送类改动在用户说「提交/推送」后执行，JS/HTML 同样适用（见上表）。
+- 本地个人 GitHub 备份（origin=SanYLocalCode）的 commit 仍需用户说「提交」，但它与发布链路无关，不作为完成汇报的待办项。
+
+#### 8.5.2 JS/HTML 修改标准流程（2026-08-15 用户明确，强制执行）
+
+> **先推送，合并后拉取，再更新 DEV**。与旧流程（本地改 → 直接部署 DEV1）彻底切割：
+
+```
+本地改 JS/HTML
+  → ① 本地验证（node --check / Node 仿真）
+  → ② 同步到 tx-windows 仓库路径，建分支 commit + push（用户说「提交/推送」后执行）
+  → ③ 用户合并 PR 到 uat
+  → ④ tx-windows 拉取最新 uat
+  → ⑤ 用仓库 uat 版文件部署 DEV1（deploy-webresource）并发布
+  → ⑥ DEV 验证 → 看板登记 → 用户 n8n 发布 McsWebResource 到 UAT
+```
+
+- **禁止再直连部署 DEV1**（JS/HTML），DEV1 的 JS 必须来自合并后的 uat，与「Plugin 必须用合并后 uat 编译」「语言包唯一通道」同一原则。
+- **🚨 公共文件追加 SOP（2026-08-17 新增，历史事故强制执行）**：修改 `ms_languagefile_*.json` 等公共文件前**必须先拉取仓库最新 uat 再追加**，禁止基于本地副本/旧版本追加（事故：未拉取直接追加推送，覆盖导致他人 key 丢失，恢复 commit `bf0c96b0ea`）。步骤：① `git checkout uat && git pull origin uat` → ② 追加前记录 key 总数、确认目标 key 不存在、抽查他人近期 key 在位 → ③ 纯追加 → ④ `git diff` 实锤仅新增行、删除行数为 0 → ⑤ 才允许推送。
+- 部署前 diff 核对 DEV1 现版与仓库 uat 版差异仅限本次改动，防覆盖他人并行修改。
+- UAT 发布路径不变：n8n 发布 `McsWebResource` Solution。
 
 ### 8.6 命名规范对照表
 

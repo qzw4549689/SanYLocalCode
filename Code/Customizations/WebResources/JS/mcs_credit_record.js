@@ -326,6 +326,10 @@ CreditRecordForm.registerEvents = function (formContext) {
     var accountField = formContext.getAttribute("mcs_accountid");
     if (accountField) {
         accountField.addOnChange(CreditRecordForm.onAccountChange);
+        // 新建表单：客户变更后检测同客户未生效评估记录（禅道 #1645）
+        if (formContext.ui.getFormType() === 1) {
+            accountField.addOnChange(CreditRecordForm.checkInFlightRecordOnCreate);
+        }
     }
     
     // 状态变更 - 控制字段锁定和按钮
@@ -635,13 +639,25 @@ CreditRecordForm.nextStep = function (primaryControl) {
             break;
             
         case CreditRecordForm.STATUS.LINK_ACCOUNT: // 10 → 11
-            // 校验Coface ID存在
+            // 未绑定 Coface ID：弹确认框，确定放行、取消阻断（#1850）
             var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
             if (!cofaceId) {
-                Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_NoCofaceCannotIntegrate", "未关联科法斯客户，无法进入数据集成阶段"));
+                Xrm.Utility.confirmDialog(
+                    CreditRecordForm.L("CreditRecord_ConfirmNextWithoutCofaceId", "没有绑定Coface代码，是否进入下一阶段？"),
+                    function () {
+                        formContext.ui.setFormNotification(
+                            CreditRecordForm.L("CreditRecord_CofaceDataMissingNotice", "Coface 数据缺失，已生成待补充标签，请在人工复核阶段录入。"),
+                            "WARNING", "coface_missing"
+                        );
+                        CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
+                    },
+                    function () {
+                        // 用户取消，阻断不进入下一阶段
+                    }
+                );
                 return;
             }
-            // PRD 口径：Coface 订单未就绪时阻断进入数据集成（先自动推进一次状态查询再判定）
+            // Coface 订单未就绪时同样弹确认框，确定放行、取消阻断（#1850）
             CreditRecordForm.checkCofaceOrderReadyAndProceed(formContext, recordId);
             break;
             
@@ -650,7 +666,9 @@ CreditRecordForm.nextStep = function (primaryControl) {
             break;
             
         case CreditRecordForm.STATUS.MANUAL_REVIEW: // 12 → 13
-            CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.SCORE_CALC, CreditRecordForm.L("CreditRecord_EnterScoreCalc", "进入信用分计算"));
+            CreditRecordForm.validateTagsCompleted(formContext, recordId, function () {
+                CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.SCORE_CALC, CreditRecordForm.L("CreditRecord_EnterScoreCalc", "进入信用分计算"));
+            });
             break;
             
         case CreditRecordForm.STATUS.SCORE_CALC: // 13 → 14
@@ -953,7 +971,8 @@ CreditRecordForm.showBppInfo = function (formContext) {
 
 /**
  * 【搜索 Coface 企业】按钮命令
- * 状态9（发起）或状态10（关联客户）且 mcs_cofaceid 为空时可用
+ * 状态9（发起）或状态10（关联客户）时可用；
+ * mcs_cofaceid 已绑定时允许重新绑定（#1961，确认后打开搜索弹窗覆盖原绑定）
  */
 CreditRecordForm.searchCofaceCompany = function (primaryControl) {
     var formContext = primaryControl;
@@ -979,13 +998,26 @@ CreditRecordForm.searchCofaceCompany = function (primaryControl) {
         return;
     }
     
+    // #1961 允许重新绑定：仅在绑定阶段（上方已校验状态9/10），确认后打开搜索弹窗覆盖原绑定
     if (cofaceId) {
-        Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceIdBound", "当前记录已绑定 Coface ID，无需重新搜索"));
+        Xrm.Utility.confirmDialog(
+            CreditRecordForm.L("CreditRecord_CofaceRebindConfirm", "当前记录已绑定 Coface ID（{0}），重新绑定将覆盖原绑定，是否继续？").replace("{0}", cofaceId),
+            function () {
+                CreditRecordForm.openCofaceSearchDialog(formContext);
+            }
+        );
         return;
     }
     
-    // 打开企业搜索弹窗，通过 data 传递上下文（Modern UI 中弹窗无法直接访问 parent.Xrm.Page）
-    recordId = recordId.replace(/[{}]/g, "");
+    CreditRecordForm.openCofaceSearchDialog(formContext);
+};
+
+/**
+ * 打开 Coface 企业搜索弹窗（首绑/重绑共用，#1961 抽取）
+ * 通过 data 传递上下文（Modern UI 中弹窗无法直接访问 parent.Xrm.Page）
+ */
+CreditRecordForm.openCofaceSearchDialog = function (formContext) {
+    var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
     var accountRef = formContext.getAttribute("mcs_accountid").getValue();
     var pageInput = {
         pageType: "webresource",
@@ -1075,8 +1107,37 @@ CreditRecordForm.callCofacePlaceOrderApi = function (recordId) {
 };
 
 /**
+ * 循环推进 Coface 下单状态机，直到「已就绪」或状态不再前进（T-0066，2026-09-03 生产反馈）
+ * 背景：Coface 侧报告早已就绪（其他记录已下单用过）时，新记录本地状态仍从 0 起步，
+ * 原来每点一次只推一步（0→2→3→4），用户要点 2-3 次。
+ * 插件每步幂等（先查已有订单再下单），连续调用等价于用户连续点击，不会重复下单扣费。
+ * 停止条件：已就绪(4) / 下单失败(5) / 接口失败(Status!=1) / 状态与上一次相同（到达真实等待态）/ 达到次数上限
+ */
+CreditRecordForm.callCofacePlaceOrderUntilStable = function (recordId, maxCalls) {
+    maxCalls = maxCalls || 5;
+    var lastStatus = -1;
+    var attempt = function (remaining) {
+        return CreditRecordForm.callCofacePlaceOrderApi(recordId).then(function (result) {
+            var status = result ? result.OrderStatus : null;
+            if (!result || result.Status !== 1 ||
+                status === CreditRecordForm.COFACE_ORDER_STATUS.READY ||
+                status === CreditRecordForm.COFACE_ORDER_STATUS.FAILED ||
+                status === null || status === undefined ||
+                status === lastStatus ||
+                remaining <= 1) {
+                return result;
+            }
+            lastStatus = status;
+            return attempt(remaining - 1);
+        });
+    };
+    return attempt(maxCalls);
+};
+
+/**
  * 【Coface 下单】按钮命令
- * 状态10（关联客户代码）且已绑定 Coface ID 时可用，每次点击推进一个下单阶段
+ * 状态10（关联客户代码）且已绑定 Coface ID 时可用；
+ * 点击后自动连续推进至「已就绪」或真实等待态（T-0066，原为每次点击只推一步）
  */
 CreditRecordForm.placeCofaceOrder = function (primaryControl) {
     var formContext = primaryControl;
@@ -1103,7 +1164,7 @@ CreditRecordForm.placeCofaceOrder = function (primaryControl) {
 
     CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_CofaceOrderPlacing", "正在执行 Coface 下单/状态查询，请稍候..."));
 
-    CreditRecordForm.callCofacePlaceOrderApi(recordId)
+    CreditRecordForm.callCofacePlaceOrderUntilStable(recordId)
         .then(function (result) {
             CreditRecordForm.hideLoading(formContext);
             var message = (result && result.Message) || CreditRecordForm.L("CreditRecord_CofaceOrderAbnormal", "Coface 下单接口返回异常");
@@ -1122,8 +1183,8 @@ CreditRecordForm.placeCofaceOrder = function (primaryControl) {
 };
 
 /**
- * 进入数据集成前的就绪校验（PRD 口径：未就绪阻断并停留本阶段）
- * 下单状态非「已就绪」时先自动调一次下单 API 推进状态查询，再按结果放行/阻断
+ * 进入数据集成前的就绪查询（#1850 改确认制）
+ * 已就绪时直接放行；未就绪/查询失败时弹确认框，确定放行、取消阻断
  */
 CreditRecordForm.checkCofaceOrderReadyAndProceed = function (formContext, recordId) {
     var orderStatusAttr = formContext.getAttribute("mcs_cofaceorderstatus");
@@ -1135,33 +1196,113 @@ CreditRecordForm.checkCofaceOrderReadyAndProceed = function (formContext, record
         return;
     }
 
-    // 未就绪：先自动推进一次状态查询（可能刚 Ready）
+    // 未就绪：自动连续推进状态查询直至已就绪或真实等待态（T-0066），就绪则直接放行，否则弹确认框
     CreditRecordForm.showLoading(formContext, CreditRecordForm.L("CreditRecord_CofaceOrderChecking", "正在查询 Coface 订单状态，请稍候..."));
 
-    CreditRecordForm.callCofacePlaceOrderApi(recordId)
+    CreditRecordForm.callCofacePlaceOrderUntilStable(recordId)
         .then(function (result) {
             CreditRecordForm.hideLoading(formContext);
             if (result && result.OrderStatus === CreditRecordForm.COFACE_ORDER_STATUS.READY) {
-                // 查询后已就绪：刷新表单并放行
                 formContext.data.refresh(true).then(function () {
                     CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
                 });
                 return;
             }
-            // 仍未就绪：阻断并提示（PRD：停留「关联客户代码」阶段）
-            formContext.data.refresh(true);
-            var statusName = (result && result.OrderStatusName) || CreditRecordForm.getCofaceOrderStatusName(orderStatus);
-            var message = CreditRecordForm.L("CreditRecord_CofaceOrderBlocked", "Coface 订单未就绪，无法进入内外部数据集成阶段。请等待订单完成后重试。");
-            message += "\n" + CreditRecordForm.L("CreditRecord_CofaceOrderCurrentStatusPrefix", "当前下单状态：") + statusName;
-            if (result && result.Message) {
-                message += "\n" + result.Message;
-            }
-            Xrm.Utility.alertDialog(message);
+            formContext.data.refresh(true).then(function () {
+                Xrm.Utility.confirmDialog(
+                    CreditRecordForm.L("CreditRecord_ConfirmNextWithoutCofaceOrder", "没有Coface下单（订单未就绪），是否进入下一阶段？"),
+                    function () {
+                        CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
+                        formContext.ui.setFormNotification(
+                            CreditRecordForm.L("CreditRecord_CofaceOrderNotReadyCanProceed", "Coface 订单未就绪，已进入数据集成阶段，请在人工复核阶段补充标签数据。"),
+                            "WARNING", "coface_not_ready"
+                        );
+                    },
+                    function () {
+                        // 用户取消，阻断不进入下一阶段
+                    }
+                );
+            });
         })
         .catch(function (error) {
             CreditRecordForm.hideLoading(formContext);
             console.error("Coface 订单状态查询失败:", error);
-            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_CofaceOrderCheckFailed", "Coface 订单状态查询失败，请稍后再试：") + (error.message || JSON.stringify(error)));
+            // 查询失败无法确认订单状态，弹确认框由用户决定，避免外部接口问题直接放行或阻断
+            Xrm.Utility.confirmDialog(
+                CreditRecordForm.L("CreditRecord_ConfirmNextOrderCheckFailed", "Coface订单状态查询失败，无法确认是否已下单，是否仍进入下一阶段？"),
+                function () {
+                    CreditRecordForm.updateStatus(formContext, recordId, CreditRecordForm.STATUS.DATA_INTEGRATION, CreditRecordForm.L("CreditRecord_EnterDataIntegration", "进入数据集成"));
+                    formContext.ui.setFormNotification(
+                        CreditRecordForm.L("CreditRecord_CofaceOrderCheckFailedCanProceed", "Coface 订单状态查询失败，已进入数据集成阶段，请在人工复核阶段补充标签数据。"),
+                        "WARNING", "coface_check_failed"
+                    );
+                },
+                function () {
+                    // 用户取消，阻断不进入下一阶段
+                }
+            );
+        });
+};
+
+/**
+ * 校验所有客户信用标签是否已补录完成
+ * 定量：mcs_itemintvalue2 有有效值且 mcs_itemvalue2 != "N/A"
+ * 定性：mcs_credititem_value 有值
+ */
+CreditRecordForm.validateTagsCompleted = function (formContext, recordId, onPass) {
+    var fetchXml = [
+        "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>",
+        "  <entity name='mcs_customer_tag'>",
+        "    <attribute name='mcs_customer_tagid' />",
+        "    <attribute name='mcs_itemcode' />",
+        "    <attribute name='mcs_datatype' />",
+        "    <attribute name='mcs_itemintvalue2' />",
+        "    <attribute name='mcs_itemvalue2' />",
+        "    <attribute name='mcs_credititem_value' />",
+        "    <attribute name='mcs_credit_item' />",
+        "    <filter type='and'>",
+        "      <condition attribute='mcs_credit_record' operator='eq' value='" + recordId + "' />",
+        "      <condition attribute='mcs_active' operator='eq' value='1' />",
+        "    </filter>",
+        "  </entity>",
+        "</fetch>"
+    ].join("");
+
+    Xrm.WebApi.online.retrieveMultipleRecords("mcs_customer_tag", "?fetchXml=" + encodeURIComponent(fetchXml))
+        .then(function (result) {
+            var missingItems = [];
+            result.entities.forEach(function (tag) {
+                // 提示名单优先显示评分项目中文名（Lookup 的 FormattedValue），取不到回退项目编码
+                var itemName = tag["_mcs_credit_item_value@OData.Community.Display.V1.FormattedValue"] || tag.mcs_itemcode || "";
+                var dataType = tag.mcs_datatype;
+                if (dataType === 1) { // 定量
+                    var intValue = tag.mcs_itemintvalue2;
+                    var strValue = tag.mcs_itemvalue2;
+                    if ((intValue == null) && (strValue == null || strValue === "N/A")) {
+                        missingItems.push(itemName);
+                    }
+                } else { // 定性
+                    // WebAPI（含 fetchXml）返回 Lookup 值的属性名为 _<逻辑名>_value，
+                    // 直接读 mcs_credititem_value 恒为 undefined 会误报缺失
+                    var lookupValue = tag["_mcs_credititem_value_value"];
+                    if (!lookupValue) {
+                        missingItems.push(itemName);
+                    }
+                }
+            });
+
+            if (missingItems.length > 0) {
+                Xrm.Utility.alertDialog(
+                    CreditRecordForm.L("CreditRecord_TagsNotCompleted", "以下标签尚未补录完成，请先在人工复核阶段录入：") + "\n" + missingItems.join("、")
+                );
+                return;
+            }
+
+            onPass();
+        })
+        .catch(function (error) {
+            console.error("校验标签完整性失败:", error);
+            Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_ValidateTagsFailed", "校验标签完整性失败：") + (error.message || JSON.stringify(error)));
         });
 };
 
@@ -1324,16 +1465,15 @@ CreditRecordForm.canAbandonBpp = function () {
 /**
  * 【搜索 Coface 企业】按钮是否可用
  * 供Ribbon EnableRule调用
- * 状态9或10，且 mcs_cofaceid 为空，且已选择客户
+ * 状态9或10，且已选择客户（已绑定 Coface ID 时仍可用，用于重新绑定 #1961）
  */
 CreditRecordForm.canSearchCofaceCompany = function () {
     var formContext = Xrm.Page;
     var status = formContext.getAttribute("mcs_status").getValue();
-    var cofaceId = formContext.getAttribute("mcs_cofaceid").getValue();
     var accountId = formContext.getAttribute("mcs_accountid").getValue();
     
     return (status === CreditRecordForm.STATUS.INIT || status === CreditRecordForm.STATUS.LINK_ACCOUNT) &&
-           !cofaceId && !!accountId;
+           !!accountId;
 };
 
 // ==================== 附件页签初始化 ====================
@@ -1382,6 +1522,60 @@ CreditRecordForm.initAttachmentTab = function (formContext) {
 CreditRecordForm._duplicateCheckInProgress = false;
 CreditRecordForm._duplicateCheckPassed = false;
 
+/**
+ * 查询同客户是否存在未生效（状态 9-14）评估记录，返回第一条或 null（禅道 #867/#1645）
+ */
+CreditRecordForm.queryInFlightRecord = function (accountGuid) {
+    var statusFilter = [
+        "mcs_status eq 9",
+        "mcs_status eq 10",
+        "mcs_status eq 11",
+        "mcs_status eq 12",
+        "mcs_status eq 13",
+        "mcs_status eq 14"
+    ].join(" or ");
+    var filter = "_mcs_accountid_value eq " + accountGuid + " and (" + statusFilter + ") and statecode eq 0";
+
+    return Xrm.WebApi.retrieveMultipleRecords("mcs_credit_record", "?$select=mcs_scoreid&$filter=" + encodeURIComponent(filter) + "&$top=1")
+        .then(function (result) {
+            return result.entities.length > 0 ? result.entities[0] : null;
+        });
+};
+
+/**
+ * 新建表单客户变更检测（禅道 #1645）
+ * 同一客户只允许存在一条未生效（状态 9-14）评估记录：
+ * 检测到已存在时提示，确认后跳转到已存在记录（当前新建表单不保存）；取消则继续编辑，保存时由 onSave 兜底阻断
+ */
+CreditRecordForm.checkInFlightRecordOnCreate = function (executionContext) {
+    var formContext = executionContext.getFormContext();
+    if (formContext.ui.getFormType() !== 1) return;
+
+    var accountValue = formContext.getAttribute("mcs_accountid").getValue();
+    if (!accountValue || accountValue.length === 0) return;
+
+    var accountGuid = accountValue[0].id.replace(/[{}]/g, "");
+    CreditRecordForm.queryInFlightRecord(accountGuid).then(function (record) {
+        if (!record) return;
+        Xrm.Utility.confirmDialog(
+            CreditRecordForm.L("CreditRecord_InFlightExistsOpen", "检测到该客户下有一条正在编辑中的数据（{0}），是否需要为你打开？").replace("{0}", record.mcs_scoreid || ""),
+            function () {
+                // 确认：跳转到已存在记录，当前新建表单不保存
+                Xrm.Navigation.navigateTo({
+                    pageType: "entityrecord",
+                    entityName: "mcs_credit_record",
+                    entityId: record.mcs_credit_recordid
+                });
+            },
+            function () {
+                // 取消：不做任何操作，保存时会再次校验并阻断
+            }
+        );
+    }).catch(function (error) {
+        console.error("检测未生效评估记录失败:", error);
+    });
+};
+
 CreditRecordForm.onSave = function (executionContext) {
     var formContext = executionContext.getFormContext();
     var formType = formContext.ui.getFormType();
@@ -1416,26 +1610,17 @@ CreditRecordForm.onSave = function (executionContext) {
             return;
         }
         
-        // 校验是否存在相同客户的在途评估记录（状态 9-14）
+        // 校验是否存在相同客户的未生效评估记录（状态 9-14，禅道 #867/#1645）
         CreditRecordForm._duplicateCheckInProgress = true;
         executionContext.getEventArgs().preventDefault();
         
         var accountGuid = accountId[0].id.replace(/[{}]/g, "");
-        var statusFilter = [
-            "mcs_status eq 9",
-            "mcs_status eq 10",
-            "mcs_status eq 11",
-            "mcs_status eq 12",
-            "mcs_status eq 13",
-            "mcs_status eq 14"
-        ].join(" or ");
-        var filter = "_mcs_accountid_value eq " + accountGuid + " and (" + statusFilter + ") and statecode eq 0";
         
-        Xrm.WebApi.retrieveMultipleRecords("mcs_credit_record", "?$select=mcs_scoreid&$filter=" + encodeURIComponent(filter) + "&$top=1")
-            .then(function (result) {
+        CreditRecordForm.queryInFlightRecord(accountGuid)
+            .then(function (record) {
                 CreditRecordForm._duplicateCheckInProgress = false;
-                if (result.entities.length > 0) {
-                    Xrm.Utility.alertDialog("存在有重复客户评估记录，需核查！");
+                if (record) {
+                    Xrm.Utility.alertDialog(CreditRecordForm.L("CreditRecord_InFlightExistsBlock", "该客户下已存在一条未生效的评估记录（{0}），不允许保存，请打开已有记录继续编辑。").replace("{0}", record.mcs_scoreid || ""));
                 } else {
                     // 没有重复，标记通过后重新触发保存
                     CreditRecordForm._duplicateCheckPassed = true;

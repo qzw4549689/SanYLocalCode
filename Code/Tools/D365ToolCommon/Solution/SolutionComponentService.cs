@@ -59,8 +59,10 @@ namespace D365ToolCommon.Solution
 
         /// <summary>
         /// 通用：将组件添加到 Solution。
+        /// doNotIncludeSubcomponents=true 时实体按「不包含子组件（含元数据）」加入（rootcomponentbehavior=1），
+        /// 用于增量发版包只带实体元数据（如显示名改名）而不带全部子组件的场景。
         /// </summary>
-        public Guid AddComponentToSolution(Guid componentId, int componentType, string solutionUniqueName)
+        public Guid AddComponentToSolution(Guid componentId, int componentType, string solutionUniqueName, bool doNotIncludeSubcomponents = false)
         {
             if (string.IsNullOrWhiteSpace(solutionUniqueName))
                 throw new ArgumentException("Solution 唯一名称不能为空", nameof(solutionUniqueName));
@@ -80,7 +82,8 @@ namespace D365ToolCommon.Solution
                 ComponentId = componentId,
                 ComponentType = componentType,
                 SolutionUniqueName = solutionUniqueName,
-                AddRequiredComponents = false
+                AddRequiredComponents = false,
+                DoNotIncludeSubcomponents = doNotIncludeSubcomponents
             };
 
             var response = (AddSolutionComponentResponse)_service.Execute(request);
@@ -133,6 +136,65 @@ namespace D365ToolCommon.Solution
                 _service.Execute(request);
                 Console.WriteLine($"  ✅ 已从 Solution {solutionUniqueName} 移除: {componentId}（组件本体保留在环境中）");
             }
+            return true;
+        }
+
+        /// <summary>
+        /// 创建空 Solution（非托管）。幂等：同名已存在时直接返回已有 ID。
+        /// </summary>
+        public Guid CreateSolution(string uniqueName, string friendlyName, Guid publisherId, string version = "1.0.0.0")
+        {
+            var existingId = QuerySolutionId(uniqueName);
+            if (existingId != Guid.Empty)
+            {
+                Console.WriteLine($"  Solution {uniqueName} 已存在（{existingId}），跳过创建");
+                return existingId;
+            }
+            var solution = new Entity("solution")
+            {
+                ["uniquename"] = uniqueName,
+                ["friendlyname"] = friendlyName,
+                ["version"] = version,
+                ["publisherid"] = new EntityReference("publisher", publisherId),
+                ["description"] = "增量发版包（由 MetadataTool create-solution 创建）"
+            };
+            var id = _service.Create(solution);
+            Console.WriteLine($"  ✅ 已创建 Solution {uniqueName}（{id}）");
+            return id;
+        }
+
+        /// <summary>
+        /// 设置 Solution 中实体组件的 rootcomponentbehavior（0=含子组件 1=不含子组件含元数据 2=纯壳）。
+        /// 用于增量发版包：实体被自动加为壳(2)后，需要带元数据（如实体改名）时改为 1。
+        /// </summary>
+        public bool SetRootComponentBehavior(string solutionUniqueName, int componentType, Guid objectId, int behavior)
+        {
+            var solutionId = QuerySolutionId(solutionUniqueName);
+            if (solutionId == Guid.Empty)
+                throw new InvalidOperationException($"未找到 Solution: {solutionUniqueName}");
+            var query = new QueryExpression("solutioncomponent")
+            {
+                ColumnSet = new ColumnSet("solutioncomponentid", "rootcomponentbehavior"),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("solutionid", ConditionOperator.Equal, solutionId),
+                        new ConditionExpression("componenttype", ConditionOperator.Equal, componentType),
+                        new ConditionExpression("objectid", ConditionOperator.Equal, objectId)
+                    }
+                }
+            };
+            var row = _service.RetrieveMultiple(query).Entities.FirstOrDefault();
+            if (row == null)
+            {
+                Console.WriteLine($"  ❌ 组件不在 Solution 中: {objectId}");
+                return false;
+            }
+            var update = new Entity("solutioncomponent", row.Id);
+            update["rootcomponentbehavior"] = new OptionSetValue(behavior);
+            _service.Update(update);
+            Console.WriteLine($"  ✅ 已将组件 {objectId} 的 rootcomponentbehavior 改为 {behavior}");
             return true;
         }
 

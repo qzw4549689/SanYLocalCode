@@ -171,12 +171,12 @@
     {
       "schemaName": "mcs_status",
       "displayName": "生效状态",
-      "description": "0-未生效，1-待审批，2-生效",
+      "description": "0-未生效，2-生效；1-待审批已停用（Bug #1834 取消审批功能，保留选项值不删除组件）",
       "type": "picklist",
       "required": true,
       "options": {
         "未生效": 0,
-        "待审批": 1,
+        "待审批(已停用)": 1,
         "生效": 2
       }
     }

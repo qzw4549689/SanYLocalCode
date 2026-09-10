@@ -17,8 +17,8 @@ namespace SanyD365.Plugins.TradeStPayTerm.Api
         private readonly IOrganizationService _service;
         private readonly ITracingService _tracer;
 
-        // 泵路事业部编码（示例，需业务确认）
-        public const string PumbuBusinessUnitCode = "BU-1018";
+        // 泵路事业部编码（2026-09-10 业务确认：亚太大区）
+        public const string PumbuBusinessUnitCode = "BU-1034";
 
         public TradeStPayTermQueryService(IOrganizationService service, ITracingService tracer)
         {
@@ -74,6 +74,8 @@ namespace SanyD365.Plugins.TradeStPayTerm.Api
 
         /// <summary>
         /// 根据客户编码从客户主数据表获取客户分类
+        /// 客户编码统一口径 = mcs_customermasterdata.mcs_sapnumber（客户编号，SAP 编码），
+        /// 与 816 使用授信/查询授信、风险敞口、厂端授信余额调整接口一致
         /// </summary>
         private BuyerInfo GetBuyerInfo(string buyerCode)
         {
@@ -89,7 +91,7 @@ namespace SanyD365.Plugins.TradeStPayTerm.Api
                 {
                     Conditions =
                     {
-                        new ConditionExpression("mcs_accountnumber", ConditionOperator.Equal, buyerCode)
+                        new ConditionExpression("mcs_sapnumber", ConditionOperator.Equal, buyerCode)
                     }
                 },
                 TopCount = 1

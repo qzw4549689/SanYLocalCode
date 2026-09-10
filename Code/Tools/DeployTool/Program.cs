@@ -14,7 +14,7 @@ namespace DeployTool
 {
     class Program
     {
-        static readonly string ServiceUrl = Environment.GetEnvironmentVariable("D365_URL") ?? "https://dev1.crm5.dynamics.com";
+        static readonly string ServiceUrl = D365ConnectionFactory.ResolveUrl();
         static readonly string AppId = Environment.GetEnvironmentVariable("D365_APPID") ?? "51f81489-12ee-4a9e-aaae-a2591f45987d";
         static readonly string TenantId = Environment.GetEnvironmentVariable("D365_TENANTID") ?? "";
 
@@ -83,11 +83,21 @@ namespace DeployTool
                         }
                         new AppActionDeployer(serviceClient).SetButtonDisabled(args[1], bool.Parse(args[2]));
                         break;
-                    case "stpayterm-display-rules":
-                        // 为 3 个列表批量按钮挂 SelectionCount Display Rule（修复勾选后按钮消失，KB 4481268）
-                        // 用法: dotnet run stpayterm-display-rules [规则入包的Solution唯一名，默认 entity_20260726_peter]
-                        new AppActionDeployer(serviceClient).SetTradeStPayTermBatchDisplayRules(args.Length >= 2 ? args[1] : "entity_20260726_peter");
+                    case "set-appaction-inactive":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("用法: dotnet run set-appaction-inactive <按钮uniquename或前缀> <true|false>");
+                            Console.WriteLine("  statecode=Inactive 真正隐藏按钮（isdisabled 只禁点不隐藏）；各环境 GUID 不同，按 uniquename 操作");
+                            return;
+                        }
+                        new AppActionDeployer(serviceClient).SetButtonInactive(args[1], bool.Parse(args[2]));
                         break;
+                    // 2026-08-14 Bug #1834：取消审批功能，批量按钮 Display Rule 设置入口已停用
+                    // case "stpayterm-display-rules":
+                    //     // 为 3 个列表批量按钮挂 SelectionCount Display Rule（修复勾选后按钮消失，KB 4481268）
+                    //     // 用法: dotnet run stpayterm-display-rules [规则入包的Solution唯一名，默认 entity_20260726_peter]
+                    //     new AppActionDeployer(serviceClient).SetTradeStPayTermBatchDisplayRules(args.Length >= 2 ? args[1] : "entity_20260726_peter");
+                    //     break;
                     case "set-appaction-visibility":
                         if (args.Length < 3)
                         {

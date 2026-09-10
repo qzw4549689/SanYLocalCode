@@ -204,7 +204,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Api
         }
 
         /// <summary>
-        /// 下 Report 单（JSON / PDF 分开下单）
+        /// 下 Report 单（单格式：JSON / PDF 分开下单用，双格式 36 国两单场景）
         /// Mandatory No.10：必填 externalId + countryCode + report 对象
         /// 2026-08-01 沙盒实测修正：report 为对象 { slug, customReportId?, format[], language }，
         /// 文档中的 report:"full-report-urba" 字符串形式已不被接口接受（400 Invalid JSON structure）
@@ -216,13 +216,28 @@ namespace SanyD365.Plugins.CofaceIntegration.Api
         /// <param name="language">报告语言，默认 en</param>
         public JsonDocument PlaceReportOrder(string externalId, string countryCode, string reportSlug, string productCode, string format, string legitimateInterest = null, string customerReference = null, string language = "en")
         {
-            _tracer.Trace($"PlaceReportOrder: externalId={externalId}, country={countryCode}, slug={reportSlug}, productCode={productCode ?? "(null)"}, format={format}");
+            return PlaceReportOrder(externalId, countryCode, reportSlug, productCode, new[] { format }, legitimateInterest, customerReference, language);
+        }
+
+        /// <summary>
+        /// 下 Report 单（多格式一单：非双格式国家 format=["json","pdf"] 一单双格式）
+        /// 2026-08-18 沙盒实测（SK icon#1683850）：format=["json","pdf"] 一单，同一 publicationId 支持 format=json/pdf 两种下载；
+        /// 只传 ["json"] 时 PDF 下载必 400「This format doesn't exist for this publication」（bug1898 下单侧根因）
+        /// </summary>
+        /// <param name="reportSlug">产品 slug（customized-report / full-report）</param>
+        /// <param name="productCode">产品 code（customReportId，如 301 / 21000），full-report 类无需传</param>
+        /// <param name="formats">格式数组：json / pdf，可一次传多个（一单双格式）</param>
+        /// <param name="customerReference">对账参考号（建议填 SCO 评估编码）</param>
+        /// <param name="language">报告语言，默认 en</param>
+        public JsonDocument PlaceReportOrder(string externalId, string countryCode, string reportSlug, string productCode, string[] formats, string legitimateInterest = null, string customerReference = null, string language = "en")
+        {
+            _tracer.Trace($"PlaceReportOrder: externalId={externalId}, country={countryCode}, slug={reportSlug}, productCode={productCode ?? "(null)"}, formats={string.Join(",", formats)}");
             string url = $"{_config.BaseUrl}/publications/orders";
 
             var reportObj = new Dictionary<string, object>
             {
                 ["slug"] = reportSlug,
-                ["format"] = new[] { format },
+                ["format"] = formats,
                 ["language"] = language
             };
             // customReportId 为数字（如 301/21000），full-report 类无 code 时不传

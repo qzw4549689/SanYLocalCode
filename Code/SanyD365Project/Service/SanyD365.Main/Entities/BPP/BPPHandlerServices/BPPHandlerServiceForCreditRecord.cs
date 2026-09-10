@@ -137,7 +137,8 @@ namespace SanyD365.Main.Entities.BPP.BPPHandlerServices
                     ["mcs_creditscore"] = record.GetDecimalValue("mcs_creditscore"),
                     ["mcs_creditgrade"] = creditGrade,
                     ["mcs_cofaceid"] = record.GetStringValue("mcs_cofaceid"),
-                    ["mcs_approver"] = "gw_qiuzw",
+                    // mcs_approver 传空字符串，审批人员由 BPP 模板配置（2026-09-03 修复：原写死 gw_qiuzw 为 6 月联调遗留，与 FCA/FSM 口径拉齐）
+                    ["mcs_approver"] = string.Empty,
                     ["mcs_credit_record_url"] = recordUrl
                 };
 

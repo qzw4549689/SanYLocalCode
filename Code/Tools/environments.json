@@ -1,0 +1,26 @@
+{
+  "dev1": {
+    "url": "https://dev1.crm5.dynamics.com",
+    "description": "DEV1 开发环境（默认环境）"
+  },
+  "uat": {
+    "url": "https://sany-uat.crm5.dynamics.com",
+    "description": "UAT 环境"
+  },
+  "pre": {
+    "url": "https://pre.crm5.dynamics.com",
+    "description": "PRE 生产镜像（勿动，仅生产 bug 修复核对用）"
+  },
+  "prod": {
+    "url": "https://sany.crm5.dynamics.com",
+    "description": "生产-新加坡数据中心：亚太大区（谨慎操作）"
+  },
+  "prod-eu": {
+    "url": "https://sany.crm4.dynamics.com",
+    "description": "生产-西欧数据中心：欧洲大区、非洲大区、中东北非大区（谨慎操作）"
+  },
+  "prod-na": {
+    "url": "https://sany.crm.dynamics.com",
+    "description": "生产-美东数据中心：北美大区、拉美大区（谨慎操作）"
+  }
+}

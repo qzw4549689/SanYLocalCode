@@ -98,6 +98,12 @@ namespace D365MetadataTool
         [JsonPropertyName("type")]
         public string Type { get; set; } = "string";
 
+        /// <summary>
+        /// String 字段可选格式（如 url，审批链接类字段渲染为超链接），不指定默认 text
+        /// </summary>
+        [JsonPropertyName("format")]
+        public string Format { get; set; } = "";
+
         [JsonPropertyName("required")]
         public bool Required { get; set; } = false;
 

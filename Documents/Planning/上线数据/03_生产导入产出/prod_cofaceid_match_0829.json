@@ -1,0 +1,2239 @@
+[
+  {
+    "sap": "200000156",
+    "excelName": "Sunway Marketing Sdn Bhd",
+    "type": "经销商",
+    "excelCoface": "164031956",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "1ef2e0a7-d2e4-ee11-904d-000d3ac712e2",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "b7655c72-8de6-ee11-904d-000d3ac712e2",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "c0edf0d8-4393-ee11-be37-000d3ac71624",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "9ba3858a-4ca9-ee11-be37-000d3ac859f5",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "f8d5d160-4db3-ee11-a568-000d3ac85eda",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "d549756c-b34e-44a8-ade0-1a9e968dd353",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "8b351435-313d-4546-8b11-4570ac21a3e1",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "58b1e62b-6d12-ef11-9f8a-6045bd1e0d21",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "b6a15536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "SUNWAY ENTERPRISE(1988)SDN.BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "2b531318-2329-ef11-840b-6045bd1e0dbf",
+        "accountName": "SUNWAY MARKETING SDN BHD",
+        "masterDataId": "b93b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SUNWAY MARKETING SDN BHD",
+        "mdCountry": "MY"
+      }
+    ]
+  },
+  {
+    "sap": "200001366",
+    "excelName": "Civic Merchandising,, Inc..",
+    "type": "经销商",
+    "excelCoface": "164031539",
+    "accountMatches": 9,
+    "accounts": [
+      {
+        "accountId": "aff1de75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "a296944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "d6edf0d8-4393-ee11-be37-000d3ac71624",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "6dadeb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "ca2c0de8-be13-4896-b2a1-48deb388de5d",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "ee98f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "32a25536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "CIVIC MERCHANDISIING INC",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "b761d9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "a67f7580-f813-ef11-9f8a-6045bd1e0dbf",
+        "accountName": "CIVIC Merchandising Inc.",
+        "masterDataId": "073c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising Inc.",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200001384",
+    "excelName": "TCE Service and Equipment JSC",
+    "type": "经销商",
+    "excelCoface": "164275062",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "d0a8192d-03b9-ee11-9079-000d3ac71624",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "946ec3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "ce7ad44a-fcb8-ee11-9079-000d3ac85eda",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "93f01aa6-03f7-4eaf-a54a-13ba80a4af18",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "e69f06d0-6f1a-4ed5-b7bc-1eea98ceca75",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "a741c110-c398-4996-91c6-1ef1bed04a71",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "0b128337-af53-4e0d-882b-392b042c448a",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "13f8fafe-a310-4283-b1f4-43bc9a96195c",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "6045573b-ae8a-4b84-b37b-4b6f22aa8b3c",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "e447d80c-892c-4b3a-a498-516ed9ddf5b2",
+        "accountName": "TCE Service and Equipment JSC",
+        "masterDataId": "0d3c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TCE Service and Equipment JSC",
+        "mdCountry": "VN"
+      }
+    ]
+  },
+  {
+    "sap": "200006456",
+    "excelName": "LTE Concrete solutions inc",
+    "type": "经销商",
+    "excelCoface": "161516017",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "29f7de75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "6e9c944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "f3edf0d8-4393-ee11-be37-000d3ac71624",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "9c29acbf-97c2-ee11-907a-000d3ac85963",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "f36ec3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "ddb2eb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "5c9ef700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "e4a35536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "LTE Concrete Solution Inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "5367d9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "e3e31f55-2e16-49de-a6ba-8fc293e7430a",
+        "accountName": "LTE Concrete solutions inc",
+        "masterDataId": "174013ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "LTE Concrete solutions inc",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200024682",
+    "excelName": "Turbo Fly Machine Engineering limited",
+    "type": "经销商",
+    "excelCoface": "164275061",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "c678443c-01c3-ee11-907a-000d3ac712e2",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "252a42a4-a8af-ee11-a569-000d3ac71624",
+        "accountName": "三一騰飛機械設備公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "85229b69-0611-ef11-9f8a-000d3ac85963",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "089c16d0-5bb0-ee11-a569-000d3ac85963",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "4362c05e-2bb4-4297-a896-221b5fe0c6aa",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "112bf0ad-704f-4cde-9c8e-5a2a0677b654",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "a71159b6-4fb3-ee11-a568-6045bd1e0d21",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "eca55536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "三一騰飛機械設備公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "194f4244-d6bb-f011-bbd2-6045bd214e5e",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "9e0a5f45-2c4e-4786-bf91-7c7cf10406c1",
+        "accountName": "三一騰飛機械有限公司",
+        "masterDataId": "9d4313ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "SANY TURBO FLY MACHINE LIMITED",
+        "mdCountry": "HK"
+      }
+    ]
+  },
+  {
+    "sap": "200025219",
+    "excelName": "ENTER Engineering PTE. LTD Olmaliq",
+    "type": "S级大客户",
+    "excelCoface": null,
+    "accountMatches": 9,
+    "accounts": [
+      {
+        "accountId": "8f0c486d-1019-ef11-840b-000d3ac712e2",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "9d6fc3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "9d74ff2d-110e-4276-9aa8-048b01f586ea",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "66bb6c73-8b3a-4a4c-93f6-409f69920a5b",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "f8a55536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "05821bcc-6726-4637-a86b-83a61b496399",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "5715357c-bf15-41c6-8335-b6422f236dce",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "16040c38-354b-47c9-9071-cdc4973952d8",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "8b6157da-9f22-4c32-9272-e6050d7b1fc9",
+        "accountName": "Enter Engineering Pte. Ltd...",
+        "masterDataId": "f871ab16-3283-4b39-82e8-56a9cddf9ab5",
+        "currentCofaceId": null,
+        "mdEnglishName": "Enter Engineering Pte. Ltd.",
+        "mdCountry": "UZ"
+      }
+    ]
+  },
+  {
+    "sap": "200036176",
+    "excelName": "MaxCrane Machinery Co., Ltd.",
+    "type": "经销商",
+    "excelCoface": null,
+    "accountMatches": 7,
+    "accounts": [
+      {
+        "accountId": "c0668c54-dcf4-ee11-a1ff-000d3ac712e2",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "b2f3f0d8-4393-ee11-be37-000d3ac71624",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "cc092470-b6cb-ee11-907a-000d3ac85963",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด ",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "17b860c7-67e1-49bd-8e2f-1222176109e4",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "ba41d9ef-db0e-447e-b45e-15fb9fd54003",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "31c16054-c4b9-ee11-9079-6045bd1e0d21",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "bcca2354-5eb0-ee11-a569-6045bd1e0d21",
+        "accountName": "บริษัท แม็กซ์เครน แมชชีนเนอรี่ จำกัด",
+        "masterDataId": "b74513ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Maxcrane Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      }
+    ]
+  },
+  {
+    "sap": "200037577",
+    "excelName": "Pt.sany Makmur Perkasa",
+    "type": "经销商",
+    "excelCoface": "159454536",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "95a7f561-b756-ee11-be6f-000d3ac712e2",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "8adb37c7-bc7f-ee11-8179-000d3ac85963",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "1770c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "8c6d9269-f27f-46f9-ba47-33ec8b983985",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "308d6308-4edf-457d-90ca-46bd8f4f95eb",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "2f2c90d6-7cbe-ee11-907a-6045bd1e0d21",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "faa65536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "9e40ad0b-a73a-ee11-bdf5-6045bd1e0dbf",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "c2dc1d9c-ab3a-ee11-bdf5-6045bd1e0dbf",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": "981e3b70-ce4d-48d9-951b-bb8602edfbc1",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT.SANY MAKMUR PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "9e85628d-e139-4f9a-a387-73077a711fe6",
+        "accountName": "PT.SANY MAKMUR PERKASA",
+        "masterDataId": null
+      }
+    ]
+  },
+  {
+    "sap": "200045258",
+    "excelName": "Leadway Heavy Machinery Co., Ltd.",
+    "type": "经销商",
+    "excelCoface": null,
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "ce588c54-dcf4-ee11-a1ff-000d3ac712e2",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "43fc2370-b6cb-ee11-907a-000d3ac85963",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "5a70c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "5e6f7df2-0c96-4cba-91e4-1649a37ce025",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "072e22f5-f277-4666-a417-1a00f5c4fab7",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "cedeeb95-6499-48a5-856d-39268c64a23c",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "92cbc9f2-f034-4a6d-812d-50f5f96e0d5e",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "b9b36054-c4b9-ee11-9079-6045bd1e0d21",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "72bc2354-5eb0-ee11-a569-6045bd1e0d21",
+        "accountName": "Leadway",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      },
+      {
+        "accountId": "1ea95536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "TH",
+        "masterDataId": "a54713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "Leadway Heavy Machinery Co., Ltd.",
+        "mdCountry": "TH"
+      }
+    ]
+  },
+  {
+    "sap": "200045272",
+    "excelName": "China Wealth Hongkong Machine Limit",
+    "type": "经销商",
+    "excelCoface": "164063843",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "a629acbf-97c2-ee11-907a-000d3ac85963",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "5e70c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "b0db5e12-3ec5-f011-bbd3-0022485a6dda",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "69f1faf5-5e3c-4efd-9beb-0af24ce257b0",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "1ff4a4b6-3fa4-4281-8e57-31852329fb35",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "c4c2128d-a1bb-4914-b0a4-363d11e6c7bc",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "ac3d0b25-7f6b-48bf-8540-3699eed82008",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "532f58b4-9b16-405d-8fff-5672f5d8846e",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "20a95536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "a353dba9-02c4-430a-b2b9-6b0223829756",
+        "accountName": "中富香港机械有限公司",
+        "masterDataId": "a74713ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "China Wealth Hongkong Machine Limit",
+        "mdCountry": "HK"
+      }
+    ]
+  },
+  {
+    "sap": "200047079",
+    "excelName": "Zhongwang Machineries Philippines Inc.",
+    "type": "经销商",
+    "excelCoface": "161500451",
+    "accountMatches": 9,
+    "accounts": [
+      {
+        "accountId": "acfdde75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "45a3944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "4eb9eb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "3310c4f6-cb80-4703-a076-2fce9106c444",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "40272f09-40f6-4327-9c98-4c295d0d01ec",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "cea4f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "4ca95536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "f46dd9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "cc8b1161-1471-40e8-a83b-f69f14071164",
+        "accountName": "ZWM PHILPPINES, INC.",
+        "masterDataId": "5f4813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZWM PHILPPINES, INC.",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200047692",
+    "excelName": "Ten-league Engineering && Technology",
+    "type": "经销商",
+    "excelCoface": "161500645",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "25d9dda1-ecb2-ee11-a568-000d3ac712e2",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "722560bb-f8b2-ee11-a568-000d3ac71624",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "83f8f0d8-4393-ee11-be37-000d3ac71624",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "a829acbf-97c2-ee11-907a-000d3ac85963",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "7b70c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "05a4858a-4ca9-ee11-be37-000d3ac859f5",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "083b0259-2456-43bd-9b16-27f09a83899d",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "2d5448b1-52ad-4de9-bd0d-526cd9afe9db",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "0d3d30c0-cfe4-ee11-904d-6045bd1e0d21",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      },
+      {
+        "accountId": "5ca95536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "masterDataId": "874813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "TEN-LEAGUE ENGINEERING & TECHNOLOGY PTE",
+        "mdCountry": "SG"
+      }
+    ]
+  },
+  {
+    "sap": "200051662",
+    "excelName": "Vietnam Fuli Machinery Company Limited",
+    "type": "经销商",
+    "excelCoface": "161542725",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "30a9192d-03b9-ee11-9079-000d3ac71624",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "3f7c58b5-f8b5-ee11-a568-000d3ac71624",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "7b83ee76-32cf-ee11-907a-000d3ac85963",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "9d70c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "adf68323-fbb5-ee11-a568-000d3ac85963",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "2e7bd44a-fcb8-ee11-9079-000d3ac85eda",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "3a0999d6-1245-4cca-9efa-37abc4e17b2c",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "74b72354-5eb0-ee11-a569-6045bd1e0d21",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "4484a4ce-e37c-4648-bc0a-a926df714211",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      },
+      {
+        "accountId": "dc17cce8-e1a0-4eea-986d-afe96b4a7b64",
+        "accountName": "CÔNG TY TNHH MÁY MÓC FULI VIỆT NAM",
+        "masterDataId": "e54813ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "VIETNAM FULI MACHINERY CO.,LTD",
+        "mdCountry": "VN"
+      }
+    ]
+  },
+  {
+    "sap": "200054124",
+    "excelName": "Civic Merchandising,, Inc..",
+    "type": "经销商",
+    "excelCoface": "164031539",
+    "accountMatches": 5,
+    "accounts": [
+      {
+        "accountId": "b1f1de75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "CIVIC Merchandising, Inc.",
+        "masterDataId": "2d4913ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising, Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "a496944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "CIVIC Merchandising, Inc.",
+        "masterDataId": "2d4913ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising, Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "6fadeb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "CIVIC Merchandising, Inc.",
+        "masterDataId": "2d4913ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising, Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "f098f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "CIVIC Merchandising, Inc.",
+        "masterDataId": "2d4913ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising, Inc.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "b961d9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "CIVIC Merchandising, Inc.",
+        "masterDataId": "2d4913ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "CIVIC Merchandising, Inc.",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200054880",
+    "excelName": "Minmetals Kazakhstan LLP",
+    "type": "经销商",
+    "excelCoface": "111510231",
+    "accountMatches": 9,
+    "accounts": [
+      {
+        "accountId": "cd0c486d-1019-ef11-840b-000d3ac712e2",
+        "accountName": "ТОО «Минметалс Казахстан»",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "1cf2a469-4962-46cb-9052-1c2a0645024f",
+        "accountName": "ТОО «Минметалс Казахстан»-冻结",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "afd479c2-f091-4366-bf9c-29b4e8d34be9",
+        "accountName": "ТОО «Минметалс Казахстан»-冻结",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "c715d71c-89f2-4aa5-9aa9-2e29ca5bbb55",
+        "accountName": "ТОО «Минметалс Казахстан»-冻结",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "1df91d2e-3412-4130-976c-5956fc4b050b",
+        "accountName": "ТОО «Минметалс Казахстан»-冻结",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "a4a95536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "ТОО «Минметалс Казахстан»",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "5c139b3a-f1e5-43f9-8da6-65e69499e8eb",
+        "accountName": "ТОО «Минметалс Казахстан»",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "340e52a2-723d-4347-96a0-6c70fa761c99",
+        "accountName": "ТОО «Минметалс Казахстан»",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      },
+      {
+        "accountId": "c5442ab5-7231-45ef-a2a2-f154c866e2be",
+        "accountName": "ТОО «Минметалс Казахстан»-冻结",
+        "masterDataId": "0b873c6b-3b7e-4c86-9949-af22c5b0ac07",
+        "currentCofaceId": null,
+        "mdEnglishName": "MINMETALS KAZAKHSTAN LLC-冻结",
+        "mdCountry": "KZ"
+      }
+    ]
+  },
+  {
+    "sap": "200058542",
+    "excelName": "PREMIER HEAVY EQUIPMENT INC",
+    "type": "经销商",
+    "excelCoface": null,
+    "accountMatches": 5,
+    "accounts": [
+      {
+        "accountId": "75edde75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "ARCHON HEAVY EQUIPMENT INC.",
+        "masterDataId": "8f4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ARCHON HEAVY EQUIPMENT INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "3692944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "ARCHON HEAVY EQUIPMENT INC.",
+        "masterDataId": "8f4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ARCHON HEAVY EQUIPMENT INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "33a9eb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "ARCHON HEAVY EQUIPMENT INC.",
+        "masterDataId": "8f4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ARCHON HEAVY EQUIPMENT INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "ba94f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "ARCHON HEAVY EQUIPMENT INC.",
+        "masterDataId": "8f4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ARCHON HEAVY EQUIPMENT INC.",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "635dd9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "ARCHON HEAVY EQUIPMENT INC.",
+        "masterDataId": "8f4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ARCHON HEAVY EQUIPMENT INC.",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200058684",
+    "excelName": "Anteng Heavy Machinery Corp.",
+    "type": "经销商",
+    "excelCoface": "161516020",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "ffefde75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "d094944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "d270c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "bcabeb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "93334cc1-9a9b-4729-9b9b-5896f90754c5",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "3f97f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "e2a95536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "f65fd9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "6487be36-0b7e-458e-b968-729de22b6fef",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "af32d442-cc2b-48d9-b4be-add12c10ad3a",
+        "accountName": "ANTENG HEAVY MACHINERY CORP",
+        "masterDataId": "ab4c13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ANTENG HEAVY MACHINERY CORP",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200068077",
+    "excelName": "JT Machinery Sdn. Bhd.",
+    "type": "经销商",
+    "excelCoface": null,
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "30ede0a7-d2e4-ee11-904d-000d3ac712e2",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "028ae8dc-4393-ee11-be37-000d3ac71624",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "f19d858a-4ca9-ee11-be37-000d3ac859f5",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "fed5d160-4db3-ee11-a568-000d3ac85eda",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "5a5f0bf2-56fc-4361-8794-0e494b2c635a",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "8eaa5536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "43f5c0d2-29b1-ee11-a569-6045bd1e0dbf",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "a2e7ab0e-abde-4c07-b6e1-85cd4d960b61",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "b5abcb4d-4941-4166-879a-9f03853d055b",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "10d2499b-01ce-4496-a223-b878289db394",
+        "accountName": "JT MACHINERY SDN BHD",
+        "masterDataId": "c55b13ae-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "JT MACHINERY SDN BHD",
+        "mdCountry": "MY"
+      }
+    ]
+  },
+  {
+    "sap": "200074014",
+    "excelName": "Zhongwang Machineries Philippines Inc.",
+    "type": "经销商",
+    "excelCoface": "161500451",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "9afdde75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "33a3944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "3371c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "3cb9eb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "bca4f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "eeaa5536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "ZhongWang Machineries Philippines Inc",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "e06dd9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "6a11843c-e844-429a-b091-b0219d042d61",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "b5657623-6c9d-478a-ad49-d51e680cbcc3",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "71808833-61fe-4b49-8156-db91fe7b8dd8",
+        "accountName": "ZhongWang Machineries Philippings,Inc.",
+        "masterDataId": "89b4bacb-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "ZhongWang Machineries Philippines Inc",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "200075521",
+    "excelName": "Enter Machinaries Service",
+    "type": "S级大客户",
+    "excelCoface": "164069505",
+    "accountMatches": 7,
+    "accounts": [
+      {
+        "accountId": "f50c486d-1019-ef11-840b-000d3ac712e2",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "4d71c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "8e12386a-08db-4888-b043-0f3e2da555cd",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "d24653c9-0a94-4c2d-910f-64140cda07f0",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "5ffa0c8e-a047-4f51-ad8b-6f87f1c30790",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "e18528cd-1479-4943-95d0-85c87aa461fd",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "1e53c514-1335-4db8-b1e7-fff74ee2ec19",
+        "accountName": "ENTER MACHINARIES SERVICE",
+        "masterDataId": "bff51e66-e8bb-4730-84a2-5ee25c4fa24f",
+        "currentCofaceId": null,
+        "mdEnglishName": "ENTER MACHINARIES SERVICE",
+        "mdCountry": "UZ"
+      }
+    ]
+  },
+  {
+    "sap": "200102328",
+    "excelName": "Pt.. Jakarta International Machine Centre",
+    "type": "A级大客户",
+    "excelCoface": "164034482",
+    "accountMatches": 5,
+    "accounts": [
+      {
+        "accountId": "e0a8f561-b756-ee11-be6f-000d3ac712e2",
+        "accountName": "PT JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "masterDataId": "0af23b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "8a8c5818-370c-4321-affe-0a3c1c492d6d",
+        "accountName": "PT JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "masterDataId": "0af23b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "6150ad0b-a73a-ee11-bdf5-6045bd1e0dbf",
+        "accountName": "PT JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "masterDataId": "0af23b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "cff11d9c-ab3a-ee11-bdf5-6045bd1e0dbf",
+        "accountName": "PT JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "masterDataId": "0af23b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "b48c4096-8af5-ee11-a1fe-6045bd20bd89",
+        "accountName": "PT JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "masterDataId": "0af23b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. JAKARTA INTERNATIONAL MACHINE CENTRE",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "200106522",
+    "excelName": "PT. Karunia Permai Sentosa",
+    "type": "A级大客户",
+    "excelCoface": "156438784",
+    "accountMatches": 6,
+    "accounts": [
+      {
+        "accountId": "dd4378da-74ba-4257-986f-25aebcaa26bd",
+        "accountName": "PT. Karunia Permai Sentosa",
+        "masterDataId": "bc06b3d1-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. Karunia Permai Sentosa",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "fc2fde32-7907-43c0-97ec-4f0a0fcfe980",
+        "accountName": "PT. Karunia Permai Sentosa",
+        "masterDataId": "bc06b3d1-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. Karunia Permai Sentosa",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "0a28fef3-5692-ee11-be37-6045bd1e0dbf",
+        "accountName": "PT. Karunia Permai Sentosa",
+        "masterDataId": "bc06b3d1-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. Karunia Permai Sentosa",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "228d4096-8af5-ee11-a1fe-6045bd20bd89",
+        "accountName": "PT. Karunia Permai Sentosa",
+        "masterDataId": "bc06b3d1-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. Karunia Permai Sentosa",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "d532c95f-856f-4ac6-bc92-71f221678289",
+        "accountName": "PT. Karunia Permai Sentosa",
+        "masterDataId": "bc06b3d1-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. Karunia Permai Sentosa",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "bb1e468e-f05b-40b8-a8ef-8d5df95c1edc",
+        "accountName": "PT. Karunia Permai Sentosa",
+        "masterDataId": "bc06b3d1-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. Karunia Permai Sentosa",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "200123135",
+    "excelName": "Pt Lixing Labour Service",
+    "type": "A级大客户",
+    "excelCoface": "164041398",
+    "accountMatches": 7,
+    "accounts": [
+      {
+        "accountId": "500afb01-6f8c-ee11-be36-000d3ac85eda",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "72b2a9e9-ca17-4692-9247-402e6eea09d3",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "642615d6-0fd0-4075-ac24-531504d3a170",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "4e49774b-46ca-4d71-b1ad-5a8f1f06e7da",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "a30b9570-f18c-ee11-be36-6045bd1e0d21",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "2428fef3-5692-ee11-be37-6045bd1e0dbf",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "d98d4096-8af5-ee11-a1fe-6045bd20bd89",
+        "accountName": "PT. LIXING LABOUR SERVICE",
+        "masterDataId": "49b9227d-348f-ee11-be36-000d3ac85eda",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT LIXING LABOUR SERVICE",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "200124091",
+    "excelName": "Farovon-yol Servis",
+    "type": "S级大客户",
+    "excelCoface": "164069390",
+    "accountMatches": 4,
+    "accounts": [
+      {
+        "accountId": "7d7f5e35-0df1-4d5a-bd03-4d4765ae6373",
+        "accountName": "FAROVON-YOL SERVIS",
+        "masterDataId": "a4fa68ba-e332-408d-adbf-300371369423",
+        "currentCofaceId": null,
+        "mdEnglishName": "FAROVON-YOL SERVIS",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "eaad5536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "FAROVON-YOL SERVIS",
+        "masterDataId": "a4fa68ba-e332-408d-adbf-300371369423",
+        "currentCofaceId": null,
+        "mdEnglishName": "FAROVON-YOL SERVIS",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "c80f89c2-3cd2-4ccd-8188-731bb28de230",
+        "accountName": "FAROVON-YOL SERVIS",
+        "masterDataId": "a4fa68ba-e332-408d-adbf-300371369423",
+        "currentCofaceId": null,
+        "mdEnglishName": "FAROVON-YOL SERVIS",
+        "mdCountry": "UZ"
+      },
+      {
+        "accountId": "990225c7-730f-4810-91c7-b75a3d983c17",
+        "accountName": "FAROVON-YOL SERVIS",
+        "masterDataId": "a4fa68ba-e332-408d-adbf-300371369423",
+        "currentCofaceId": null,
+        "mdEnglishName": "FAROVON-YOL SERVIS",
+        "mdCountry": "UZ"
+      }
+    ]
+  },
+  {
+    "sap": "200125466",
+    "excelName": "Pt Buka Bumi Konstruksi",
+    "type": "S级大客户",
+    "excelCoface": null,
+    "accountMatches": 6,
+    "accounts": [
+      {
+        "accountId": "57a9f561-b756-ee11-be6f-000d3ac712e2",
+        "accountName": "PT BUKA BUMI KONSTRUKSI",
+        "masterDataId": "fcef3b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT BUKA BUMI KONSTRUKSI",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "d2d837c7-bc7f-ee11-8179-000d3ac85963",
+        "accountName": "PT BUKA BUMI KONSTRUKSI",
+        "masterDataId": "fcef3b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT BUKA BUMI KONSTRUKSI",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "02ae5536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "PT. BUKA BUMI KONSTRUKSI",
+        "masterDataId": "fcef3b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT BUKA BUMI KONSTRUKSI",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "8553ad0b-a73a-ee11-bdf5-6045bd1e0dbf",
+        "accountName": "PT BUKA BUMI KONSTRUKSI",
+        "masterDataId": "fcef3b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT BUKA BUMI KONSTRUKSI",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "fefa1d9c-ab3a-ee11-bdf5-6045bd1e0dbf",
+        "accountName": "PT BUKA BUMI KONSTRUKSI",
+        "masterDataId": "fcef3b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT BUKA BUMI KONSTRUKSI",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "85894096-8af5-ee11-a1fe-6045bd20bd89",
+        "accountName": "PT BUKA BUMI KONSTRUKSI",
+        "masterDataId": "fcef3b2e-2c4a-ee11-be6f-000d3ac85963",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT BUKA BUMI KONSTRUKSI",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "200125567",
+    "excelName": "Pt.. Sinar Bintang Mulia",
+    "type": "A级大客户",
+    "excelCoface": "164034827",
+    "accountMatches": 4,
+    "accounts": [
+      {
+        "accountId": "d9e22e0c-39e0-ee11-904d-000d3ac71624",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "bff338b2-c01e-449f-b6c9-868e1381e51f",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "2447ef39-7cf5-ee11-a1ff-6045bd1e0dbf",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "bff338b2-c01e-449f-b6c9-868e1381e51f",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "2facaa36-2930-4bd1-966e-79a980e6b39b",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "bff338b2-c01e-449f-b6c9-868e1381e51f",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "7eeaeca8-e466-4d03-b3ef-9e413d8447df",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "bff338b2-c01e-449f-b6c9-868e1381e51f",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "200139217",
+    "excelName": "PREMIER HEAVY EQUIPMENT INC",
+    "type": "经销商",
+    "excelCoface": null,
+    "accountMatches": 8,
+    "accounts": [
+      {
+        "accountId": "f2f9de75-68ba-ee11-9079-000d3ac712e2",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "5c9f944f-bef5-ee11-a1ff-000d3ac71624",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "2572c3a2-2314-ef11-9f8a-000d3ac85963",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "a1b5eb50-5dba-ee11-9079-000d3ac85eda",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "21a1f700-6bba-ee11-9079-6045bd1e0d21",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "c2ae5536-a016-ef11-840b-6045bd1e0dbf",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "2b6ad9b4-62ba-ee11-9079-6045bd1e0dbf",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      },
+      {
+        "accountId": "2398f82b-668b-4346-a3a0-6d3d7081c9fa",
+        "accountName": "PREMIER HEAVY EQUIPMENT INC",
+        "masterDataId": "77bc79ec-a3c8-ee11-907a-000d3ac712e2",
+        "currentCofaceId": null,
+        "mdEnglishName": "PREMIER HEAVY EQUIPMENT INC",
+        "mdCountry": "PH"
+      }
+    ]
+  },
+  {
+    "sap": "210031820",
+    "excelName": "Pt.. Malachite International Mining",
+    "type": "S级大客户",
+    "excelCoface": null,
+    "accountMatches": 3,
+    "accounts": [
+      {
+        "accountId": "b1e73796-6afd-ee11-9f89-000d3ac6c483",
+        "accountName": "PT. MALACHITE INTERNATIONAL MINING",
+        "masterDataId": "0949646b-7ae1-4435-8909-04d96286fb9a",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. MALACHITE INTERNATIONAL MINING",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "f7055f4b-7c18-4811-9be0-1370861d17d7",
+        "accountName": "PT. MALACHITE INTERNATIONAL MINING",
+        "masterDataId": "0949646b-7ae1-4435-8909-04d96286fb9a",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. MALACHITE INTERNATIONAL MINING",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "f1afc75e-7809-4ea5-b449-5172006df9dd",
+        "accountName": "PT. MALACHITE INTERNATIONAL MINING",
+        "masterDataId": "0949646b-7ae1-4435-8909-04d96286fb9a",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. MALACHITE INTERNATIONAL MINING",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "210032955",
+    "excelName": "HLM Machinery Sdn. Bhd.",
+    "type": "经销商",
+    "excelCoface": "161534781",
+    "accountMatches": 10,
+    "accounts": [
+      {
+        "accountId": "755a56bf-8b97-45f3-8117-0009fccfc3bd",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "57a4178b-593f-ef11-a316-00224858f2be",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "37fadd78-2f34-ef11-8e4f-002248591ab1",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "bb2b0cea-7193-476a-b881-06de0ed39f34",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "aac3f494-92b9-4840-90b4-08598de2d333",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "821e5aba-a2c1-4db5-ac41-1de0294e2487",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "e8e57394-585f-4fd2-95b5-4684d7f4525a",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "e394fa4e-1f45-4caf-9954-9061fb0f76e5",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "ef79e15a-2e8c-4d59-b1ba-908def352bff",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      },
+      {
+        "accountId": "f280ec96-607f-4fc6-a003-95d6426c4848",
+        "accountName": "HLM Machinery Sdn. Bhd.",
+        "masterDataId": "c6a48a1e-f43c-4eed-8d1f-57feb33c56e0",
+        "currentCofaceId": null,
+        "mdEnglishName": "HLM Machinery Sdn. Bhd.",
+        "mdCountry": "MY"
+      }
+    ]
+  },
+  {
+    "sap": "210036332",
+    "excelName": "Pt.. Trans Layanan Halmahera",
+    "type": "S级大客户",
+    "excelCoface": "145364870",
+    "accountMatches": 5,
+    "accounts": [
+      {
+        "accountId": "ca155e1f-2e7b-45af-9f0b-0785705495a7",
+        "accountName": "永青集團有限公司",
+        "masterDataId": "98290652-11b2-42e6-b2eb-8a434089a041",
+        "currentCofaceId": null,
+        "mdEnglishName": "ETERNAL TSINGSHAN GROUP LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "c47c3df3-1fd4-4d02-bc17-3d01a828f565",
+        "accountName": "永青集團有限公司",
+        "masterDataId": "98290652-11b2-42e6-b2eb-8a434089a041",
+        "currentCofaceId": null,
+        "mdEnglishName": "ETERNAL TSINGSHAN GROUP LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "b7cb2ae2-a193-41c5-950a-5bea0311e424",
+        "accountName": "永青集團有限公司",
+        "masterDataId": "98290652-11b2-42e6-b2eb-8a434089a041",
+        "currentCofaceId": null,
+        "mdEnglishName": "ETERNAL TSINGSHAN GROUP LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "ecf327ac-5e6b-ef11-a670-6045bd1fc4c6",
+        "accountName": "永青集團有限公司",
+        "masterDataId": "98290652-11b2-42e6-b2eb-8a434089a041",
+        "currentCofaceId": null,
+        "mdEnglishName": "ETERNAL TSINGSHAN GROUP LIMITED",
+        "mdCountry": "HK"
+      },
+      {
+        "accountId": "936b6105-fcf4-4346-8abe-8a36a52c30ef",
+        "accountName": "永青集團有限公司",
+        "masterDataId": "98290652-11b2-42e6-b2eb-8a434089a041",
+        "currentCofaceId": null,
+        "mdEnglishName": "ETERNAL TSINGSHAN GROUP LIMITED",
+        "mdCountry": "HK"
+      }
+    ]
+  },
+  {
+    "sap": "210088045",
+    "excelName": "Pt.. Cahaya Mitra Perkasa",
+    "type": "S级大客户",
+    "excelCoface": null,
+    "accountMatches": 3,
+    "accounts": [
+      {
+        "accountId": "1a5fd576-8781-f011-b4cc-000d3ac9496c",
+        "accountName": "PT. CAHAYA MITRA PERKASA",
+        "masterDataId": "f8995d21-1e40-47ee-8fab-8624bf9ec613",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. CAHAYA MITRA PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "1c4cdbd4-9fb3-407b-86d5-073f02c826b5",
+        "accountName": "PT. CAHAYA MITRA PERKASA",
+        "masterDataId": "f8995d21-1e40-47ee-8fab-8624bf9ec613",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. CAHAYA MITRA PERKASA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "baefcb80-2c6a-45cd-8c42-c3dc0b24aaec",
+        "accountName": "PT. CAHAYA MITRA PERKASA",
+        "masterDataId": "f8995d21-1e40-47ee-8fab-8624bf9ec613",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. CAHAYA MITRA PERKASA",
+        "mdCountry": "ID"
+      }
+    ]
+  },
+  {
+    "sap": "210115228",
+    "excelName": "Pt.. Sinar Bintang Mulia",
+    "type": "A级大客户",
+    "excelCoface": "164034827",
+    "accountMatches": 3,
+    "accounts": [
+      {
+        "accountId": "0b3f479b-a2b2-433e-97a5-52b08690c82c",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "947cfd05-f8b4-4ac5-b3ce-1dae801ab8f6",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "450fa728-4510-4ce8-ae13-6060ae54c105",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "947cfd05-f8b4-4ac5-b3ce-1dae801ab8f6",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      },
+      {
+        "accountId": "edb5ab3e-eef4-f011-8406-7ced8db582f6",
+        "accountName": "PT. SINAR BINTANG MULIA",
+        "masterDataId": "947cfd05-f8b4-4ac5-b3ce-1dae801ab8f6",
+        "currentCofaceId": null,
+        "mdEnglishName": "PT. SINAR BINTANG MULIA",
+        "mdCountry": "ID"
+      }
+    ]
+  }
+]

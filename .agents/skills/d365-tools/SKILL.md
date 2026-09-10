@@ -23,6 +23,8 @@ dotnet run remove <实体名> <解决方案名>    # 从解决方案移除实体
 
 # ========== 字段操作 ==========
 dotnet run update-field-default <实体名> <字段名> <默认值>  # 设置字段默认值（选项集/布尔/整数传整数值，小数/金额传数字）
+dotnet run update-field-format <实体名> <字段名> <text|url|...>  # 更新 String 字段格式（如审批链接改 url 渲染为超链接；原地更新不影响数据）
+# 注意：JSON 定义中 string 字段支持可选 "format": "url" 属性（FieldDefinition.Format → CreateStringField format 参数）
 # 以下方法在 EntityManager.cs 中，需写 C# 代码调用：
 # CreateStringField()   - 创建文本字段
 # CreateMemoField()     - 创建多行文本
@@ -40,6 +42,7 @@ dotnet run update-field-default <实体名> <字段名> <默认值>  # 设置字
 dotnet run update-form <实体名>           # 批量添加字段到主窗体（两列布局）
 dotnet run add-form-field <实体名> <字段名> <显示名>  # 添加单个字段到主窗体（幂等，自动发布；2026-07-29 新增，复用 UpdateMainForm）
 dotnet run update-form-field-label <实体名> <字段名> <中文> [英文]  # 更新主窗体字段单元格标签 2052/1033（自动发布；2026-07-29 新增）
+dotnet run replace-form-field <实体名> <旧字段> <新字段> <中文标签> [英文标签]  # 原位替换主窗体字段（保留单元格位置，自动发布；2026-09-03 新增，禅道 #2138；用于新建字段替代旧字段场景，避免 remove+add 落位错误）
 dotnet run check-form <实体名>            # 检查窗体字段清单
 dotnet run export-formxml <实体名> <路径>  # 导出窗体XML到文件
 dotnet run rearrange-form <实体名>        # 重新排列窗体字段（按预定义分组）
@@ -63,7 +66,12 @@ dotnet run publish-webresource <名称1> [名称2] ...  # 发布指定WebResourc
 # BindJsToForm()        - 绑定JS到表单事件（C#调用）
 
 # ========== Plugin ==========
-dotnet run register-plugin <DLL路径> <类名> [实体名]  # 注册Create Plugin
+dotnet run register-plugin <DLL路径> <类名> [实体名]  # 不传实体=仅注册 Assembly+Type（2026-08-20 起）；传实体=注册 Create Step
+# ⚠️ 2026-08-20 新增防线（#1641 幽灵 Step/跨包依赖事故）：被 Custom API 绑定的类禁止注册实体 Step，
+#    register-plugin / register-plugin-update / register-plugin-advanced / register-step-only / create-plugin-step-with-id 全部强制拦截
+dotnet run check-step-assembly [Solution唯一名]  # 跨包依赖检查：包内每个 Step 的实现类所在 Assembly 是否同包（只读，默认 McsPlugin）
+# 离线导入仿真（预热）：python3 Code/Tools/release-diff/simulate_import.py --target uat|prod [--batch 按序包列表]
+#    发 UAT/生产前各跑一遍；build-registry 重建生产台账；seed-from-uat 生成实体基线。详见 release-diff/README.md
 # RegisterPlugin()      - 注册Plugin（C#调用）
 # RegisterPluginWithFilter() - 注册带筛选属性的Update Plugin
 
@@ -126,6 +134,33 @@ dotnet run --no-build -- add-manifest-to-solution <清单.json> <Solution唯一�
 # ========== 测试数据 ==========
 dotnet run create-credit-items            # 创建评分项目测试数据(22条)
 dotnet run create-qualitative-enums       # 创建定性枚举值测试数据(30条)
+
+# ========== 导入/组件分布诊断（只读，2026-08-19 #1928 新增） ==========
+dotnet run --no-build -- query-import-log <Solution名称关键字>
+# 查该 Solution 最近一次导入的 importjob 日志：根结构标签统计、非 success 的 result 明细、
+#   sitemap/appmodule 相关节点。用于排查「导入成功但某组件没生效」（如 AppModuleSiteMap 是否真处理）
+
+dotnet run --no-build -- query-sitemap-layers <sitemapId>
+# 查指定 sitemap 组件出现在哪些 Solution 的 solutioncomponent 中（含 Active 层判断），
+#   用于排查共享 sitemap（92 个包共携带）导入后未生效的分层问题
+
+# ========== 角色权限工具（2026-08-21 新增，实现：D365ToolCommon.Security.SecurityRoleService） ==========
+dotnet run --no-build -- list-role-privileges <角色关键字> [实体名过滤]
+# 只读：角色权限明细（读/写/建/删/追加/追加到/分派/共享 × 深度）；不传实体名输出按实体分组的紧凑表 + 杂项权限
+# 注意：同名角色存在多 BU 副本（如 LTC Regional Sales Operations 在 DEV1 有 92 个副本），只读命令逐副本输出
+
+dotnet run --no-build -- query-user-permissions <用户domainname> [实体名过滤]
+# 只读：用户全部角色（标注直接/团队继承）+ RetrieveUserPrivileges 有效权限汇总（同名取最大深度）
+
+dotnet run --no-build -- set-role-privilege <角色关键字> <实体名> <权限类型> <深度>
+# 【写，需用户明确授权】权限类型: read|write|create|delete|append|appendto|assign|share
+#   深度: none(移除)|user(本人)|bu(本部门)|childbu(本部门及子部门)|org(组织)
+#   幂等（已是目标状态跳过）；输出变更前→变更后并回读确认；多 BU 副本/多匹配一律拒绝要求精确名称；
+#   禁止改 System Administrator/System Customizer；D365 权限变更即时生效无需发布
+
+dotnet run --no-build -- assign-role <用户domainname> <角色名>     # 【写，需授权】挂角色（幂等）
+dotnet run --no-build -- remove-role <用户domainname> <角色名>     # 【写，需授权】摘角色（幂等）
+#   角色名优先精确匹配；对当前连接账号自己操作时警告；写命令首行均打印目标环境 URL
 ```
 
 ---
@@ -151,6 +186,11 @@ AppActionDeployer.UpdateButtonParameters(string uniqueName, string parametersJso
 AppActionDeployer.DeleteAppAction(string uniqueName)
 // CLI：dotnet run delete-appaction <按钮uniquename或前缀>
 // 删除按钮记录（先自动解除全部经典规则 N:N 关联，否则外键冲突）；不从 Solution 移除组件引用
+
+AppActionDeployer.SetButtonInactive(string uniqueName, bool inactive)   // 2026-08-15 新增（Bug #1834）
+// CLI：dotnet run set-appaction-inactive <按钮uniquename或前缀> <true|false>
+// statecode=Inactive 真正隐藏按钮（不删组件，幂等）；⚠️ isdisabled 只禁点不隐藏，不能当隐藏用
+// ⚠️ 各环境 appaction GUID 不同（UAT/生产为导入重建），跨环境操作必须按 uniquename，禁用 DEV 的 GUID 更新其他环境
 
 AppActionDeployer.AttachFirstPartySelectionCountRule(string uniqueName)
 // CLI：dotnet run attach-selection-rule <按钮uniquename或前缀>
@@ -264,6 +304,29 @@ dotnet run update-field-range <实体名> <字段名> <最小值> <最大值>
 **选型结论（2026-08-01 用户定稿）**：跨环境发布的按钮 → 一律 RibbonDiffXml；App Action 仅限 DEV 临时验证。**载体包必须先问用户**（红线），导出重导会带上包内全部组件（含他人实体），擅自选包影响面不可控。
 **案例**：`Code/Customizations/Ribbon/mcs_trade_stpayterm.ribbon.xml`（3 个列表批量按钮，内联 `SelectionCountRule Minimum=1`，1033/2052 LocLabels，CrmParameter `SelectedControlSelectedItemIds`+`SelectedControl` 与 JS 签名一一对应）；`Code/Customizations/Ribbon/mcs_credit_record.ribbon.xml`（表单按钮【Coface 下单】，`Mscrm.Form.{entity}.MainTab.Management.Controls._children`，CrmParameter `PrimaryControl`）。部署用 `MetadataTool deploy-ribbon <实体> <xml> <载体Solution> [工作目录] [幂等前缀]`（导出载体包→合并实体 Ribbon 节点→重打包→非托管导入→发布，幂等）。
 **注意**：Ribbon 按钮在 UCI 固定落入「更多命令」溢出菜单（两轮实测：Sequence/ModernImage 不影响位置，主栏只渲染现代命令；Sequence 决定溢出菜单内排序、ModernImage 提供图标）；Location 表单用 `Mscrm.Form.{entity}.MainTab.Management.Controls._children`、列表用 `Mscrm.HomepageGrid.{entity}.MainTab.Management.Controls._children`；同一实体不要 Legacy + App Action 混用同一功能按钮（会重复）。**DEV1 迭代可用本机 pac CLI 导入**（`pac solution import`，已有 peter_qiuzw profile），撞锁报 `Cannot start another [Import]` 错峰重试。
+
+### 4.1.1 🚨 按钮显隐问题排障 SOP（2026-08-15 花一整天换来的，强制执行）
+
+> 适用：「按钮该隐藏却还在 / 该显示却不显示 / 按钮点了没反应」类问题。**禁止不查就改、禁止用 API 回读当验证。**
+
+**第一步永远是定位按钮来源（10 分钟，别猜）：** URL 加 `&ribbondebug=true` → `⋯` 菜单 →「命令检查器」→ 树里点该按钮，看三样东西：
+| 看什么 | 判读 |
+|---|---|
+| 按钮 Id | `mcs.{entity}.xxx.Button` = 经典 ribbon（RibbonDiffXml 引入）；uniquename 形如 `mcs_xxx_apply` 无 `mcs.` 前缀 = App Action 现代按钮 |
+| SolutionUniqueName / 解决方案层 | 按钮来自哪个层（Active=非托管层） |
+| Display/Enable rules | 哪条规则在控制显隐/可用 |
+
+**按来源对症下药：**
+| 来源 | 隐藏/移除的正确做法 | 错误做法（都踩过） |
+|---|---|---|
+| App Action 现代按钮 | `DeployTool set-appaction-inactive <uniquename> true`（statecode=1，不删组件） | ❌ `isdisabled=true` 只禁点不隐藏；❌ 按 DEV 的 GUID 更新其他环境（各环境 GUID 不同，导入重建） |
+| 经典 ribbon 按钮（已在环境 Active 层存在） | **RibbonDiffXml 加 `HideCustomAction` 显式隐藏**（HideActionId=原 CustomAction Id + Location 一致），随实体包导入 | ❌ **注释/清空 XML 再导入=空 diff，平台不移除 Active 层已有按钮**（2026-08-15 DEV1/UAT 双实锤） |
+
+**生效三件套（ribbon 变更缺一不可）：** ① 导入成功（看 importjob completedon/结果列）→ ② **Publish 成功**（撞锁会静默失败，必须回查，n8n 自动 Publish 实测撞锁失败过）→ ③ **Regenerate ribbon metadata**（命令检查器顶部按钮，后台任务 15~30 分钟，状态在 Solutions History「Ribbon Metadata Generation Operations」视图）。
+
+**验证只认 UI 实证（2026-08-15 铁律）：** 清站点数据（Cache Storage+Service Worker，硬刷新无效）或无痕窗口 → 勾选 1 条记录 → 看主命令栏+溢出菜单 → 截图留证。❌ **禁止用 `RetrieveEntityRibbon`（get-entity-ribbon）当验证依据**——它读的存储与 UCI 渲染用的预计算 blob 不是一套，会出现「API 显示干净、UI 按钮还在」的假象（已实锤）。
+
+**环境锁判读：** `list-failed-imports` 列出的是 progress<100 记录，**含已失败/已完成的，不等于正在跑**；判断是否真锁要看 completedon 是否有值 / 结果列。微软第一方包（OmnichannelPrime 等）导入会长时间持锁，只能等。
 
 ### 4.2 App Action 正确创建方式
 

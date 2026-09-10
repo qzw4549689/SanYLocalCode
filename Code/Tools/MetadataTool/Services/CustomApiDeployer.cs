@@ -131,6 +131,140 @@ namespace D365MetadataTool.Services
         }
 
         /// <summary>
+        /// 部署使用授信 Custom API（816 授信池·哑记账）
+        /// </summary>
+        public Guid DeployRecordCreditDetailApi(string pluginTypeName, string solutionName = "McsCustomAPI")
+        {
+            const string uniqueName = "mcs_recordCreditDetail";
+            Console.WriteLine($">>> 部署 Custom API: {uniqueName}");
+
+            // 1. 查找 Plugin Type
+            var pluginTypeId = QueryPluginType(pluginTypeName);
+            if (pluginTypeId == Guid.Empty)
+            {
+                Console.WriteLine($"  ❌ 未找到 Plugin Type: {pluginTypeName}");
+                return Guid.Empty;
+            }
+
+            // 2. 创建/更新 Custom API
+            var apiId = CreateOrUpdateCustomApi(pluginTypeId, solutionName, uniqueName,
+                "使用授信",
+                "使用授信统一接口（816授信池·哑记账）：占用/释放/初始化授信额度并写入台账，供交货单、订单、解款记录等上游系统调用（金额由调用方算好传入）");
+            if (apiId == Guid.Empty)
+            {
+                Console.WriteLine("  ❌ Custom API 创建/更新失败");
+                return Guid.Empty;
+            }
+
+            // 3. 创建请求参数
+            var requestParamIds = new List<Guid>
+            {
+                CreateRequestParameter(apiId, "mcs_accountid", "客户编码（SAP客户代码）", "String", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_creditType", "授信类型（FACTORY=厂端授信/SINOSURE=中信保授信）", "String", true, solutionName),
+                CreateRequestParameter(apiId, "mcs_usebalanceUSD", "使用或者释放的授信金额美元", "Decimal", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_usebalanceCNY", "使用或者释放的授信金额人民币", "Decimal", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_proccess", "流程环节（1-12）", "String", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_adjust", "额度调整动作（1初始化/3占用/4释放）", "String", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_contractid", "合同编码（环节≥3时必填）", "String", true, solutionName),
+                CreateRequestParameter(apiId, "mcs_orderid", "订单编码（环节6-10时必填）", "String", true, solutionName),
+                CreateRequestParameter(apiId, "mcs_deliveryordid", "发货单编码", "String", true, solutionName),
+                CreateRequestParameter(apiId, "mcs_settle_id", "解款单明细guid", "String", true, solutionName),
+                CreateRequestParameter(apiId, "mcs_settle_no", "解款单号", "String", true, solutionName)
+            };
+
+            // 4. 创建响应属性
+            var responsePropIds = new List<Guid>
+            {
+                CreateResponseProperty(apiId, "mcs_accountid", "客户编码", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_usebalance", "调整授信金额USD", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_proccess", "流程环节", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_adjust", "额度调整动作", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_contractid", "合同编码", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_orderid", "订单编码", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_usedbalance", "实际调整授信余额USD", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sellerbalance", "调整后授信余额USD（允许负数，表示超额）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_usedflag", "是否调整成功（1是/0否）", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_recordid", "台账编号", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_failreason", "使用失败原因", "String", solutionName)
+            };
+
+            // 5. 加入解决方案
+            AddToSolution(apiId, requestParamIds, responsePropIds, solutionName);
+
+            Console.WriteLine("  ✅ Custom API 部署完成");
+            return apiId;
+        }
+
+        /// <summary>
+        /// 部署查询授信 Custom API（816 授信池）
+        /// </summary>
+        public Guid DeployQueryCreditBalanceApi(string pluginTypeName, string solutionName = "McsCustomAPI")
+        {
+            const string uniqueName = "mcs_queryCreditBalance";
+            Console.WriteLine($">>> 部署 Custom API: {uniqueName}");
+
+            // 1. 查找 Plugin Type
+            var pluginTypeId = QueryPluginType(pluginTypeName);
+            if (pluginTypeId == Guid.Empty)
+            {
+                Console.WriteLine($"  ❌ 未找到 Plugin Type: {pluginTypeName}");
+                return Guid.Empty;
+            }
+
+            // 2. 创建/更新 Custom API
+            var apiId = CreateOrUpdateCustomApi(pluginTypeId, solutionName, uniqueName,
+                "查询授信",
+                "查询授信接口（816授信池）：客户维度授信信息查询（厂端交易基线+中信保批复/上浮/净占用/上浮余额+风险敞口），传合同编码时附带合同授信金额；主要给合同模块调用");
+            if (apiId == Guid.Empty)
+            {
+                Console.WriteLine("  ❌ Custom API 创建/更新失败");
+                return Guid.Empty;
+            }
+
+            // 3. 创建请求参数
+            var requestParamIds = new List<Guid>
+            {
+                CreateRequestParameter(apiId, "mcs_accountid", "客户编码（SAP客户代码）", "String", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_contractid", "合同编码（选传，传了则查合同授信金额）", "String", true, solutionName)
+            };
+
+            // 4. 创建响应属性
+            var responsePropIds = new List<Guid>
+            {
+                CreateResponseProperty(apiId, "mcs_accountid", "客户编码（回显）", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_contractid", "合同编码（回显）", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_credit_limit_usd", "授信金额USD（传合同编码才查）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_credit_limit_cny", "授信金额CNY（传合同编码才查）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_limit_usd", "中信保批复限额USD", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_limit_cny", "中信保批复限额CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_balance_usd", "中信保批复限额余额USD（T+1参考）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_balance_cny", "中信保批复限额余额CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_uplift_limit_usd", "中信保批复限额上浮限额USD（min(批复×1.5,8M)）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_uplift_limit_cny", "中信保批复限额上浮限额CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_netused_usd", "中信保净占用额度USD（台账快照聚合）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_netused_cny", "中信保净占用额度CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_uplift_balance_usd", "中信保批复限额上浮余额USD（上浮限额-净占用）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_sinosure_uplift_balance_cny", "中信保批复限额上浮余额CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_factory_limit_usd", "客户交易基线额度USD（厂端授信额度）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_factory_limit_cny", "客户交易基线额度CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_factory_balance_usd", "客户交易基线余额USD（厂端授信余额）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_factory_balance_cny", "客户交易基线余额CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_risk_exposure_usd", "客户风险敞口USD（厂端授信净占用）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_risk_exposure_cny", "客户风险敞口CNY（汇率实时计算）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_signing_occupy_usd", "客户签约占用USD（来源待定，暂0）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_signing_occupy_cny", "客户签约占用CNY（来源待定，暂0）", "Decimal", solutionName),
+                CreateResponseProperty(apiId, "mcs_usedflag", "是否查询成功（1是/0否）", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_failreason", "查询失败原因", "String", solutionName)
+            };
+
+            // 5. 加入解决方案
+            AddToSolution(apiId, requestParamIds, responsePropIds, solutionName);
+
+            Console.WriteLine("  ✅ Custom API 部署完成");
+            return apiId;
+        }
+
+        /// <summary>
         /// 部署 Coface 系统内下单 Custom API
         /// </summary>
         public Guid DeployCofacePlaceOrderApi(string pluginTypeName, string solutionName = "McsCustomAPI")
@@ -591,6 +725,57 @@ namespace D365MetadataTool.Services
             {
                 Console.WriteLine($"  ⚠️ 加入解决方案失败: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// 部署风险敞口计算 Custom API
+        /// </summary>
+        public Guid DeployRiskExposureApi(string pluginTypeName, string solutionName = "McsCustomAPI")
+        {
+            const string uniqueName = "mcs_CalcContractRiskExposure";
+            Console.WriteLine($">>> 部署 Custom API: {uniqueName}");
+
+            // 1. 查找 Plugin Type
+            var pluginTypeId = QueryPluginType(pluginTypeName);
+            if (pluginTypeId == Guid.Empty)
+            {
+                Console.WriteLine($"  ❌ 未找到 Plugin Type: {pluginTypeName}");
+                return Guid.Empty;
+            }
+            Console.WriteLine($"  Plugin Type: {pluginTypeId}");
+
+            // 2. 创建/更新 Custom API
+            var apiId = CreateOrUpdateCustomApi(pluginTypeId, solutionName, uniqueName,
+                "风险敞口计算",
+                "合同交易风险敞口计算接口：按厂端授信/中信保或外部融资类型计算风险敞口金额（供合同调用）");
+            if (apiId == Guid.Empty)
+            {
+                Console.WriteLine("  ❌ Custom API 创建/更新失败");
+                return Guid.Empty;
+            }
+
+            // 3. 创建请求参数
+            var requestParamIds = new List<Guid>
+            {
+                CreateRequestParameter(apiId, "mcs_type", "类型（A=厂端授信/中信保，B=外部融资）", "String", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_buyercode", "客户编码", "String", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_risk_amount", "合同风险赊销金额", "Decimal", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_signed_amount", "合同签约占用金额", "Decimal", false, solutionName),
+                CreateRequestParameter(apiId, "mcs_contractid", "合同编码", "String", true, solutionName)
+            };
+
+            // 4. 创建响应属性
+            var responsePropIds = new List<Guid>
+            {
+                CreateResponseProperty(apiId, "mcs_buyercode", "客户编码", "String", solutionName),
+                CreateResponseProperty(apiId, "mcs_risk_exposure", "风险敞口金额", "Decimal", solutionName)
+            };
+
+            // 5. 加入解决方案
+            AddToSolution(apiId, requestParamIds, responsePropIds, solutionName);
+
+            Console.WriteLine("  ✅ Custom API 部署完成");
+            return apiId;
         }
 
         private int GetOptionSetTypeValue(string typeName)

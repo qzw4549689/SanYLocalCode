@@ -71,7 +71,7 @@ Xrm.WebApi.online.execute(request).then(
 | `mcs_subid` | String | 是 | 子公司编码 | `mcs_trade_stpayterm.mcs_subid` |
 | `mcs_countrycode` | String | 是 | 国家代码 | `mcs_country.mcs_countrycode` |
 | `mcs_prdgroupid` | String | 是 | 产品线编码；**支持逗号分隔传多个**（如 `CP0202,CP0501`），多个产品线映射的产品分类取并集，与记录产品分类任一相交即命中 | `mcs_trade_ptgrouptype.mcs_groupid` |
-| `mcs_buyercode` | String | 是 | 客户编码 | `mcs_customermasterdata.mcs_accountnumber` |
+| `mcs_buyercode` | String | 是 | 客户编码（客户编号，SAP 编码；与 816 授信池/风险敞口/厂端授信接口同一口径） | `mcs_customermasterdata.mcs_sapnumber` |
 
 ---
 
@@ -109,20 +109,21 @@ Xrm.WebApi.online.execute(request).then(
 
 ## 6. 调用示例与返回
 
-> 以下入参为实测可调通的组合（2026-07-28 验证），其他环境请按实际数据调整。
+> 以下入参为实测可调通的组合，其他环境请按实际数据调整。
 > `mcs_prdgroupid` 支持逗号分隔传多个产品线编码，如 `"CP0202,CP0501"`。
+> ⚠️ 2026-09-07 起客户编码统一为 `mcs_customermasterdata.mcs_sapnumber`（客户编号，SAP 编码）；6.1 已按新口径重测（2026-09-07），6.2 的 `mcs_buyercode` 仍为旧口径（流水号）实测值，待重测更新。
 
-### 6.1 单产品线查询示例（DEV1 实测）
+### 6.1 单产品线查询示例（DEV1 实测，2026-09-07 新口径重测）
 
 ### 请求
 
 ```csharp
 var request = new OrganizationRequest("mcs_QueryTradeStPayTerm");
 request["mcs_buid"] = "BU-1018";
-request["mcs_subid"] = "A000025";
+request["mcs_subid"] = "SUB-001";
 request["mcs_countrycode"] = "001";
 request["mcs_prdgroupid"] = "4";
-request["mcs_buyercode"] = "ACN202605280000";
+request["mcs_buyercode"] = "0000016233"; // 客户编号（mcs_sapnumber）：长沙鼎宸机械设备租赁有限公司，无等级→缺省 C
 ```
 
 ### 响应
@@ -132,22 +133,24 @@ request["mcs_buyercode"] = "ACN202605280000";
 ```json
 [
   {
-    "tradeTermId": "TC26062502",
+    "tradeTermId": "TC2608140001",
     "buId": "BU-1018",
-    "buName": "CONCRETE MACHINERY BU/泵路海外营销公司",
-    "subId": "A000025",
-    "subName": "China-SH",
-    "countryCode": "1,001,KT",
-    "countryName": "南非,中国,Kertdiva",
-    "typeId": "01,02",
-    "typeName": "燃油牵引车,电动牵引车",
-    "buyerGrade": "A/S",
-    "downPay": 0.4000000000,
+    "buName": null,
+    "subId": "SUB-001",
+    "subName": null,
+    "countryCode": "",
+    "countryName": "",
+    "typeId": "",
+    "typeName": "",
+    "buyerGrade": "C",
+    "downPay": 0.3000000000,
     "payTerm": 30,
     "payFreq": 30
   }
 ]
 ```
+
+> 同日反例实测：buyerCode=`BMW0001`（直销 L4→S 级）返回 `[]`（记录等级组=C 不含 S，等级过滤生效）；buyerCode 传不存在的编码返回全部等级通配记录（兼容路径不变）。
 
 ### 6.2 多产品线查询示例（UAT 实测，2026-07-28）
 
@@ -251,7 +254,7 @@ request["mcs_buyercode"] = "AID202309210002";
 
 #### 泵路事业部
 
-当 `mcs_buid` = `BU-1018` 时（当前占位，待业务确认）：
+当 `mcs_buid` = `BU-1034` 时（2026-09-10 业务确认：亚太大区，原占位 `BU-1018` 已替换）：
 
 | 维度 | 匹配逻辑 |
 |---|---|
@@ -310,7 +313,7 @@ request["mcs_buyercode"] = "AID202309210002";
 
 ## 10. 待确认事项
 
-1. **泵路事业部真实编码**：当前代码使用 `BU-1018` 作为泵路事业部标识，需业务确认后替换。
+1. ~~**泵路事业部真实编码**~~ ✅ 已确认=`BU-1034`（亚太大区），代码常量已替换（2026-09-10，分支 `uat-20260910-peter-tradestpayterm-pumpbu`）。
 2. **个人客户判断**：客户主数据表 `mcs_customermasterdata` 暂无 `mcs_customertype` 字段，个人客户逻辑待补充。
 3. **客户等级**：PRD 明确 `mcs_creditgrade` 暂不参与查询。
 

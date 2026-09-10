@@ -86,6 +86,12 @@ var FcaProcForm = FcaProcForm || {};
             accountAttr.addOnChange(function () {
                 onAccountChange(formContext);
             });
+            // 新建表单：客户变更后检测同客户未生效模型计算记录（禅道 #1644）
+            if (formContext.ui.getFormType() === 1) {
+                accountAttr.addOnChange(function () {
+                    checkInFlightRecordOnCreate(formContext);
+                });
+            }
             // 表单加载时如果已有值，也触发一次
             if (accountAttr.getValue() !== null) {
                 onAccountChange(formContext);
@@ -248,6 +254,11 @@ var FcaProcForm = FcaProcForm || {};
                 var masterDataId = accountAttr.getValue()[0].id.replace(/[{}]/g, "");
                 updateCustomerRejectFlag(masterDataId, true);
             }
+        }
+
+        // 异步校验：新建保存时同一客户仅允许一条未生效记录（禅道 #1644，兜底阻断）
+        if (formContext.ui.getFormType() === 1) {
+            blockSaveIfInFlightExists(formContext, eventArgs);
         }
     };
 
@@ -590,6 +601,112 @@ var FcaProcForm = FcaProcForm || {};
         });
     }
 
+    // ==================== 未生效记录唯一性校验（禅道 #1644） ====================
+
+    // 重复记录校验状态标志（防止重复点击保存导致多次查询 / 异步校验通过后放行重存）
+    var _duplicateCheckInProgress = false;
+    var _duplicateCheckPassed = false;
+
+    /**
+     * 查询同客户是否存在未生效（计算状态 ≠ 3 生效启用）模型计算记录，返回第一条或 null（禅道 #1644）
+     */
+    function queryInFlightRecord(accountGuid) {
+        var filter = "_mcs_accountid_value eq " + accountGuid +
+            " and mcs_status ne " + STATUS_ACTIVE +
+            " and statecode eq 0";
+
+        return Xrm.WebApi.retrieveMultipleRecords("mcs_fca_proc", "?$select=mcs_doid&$filter=" + encodeURIComponent(filter) + "&$top=1")
+            .then(function (result) {
+                return result.entities.length > 0 ? result.entities[0] : null;
+            });
+    }
+
+    /**
+     * 新建表单客户变更检测（禅道 #1644）
+     * 同一客户只允许存在一条未生效模型计算记录：
+     * 检测到已存在时提示，确认后跳转到已存在记录（当前新建表单不保存）；取消则继续编辑，保存时由 onSave 兜底阻断
+     */
+    function checkInFlightRecordOnCreate(formContext) {
+        if (formContext.ui.getFormType() !== 1) return;
+
+        var accountAttr = formContext.getAttribute("mcs_accountid");
+        if (!accountAttr) return;
+        var accountValue = accountAttr.getValue();
+        if (!accountValue || accountValue.length === 0) return;
+
+        var accountGuid = accountValue[0].id.replace(/[{}]/g, "");
+        queryInFlightRecord(accountGuid).then(function (record) {
+            if (!record) return;
+            Xrm.Navigation.openConfirmDialog({
+                text: t("FcaProc_InFlightExistsOpen", "检测到该客户下有一条正在编辑中的数据（{0}），是否需要为你打开？").replace("{0}", record.mcs_doid || "")
+            }).then(function (result) {
+                if (result && result.confirmed) {
+                    // 确认：跳转到已存在记录，当前新建表单不保存
+                    Xrm.Navigation.navigateTo({
+                        pageType: "entityrecord",
+                        entityName: "mcs_fca_proc",
+                        entityId: record.mcs_fca_procid
+                    });
+                }
+                // 取消：不做任何操作，保存时会再次校验并阻断
+            });
+        }).catch(function (error) {
+            console.error("检测未生效模型计算记录失败:", error);
+        });
+    }
+
+    /**
+     * 新建保存时兜底阻断（禅道 #1644）
+     * 同客户已存在未生效记录时不允许保存；无重复则标记通过后重新触发保存
+     */
+    function blockSaveIfInFlightExists(formContext, eventArgs) {
+        // 已通过重复记录校验，放行本次保存
+        if (_duplicateCheckPassed) {
+            _duplicateCheckPassed = false;
+            return;
+        }
+
+        var accountAttr = formContext.getAttribute("mcs_accountid");
+        if (!accountAttr || accountAttr.getValue() === null || accountAttr.getValue().length === 0) {
+            return; // 客户必填由 validateAccountRequired 处理
+        }
+
+        // 防止重复点击保存导致多次查询
+        if (_duplicateCheckInProgress) {
+            eventArgs.preventDefault();
+            return;
+        }
+
+        _duplicateCheckInProgress = true;
+        eventArgs.preventDefault();
+
+        var accountGuid = accountAttr.getValue()[0].id.replace(/[{}]/g, "");
+
+        queryInFlightRecord(accountGuid)
+            .then(function (record) {
+                _duplicateCheckInProgress = false;
+                if (record) {
+                    Xrm.Navigation.openAlertDialog({ text: t("FcaProc_InFlightExistsBlock", "该客户下已存在一条未生效的厂端授信模型计算记录（{0}），不允许保存，请打开已有记录继续编辑。").replace("{0}", record.mcs_doid || "") });
+                } else {
+                    // 没有重复，标记通过后重新触发保存
+                    _duplicateCheckPassed = true;
+                    formContext.data.save().then(
+                        function () { _duplicateCheckPassed = false; },
+                        function (error) {
+                            _duplicateCheckPassed = false;
+                            console.error("保存失败:", error);
+                        }
+                    );
+                }
+            })
+            .catch(function (error) {
+                _duplicateCheckInProgress = false;
+                _duplicateCheckPassed = false;
+                console.error("查询重复模型计算记录失败:", error);
+                Xrm.Navigation.openAlertDialog({ text: t("FcaProc_InFlightCheckFailed", "校验重复记录失败：") + (error.message || JSON.stringify(error)) });
+            });
+    }
+
     // ==================== BPF 阶段切换事件 ====================
 
     /**
@@ -764,10 +881,12 @@ var FcaProcForm = FcaProcForm || {};
 
     /**
      * 自动加载最新生效且处于有效期内的模型版本
-     * 返回 Promise<boolean>：true=成功加载，false=未找到
+     * 返回 Promise<boolean>：true=成功加载或查询失败放行，false=未找到
+     * 禅道 #1854：无模型版本读权限的角色查询会 403——放行推进，
+     * 由后端 FcaProcCalculationPlugin（系统身份）兜底校验版本并给出明确报错
      */
     function loadLatestModelVersion(formContext) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             var versionAttr = formContext.getAttribute("mcs_versionid");
             if (!versionAttr) {
                 resolve(false);
@@ -796,8 +915,9 @@ var FcaProcForm = FcaProcForm || {};
                     resolve(true);
                 },
                 function (error) {
-                    console.error("查询最新生效模型版本失败:", error);
-                    reject(error);
+                    // #1854：查询失败（无读取权限/网络等）不阻断推进，后端插件系统身份兜底校验
+                    console.warn("查询最新生效模型版本失败（可能无读取权限），放行由后端校验:", error);
+                    resolve(true);
                 }
             );
         });

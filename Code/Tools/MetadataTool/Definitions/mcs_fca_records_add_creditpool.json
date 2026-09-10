@@ -1,0 +1,77 @@
+{
+  "entityName": "mcs_fca_records",
+  "displayName": "厂端授信额度动态调整管理台账表",
+  "displayNameZh": "厂端授信额度动态调整管理台账表",
+  "displayNameEn": "Factory Credit Quota Adjustment Ledger",
+  "primaryAttribute": "mcs_recordid",
+  "primaryAttributeDisplayName": "台账编号",
+  "primaryAttributeDisplayNameZh": "台账编号",
+  "primaryAttributeDisplayNameEn": "Ledger No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "entity_20260629_peter",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_credit_type",
+      "displayName": "授信类型",
+      "displayNameZh": "授信类型",
+      "displayNameEn": "Credit Type",
+      "description": "授信池类型：1厂端授信(FACTORY)/2中信保授信(SINOSURE)。816授信池新增，旧记录为空=厂端",
+      "type": "picklist",
+      "required": false,
+      "options": { "厂端授信": 1, "中信保授信": 2 }
+    },
+    {
+      "schemaName": "mcs_usebalance_cny",
+      "displayName": "占用释放金额CNY",
+      "displayNameZh": "占用释放金额CNY",
+      "displayNameEn": "Occupy/Release Amount CNY",
+      "description": "使用或者释放的授信金额人民币（调用方传入快照）。816授信池新增",
+      "type": "money",
+      "minDecimalValue": 0,
+      "maxDecimalValue": 999999999999.99,
+      "precision": 2,
+      "required": false
+    },
+    {
+      "schemaName": "mcs_delivery_no",
+      "displayName": "发货单编码",
+      "displayNameZh": "发货单编码",
+      "displayNameEn": "Delivery No.",
+      "description": "SAP发货单编码（发货单推出/取消占用释放场景）。816授信池新增",
+      "type": "string",
+      "maxLength": 100,
+      "required": false
+    },
+    {
+      "schemaName": "mcs_settle_no",
+      "displayName": "解款单号",
+      "displayNameZh": "解款单号",
+      "displayNameEn": "Settlement No.",
+      "description": "解款单号（回款解款/解款红冲场景）。816授信池新增",
+      "type": "string",
+      "maxLength": 100,
+      "required": false
+    },
+    {
+      "schemaName": "mcs_settle_id",
+      "displayName": "解款单明细GUID",
+      "displayNameZh": "解款单明细GUID",
+      "displayNameEn": "Settlement Detail GUID",
+      "description": "解款单明细guid（解款类幂等键）。816授信池新增",
+      "type": "string",
+      "maxLength": 50,
+      "required": false
+    },
+    {
+      "schemaName": "mcs_idempotency_key",
+      "displayName": "幂等键",
+      "displayNameZh": "幂等键",
+      "displayNameEn": "Idempotency Key",
+      "description": "幂等查重键：发货类=发货单号+环节+动作；解款类=解款明细guid；兜底=合同+订单+环节+动作+金额。816授信池新增",
+      "type": "string",
+      "maxLength": 200,
+      "required": false
+    }
+  ]
+}

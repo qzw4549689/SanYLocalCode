@@ -67,9 +67,9 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 result["ExternalRating"] = externalRating;
                 _tracer.Trace($"外部评级: {externalRating}");
 
-                // 2. 迟付指数 - latePaymentIndex value (定量)
-                decimal? latePaymentIndex = ParseLatePaymentIndex(root);
-                result["LatePaymentIndex"] = latePaymentIndex ?? -1;
+                // 2. 迟付指数 - latePaymentIndex value (定性：Coface 返回 0~4 代码，经 mcs_credititem_value 映射为枚举)
+                string latePaymentIndex = ParseLatePaymentIndex(root);
+                result["LatePaymentIndex"] = latePaymentIndex;
                 _tracer.Trace($"迟付指数: {latePaymentIndex}");
 
                 // 3. 国别风险 - countryRiskValue (定性)
@@ -246,8 +246,10 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
         /// <summary>
         /// 解析迟付指数
         /// JSON Path: productDetails.latePaymentIndex[].value
+        /// Coface 返回 0~4 整数代码（0/1=n/a、2=Considerable、3=Some、4=No negative experience），
+        /// 定性指标：原样返回代码字符串，由 CofaceQualitativeMappingHelper 按 mcs_credititem_value.mcs_cofacevalue 映射为枚举
         /// </summary>
-        private decimal? ParseLatePaymentIndex(JsonElement root)
+        private string ParseLatePaymentIndex(JsonElement root)
         {
             try
             {
@@ -258,7 +260,15 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                     {
                         if (lpi.TryGetProperty("value", out var value))
                         {
-                            return value.GetDecimalSafe();
+                            // value 可能是数字或字符串（Coface 文档标注 String），统一转字符串代码
+                            if (value.ValueKind == JsonValueKind.Number && value.TryGetDecimal(out var d))
+                            {
+                                // Coface 代码为 0~4 整数，规整掉小数尾零（如 4.0 → "4"），保证与枚举 cofaceValue 精确匹配
+                                return (d % 1 == 0)
+                                    ? ((long)d).ToString(System.Globalization.CultureInfo.InvariantCulture)
+                                    : d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                            }
+                            return value.GetString();
                         }
                     }
                 }
@@ -299,7 +309,8 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
 
         /// <summary>
         /// 解析行业风险
-        /// JSON Path: productDetails.sectorRiskAssessment[].countryRiskValue
+        /// JSON Path: productDetails.sectorRiskAssessment[].inHouseRegionRiskValue
+        /// 口径（业务反馈表20260408）：JSON 中是多期值，取最新（isCurrent=true）
         /// </summary>
         private string ParseSectorRisk(JsonElement root)
         {
@@ -308,13 +319,25 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 if (root.TryGetProperty("productDetails", out var productDetails) &&
                     productDetails.TryGetProperty("sectorRiskAssessment", out var sraArray))
                 {
+                    string fallback = null;
                     foreach (var sra in sraArray.EnumerateArray())
                     {
-                        if (sra.TryGetProperty("countryRiskValue", out var riskValue))
-                        {
-                            return riskValue.GetString();
-                        }
+                        if (!sra.TryGetProperty("inHouseRegionRiskValue", out var riskValue))
+                            continue;
+
+                        string value = riskValue.GetString();
+                        if (string.IsNullOrEmpty(value))
+                            continue;
+
+                        // 取最新（isCurrent=true）；无 isCurrent 标记时记录首个有效值兜底
+                        bool isCurrent = sra.TryGetProperty("isCurrent", out var isCurrentProp) && isCurrentProp.GetBoolean();
+                        if (isCurrent)
+                            return value;
+                        if (fallback == null)
+                            fallback = value;
                     }
+                    if (fallback != null)
+                        return fallback;
                 }
             }
             catch (Exception ex)
@@ -486,37 +509,57 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
         /// 解析财务比率
         /// JSON Path: productDetails.financials.ratios[]
         /// 根据国家配置表匹配 type.value
+        /// 资产负债率特殊处理：①匹配到的比率若 type.name 含「%」则 ÷100 归一为小数比率（Coface 各编码量纲不统一）；
+        /// ②ratios 匹配失败时按固定公式从资产负债表计算 Total Liabilities / Total Assets
+        /// （公式型配置国家：配置的 typeValue 是金额科目编码，ratios 中不存在现成比率，如 PH indicator(35523)/indicator(35519)）
         /// </summary>
         private decimal? ParseFinancialRatio(JsonElement root, string indicatorName)
         {
             try
             {
                 if (!root.TryGetProperty("productDetails", out var productDetails) ||
-                    !productDetails.TryGetProperty("financials", out var financials) ||
-                    !financials.TryGetProperty("ratios", out var ratios))
+                    !productDetails.TryGetProperty("financials", out var financials))
                 {
                     return null;
                 }
+
+                bool hasRatios = financials.TryGetProperty("ratios", out var ratios);
 
                 // 获取配置表中指定指标的配置列表
                 var configs = GetIndicatorConfigs(indicatorName);
                 if (configs.Count == 0)
                 {
                     _tracer.Trace($"国家 {_countryCode} 未配置 {indicatorName} 科目编码，尝试使用默认名称匹配");
-                    return ParseFinancialRatioByDefaultName(ratios, indicatorName);
-                }
-
-                foreach (var config in configs)
-                {
-                    decimal? value = FindRatioValue(ratios, config.TypeValue);
-                    if (value.HasValue)
+                    if (hasRatios)
                     {
-                        _tracer.Trace($"{indicatorName} 匹配 type.value={config.TypeValue}, 值={value.Value}");
-                        return value.Value;
+                        decimal? byName = ParseFinancialRatioByDefaultName(ratios, indicatorName, out string nameUsed);
+                        if (byName.HasValue)
+                        {
+                            return indicatorName == "DebtRatio" ? NormalizeDebtRatioToFraction(byName.Value, nameUsed) : byName.Value;
+                        }
                     }
                 }
+                else if (hasRatios)
+                {
+                    foreach (var config in configs)
+                    {
+                        decimal? value = FindRatioValue(ratios, config.TypeValue, out string matchedName);
+                        if (value.HasValue)
+                        {
+                            decimal finalValue = indicatorName == "DebtRatio" ? NormalizeDebtRatioToFraction(value.Value, matchedName, config.FormulaFallback) : value.Value;
+                            _tracer.Trace($"{indicatorName} 匹配 type.value={config.TypeValue}, 值={finalValue}");
+                            return finalValue;
+                        }
+                    }
 
-                _tracer.Trace($"{indicatorName} 未在 ratios 中匹配到任何配置编码");
+                    _tracer.Trace($"{indicatorName} 未在 ratios 中匹配到任何配置编码");
+                }
+
+                // 资产负债率公式兜底：固定公式 总负债/总资产（用户 2026-09-08 拍板：公式固定，不按配置读取）
+                if (indicatorName == "DebtRatio")
+                {
+                    return ComputeDebtRatioFromBalanceSheet(financials);
+                }
             }
             catch (Exception ex)
             {
@@ -526,10 +569,99 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
         }
 
         /// <summary>
+        /// 资产负债率量纲归一为小数比率：Coface 各编码量纲不统一，URBA 报文 type.name 不带「%」标记
+        /// （如实锤：PL 190 在 Report 字典叫 General debt ratio (%)，URBA 里只叫 General debt ratio，值 12.7449=百分数）
+        /// 判定为百分数的依据：①type.name 含「%」；②配置 formulaFallback 含「*100」（Excel 公式列原文，如 PL (…)*100、RU …*100）
+        /// 归一为小数（0.13），标签写入侧再统一 ×100 对齐 0907 卡百分制区间
+        /// </summary>
+        private static decimal NormalizeDebtRatioToFraction(decimal value, string ratioTypeName, string formulaFallback = null)
+        {
+            bool isPercent = (!string.IsNullOrEmpty(ratioTypeName) && ratioTypeName.Contains("%"))
+                || (!string.IsNullOrEmpty(formulaFallback) &&
+                    (formulaFallback.Contains("*100") || formulaFallback.Contains("* 100") || formulaFallback.Contains("×100")));
+            if (isPercent)
+            {
+                return value / 100m;
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// 资产负债率公式兜底：从资产负债表按固定公式计算 Total Liabilities / Total Assets
+        /// 按科目名称取数（名称各国一致，编码各国不同），取两科目均有值的最新期
+        /// 返回小数比率（如 0.2475），标签写入侧 ×100 后为 24.75 对齐 0907 卡百分制区间
+        /// </summary>
+        private decimal? ComputeDebtRatioFromBalanceSheet(JsonElement financials)
+        {
+            try
+            {
+                if (!financials.TryGetProperty("balanceSheet", out var balanceSheet) ||
+                    !balanceSheet.TryGetProperty("balanceSheetItems", out var items))
+                {
+                    return null;
+                }
+
+                // 按期次收集 Total Liabilities / Total Assets（跳过空值期次）
+                var liabByDate = new Dictionary<string, decimal>();
+                var assetByDate = new Dictionary<string, decimal>();
+                foreach (var item in items.EnumerateArray())
+                {
+                    if (!item.TryGetProperty("indicators", out var indicators))
+                        continue;
+
+                    foreach (var indicator in indicators.EnumerateArray())
+                    {
+                        if (!indicator.TryGetProperty("type", out var type) ||
+                            !type.TryGetProperty("name", out var nameProp))
+                            continue;
+
+                        string name = nameProp.GetString() ?? "";
+                        bool isLiab = string.Equals(name, "Total Liabilities", StringComparison.OrdinalIgnoreCase);
+                        bool isAsset = string.Equals(name, "Total Assets", StringComparison.OrdinalIgnoreCase);
+                        if (!isLiab && !isAsset)
+                            continue;
+
+                        decimal? amount = null;
+                        if (indicator.TryGetProperty("fromAmount", out var fromAmount))
+                        {
+                            amount = fromAmount.GetDecimalSafe();
+                        }
+                        if (!amount.HasValue)
+                            continue;
+
+                        string date = indicator.TryGetProperty("date", out var dateProp)
+                            ? dateProp.GetRawText().Trim('"') : "";
+                        if (isLiab) liabByDate[date] = amount.Value;
+                        else assetByDate[date] = amount.Value;
+                    }
+                }
+
+                // 取两科目均有值的最新期（期次为 YYYYMMDD 文本，倒序首个即最新）
+                foreach (var date in assetByDate.Keys.OrderByDescending(d => d, StringComparer.Ordinal))
+                {
+                    if (liabByDate.TryGetValue(date, out var liab) && assetByDate[date] != 0)
+                    {
+                        decimal ratio = liab / assetByDate[date];
+                        _tracer.Trace($"DebtRatio 按固定公式从资产负债表计算: Total Liabilities({liab})/Total Assets({assetByDate[date]})={ratio} (期次 {date})");
+                        return ratio;
+                    }
+                }
+
+                _tracer.Trace("DebtRatio 资产负债表中未找到 Total Liabilities/Total Assets 科目");
+            }
+            catch (Exception ex)
+            {
+                _tracer.Trace($"DebtRatio 公式兜底计算异常: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
         /// 无配置时的默认名称匹配（兼容旧逻辑）
         /// </summary>
-        private decimal? ParseFinancialRatioByDefaultName(JsonElement ratios, string indicatorName)
+        private decimal? ParseFinancialRatioByDefaultName(JsonElement ratios, string indicatorName, out string matchedName)
         {
+            matchedName = null;
             string ratioName;
             switch (indicatorName)
             {
@@ -539,10 +671,14 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 default: ratioName = indicatorName; break;
             }
 
+            decimal? best = null;
+            string bestDate = null;
             foreach (var ratio in ratios.EnumerateArray())
             {
+                // 名称嵌套在 type.name（2026-09-08 修复：原误读 ratio 顶层 name，该属性不存在，兜底恒失效）
                 string currentName = "";
-                if (ratio.TryGetProperty("name", out var nameProp))
+                if (ratio.TryGetProperty("type", out var typeProp) &&
+                    typeProp.TryGetProperty("name", out var nameProp))
                 {
                     currentName = nameProp.GetString() ?? "";
                 }
@@ -550,49 +686,85 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                 if (currentName == ratioName ||
                     (indicatorName == "NetProfitMargin" && currentName == "ROS"))
                 {
+                    // 跳过空值期次，取最新有值期（2026-09-08 修复：原首个匹配即返回，空值期次会直接返回 null）
+                    decimal? v = null;
                     if (ratio.TryGetProperty("resultValue", out var resultValue))
                     {
-                        return resultValue.GetDecimalSafe();
+                        v = resultValue.GetDecimalSafe();
                     }
-                    if (ratio.TryGetProperty("fromAmount", out var fromAmount))
+                    if (!v.HasValue && ratio.TryGetProperty("fromAmount", out var fromAmount))
                     {
-                        return fromAmount.GetDecimalSafe();
+                        v = fromAmount.GetDecimalSafe();
+                    }
+                    if (!v.HasValue)
+                        continue;
+
+                    string date = ratio.TryGetProperty("date", out var dateProp)
+                        ? dateProp.GetRawText().Trim('"') : "";
+                    if (best == null || string.CompareOrdinal(date, bestDate) > 0)
+                    {
+                        best = v.Value;
+                        bestDate = date;
+                        matchedName = currentName;
                     }
                 }
             }
-            return null;
+            return best;
         }
 
         /// <summary>
         /// 在 ratios 中查找指定 type.value 的 ratio 值
+        /// 跳过空值期次，取最新有值期（2026-09-08 修复：原首个匹配即返回，空值期次会直接返回 null）
         /// </summary>
-        private decimal? FindRatioValue(JsonElement ratios, string expectedTypeValue)
+        private decimal? FindRatioValue(JsonElement ratios, string expectedTypeValue, out string matchedTypeName)
         {
+            matchedTypeName = null;
             if (string.IsNullOrEmpty(expectedTypeValue))
                 return null;
 
+            decimal? best = null;
+            string bestDate = null;
             foreach (var ratio in ratios.EnumerateArray())
             {
                 string actualTypeValue = "";
-                if (ratio.TryGetProperty("type", out var type) &&
-                    type.TryGetProperty("value", out var valueProp))
+                string typeName = "";
+                if (ratio.TryGetProperty("type", out var type))
                 {
-                    actualTypeValue = valueProp.GetRawText().Trim('"');
+                    if (type.TryGetProperty("value", out var valueProp))
+                    {
+                        actualTypeValue = valueProp.GetRawText().Trim('"');
+                    }
+                    if (type.TryGetProperty("name", out var nameProp))
+                    {
+                        typeName = nameProp.GetString() ?? "";
+                    }
                 }
 
-                if (string.Equals(actualTypeValue, expectedTypeValue, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(actualTypeValue, expectedTypeValue, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                decimal? v = null;
+                if (ratio.TryGetProperty("resultValue", out var resultValue))
                 {
-                    if (ratio.TryGetProperty("resultValue", out var resultValue))
-                    {
-                        return resultValue.GetDecimalSafe();
-                    }
-                    if (ratio.TryGetProperty("fromAmount", out var fromAmount))
-                    {
-                        return fromAmount.GetDecimalSafe();
-                    }
+                    v = resultValue.GetDecimalSafe();
+                }
+                if (!v.HasValue && ratio.TryGetProperty("fromAmount", out var fromAmount))
+                {
+                    v = fromAmount.GetDecimalSafe();
+                }
+                if (!v.HasValue)
+                    continue;
+
+                string date = ratio.TryGetProperty("date", out var dateProp)
+                    ? dateProp.GetRawText().Trim('"') : "";
+                if (best == null || string.CompareOrdinal(date, bestDate) > 0)
+                {
+                    best = v.Value;
+                    bestDate = date;
+                    matchedTypeName = typeName;
                 }
             }
-            return null;
+            return best;
         }
 
         /// <summary>
@@ -646,7 +818,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
 
         /// <summary>
         /// 货币转换（统一转USD）
-        /// 汇率来源: D365 mcs_coface_exchange_rate 配置表（Coface 年度预算汇率）
+        /// 汇率来源: D365 transactioncurrency 标准汇率（1 LC => USD，由 CofaceExchangeRateHelper 取倒数转换方向，2026-06-23 起）
         /// </summary>
         private decimal ConvertCurrency(JsonElement indicator, decimal amount)
         {
@@ -659,7 +831,7 @@ namespace SanyD365.Plugins.CofaceIntegration.Parser
                     if (string.IsNullOrEmpty(currencyCode) || currencyCode == "USD")
                         return amount;
 
-                    // 从 D365 mcs_coface_exchange_rate 配置表读取年度预算汇率
+                    // 从 D365 transactioncurrency 标准汇率读取（取倒数 1 LC => USD）
                     decimal rate = CofaceExchangeRateHelper.GetRateToUsd(_service, _tracer, currencyCode);
                     if (rate > 0)
                     {

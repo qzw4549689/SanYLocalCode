@@ -1,0 +1,26 @@
+{
+  "entityName": "mcs_fsm_detail_data",
+  "displayName": "融资落实",
+  "displayNameZh": "融资落实",
+  "displayNameEn": "Financing Implementation",
+  "primaryAttribute": "mcs_fsm_detail_no",
+  "primaryAttributeDisplayName": "融资落实编号",
+  "primaryAttributeDisplayNameZh": "融资落实编号",
+  "primaryAttributeDisplayNameEn": "FSM Detail No",
+  "primaryAttributeLength": 100,
+  "solutionName": "",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_orderid",
+      "displayName": "订单编号",
+      "displayNameZh": "订单编号",
+      "displayNameEn": "Order",
+      "description": "关联自定义订单（mcs_order），按主表合同号过滤（PRD 外部融资额度管理）。2026-09-02 新建替代 mcs_order_id——原字段误指标准订单 salesorder（无合同关联字段），已隐藏停用，数据保留不删（用户拍板）",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "mcs_order",
+      "targetEntityDisplayName": "订单"
+    }
+  ]
+}

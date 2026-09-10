@@ -1,14 +1,16 @@
 /**
  * 融资资源管理（mcs_fsm_resource）表单脚本
  * 功能：
- * 1. 机构类型=银行时，选择银行（mcs_bank_id）自动带出机构代码（mcs_bank.mcs_bankno）
- *    与机构名称（mcs_bank.mcs_name），并锁定只读；保险/其他时手工输入
+ * 1. 机构代码（mcs_fsm_institution_code）任何类型均锁定只读（禅道 #2072）：
+ *    银行时由所选银行带出（mcs_bank.mcs_bankno）；保险/其他时=融资资源编号（mcs_fsm_resource_no）
+ *    机构名称：银行时带出（mcs_bank.mcs_name）锁定，保险/其他时手工输入
  * 2. 金融产品名称（mcs_fsm_institution_products）多选选项集按机构类型筛选：
- *    银行(1)/保险(2) → 选项 1-10（禅道 #1572：保险与银行同一代码表）；其他(9) → 仅 Others(10)（禅道 #1576 新代码表）
- * 3. 国家→洲省→城市级联过滤（禅道 #1528）：
- *    洲省弹窗按所选国家过滤（mcs_state.mcs_countryid）；
- *    城市弹窗按所选洲省过滤（mcs_city.mcs_stateid）；
- *    国家变更清空洲省/城市，洲省变更清空城市
+ *    银行(1)/保险(2)/其他(9) → 选项 1-10（禅道 #1572：保险与银行同一代码表；
+ *    禅道 #2085：其他类型改为与银行/保险一致，共 10 项）
+ * 3. 国家→洲省级联过滤（禅道 #1528）：
+ *    洲省弹窗按所选国家过滤（mcs_state.mcs_countryid）；国家变更清空洲省
+ *    （禅道 #2138：所在城市改为手工输入文本字段 mcs_fsm_institution_city_text，
+ *    原城市 Lookup 级联过滤随之移除）
  * 触发：主窗体 onLoad（字段 onChange 在 onLoad 中程序化注册）
  */
 
@@ -25,17 +27,17 @@ var FsmResourceForm = (function () {
     };
 
     // mcs_fsm_institution_products 多选选项集允许值
-    // （禅道 #1572：保险与银行使用同一代码表；禅道 #1576：代码表改为 1-10，Others=10，101-104 保险专属选项不再展示）
+    // （禅道 #1572：保险与银行使用同一代码表；禅道 #1576：代码表改为 1-10，Others=10，101-104 保险专属选项不再展示；
+    //   禅道 #2085：其他类型改为与银行/保险一致 1-10，共 10 项）
     var BANK_PRODUCT_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    var OTHER_PRODUCT_VALUES = [10]; // 其他类型仅允许 Others（#1576 后 Others=10）
+    var OTHER_PRODUCT_VALUES = BANK_PRODUCT_VALUES; // 禅道 #2085：其他与银行/保险一致
 
     // 完整选项缓存（onLoad 时快照，避免 removeOption 后丢失标签）
     var allProductOptions = null;
 
-    // 省市区级联字段（禅道 #1528）
+    // 省市区级联字段（禅道 #1528；禅道 #2138 起所在城市改手工输入文本字段，不再参与级联）
     var FIELD_COUNTRY = "mcs_fsm_institution_country";   // 所在国家 → mcs_country
     var FIELD_PROVINCE = "mcs_fsm_institution_province"; // 洲省 → mcs_state
-    var FIELD_CITY = "mcs_fsm_institution_city";         // 所在城市 → mcs_city
     var EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
     /**
@@ -54,32 +56,19 @@ var FsmResourceForm = (function () {
                 bankAttr.addOnChange(onBankChange);
             }
 
-            // 省市区级联：父级变更清空子级（禅道 #1528）
+            // 国家→洲省级联：国家变更清空洲省（禅道 #1528）
             var countryAttr = formContext.getAttribute(FIELD_COUNTRY);
             if (countryAttr) {
                 countryAttr.addOnChange(function () {
                     clearLookup(formContext, FIELD_PROVINCE);
-                    clearLookup(formContext, FIELD_CITY);
-                });
-            }
-            var provinceAttr = formContext.getAttribute(FIELD_PROVINCE);
-            if (provinceAttr) {
-                provinceAttr.addOnChange(function () {
-                    clearLookup(formContext, FIELD_CITY);
                 });
             }
 
-            // 省市区级联：弹窗按父级过滤
+            // 洲省弹窗按所选国家过滤
             var provinceControl = formContext.getControl(FIELD_PROVINCE);
             if (provinceControl) {
                 provinceControl.addPreSearch(function () {
                     filterProvinceByCountry(formContext);
-                });
-            }
-            var cityControl = formContext.getControl(FIELD_CITY);
-            if (cityControl) {
-                cityControl.addPreSearch(function () {
-                    filterCityByProvince(formContext);
                 });
             }
 
@@ -87,6 +76,13 @@ var FsmResourceForm = (function () {
             var productAttr = formContext.getAttribute("mcs_fsm_institution_products");
             if (productAttr) {
                 allProductOptions = productAttr.getOptions();
+            }
+
+            // Bug #2072：新记录首次保存后资源编码（自动编号）才生成，保存完成后同步机构代码并无感保存
+            if (formContext.data && formContext.data.entity && formContext.data.entity.addOnPostSave) {
+                formContext.data.entity.addOnPostSave(function () {
+                    syncInstitutionCodeWithResourceNo(formContext, true);
+                });
             }
 
             applyInstitutionTypeRules(formContext);
@@ -129,23 +125,21 @@ var FsmResourceForm = (function () {
             bankAttr.setRequiredLevel(isBank ? "required" : "none");
         }
         if (!isBank && bankAttr && bankAttr.getValue()) {
-            // 从银行切换到其他类型：清空 Bank 及银行带出的机构代码/名称
+            // 从银行切换到其他类型：清空 Bank 及银行带出的机构名称；
+            // 机构代码不清空，由下方 sync 覆盖为资源编码（Bug #2072）
             bankAttr.setValue(null);
-            var codeAttr = formContext.getAttribute("mcs_fsm_institution_code");
             var nameAttr = formContext.getAttribute("mcs_fsm_institution_name");
-            if (codeAttr) {
-                codeAttr.setValue(null);
-            }
             if (nameAttr) {
                 nameAttr.setValue(null);
             }
         }
 
-        // 2. 机构代码/名称：银行时只读（自动带出）；非银行时可编辑（手工输入）
+        // 2. 机构代码：任何类型均锁定只读（Bug #2072：银行=银行带出；保险/其他=资源编码）；
+        //    机构名称：银行时只读（自动带出）；非银行时可编辑（手工输入）
         var codeControl = formContext.getControl("mcs_fsm_institution_code");
         var nameControl = formContext.getControl("mcs_fsm_institution_name");
         if (codeControl) {
-            codeControl.setDisabled(isBank);
+            codeControl.setDisabled(true);
         }
         if (nameControl) {
             nameControl.setDisabled(isBank);
@@ -154,6 +148,9 @@ var FsmResourceForm = (function () {
         if (isBank) {
             // 已选银行则补齐带出值（如编辑已有记录打开表单）
             populateFromBank(formContext);
+        } else {
+            // Bug #2072：保险/其他时机构代码=融资资源编号
+            syncInstitutionCodeWithResourceNo(formContext, false);
         }
 
         // 3. 金融产品多选按类型筛选
@@ -204,6 +201,42 @@ var FsmResourceForm = (function () {
     }
 
     /**
+     * Bug #2072（2026-08-29）：非银行（保险/其他）时机构代码=融资资源编号（mcs_fsm_resource_no）
+     * 编号为服务端生成的自动编号，新建记录保存前无值——不同步、留空（元数据已配套改非必填）；
+     * 只读/停用窗体（formType 3/4/6）不同步，避免只读记录打开产生无法保存的脏值。
+     * @param {object} formContext 表单上下文
+     * @param {boolean} autoSave 置值后是否无感保存（仅 addOnPostSave 闭环新记录时传 true）
+     */
+    function syncInstitutionCodeWithResourceNo(formContext, autoSave) {
+        var typeAttr = formContext.getAttribute("mcs_fsm_institution_type");
+        var type = typeAttr ? typeAttr.getValue() : null;
+        if (type === INSTITUTION_TYPE.BANK) {
+            return; // 银行由 populateFromBank 负责
+        }
+        var formType = formContext.ui.getFormType();
+        if (formType === 3 || formType === 4 || formType === 6) {
+            return; // 只读/停用/批量编辑窗体
+        }
+        var noAttr = formContext.getAttribute("mcs_fsm_resource_no");
+        var codeAttr = formContext.getAttribute("mcs_fsm_institution_code");
+        if (!noAttr || !codeAttr) {
+            return;
+        }
+        var no = noAttr.getValue();
+        if (!no || codeAttr.getValue() === no) {
+            return;
+        }
+        codeAttr.setValue(no);
+        if (autoSave) {
+            // #2072 UAT 复验修复（2026-09-09）：formContext.data.entity.save() 为旧式同步 API 返回 undefined，
+            // 接 .then 抛 TypeError；改用 UCI 承诺式 formContext.data.save()
+            formContext.data.save().then(null, function (e) {
+                console.error("FsmResourceForm 机构代码同步保存失败:", e && e.message);
+            });
+        }
+    }
+
+    /**
      * 清空 Lookup 字段值
      */
     function clearLookup(formContext, fieldName) {
@@ -236,20 +269,6 @@ var FsmResourceForm = (function () {
         var ctrl = formContext.getControl(FIELD_PROVINCE);
         if (ctrl) {
             ctrl.addCustomFilter(fetchXml, "mcs_state");
-        }
-    }
-
-    /**
-     * 城市弹窗按所选洲省过滤（mcs_city.mcs_stateid）；未选洲省时显示空结果
-     */
-    function filterCityByProvince(formContext) {
-        var provinceId = getLookupId(formContext, FIELD_PROVINCE) || EMPTY_GUID;
-        var fetchXml = "<fetch><entity name='mcs_city'>" +
-            "<filter type='and'><condition attribute='mcs_stateid' operator='eq' value='" + provinceId + "' /></filter>" +
-            "</entity></fetch>";
-        var ctrl = formContext.getControl(FIELD_CITY);
-        if (ctrl) {
-            ctrl.addCustomFilter(fetchXml, "mcs_city");
         }
     }
 

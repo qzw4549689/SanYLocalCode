@@ -1,0 +1,210 @@
+{
+  "env": "prod-na",
+  "stats": {
+    "updated": 0,
+    "already": 0,
+    "conflict": 0,
+    "no_account": 12,
+    "no_md": 10,
+    "multi_md": 0,
+    "no_coface": 9,
+    "failed": 1
+  },
+  "report": [
+    {
+      "sap": "200000156",
+      "excelName": "Sunway Marketing Sdn Bhd",
+      "target": "icon#164031956",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200001366",
+      "excelName": "Civic Merchandising,, Inc..",
+      "target": "icon#164031539",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200001384",
+      "excelName": "TCE Service and Equipment JSC",
+      "target": "icon#164275062",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200006456",
+      "excelName": "LTE Concrete solutions inc",
+      "target": "icon#161516017",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200024682",
+      "excelName": "Turbo Fly Machine Engineering limited",
+      "target": "icon#164275061",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200025219",
+      "excelName": "ENTER Engineering PTE. LTD Olmaliq",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200036176",
+      "excelName": "MaxCrane Machinery Co., Ltd.",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200037577",
+      "excelName": "Pt.sany Makmur Perkasa",
+      "target": "icon#159454536",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200045258",
+      "excelName": "Leadway Heavy Machinery Co., Ltd.",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200045272",
+      "excelName": "China Wealth Hongkong Machine Limit",
+      "target": "icon#164063843",
+      "mdId": "a0d53b36-8d62-492d-9528-c7b8361e579d",
+      "mdName": "China Wealth Hongkong Machine Limit",
+      "before": null,
+      "action": "failed:HTTP Error 403: Forbidden"
+    },
+    {
+      "sap": "200047079",
+      "excelName": "Zhongwang Machineries Philippines Inc.",
+      "target": "icon#161500451",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200047692",
+      "excelName": "Ten-league Engineering && Technology",
+      "target": "icon#161500645",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200051662",
+      "excelName": "Vietnam Fuli Machinery Company Limited",
+      "target": "icon#161542725",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200054124",
+      "excelName": "Civic Merchandising,, Inc..",
+      "target": "icon#164031539",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200054880",
+      "excelName": "Minmetals Kazakhstan LLP",
+      "target": "icon#111510231",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200058542",
+      "excelName": "PREMIER HEAVY EQUIPMENT INC",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200058684",
+      "excelName": "Anteng Heavy Machinery Corp.",
+      "target": "icon#161516020",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200068077",
+      "excelName": "JT Machinery Sdn. Bhd.",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200074014",
+      "excelName": "Zhongwang Machineries Philippines Inc.",
+      "target": "icon#161500451",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200075521",
+      "excelName": "Enter Machinaries Service",
+      "target": "icon#164069505",
+      "action": "skip:no_masterdata"
+    },
+    {
+      "sap": "200102328",
+      "excelName": "Pt.. Jakarta International Machine Centre",
+      "target": "icon#164034482",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200106522",
+      "excelName": "PT. Karunia Permai Sentosa",
+      "target": "icon#156438784",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200123135",
+      "excelName": "Pt Lixing Labour Service",
+      "target": "icon#164041398",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200124091",
+      "excelName": "Farovon-yol Servis",
+      "target": "icon#164069390",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200125466",
+      "excelName": "Pt Buka Bumi Konstruksi",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "200125567",
+      "excelName": "Pt.. Sinar Bintang Mulia",
+      "target": "icon#164034827",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "200139217",
+      "excelName": "PREMIER HEAVY EQUIPMENT INC",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "210031820",
+      "excelName": "Pt.. Malachite International Mining",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "210032955",
+      "excelName": "HLM Machinery Sdn. Bhd.",
+      "target": "icon#161534781",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "210036332",
+      "excelName": "Pt.. Trans Layanan Halmahera",
+      "target": "icon#145364870",
+      "action": "skip:no_account"
+    },
+    {
+      "sap": "210088045",
+      "excelName": "Pt.. Cahaya Mitra Perkasa",
+      "target": null,
+      "action": "skip:no_coface_in_excel"
+    },
+    {
+      "sap": "210115228",
+      "excelName": "Pt.. Sinar Bintang Mulia",
+      "target": "icon#164034827",
+      "action": "skip:no_account"
+    }
+  ]
+}

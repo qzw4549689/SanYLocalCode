@@ -15,7 +15,8 @@ namespace SanyD365.Plugins.TradeStPayTerm
         // 角色权限（2026-07-20 按业务角色矩阵）：按 D365 安全角色"名称"匹配，环境中角色改名需同步修改
         // 注意：仅检查直接分配给用户的角色（systemuserroles），不含通过团队继承的角色
         // 2026-07-24 禅道 #1151：角色名按环境实际创建改为英文
-        private const string RoleCreator = "LTC Risk Control Configuration Admin";    // 成交条件制定人：发起配置/申请审批
+        // 2026-08-21 禅道 #1989：制定人角色按基线库口径由 Risk Control 改为 Business Control
+        private const string RoleCreator = "LTC Business Control Configuration Admin";    // 成交条件制定人：发起配置/申请审批
         private const string RoleApprover = "LTC Regional Overseas Risk Director"; // 成交条件审批人：审核配置数据
         private const string RoleAdmin = "System Administrator"; // 系统管理员放行
 
@@ -59,10 +60,11 @@ namespace SanyD365.Plugins.TradeStPayTerm
 
         private void ValidateBusinessRules(Entity target, IPluginExecutionContext context, IOrganizationService service, IOrganizationService systemService, ITracingService tracer)
         {
-            // 0. 创建时状态默认值 = 0（未生效）
+            // 0. 创建时状态默认值 = 2（生效）
+            // 2026-08-14 Bug #1834：取消审批功能，新增/导入数据直接生效
             if (context.MessageName == "Create" && (!target.Contains("mcs_status") || target["mcs_status"] == null))
             {
-                target["mcs_status"] = new OptionSetValue(0);
+                target["mcs_status"] = new OptionSetValue(2);
             }
 
             // 0.5 Excel 导入/手工录入兼容：国家/产品分类「名称 → GUID」解析
@@ -102,7 +104,7 @@ namespace SanyD365.Plugins.TradeStPayTerm
                 }
             }
 
-            // 2. 账期/付款频次 30 倍数校验
+            // 2. 账期 30 倍数校验（付款频次的 30 倍数限定已于 2026-09-10 按业务要求去除，见下）
             if (target.Contains("mcs_payterm"))
             {
                 int payTerm = target.GetAttributeValue<int>("mcs_payterm");
@@ -112,20 +114,24 @@ namespace SanyD365.Plugins.TradeStPayTerm
                 }
             }
 
+            // 付款频次负数兜底校验
+            // 2026-09-10（《bugfix发布内容》序号 5）：业务要求去除「付款频次必须为 30 的倍数」限定，
+            // 30 倍数校验已删除；仅保留负数兜底。
             if (target.Contains("mcs_payfreq"))
             {
                 int payFreq = target.GetAttributeValue<int>("mcs_payfreq");
-                if (payFreq < 0 || (payFreq != 0 && payFreq % 30 != 0))
+                if (payFreq < 0)
                 {
-                    throw new InvalidPluginExecutionException("付款频次（天）必须是 0 或 30 的倍数");
+                    throw new InvalidPluginExecutionException("付款频次（天）不能为负数");
                 }
             }
 
             // 3. 状态流转校验（Update 时）
-            if (context.MessageName == "Update" && target.Contains("mcs_status"))
-            {
-                ValidateStatusTransition(target, context, systemService, tracer);
-            }
+            // 2026-08-14 Bug #1834：取消审批功能，状态流转校验已停用
+            // if (context.MessageName == "Update" && target.Contains("mcs_status"))
+            // {
+            //     ValidateStatusTransition(target, context, systemService, tracer);
+            // }
 
             // 4. 重复记录校验（Create/Update 涉及关键维度变更时）
             // 维度：事业部、子公司、国家、产品分类、客户分类、客户等级
@@ -392,61 +398,62 @@ namespace SanyD365.Plugins.TradeStPayTerm
             return null;
         }
 
-        private void ValidateStatusTransition(Entity target, IPluginExecutionContext context, IOrganizationService systemService, ITracingService tracer)
-        {
-            if (!context.PreEntityImages.Contains("PreImage"))
-            {
-                tracer.Trace("未找到 PreImage，跳过状态流转校验");
-                return;
-            }
-
-            Entity preImage = context.PreEntityImages["PreImage"];
-            int oldStatus = preImage.GetAttributeValue<OptionSetValue>("mcs_status")?.Value ?? 0;
-            int newStatus = target.GetAttributeValue<OptionSetValue>("mcs_status")?.Value ?? 0;
-
-            if (oldStatus == newStatus)
-            {
-                return;
-            }
-
-            // 合法流转：
-            // 0(未生效) -> 1(待审批): 申请
-            // 1(待审批) -> 2(生效): 审批
-            // 1(待审批) -> 0(未生效): 拒绝
-            bool valid = (oldStatus == 0 && newStatus == 1) ||
-                         (oldStatus == 1 && newStatus == 2) ||
-                         (oldStatus == 1 && newStatus == 0);
-
-            if (!valid)
-            {
-                string oldStatusName = MapStatusValueToName(oldStatus);
-                string newStatusName = MapStatusValueToName(newStatus);
-                throw new InvalidPluginExecutionException(
-                    $"状态流转不合法：当前记录状态为【{oldStatusName}】，不允许直接变更为【{newStatusName}】。" +
-                    "正确流程：未生效 → 待审批 → 生效，或待审批 → 未生效（拒绝）。");
-            }
-
-            // 角色权限校验（后端兜底，防止绕过前端按钮直接调用 API 改状态）
-            // 0->1（申请）：制定人；1->2（审批）/1->0（拒绝）：审批人；系统管理员均放行
-            string actionName;
-            string requiredRole;
-            if (oldStatus == 0 && newStatus == 1)
-            {
-                actionName = "申请";
-                requiredRole = RoleCreator;
-            }
-            else
-            {
-                actionName = newStatus == 2 ? "审批" : "拒绝";
-                requiredRole = RoleApprover;
-            }
-
-            if (!UserHasAnyRole(systemService, context.UserId, requiredRole, RoleAdmin))
-            {
-                throw new InvalidPluginExecutionException(
-                    $"没有【{actionName}】权限：只有【{requiredRole}】或【{RoleAdmin}】角色才能执行{actionName}操作。");
-            }
-        }
+        // 2026-08-14 Bug #1834：取消审批功能，状态流转校验方法已停用，保留代码供后续恢复
+        // private void ValidateStatusTransition(Entity target, IPluginExecutionContext context, IOrganizationService systemService, ITracingService tracer)
+        // {
+        //     if (!context.PreEntityImages.Contains("PreImage"))
+        //     {
+        //         tracer.Trace("未找到 PreImage，跳过状态流转校验");
+        //         return;
+        //     }
+        //
+        //     Entity preImage = context.PreEntityImages["PreImage"];
+        //     int oldStatus = preImage.GetAttributeValue<OptionSetValue>("mcs_status")?.Value ?? 0;
+        //     int newStatus = target.GetAttributeValue<OptionSetValue>("mcs_status")?.Value ?? 0;
+        //
+        //     if (oldStatus == newStatus)
+        //     {
+        //         return;
+        //     }
+        //
+        //     // 合法流转：
+        //     // 0(未生效) -> 1(待审批): 申请
+        //     // 1(待审批) -> 2(生效): 审批
+        //     // 1(待审批) -> 0(未生效): 拒绝
+        //     bool valid = (oldStatus == 0 && newStatus == 1) ||
+        //                  (oldStatus == 1 && newStatus == 2) ||
+        //                  (oldStatus == 1 && newStatus == 0);
+        //
+        //     if (!valid)
+        //     {
+        //         string oldStatusName = MapStatusValueToName(oldStatus);
+        //         string newStatusName = MapStatusValueToName(newStatus);
+        //         throw new InvalidPluginExecutionException(
+        //             $"状态流转不合法：当前记录状态为【{oldStatusName}】，不允许直接变更为【{newStatusName}】。" +
+        //             "正确流程：未生效 → 待审批 → 生效，或待审批 → 未生效（拒绝）。");
+        //     }
+        //
+        //     // 角色权限校验（后端兜底，防止绕过前端按钮直接调用 API 改状态）
+        //     // 0->1（申请）：制定人；1->2（审批）/1->0（拒绝）：审批人；系统管理员均放行
+        //     string actionName;
+        //     string requiredRole;
+        //     if (oldStatus == 0 && newStatus == 1)
+        //     {
+        //         actionName = "申请";
+        //         requiredRole = RoleCreator;
+        //     }
+        //     else
+        //     {
+        //         actionName = newStatus == 2 ? "审批" : "拒绝";
+        //         requiredRole = RoleApprover;
+        //     }
+        //
+        //     if (!UserHasAnyRole(systemService, context.UserId, requiredRole, RoleAdmin))
+        //     {
+        //         throw new InvalidPluginExecutionException(
+        //             $"没有【{actionName}】权限：只有【{requiredRole}】或【{RoleAdmin}】角色才能执行{actionName}操作。");
+        //     }
+        // }
 
         /// <summary>
         /// 判断用户是否拥有指定角色中的任意一个（按角色名匹配，使用系统身份查询）
@@ -806,7 +813,8 @@ namespace SanyD365.Plugins.TradeStPayTerm
             switch (value)
             {
                 case 0: return "未生效";
-                case 1: return "待审批";
+                // 2026-08-14 Bug #1834：取消审批功能，待审批状态（1）已停用
+                // case 1: return "待审批";
                 case 2: return "生效";
                 default: return $"未知({value})";
             }

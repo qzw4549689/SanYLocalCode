@@ -1,0 +1,236 @@
+[
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "L",
+    "listName": "低",
+    "cofaceValue": "A1,A2"
+  },
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "M",
+    "listName": "中",
+    "cofaceValue": "A3,A4"
+  },
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "H",
+    "listName": "高",
+    "cofaceValue": "B,C,D,E"
+  },
+  {
+    "creditItemCode": "CountryRisk",
+    "listValue": "O",
+    "listName": "缺失",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "L",
+    "listName": "低",
+    "cofaceValue": "1,2"
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "M",
+    "listName": "中",
+    "cofaceValue": "3"
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "H",
+    "listName": "高",
+    "cofaceValue": "4"
+  },
+  {
+    "creditItemCode": "SectorRisk",
+    "listValue": "O",
+    "listName": "缺失",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "1",
+    "listName": "矿业、港务",
+    "cofaceValue": "矿业,港务"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "2",
+    "listName": "建工、吊装、集装箱运力",
+    "cofaceValue": "建工,吊装,集装箱运力"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "3",
+    "listName": "租赁、商混",
+    "cofaceValue": "租赁,商混"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "4",
+    "listName": "矿业、港务、建工、吊装、租赁、商混、集装箱运力",
+    "cofaceValue": "矿业,港务,建工,吊装,租赁,商混,集装箱运力"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "5",
+    "listName": "林业、农业、制造业、交通运输",
+    "cofaceValue": "林业,农业,制造业,交通运输"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "6",
+    "listName": "其他行业",
+    "cofaceValue": "其他"
+  },
+  {
+    "creditItemCode": "Sectors",
+    "listValue": "O",
+    "listName": "缺失",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "S",
+    "listName": "S级",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "A",
+    "listName": "A级",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "SH",
+    "listName": "S级控股参股公司",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "BigAccount",
+    "listValue": "AH",
+    "listName": "A级控股参股公司",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "1",
+    "listName": "钻石",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "2",
+    "listName": "铂金",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "3",
+    "listName": "白银",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "4",
+    "listName": "认证",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "DealerRating",
+    "listValue": "5",
+    "listName": "意向",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "N",
+    "listName": "No negative experience",
+    "cofaceValue": "4"
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "S",
+    "listName": "Some negative experience",
+    "cofaceValue": "3"
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "C",
+    "listName": "Considerable negative experience",
+    "cofaceValue": "2"
+  },
+  {
+    "creditItemCode": "LatePaymentIndex",
+    "listValue": "O",
+    "listName": "缺失",
+    "cofaceValue": "0,1"
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S01",
+    "listName": "S01",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S02",
+    "listName": "S02",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S03",
+    "listName": "S03",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S04",
+    "listName": "S04",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S05",
+    "listName": "S05",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S06",
+    "listName": "S06",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S07",
+    "listName": "S07",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S08",
+    "listName": "S08",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S09",
+    "listName": "S09",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "S10",
+    "listName": "S10",
+    "cofaceValue": ""
+  },
+  {
+    "creditItemCode": "OverdueModel",
+    "listValue": "O",
+    "listName": "缺失",
+    "cofaceValue": ""
+  }
+]

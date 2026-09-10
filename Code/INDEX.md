@@ -38,8 +38,8 @@
 
 | 模块 | 功能点 | 代码路径 | 涉及实体 | 备注 |
 |---|---|---|---|---|
-| 信用评估管理 | 客户信用评估记录表单逻辑 | `Customizations/WebResources/JS/mcs_credit_record.js` | `mcs_credit_record` / `mcs_custcredit` | 状态流 9-16、客户信息带出、下一步/数据集成刷新/重新发起按钮、BPP 审批提交/查看/废弃、Coface 企业搜索、BPF 拦截与字段锁定 |
-| 信用评估管理 | Coface 企业搜索弹窗 | `Customizations/WebResources/HTML/mcs_coface_company_search.html` | `mcs_credit_record`、`account`、`mcs_customermasterdata` | 按英文名称/国家编码搜索 Coface 企业并绑定 `mcs_cofaceid` |
+| 信用评估管理 | 客户信用评估记录表单逻辑 | `Customizations/WebResources/JS/mcs_credit_record.js` | `mcs_credit_record` / `mcs_custcredit` | 状态流 9-16、客户信息带出、下一步/数据集成刷新/重新发起按钮、BPP 审批提交/查看/废弃、Coface 企业搜索、BPF 拦截与字段锁定；**状态 10→11 不再因 Coface 缺失阻断，状态 12→13 强制校验标签已补录** |
+| 信用评估管理 | Coface 企业搜索弹窗 | `Customizations/WebResources/HTML/mcs_coface_company_search.html` | `mcs_credit_record`、`account`、`mcs_customermasterdata` | 按英文名称/国家编码搜索 Coface 企业并绑定 `mcs_cofaceid`；**搜索条件上方显示 Coface 联系邮箱提示** |
 | 信用评估管理 | 客户信用评估记录命令栏定义（占位） | `Customizations/Entities/mcs_credit_record/RibbonDiff.xml` | `mcs_credit_record` | 当前目录仅有 RibbonDiff.xml，无 Entity.xml；按钮通过 Modern Command Bar / App Action 部署 |
 | 信用评估管理 | 客户信用评估记录表实体定义 | `Customizations/Entities/mcs_custcredit/Entity.xml` | `mcs_custcredit` | 显示名“客户信用评估记录表”，含评估编码、客户信息、Coface/URBA/Report/BPP 字段、评估状态 9-16、信用分等 |
 | 信用评估管理 | 客户信用评估记录表主窗体 | `Customizations/Entities/mcs_custcredit/FormXml/main/4a54029f-08d0-4002-8efa-cd81adcd8f4e.xml` | `mcs_custcredit` | 主窗体 XML |
@@ -69,8 +69,8 @@
 | 信用评分与评分卡 | 评分项目枚举值保存校验 | `Customizations/Plugins/CreditItemValue/AutoNumber/CreditItemValueValidationPlugin.cs` | `mcs_credititem_value`、`mcs_credit_items` | 本地独立 Assembly；定性类型校验、选择项编码唯一性 |
 | 信用评分与评分卡 | 评分卡配置编码自动生成 | `Customizations/Plugins/ScoringCard/AutoNumber/AutoNumberPlugin.cs` | `mcs_credit_scoringcard` | 本地独立 Assembly；规则：SC + YYYYMMDD + 4 位序列号 |
 | 信用评分与评分卡 | 评分卡配置校验 | `Customizations/Plugins/ScoringCard/Validation/CreditScoringCardValidationPlugin.cs` | `mcs_credit_scoringcard`、`mcs_credititem_value` | 同一 category+项目下定性值不重复、定量区间不重叠 |
-| 信用评分与评分卡 | 信用分计算主 Plugin | `Customizations/Plugins/CreditScore/Plugin/CreditScorePlugin.cs` | `mcs_credit_record`、`account`、`mcs_customermasterdata`、`salesorder` | 本地独立 Assembly；状态 13 时计算信用分并回写 |
-| 信用评分与评分卡 | 信用分计算核心算法 | `Customizations/Plugins/CreditScore/Calculator/ScoreCalculator.cs` | `mcs_credit_scoringcard`、`mcs_customer_tag`、`mcs_credit_items` | 本地独立 Assembly；按评分卡配置逐项定量/定性评分 |
+| 信用评分与评分卡 | 信用分计算主 Plugin | `Customizations/Plugins/CreditScore/Plugin/CreditScorePlugin.cs` | `mcs_credit_record`、`account`、`mcs_customermasterdata`、`salesorder` | 本地独立 Assembly；状态 13 时计算信用分并回写；**计算前校验所有空标签已补录，否则阻断** |
+| 信用评分与评分卡 | 信用分计算核心算法 | `Customizations/Plugins/CreditScore/Calculator/ScoreCalculator.cs` | `mcs_credit_scoringcard`、`mcs_customer_tag`、`mcs_credit_items` | 本地独立 Assembly；按评分卡配置逐项定量/定性评分；**禅道 #2090：指标缺失时按评分卡「缺失」档赋分（定性=listvalue 为 O 的配置行；定量=min/max 均空的配置行），未配置缺失档兜底 0 分** |
 | 信用评分与评分卡 | BPF 阶段同步 Plugin | `Customizations/Plugins/CreditScore/Plugin/BpfStageSyncPlugin.cs` | `mcs_credit_record` | 本地独立 Assembly；`mcs_status` 变更时同步 `stageid` |
 | 信用评分与评分卡 | BPF 阶段同步辅助类 | `Customizations/Plugins/CreditScore/Plugin/BpfSyncHelper.cs` | `mcs_credit_record` | 本地独立 Assembly；维护状态值到 BPF StageId 映射 |
 | 信用评分与评分卡 | 客户评分卡配置表实体定义 | `Customizations/Entities/mcs_credit_scoringcard/Entity.xml` | `mcs_credit_scoringcard` | 含评分卡类型（7 类）、评分项目编码/名称/分类、数据类型、定量 min/max、定性项目值、赋分等 |
@@ -110,6 +110,7 @@
 | Coface 集成 | Coface 数据集成主 Plugin | `Customizations/Plugins/CofaceIntegration/Plugin/CofaceDataSyncPlugin.cs` | `mcs_credit_record`、`mcs_customer_tag`、`mcs_credit_items`、`mcs_credit_scoringcard`、`mcs_customer_file`、`account`、`mcs_customermasterdata`、`salesorder`、`mcs_outstanding` | 本地独立 Assembly；状态 11 时拉取 URBA360/Full Report/内部交易数据并写入标签 |
 | Coface 集成 | Coface 企业搜索 Custom Action | `Customizations/Plugins/CofaceIntegration/Plugin/CofaceSearchCompanyPlugin.cs` | — | 本地独立 Assembly；Custom Action `mcs_CofaceSearchCompany` |
 | Coface 集成 | Coface 系统内下单 Custom API Plugin | `Customizations/Plugins/CofaceIntegration/Plugin/CofacePlaceOrderPlugin.cs` | `mcs_credit_record` | 本地独立 Assembly；Custom API `mcs_CofacePlaceOrder`；点击推进式下单状态机（调查单→URBA监控单→Report单），防重复扣费先查后下 |
+| Coface 集成 | 绑定 Coface ID 回写客户主数据 Plugin（禅道 #2092） | `Customizations/Plugins/CofaceIntegration/Plugin/CofaceBindWritebackPlugin.cs` | `mcs_credit_record` | Update PostOperation，Filter=mcs_cofaceid；系统身份回写客户主数据科法斯客户代码（空才写、有值不覆盖） |
 | Coface 集成 | Coface 订单信息提取帮助类 | `Customizations/Plugins/CofaceIntegration/CofaceOrderInfoHelper.cs` | — | 本地独立 Assembly；从 CofaceDataSyncPlugin 抽取的 URBA/Report 订单就绪判定与 publicationId 提取公共逻辑 |
 | Coface 集成 | Coface 订单查询测试程序 | `Customizations/Plugins/CofaceIntegration/CheckCofaceOrders.cs` | — | 本地独立 Assembly；独立控制台入口，仅输出参数 |
 | Coface 集成 | Coface API 测试工具 | `Tools/CofaceApiTest/Program.cs` | — | 认证、URBA360/Report 订单查询与内容获取 |
@@ -130,11 +131,12 @@
 |---|---|---|---|---|
 | BPP 集成 | BPP 审批流程发起 | `Customizations/Plugins/BppIntegration/Plugin/BppIntegrationPlugin.cs` | `mcs_credit_record` | 本地独立 Assembly；状态 14 时调用 `mcs_bppstartapi`，防重复提交 |
 | BPP 集成 | BPP 审批结果回调处理 | `Customizations/Plugins/BppIntegration/Plugin/BppCallbackPlugin.cs` | `mcs_credit_record`、`mcs_customermasterdata` | 本地独立 Assembly；监听 `mcs_bppstatus`，更新业务状态并生成 BPP 链接 |
+| BPP 集成 | 信用等级映射配置读取（禅道 #2091） | `Customizations/Plugins/BppIntegration/CreditGradeMappingConfig.cs` | `ms_systemconfiguration` | 读 `CreditGradeMapping` 配置（信用分→A0-A4 阈值，下限含降序匹配），缺失/解析失败用内置新口径默认值（70/58/49/40/0）兜底不阻断 |
 | BPP 集成 | 客户信用评估 BPP 审批处理 | `SanyD365Project/Service/SanyD365.Main/Entities/BPP/BPPHandlerServices/BPPHandlerServiceForCreditRecord.cs` | `mcs_credit_record`、`account`、`mcs_bppapply` | 实现 `IBPPHandlerService`：封装 BPP 表单变量、发起前清理旧流程、发起后更新审批链接/下一审批人、统一回调处理、错误信息回写 |
 | BPP 集成 | 融资管理 BPP 提交（立项/方案审批） | `Customizations/Plugins/FinancingManagement/Bpp/FsmDataBppIntegrationPlugin.cs` | `mcs_fsm_data` | 本地独立 Assembly；`mcs_bppstatus` 非2→2 时校验状态与可提交标记后调 `mcs_bppstartapi` |
 | BPP 集成 | 融资管理 BPP 回调处理 | `Customizations/Plugins/FinancingManagement/Bpp/FsmDataBppCallbackPlugin.cs` | `mcs_fsm_data` | 本地独立 Assembly；监听 `mcs_bppstatuscode`，按 `mcs_approve_type` 流转融资状态（2→3 / 3→4），驳回恢复可提交标记，撤回/废弃清空 BPP 标识 |
-| BPP 集成 | 融资管理 BPP 审批处理 | `SanyD365Project/Service/SanyD365.Main/Entities/BPP/BPPHandlerServices/BPPHandlerServiceForFsmData.cs` | `mcs_fsm_data`、`mcs_bppapply` | 实现 `IBPPHandlerService`；按 `mcs_approve_type` 选 TemplateCode（FsmDataInitiation/FsmDataProject），表单变量含融资编号/记录链接/客户名称/客户编码/融资经理；#1561 起按审批类型取提交备注（立项取 `mcs_fsm_initiation_remark`/方案取 `mcs_fsm_project_remark`）写入平台级 `ApproveOpn`/`RetryApproveOpn`（审批记录-起草人节点意见，FundClaim 先例；不走表单变量，融资两个 BPP 模板无备注字段 Code） |
-| BPP 集成 | 融资管理表单提交审批逻辑 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data` | `FsmDataForm.submitInitiationApproval` / `submitProjectApproval`：前端校验后置 `mcs_approve_type` + `mcs_bppstatus=2` 触发后端 Plugin；#1561 起 payload 按审批类型带对应提交审批备注字段（`mcs_fsm_initiation_remark`/`mcs_fsm_project_remark`，仅状态 2/3 可填，随 updateRecord 同事务落库） |
+| BPP 集成 | 融资管理 BPP 审批处理 | `SanyD365Project/Service/SanyD365.Main/Entities/BPP/BPPHandlerServices/BPPHandlerServiceForFsmData.cs` | `mcs_fsm_data`、`mcs_bppapply` | 实现 `IBPPHandlerService`；按 `mcs_approve_type` 选 TemplateCode（FsmDataInitiation/FsmDataProject），表单变量含融资编号/记录链接/客户名称/客户编码/融资经理；#1561 起按审批类型取提交备注（立项取 `mcs_fsm_initiation_remark`/方案取 `mcs_fsm_project_remark`）写入平台级 `ApproveOpn`/`RetryApproveOpn`（审批记录-起草人节点意见，FundClaim 先例；不走表单变量，融资两个 BPP 模板无备注字段 Code）；审批信息快照：#1713 起立项（type=1）发起/回调同步写 `mcs_init_*` 快照组，#1754/#1756 起方案（type=2）同步写 `mcs_proj_*` 快照组，通用组（`mcs_bppstatuscode`/`mcs_fsm_data_url` 等）无条件写供 `FsmDataBppCallbackPlugin` 流转触发但不上表单，表单「立项审批」section 绑 `mcs_init_*`、`融资解决方案审批」section 绑 `mcs_proj_*` |
+| BPP 集成 | 融资管理表单提交审批逻辑 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data` | `FsmDataForm.submitInitiationApproval` / `submitProjectApproval`：前端校验后置 `mcs_approve_type` + `mcs_bppstatus=2` 触发后端 Plugin；#1561 起 payload 按审批类型带对应提交审批备注字段（`mcs_fsm_initiation_remark`/`mcs_fsm_project_remark`，仅状态 2/3 可填，随 updateRecord 同事务落库）；阶段锁定矩阵 `applyStageControl`：#1656 状态=2 未提交立项审批前六要素可编辑（提交后锁/驳回解锁/通过锁死，取代 #1540 全锁）；#1652 提交立项审批前允许 BPF 回退融资需求（状态同步回 1+自动保存防反弹，审批中/已通过禁回退）；#2071 融资方案接口人 `mcs_fsm_manager` 状态 1/2 必填（元数据保持 None，JS setRequiredLevel） |
 
 ---
 
@@ -142,14 +144,17 @@
 
 | 模块 | 功能点 | 代码路径 | 涉及实体 | 备注 |
 |---|---|---|---|---|
-| 融资管理 | 融资资源管理表单逻辑 | `Customizations/WebResources/JS/mcs_fsm_resource.js` | `mcs_fsm_resource`、`mcs_bank` | 机构类型=银行时选择银行自动带出机构代码（`mcs_bank.mcs_bankno`）/机构名称（`mcs_bank.mcs_name`）并锁定只读；从银行切换到其他类型时隐藏 Bank 并同时清空 Bank/机构代码/机构名称三个字段；金融产品多选按类型筛选：银行 1-11 / 保险 101-104 / 其他仅 Others(11)（FluentUI 多选控件 addOption 需用对象签名 {text,value}） |
-| 融资管理 | 融资需求级联带出/弹窗过滤/清空联动/保存校验 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_leadmain`、`mcs_quoter`、`mcs_quote_main`、`mcs_contract`、`mcs_customermasterdata` | `FsmDataForm.onLoad`：线索（新字段 `mcs_leadmain_id`→mcs_leadmain）/报价单（新字段 `mcs_quoter_id`→mcs_quoter）/合同 onChange 全量重算派生字段（大区/国家/事业部/客户名称/客户编码，优先级 合同>报价单>线索，客户编码取 sapnumber）；合同/报价单向上代入线索；报价单/合同弹窗按线索过滤（addPreSearch）；来源清空时派生字段联动清空；onSave 校验三来源至少一个 + 重复性校验（三者任一相同即重复，异步查询后放行）；提交立项/方案审批前置分阶段必填校验（融资六要素+合同号；方案阶段四项贴息/费用/回购/其它条件 2026-08-04 #1559 起非必填），融资经理自动取登录人。旧字段 mcs_lead_id/mcs_quote_id 保留不删（2026-07-24 红线） |
+| 融资管理 | 融资资源管理表单逻辑 | `Customizations/WebResources/JS/mcs_fsm_resource.js` | `mcs_fsm_resource`、`mcs_bank` | 机构代码全类型锁定只读（禅道 #2072）：银行时选择银行自动带出机构代码（`mcs_bank.mcs_bankno`）/机构名称（`mcs_bank.mcs_name`）；保险/其他时机构代码=融资资源编号（新建保存后 addOnPostSave 同步+无感保存；元数据配套改非必填）；从银行切换到其他类型时隐藏 Bank 并清空 Bank/机构名称（机构代码由 sync 覆盖）；金融产品多选按类型筛选：银行/保险/其他均为 1-10 共 10 项（禅道 #1572 保险与银行同代码表；禅道 #2085 其他类型与银行/保险一致）；国家→洲省级联（#1528），所在城市 #2138 起改手工输入文本字段 `mcs_fsm_institution_city_text`（原城市 Lookup `mcs_fsm_institution_city` 改非必填移出表单，城市级联移除）（FluentUI 多选控件 addOption 需用对象签名 {text,value}） |
+| 融资管理 | 融资需求级联带出/弹窗过滤/清空联动/保存校验 | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_leadmain`、`mcs_quoter`、`mcs_quote_main`、`mcs_contract`、`mcs_customermasterdata` | `FsmDataForm.onLoad`：线索（新字段 `mcs_leadmain_id`→mcs_leadmain）/报价单（新字段 `mcs_quoter_id`→mcs_quoter）/合同 onChange 全量重算派生字段（大区/国家/事业部/客户名称/客户编码，优先级 合同>报价单>线索，客户编码取 sapnumber）；合同/报价单向上代入线索；报价单弹窗按线索过滤（addPreSearch）；来源清空时派生字段联动清空；onSave 校验三来源至少一个 + 重复性校验（三者任一相同即重复，**同步 XHR 查询**，2026-08-07 #1652 二次修复：异步 preventDefault 会中止 BPF 阶段导航保存导致回退弹回）；提交立项/方案审批前置分阶段必填校验（融资六要素+合同号；方案阶段四项贴息/费用/回购/其它条件 2026-08-04 #1559 起非必填），融资经理自动取登录人。旧字段 mcs_lead_id/mcs_quote_id 保留不删（2026-07-24 红线）。**禅道 #2150（2026-09-07）：合同改多选**——新字段 `mcs_contract_ids`（Memo 存 GUID 逗号分隔，平台公共 PCF `mcs_common.control.lookup.multiplechoice` 绑值，同成交条件基线库）+ `mcs_contract_nos`（合同编号文本，onChange `onContractIdsChanged`→`syncContractNos` 同步）；以**第一个合同**带出派生字段；重复校验改 `contains(mcs_contract_ids)` 任一合同相同即重复；阶段控制/必填清单换多选字段；原「按线索过滤合同放大镜」随控件取消（PCF 无过滤参数）；旧单选 `mcs_contract_id` 表单隐藏保留，存量不迁移（用户拍板） |
+| 融资管理 | 合同编号多选 picker（禅道 #2169①） | `Customizations/WebResources/HTML/mcs_fsm_contract_multiselect.html` | `mcs_fsm_data`、`mcs_contract`、`mcs_quoter`、`mcs_quote_main` | #2150 合同改多选后业务要求候选合同按线索/报价单过滤，平台 PCF `mcs_common.control.lookup.multiplechoice` 无过滤参数（#1559 实锤）→ 参照机构 picker 自制：线索（mcs_leadmain_id）有值→`mcs_contract.mcs_leadmain`=线索过滤；无线索则报价单→报价主表→其线索过滤；均无→不过滤；写回 `mcs_contract_ids`+fireOnChange 复用 #2150 编号同步/第一个合同带出；可编辑状态读 `mcs_contract_ids` 控件 disabled 与表单阶段控制同源。**上下文获取要点（DEV1 实锤）**：存量记录 parent.Xrm.Page 已绑定可用；新建表单顶层 Xrm.Page 是 stub 永不绑定，真实表单在顶层子 frame（uclient/blank.htm，含 FsmDataForm+已绑定 Page），getFormPage 按 自身→父级→顶层→顶层子 frame 逐级找含 mcs_fsm_status 的 Page + 轮询等待就绪；FsmStageChanged 也分发在该 frame 的 window |
 | 融资管理 | 融资六要素/解决方案页面字段（禅道 #1559） | `Customizations/WebResources/JS/mcs_fsm_data.js` | `mcs_fsm_data`、`mcs_fsm_resource` | 六要素「融资产品」单选选项集 `mcs_fsm_product`（仅银行类 1-11），六要素/方案双单元格同一字段（方案侧标签=金融产品、只读）；「融资资源机构」多选 = 自制 HTML WebResource `mcs_fsm_resource_multiselect.html` 嵌入式 picker（平台 PCF `mcs_common.control.lookup.multiplechoice` 无过滤参数不满足下拉级过滤，bundle 实锤查询无 $filter）：仅启用且机构产品含所选融资产品的机构显示，搜索+勾选写回 `mcs_fsm_resource_ids`（Memo 存 GUID 逗号分隔，表单隐藏单元格保留属性），`onResourceIdsChanged` 校验并按机构类型（1银行/2保险/9其它）分组把名称/编码逗号分隔带入 6 个只读字段（`mcs_fsm_bank/insurance/other_names/codes`，`SOLUTION_AUTO_FIELDS` 始终只读）；融资产品变更清空重选；#1507 的 syncResourceName/filterProductsByResource/ALL_PRODUCT_OPTIONS 已废弃移除，旧字段 product_desc/resource_id/resource_name/resource_products 表单隐藏保留不删 |
 
 | 融资管理 | 融资资源状态同步（激活回写是否启用过，禅道 #1433） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceStateSyncPlugin.cs` | `mcs_fsm_resource` | Update Filter=statecode PostOp Sync；列表【激活】（statecode→0）时幂等回写 `mcs_fsm_rl_status=true`（单向标记，停用不清）；主 Assembly 类名 `SanyD365.D365Extension.Sales.Plugins.FinancingManagement.Resource.FsmResourceStateSyncPlugin` |
 | 融资管理 | 融资资源删除守卫（禅道 #1433 关联 PRD 删除规则） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceDeleteGuardPlugin.cs` | `mcs_fsm_resource` | Delete PreOp Sync + PreImage（mcs_fsm_rl_status+createdby）；已启用过拦截、非创建人拦截（SysAdmin 放行）；⚠️ Delete 管道 `context.UserId` 恒为 SYSTEM，创建人比对必须用 `InitiatingUserId`；业务角色不写死靠安全角色删除权限配置 |
 | 融资管理 | 融资资源机构代码重复校验（禅道 #1512） | `Customizations/Plugins/FinancingManagement/Resource/FsmResourceDuplicationCheckPlugin.cs` | `mcs_fsm_resource` | Create/Update PreOp Sync（Update Filter=mcs_fsm_institution_code）；机构代码全局唯一、含停用记录（用户确认口径）；系统身份查重防权限绕过；拦截提示含已有记录编号并引导「启用」原记录 |
-| 融资管理 | 融资落实订单号唯一校验（禅道 #1511） | `Customizations/Plugins/FinancingManagement/Detail/FsmDetailDataDuplicationCheckPlugin.cs` | `mcs_fsm_detail_data` | Create/Update PreOp Sync（Update Filter=mcs_order_id,mcs_fsm_data_id + PreImage 补齐）；同一融资管理记录（mcs_fsm_data_id）下订单号（mcs_order_id）唯一，不同融资管理记录间不拦截（用户确认口径，PRD 融资方案落实-新增-保存唯一性校验）；系统身份查重；拦截提示显示订单名称（Create Target Lookup 无 Name 需显式 Retrieve） |
+| 融资管理 | 融资落实订单号唯一校验（禅道 #1511） | `Customizations/Plugins/FinancingManagement/Detail/FsmDetailDataDuplicationCheckPlugin.cs` | `mcs_fsm_detail_data` | Create/Update PreOp Sync（Update Filter=mcs_order_id,mcs_fsm_data_id + PreImage 补齐）；同一融资管理记录（mcs_fsm_data_id）下订单号（mcs_order_id）唯一，不同融资管理记录间不拦截（用户确认口径，PRD 融资方案落实-新增-保存唯一性校验）；系统身份查重；拦截提示显示订单名称（Create Target Lookup 无 Name 需显式 Retrieve）；⚠️ 该校验仍针对旧字段 `mcs_order_id`（salesorder），表单 2026-09-02 起已改用新字段 `mcs_orderid`（mcs_order），新字段暂无唯一性校验覆盖 |
+| 融资管理 | 融资落实表单逻辑（只读守卫+订单过滤） | `Customizations/WebResources/JS/mcs_fsm_detail_data.js` | `mcs_fsm_detail_data`、`mcs_fsm_data`、`mcs_order`、`mcs_fmprocess` | 禅道 #1816：主单 BPF 完成（statuscode=2）全表单只读+提示；2026-09-02：订单编号放大镜按主表合同过滤（`mcs_order.mcs_contract`，addPreSearch+addCustomFilter，缓存未就绪/无合同空结果兜底）；**禅道 #2150（2026-09-07）：主表合同改多选**——读 `mcs_contract_ids` 解析 GUID 数组，`mcs_contract IN 多选合同`过滤；主表无合同时按客户兜底（link-entity account，`mcs_contractbuyer`→`mcs_customermasterdata`=主表客户主数据，与判新老客户同口径）；均无仍空结果兜底 |
+| 融资管理 | 进入融资落实阶段小铃铛通知（禅道 #1654） | `Customizations/Plugins/FinancingManagement/Notify/FsmDataStage4NotifyPlugin.cs` | `mcs_fsm_data`、`systemuser` | Update PostOp Sync（Filter=mcs_fsm_status + PreImage：mcs_fsm_status/mcs_fsm_no/mcs_fsm_manager/createdby）；融资状态非4→4（方案审批通过回调）时调 `SendAppNotification`（Recipient=融资经理 mcs_fsm_manager 为空兼底 createdby）发小铃铛提醒，正文含融资编号（本环境不支持 Data 操作按钮/正文链接不可点击，2026-08-06 实测）；通知失败仅记 Trace 不影响主流程；预研命令 `test-app-notification`（MetadataTool） |
 
 ---
 
@@ -178,12 +183,18 @@
 |---|---|---|---|---|
 | 工厂信用 | 厂端授信模型版本表单逻辑 | `Customizations/WebResources/JS/mcs_fca_mdlversion.js` | `mcs_fca_mdlversion` | 新建默认值（生效=是、开始/结束日期）；保存前校验生效版本日期重叠 |
 | 工厂信用 | 厂端授信模型配置表单逻辑 | `Customizations/WebResources/JS/mcs_fca_mdlconfig.js` | `mcs_fca_mdlconfig` | 客户分类+客户等级组合唯一性校验；ALL 等级基准额度校验；因子字段必填校验 |
-| 工厂信用 | 厂端授信流程计算表单逻辑 | `Customizations/WebResources/JS/mcs_fca_proc.js` | `mcs_fca_proc` | BPF 阶段切换前校验；黑名单/逾期（>6 个月且逾期率>50%）自动判定不予授信；模型版本有效校验 |
-| 工厂信用 | 厂端授信额度调整申请表单逻辑 | `Customizations/WebResources/JS/mcs_fca_quotaapp.js` | `mcs_fca_quotaapp` | 客户/模型序列号带出、调整后余额计算、保存校验、提交 BPP 审批；审批中(2)/通过(3) 全表单只读（mcs_bppstatus 未上表单需服务端读取，禅道 #1283） |
-| 工厂信用 | 厂端授信模型生效启用回写 | `Customizations/Plugins/FactoryCredit/ProcActivation/FcaProcActivationPlugin.cs` | `mcs_fca_proc`、`mcs_fca_quota`、`mcs_fca_records` | 本地独立 Assembly；状态 3 时创建/更新额度表并生成台账；余额=额度-占用、初始化台账调整金额=0 |
+| 工厂信用 | 厂端授信流程计算表单逻辑 | `Customizations/WebResources/JS/mcs_fca_proc.js` | `mcs_fca_proc` | BPF 阶段切换前校验；黑名单/逾期（>6 个月且逾期率>50%）自动判定不予授信；模型版本有效校验；同客户未生效记录唯一（新建提示跳转+保存阻断，禅道 #1644） |
+| 工厂信用 | 厂端授信额度调整申请表单逻辑 | `Customizations/WebResources/JS/mcs_fca_quotaapp.js` | `mcs_fca_quotaapp` | 客户/模型序列号带出、调整后余额计算、保存校验、提交 BPP 审批；审批中(2)/通过(3) 全表单只读（mcs_bppstatus 未上表单需服务端读取，禅道 #1283）；模型序列号带出按 mcs_active 过滤唯一有效记录（禅道 #1644） |
+| 工厂信用 | 厂端授信模型生效启用回写 | `Customizations/Plugins/FactoryCredit/ProcActivation/FcaProcActivationPlugin.cs` | `mcs_fca_proc`、`mcs_fca_quota`、`mcs_fca_records` | 本地独立 Assembly；状态 3 时自动创建额度生效申请单（待人工提交 BPP）；禅道 #1644：生效时本记录 mcs_active=是+同客户其他有效记录置否（一客户仅一条有效），退回计算联动置否 |
 | 工厂信用 | 厂端授信额度调整申请审批回写 | `Customizations/Plugins/FactoryCredit/Bpp/Services/QuotaActivationService.cs`、`QuotaRecordService.cs` | `mcs_fca_quotaapp`、`mcs_fca_quota`、`mcs_fca_records` | 审批通过后回写额度表（余额=调整后额度-占用）并写台账 |
 | 工厂信用 | 厂端授信余额调整 Custom API | `Customizations/Plugins/FactoryCredit.Api/AdjustFcaQuotaBalancePlugin.cs` | `mcs_fca_quota`、`mcs_fca_records` | 本地独立 Assembly；Custom API `mcs_AdjustFcaQuotaBalance`，初始化/占用/释放统一接口 |
 | 工厂信用 | 厂端授信余额调整服务 | `Customizations/Plugins/FactoryCredit.Api/FcaQuotaAdjustService.cs` | `mcs_fca_quota`、`mcs_fca_records`、`mcs_customermasterdata`、`mcs_contract`、`mcs_order` | 本地独立 Assembly；额度调整核心逻辑（不变式：额度=余额+占用；占用防重；补偿回滚） |
+| 授信池816 | 使用授信 Custom API | `Customizations/Plugins/CreditPool.Api/RecordCreditDetailPlugin.cs` | `mcs_fca_records`、`mcs_fca_quota`、`mcs_approvedquota` | 本地独立 Assembly；Custom API `mcs_recordCreditDetail`（哑记账），占用/释放/初始化+幂等台账，供交货单/订单/解款记录调用 |
+| 授信池816 | 使用授信服务 | `Customizations/Plugins/CreditPool.Api/RecordCreditDetailService.cs` | `mcs_fca_records`、`mcs_fca_quota`、`mcs_customermasterdata`、`mcs_contract`、`mcs_order`、`mcs_approvedquota` | 本地独立 Assembly；FACTORY 走额度表（同旧 API 不变式），SINOSURE 不落库台账聚合净占用；释放超占用时占用金额按 0 兜底 |
+| 授信池816 | 中信保上浮配置读取 | `Customizations/Plugins/CreditPool.Api/SinosureUpliftConfig.cs` | `ms_systemconfiguration` | 配置名 SinosureUpliftConfig（JSON：factor/cap/excludedCountries），缺省 ×1.5 封顶 8M |
+| 授信池816 | 查询授信 Custom API | `Customizations/Plugins/CreditPool.Api/QueryCreditBalancePlugin.cs` | `mcs_fca_quota`、`mcs_fca_records`、`mcs_approvedquota`、`mcs_contract` | 本地独立 Assembly；Custom API `mcs_queryCreditBalance`，客户维度查询+传合同附带合同授信金额，给合同模块调用 |
+| 授信池816 | 查询授信服务 | `Customizations/Plugins/CreditPool.Api/QueryCreditBalanceService.cs` | `mcs_fca_quota`、`mcs_fca_records`、`mcs_approvedquota`、`mcs_customermasterdata`、`mcs_contract`、`transactioncurrency` | 本地独立 Assembly；批复限额读 mcs_approvedquota（T+1），净占用台账聚合，CNY 按 transactioncurrency 汇率实时换算。⚠️ 已下沉 SanyD365.Main `AppCreditPoolService`（本地副本为旧版）：合同授信金额=该合同下有效融资管理记录 mcs_fsm_credit_amount_usd 求和，**禅道 #2150 起匹配改 `contains(mcs_contract_ids,'合同GUID')`** |
+| 授信池816 | 合同交易风险敞口计算 Custom API | `Customizations/Plugins/RiskExposure.Api/CalculateRiskExposurePlugin.cs`、`RiskExposureService.cs` | `mcs_contract`、`mcs_fsm_data`、`mcs_fca_quota`、`mcs_approvedquota` | 本地独立 Assembly（远程 `D365ExtensionApi.Sales/Apis/RiskExposure`）；Custom API `mcs_CalcContractRiskExposure`（禅道 #1641），A 类=签约占用+厂端已用+风险赊销−厂端授信−中信保余额，B 类=风险赊销−外部融资授信金额；**禅道 #2150（2026-09-07）：融资记录匹配改 `mcs_contract_ids contains 合同GUID`（原单选 Lookup eq），授信金额=合同总金额（美元 `mcs_totalcontractamount_base`）×（1−首付比例 `mcs_fsm_payment_ratio`），取最新一条融资记录** |
 
 ---
 
@@ -203,6 +214,7 @@
 | 公共工具 | 多语言翻译导入导出 | `Tools/D365ToolCommon/Translation/TranslationService.cs` | — | 标准 D365 翻译导入导出 |
 | 公共工具 | WebResource 查询/更新/创建/发布 | `Tools/D365ToolCommon/WebResource/WebResourceService.cs` | — | `QueryByName`、`UpdateContent`、`Create`、`PublishWebResources` 等；按 ID 发布，带重试 |
 | 公共工具 | WebResource 发版排查（Active 层遮挡） | `Tools/D365ToolCommon/WebResource/WebResourceReleaseCheckService.cs` | — | 只读；双环境对比存在性/内容 MD5/非托管 Active 层 content 覆盖；CLI：`MetadataTool check-webresource-release` |
+| 公共工具 | 安全角色与权限服务 | `Tools/D365ToolCommon/Security/SecurityRoleService.cs` | `role`、`privilege`、`systemuserroles`、`teammembership` | 角色/角色权限/用户有效权限查询（只读）+ 角色权限调整（Add/RemovePrivilegesRole）、用户挂摘角色（写，幂等）；CLI：`MetadataTool list-role-privileges` / `query-user-permissions` / `set-role-privilege` / `assign-role` / `remove-role` |
 | 公共工具 | 多语言帮助类 | `Customizations/WebResources/JS/mcs_language_helper.js` | `ms_languagefile_1033`、`ms_languagefile_2052` | 按当前用户语言加载 JSON 语言包，提供 `getLabel` |
 | 公共工具 | 发版包字段对比（防 80041A06） | `Tools/release-diff/diff_solution_packages.py`、`Tools/release-diff/diff_package_vs_dev1.py` | — | 只读；发版前对比上次发版包 vs 本次内容，提前发现同名字段类型不一致；快照归档于 `Backups/Solutions/Releases/` |
 
@@ -281,6 +293,7 @@
 | 模块 | 功能点 | 代码路径 | 涉及实体 | 备注 |
 |---|---|---|---|---|
 | 元数据工具 | D365 元数据管理工具 CLI | `Tools/MetadataTool/Program.cs` | — | 命令分发器：实体/字段/表单/视图创建、WebResource 部署、Plugin 注册、翻译导入导出、信用相关诊断与同步等 |
+| 元数据工具 | 禅道 #2090 OverdueModel 改定性数据配套 | `Tools/MetadataTool/Program.cs`（`update-overdue-model-qualitative` 命令） | `mcs_credit_items`、`mcs_credititem_value`、`mcs_credit_scoringcard`（写） | 幂等：评分项目改定性+说明 → 建 S01~S10+O 枚举 → 重建 OverdueModel 评分卡分档行（权重与生产 0829 新卡一致：直销缺失档 17/经销商 15）→ 迟付指数补定性 O 缺失档行（直销 2/经销商 3） |
 | 元数据工具 | 实体/字段/表单/视图/Plugin/WebResource 综合管理 | `Tools/MetadataTool/Services/EntityManager.cs` | — | `CreateEntity`、`CreateStringField`、`CreatePicklistField`、`CreateLookupField`、`BindJsToForm`、`RegisterPlugin`、`CreateCreditItemRecords` 等核心元数据操作 |
 | 元数据工具 | JSON 实体/字段定义模型 | `Tools/MetadataTool/Models/EntityDefinition.cs` | — | `EntityDefinition`、`FieldDefinition`、`LoadFromJson`、`SaveToJson` |
 | 元数据工具 | 多语言标签辅助（本地副本） | `Tools/MetadataTool/Helpers/LabelHelper.cs` | — | 与 D365ToolCommon 逻辑一致 |
@@ -381,6 +394,7 @@
 | 贸易条款 | `Customizations/Plugins/TradeStPayTerm.Api/TradeStPayTermApiPlugins.csproj` | 贸易条款查询 API 插件项目 |
 | 工厂信用 | `Customizations/Plugins/FactoryCredit/FactoryCreditPlugins.csproj` | 工厂信用插件项目 |
 | 工厂信用 | `Customizations/Plugins/FactoryCredit.Api/FactoryCreditApiPlugins.csproj` | 厂端授信余额调整 API 插件项目 |
+| 授信池816 | `Customizations/Plugins/CreditPool.Api/CreditPoolApiPlugins.csproj` | 使用授信 API（816 授信池）插件项目 |
 | 融资管理 | `Customizations/Plugins/FinancingManagement/FinancingManagementPlugins.csproj` | 融资管理插件项目 |
 | Plugin 注册辅助 | `Customizations/PluginRegistrationHelper/PluginRegistrationHelper.csproj` | Plugin 注册辅助工具项目 |
 | ServiceJob | `ServiceJobs/CreditRecordExpiration/CreditRecordExpiration.csproj` | 信用评估过期处理作业项目 |

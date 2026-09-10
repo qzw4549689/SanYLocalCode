@@ -9,7 +9,21 @@
   JS 零改动：apply/approve/reject(selectedIds, selectedControl) 与 CrmParameter 一一对应。
 -->
 <RibbonDiffXml>
+  <!-- 2026-08-14 Bug #1834：取消审批功能，批量申请/审批/拒绝按钮已隐藏（CustomAction 注释），不删除组件 -->
+  <!-- 2026-08-15 重大修正：实测发现「注释 CustomAction / 空 diff 导入」并不能从 Active 非托管层移除已存在的按钮
+       （RetrieveEntityRibbon 显示 0 引用是假象，UCI 渲染的预计算 ribbon 元数据里按钮仍在，DEV1/UAT 双双实锤）。
+       正确做法：用 HideCustomAction 显式隐藏原 CustomAction 引入的按钮（平台标准机制，随实体包走）。 -->
   <CustomActions>
+    <HideCustomAction Id="mcs.mcs_trade_stpayterm.GridApply.HideAction"
+                      HideActionId="mcs.mcs_trade_stpayterm.GridApply.CustomAction"
+                      Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children" />
+    <HideCustomAction Id="mcs.mcs_trade_stpayterm.GridApprove.HideAction"
+                      HideActionId="mcs.mcs_trade_stpayterm.GridApprove.CustomAction"
+                      Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children" />
+    <HideCustomAction Id="mcs.mcs_trade_stpayterm.GridReject.HideAction"
+                      HideActionId="mcs.mcs_trade_stpayterm.GridReject.CustomAction"
+                      Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children" />
+    <!--
     <CustomAction Id="mcs.mcs_trade_stpayterm.GridApply.CustomAction"
                   Location="Mscrm.HomepageGrid.mcs_trade_stpayterm.MainTab.Management.Controls._children"
                   Sequence="10">
@@ -46,11 +60,14 @@
                 TemplateAlias="o1" />
       </CommandUIDefinition>
     </CustomAction>
+    -->
   </CustomActions>
   <Templates>
     <RibbonTemplates Id="Mscrm.Templates"></RibbonTemplates>
   </Templates>
   <CommandDefinitions>
+    <!-- 2026-08-14 Bug #1834：批量按钮 CommandDefinition 已注释 -->
+    <!--
     <CommandDefinition Id="mcs.mcs_trade_stpayterm.GridApply.Command">
       <EnableRules>
         <EnableRule Id="mcs.mcs_trade_stpayterm.SelectionCountAtLeastOne" />
@@ -87,17 +104,23 @@
         </JavaScriptFunction>
       </Actions>
     </CommandDefinition>
+    -->
   </CommandDefinitions>
   <RuleDefinitions>
     <TabDisplayRules />
     <DisplayRules />
     <EnableRules>
+      <!-- 2026-08-14 Bug #1834：批量按钮启用规则已注释 -->
+      <!--
       <EnableRule Id="mcs.mcs_trade_stpayterm.SelectionCountAtLeastOne">
         <SelectionCountRule AppliesTo="SelectedEntity" Minimum="1" Default="0" />
       </EnableRule>
+      -->
     </EnableRules>
   </RuleDefinitions>
   <LocLabels>
+    <!-- 2026-08-14 Bug #1834：批量按钮标签已注释 -->
+    <!--
     <LocLabel Id="mcs.mcs_trade_stpayterm.GridApply.LabelText">
       <Titles>
         <Title description="批量申请" languagecode="2052" />
@@ -134,5 +157,6 @@
         <Title description="Reject selected pending trade term templates and return them to inactive" languagecode="1033" />
       </Titles>
     </LocLabel>
+    -->
   </LocLabels>
 </RibbonDiffXml>

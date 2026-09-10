@@ -1,0 +1,25 @@
+{
+  "entityName": "mcs_fsm_resource",
+  "displayName": "融资资源管理",
+  "displayNameZh": "融资资源管理",
+  "displayNameEn": "Financing Resource",
+  "primaryAttribute": "mcs_fsm_resource_no",
+  "primaryAttributeDisplayName": "融资资源编号",
+  "primaryAttributeDisplayNameZh": "融资资源编号",
+  "primaryAttributeDisplayNameEn": "Resource No.",
+  "primaryAttributeLength": 20,
+  "solutionName": "",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_institution_city_text",
+      "displayName": "所在城市",
+      "displayNameZh": "所在城市",
+      "displayNameEn": "City",
+      "description": "所在城市（手工输入）。禅道 #2138：城市主数据列表不全面，改用文本字段替代原城市 Lookup（mcs_fsm_institution_city，已改非必填并移出表单）",
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    }
+  ]
+}

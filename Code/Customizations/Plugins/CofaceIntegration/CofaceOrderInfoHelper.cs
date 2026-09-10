@@ -19,6 +19,7 @@ namespace SanyD365.Plugins.CofaceIntegration
         {
             NotFound,       // 未找到订单
             NotReady,       // 订单存在但状态未就绪
+            PartiallyReady, // 部分就绪（财务数据未交付）：数据集成可取数，但不可下 Report 单（2026-08-31 Cathy-Coface 确认口径）
             Ready           // 订单就绪可取数
         }
 
@@ -48,7 +49,12 @@ namespace SanyD365.Plugins.CofaceIntegration
         internal class ReportOrderInfo
         {
             public string OrderId { get; set; }
+            /// <summary>数据取数用 publicationId（优先 JSON 格式；兼容旧逻辑=首个匹配 publication）</summary>
             public string PublicationId { get; set; }
+            /// <summary>JSON 格式 publicationId（取内容用；无格式信息时回退=PublicationId）</summary>
+            public string JsonPublicationId { get; set; }
+            /// <summary>PDF 格式 publicationId（附件下载用；JSON 单无 PDF 格式时为 null，调用方应跳过附件保存）</summary>
+            public string PdfPublicationId { get; set; }
             public ReportOrderStatus Status { get; set; }
             public string StatusDetail { get; set; }
         }
@@ -107,13 +113,20 @@ namespace SanyD365.Plugins.CofaceIntegration
 
                     tracer.Trace($"检查订单: id={orderId}, status={statusStr}");
 
-                    // 状态为ready或partially_ready → 订单就绪
-                    if (statusStr == "ready" || statusStr == "partially_ready")
+                    // 状态为ready → 订单就绪（partially_ready 不算 ready，Report 下单须等财务数据交付，2026-08-31 Cathy-Coface 确认）
+                    if (statusStr == "ready")
                     {
                         result.OrderId = orderId;
                         result.Status = UrbaOrderStatus.Ready;
                         result.StatusDetail = statusStr;
                         return result;
+                    }
+                    // 状态为partially_ready → 部分就绪：数据集成仍可取数（兼容原行为），下单流程不得推进 Report 单；不 return，继续扫描后续订单是否有完全 ready 的
+                    else if (statusStr == "partially_ready" && !string.IsNullOrEmpty(orderId))
+                    {
+                        result.OrderId = orderId;
+                        result.Status = UrbaOrderStatus.PartiallyReady;
+                        result.StatusDetail = statusStr;
                     }
                     // 状态为空或不存在，但有id → 兼容处理，视为就绪（Coface某些环境不返回status）
                     else if (string.IsNullOrEmpty(statusStr) && !string.IsNullOrEmpty(orderId))
@@ -137,6 +150,10 @@ namespace SanyD365.Plugins.CofaceIntegration
                 if (result.Status == UrbaOrderStatus.NotReady)
                 {
                     tracer.Trace($"找到{orders.Count}个订单，但状态均未就绪");
+                }
+                else if (result.Status == UrbaOrderStatus.PartiallyReady)
+                {
+                    tracer.Trace($"找到{orders.Count}个订单，最新状态为partially_ready（财务数据未交付），数据可取但Report单需等待");
                 }
             }
             catch (Exception ex)
@@ -188,6 +205,12 @@ namespace SanyD365.Plugins.CofaceIntegration
                 string normalizedExpectedSlug = expectedSlug?.ToUpperInvariant();
                 string normalizedExpectedProductCode = expectedProductCode?.ToUpperInvariant();
 
+                // 跨全部订单收集 JSON / PDF 两种格式的 publicationId（双格式国家为两个独立订单，不得命中首个就绪即返回）
+                string jsonPubId = null;
+                string pdfPubId = null;
+                string anyMatchedPubId = null;
+                ReportOrderInfo readyResult = null;
+
                 // 检查每个订单的状态
                 foreach (var order in orders)
                 {
@@ -228,9 +251,22 @@ namespace SanyD365.Plugins.CofaceIntegration
                             {
                                 if (pub.TryGetProperty("id", out var pubIdProp))
                                 {
-                                    matchedPubId = pubIdProp.GetString();
-                                    tracer.Trace($"匹配到Publication: slug={pubSlug}, customReportId={pubProductCode}, pubId={matchedPubId}");
-                                    break;
+                                    string pubId = pubIdProp.GetString();
+                                    string pubFormat = pub.TryGetProperty("format", out var fmtProp) ? fmtProp.GetString() : null;
+                                    if (!string.IsNullOrEmpty(pubFormat) && pubFormat.IndexOf("pdf", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        if (pdfPubId == null) pdfPubId = pubId;
+                                    }
+                                    else if (!string.IsNullOrEmpty(pubFormat) && pubFormat.IndexOf("json", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    {
+                                        if (jsonPubId == null) jsonPubId = pubId;
+                                    }
+                                    if (matchedPubId == null)
+                                    {
+                                        matchedPubId = pubId;
+                                        tracer.Trace($"匹配到Publication: slug={pubSlug}, customReportId={pubProductCode}, pubId={matchedPubId}, format={pubFormat ?? "(未知)"}");
+                                    }
+                                    // 不 break：继续扫描以收集 JSON/PDF 两种格式的 publicationId
                                 }
                             }
                         }
@@ -266,26 +302,38 @@ namespace SanyD365.Plugins.CofaceIntegration
                         continue;
                     }
 
+                    if (anyMatchedPubId == null) anyMatchedPubId = matchedPubId;
+
                     tracer.Trace($"检查订单: orderId={orderId}, pubId={matchedPubId}, status={statusStr}");
 
-                    // 状态为ready或delivered → 订单就绪
+                    // 状态为ready或delivered → 订单就绪（记录首个就绪订单，继续扫描以收集 PDF publication）
                     if (statusStr == "ready" || statusStr == "delivered")
                     {
-                        result.OrderId = orderId;
-                        result.PublicationId = matchedPubId;
-                        result.Status = ReportOrderStatus.Ready;
-                        result.StatusDetail = statusStr;
-                        return result;
+                        if (readyResult == null)
+                        {
+                            readyResult = new ReportOrderInfo
+                            {
+                                OrderId = orderId,
+                                Status = ReportOrderStatus.Ready,
+                                StatusDetail = statusStr
+                            };
+                        }
+                        continue;
                     }
                     // 状态为空或不存在，但有orderId → 兼容处理，视为就绪
                     else if (string.IsNullOrEmpty(statusStr) && !string.IsNullOrEmpty(orderId))
                     {
                         tracer.Trace($"订单status为空，按兼容逻辑视为就绪");
-                        result.OrderId = orderId;
-                        result.PublicationId = matchedPubId;
-                        result.Status = ReportOrderStatus.Ready;
-                        result.StatusDetail = "empty_status";
-                        return result;
+                        if (readyResult == null)
+                        {
+                            readyResult = new ReportOrderInfo
+                            {
+                                OrderId = orderId,
+                                Status = ReportOrderStatus.Ready,
+                                StatusDetail = "empty_status"
+                            };
+                        }
+                        continue;
                     }
                     // 状态存在但不为ready → 未就绪
                     else if (!string.IsNullOrEmpty(orderId))
@@ -295,6 +343,16 @@ namespace SanyD365.Plugins.CofaceIntegration
                         result.Status = ReportOrderStatus.NotReady;
                         result.StatusDetail = statusStr ?? "unknown";
                     }
+                }
+
+                // 有就绪订单：数据取数优先 JSON 格式 publication，附件下载用 PDF 格式 publication（可能为 null=JSON 单）
+                if (readyResult != null)
+                {
+                    readyResult.JsonPublicationId = jsonPubId ?? anyMatchedPubId;
+                    readyResult.PublicationId = readyResult.JsonPublicationId;
+                    readyResult.PdfPublicationId = pdfPubId;
+                    tracer.Trace($"就绪订单提取: orderId={readyResult.OrderId}, jsonPubId={readyResult.JsonPublicationId ?? "(无)"}, pdfPubId={readyResult.PdfPublicationId ?? "(无,JSON单)"}");
+                    return readyResult;
                 }
 
                 // 有订单但都不是就绪状态，或没有匹配产品的订单

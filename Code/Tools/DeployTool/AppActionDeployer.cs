@@ -168,9 +168,10 @@ namespace DeployTool
 
             // 删除可能已存在的旧按钮，确保能重新创建并加入解决方案
             DeleteAppActionIfExists("mcs_trade_stpayterm_clone");
-            DeleteAppActionIfExists("mcs_trade_stpayterm_apply");
-            DeleteAppActionIfExists("mcs_trade_stpayterm_approve");
-            DeleteAppActionIfExists("mcs_trade_stpayterm_reject");
+            // 2026-08-14 Bug #1834：取消审批功能，不删除/不重建批量按钮
+            // DeleteAppActionIfExists("mcs_trade_stpayterm_apply");
+            // DeleteAppActionIfExists("mcs_trade_stpayterm_approve");
+            // DeleteAppActionIfExists("mcs_trade_stpayterm_reject");
 
             // 创建【克隆新增】按钮（表单命令栏）
             CreateButton(
@@ -187,60 +188,61 @@ namespace DeployTool
                 0
             );
 
+            // 2026-08-14 Bug #1834：取消审批功能，批量申请/审批/拒绝按钮不再创建（已在 Ribbon XML 中注释隐藏）
             // 列表批量按钮统一参数：SelectedControlSelectedItemIds（type=23）+ SelectedControl（type=12）
             // 对应 JS 函数签名 TradeStPayTermGrid.apply/approve/reject(selectedIds, selectedControl)
             // 误配 PrimaryControl（type=5）会导致勾选记录后按钮消失（2026-07-27 修复）
-            const string gridParams = "[{\"type\":23},{\"type\":12}]";
+            // const string gridParams = "[{\"type\":23},{\"type\":12}]";
 
             // 创建【批量申请】按钮（列表命令栏）
-            CreateButton(
-                "mcs_trade_stpayterm_apply",
-                "批量申请",
-                "将选中的未生效成交条件样板提交为待审批",
-                "TradeStPayTermGrid.apply",
-                webResourceId,
-                entityId,
-                "mcs_trade_stpayterm",
-                100100020,
-                "Send",
-                "entity_20260603_peter",
-                1,
-                gridParams
-            );
+            // CreateButton(
+            //     "mcs_trade_stpayterm_apply",
+            //     "批量申请",
+            //     "将选中的未生效成交条件样板提交为待审批",
+            //     "TradeStPayTermGrid.apply",
+            //     webResourceId,
+            //     entityId,
+            //     "mcs_trade_stpayterm",
+            //     100100020,
+            //     "Send",
+            //     "entity_20260603_peter",
+            //     1,
+            //     gridParams
+            // );
 
             // 创建【批量审批】按钮（列表命令栏）
-            CreateButton(
-                "mcs_trade_stpayterm_approve",
-                "批量审批",
-                "将选中的待审批成交条件样板审批通过并生效",
-                "TradeStPayTermGrid.approve",
-                webResourceId,
-                entityId,
-                "mcs_trade_stpayterm",
-                100100021,
-                "CheckMark",
-                "entity_20260603_peter",
-                1,
-                gridParams
-            );
+            // CreateButton(
+            //     "mcs_trade_stpayterm_approve",
+            //     "批量审批",
+            //     "将选中的待审批成交条件样板审批通过并生效",
+            //     "TradeStPayTermGrid.approve",
+            //     webResourceId,
+            //     entityId,
+            //     "mcs_trade_stpayterm",
+            //     100100021,
+            //     "CheckMark",
+            //     "entity_20260603_peter",
+            //     1,
+            //     gridParams
+            // );
 
             // 创建【批量拒绝】按钮（列表命令栏）
-            CreateButton(
-                "mcs_trade_stpayterm_reject",
-                "批量拒绝",
-                "将选中的待审批成交条件样板拒绝并退回未生效",
-                "TradeStPayTermGrid.reject",
-                webResourceId,
-                entityId,
-                "mcs_trade_stpayterm",
-                100100022,
-                "Cancel",
-                "entity_20260603_peter",
-                1,
-                gridParams
-            );
+            // CreateButton(
+            //     "mcs_trade_stpayterm_reject",
+            //     "批量拒绝",
+            //     "将选中的待审批成交条件样板拒绝并退回未生效",
+            //     "TradeStPayTermGrid.reject",
+            //     webResourceId,
+            //     entityId,
+            //     "mcs_trade_stpayterm",
+            //     100100022,
+            //     "Cancel",
+            //     "entity_20260603_peter",
+            //     1,
+            //     gridParams
+            // );
 
-            Console.WriteLine("  ✅ 成交条件样板库按钮部署完成");
+            Console.WriteLine("  ✅ 成交条件样板库按钮部署完成（批量按钮已按 Bug #1834 隐藏）");
         }
 
         /// <summary>
@@ -312,29 +314,31 @@ namespace DeployTool
         /// 规则组件（appactionrule）创建时直接入指定 Solution，可随包发布到 UAT。
         /// </summary>
         /// <param name="solutionName">规则组件要加入的 Solution 唯一名（默认当期发版包）</param>
+        // 2026-08-14 Bug #1834：取消审批功能，批量按钮已隐藏，不再设置 Display Rule
         public void SetTradeStPayTermBatchDisplayRules(string solutionName = "entity_20260726_peter")
         {
             Console.WriteLine(">>> 为成交条件批量按钮设置 SelectionCount Display Rule...");
+            Console.WriteLine("  ⏸️ 批量按钮已按 Bug #1834 隐藏，跳过 Display Rule 设置");
 
-            var entityId = GetEntityId("mcs_trade_stpayterm");
-            if (entityId == Guid.Empty)
-            {
-                Console.WriteLine("  ❌ 未找到实体 mcs_trade_stpayterm");
-                return;
-            }
-
-            foreach (var buttonName in new[] { "mcs_trade_stpayterm_apply", "mcs_trade_stpayterm_approve", "mcs_trade_stpayterm_reject" })
-            {
-                var buttonId = GetAppActionIdByUniqueName(buttonName);
-                if (buttonId == Guid.Empty)
-                {
-                    Console.WriteLine($"  ❌ 未找到按钮 {buttonName}，跳过");
-                    continue;
-                }
-                SetSelectionCountDisplayRule(buttonId, entityId, $"{buttonName}_selection_rule", solutionName);
-            }
-
-            Console.WriteLine("  ✅ 批量按钮 Display Rule 设置完成（请发布实体 mcs_trade_stpayterm 后硬刷新验证）");
+            // var entityId = GetEntityId("mcs_trade_stpayterm");
+            // if (entityId == Guid.Empty)
+            // {
+            //     Console.WriteLine("  ❌ 未找到实体 mcs_trade_stpayterm");
+            //     return;
+            // }
+            //
+            // foreach (var buttonName in new[] { "mcs_trade_stpayterm_apply", "mcs_trade_stpayterm_approve", "mcs_trade_stpayterm_reject" })
+            // {
+            //     var buttonId = GetAppActionIdByUniqueName(buttonName);
+            //     if (buttonId == Guid.Empty)
+            //     {
+            //         Console.WriteLine($"  ❌ 未找到按钮 {buttonName}，跳过");
+            //         continue;
+            //     }
+            //     SetSelectionCountDisplayRule(buttonId, entityId, $"{buttonName}_selection_rule", solutionName);
+            // }
+            //
+            // Console.WriteLine("  ✅ 批量按钮 Display Rule 设置完成（请发布实体 mcs_trade_stpayterm 后硬刷新验证）");
         }
 
         /// <summary>
@@ -745,6 +749,55 @@ namespace DeployTool
                 update["isdisabled"] = disabled;
                 _service.Update(update);
                 Console.WriteLine($"  ✅ 已设置 isdisabled={disabled}: {actualUniqueName}");
+            }
+        }
+
+        /// <summary>
+        /// 启用/停用 App Action 按钮（statecode=1 真正隐藏按钮；幂等）
+        /// 2026-08-15 Bug #1834：隐藏批量申请/审批/拒绝按钮用（不删组件红线）。
+        /// ⚠️ 与 isdisabled 不同：isdisabled 只禁用点击、按钮仍渲染；statecode=Inactive 才不渲染。
+        /// ⚠️ 各环境 appaction GUID 不同（UAT/生产为导入重建），必须按 uniquename 操作。
+        /// </summary>
+        public void SetButtonInactive(string uniqueName, bool inactive)
+        {
+            var query = new Microsoft.Xrm.Sdk.Query.QueryExpression("appaction")
+            {
+                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("uniquename", "statecode"),
+                Criteria = new Microsoft.Xrm.Sdk.Query.FilterExpression
+                {
+                    Conditions =
+                    {
+                        new Microsoft.Xrm.Sdk.Query.ConditionExpression("uniquename", Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, uniqueName)
+                    }
+                }
+            };
+
+            var existing = _service.RetrieveMultiple(query);
+            if (existing.Entities.Count == 0)
+            {
+                query.Criteria.Conditions[0] = new Microsoft.Xrm.Sdk.Query.ConditionExpression("uniquename", Microsoft.Xrm.Sdk.Query.ConditionOperator.BeginsWith, uniqueName);
+                existing = _service.RetrieveMultiple(query);
+            }
+
+            if (existing.Entities.Count == 0)
+            {
+                Console.WriteLine($"  ⚠️ 未找到按钮: {uniqueName}");
+                return;
+            }
+
+            int targetState = inactive ? 1 : 0;
+            foreach (var entity in existing.Entities)
+            {
+                var actualUniqueName = entity.GetAttributeValue<string>("uniquename");
+                if (entity.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("statecode")?.Value == targetState)
+                {
+                    Console.WriteLine($"  ⏭️ 已是目标状态（statecode={targetState}），跳过: {actualUniqueName} ({entity.Id})");
+                    continue;
+                }
+                var update = new Microsoft.Xrm.Sdk.Entity("appaction", entity.Id);
+                update["statecode"] = new Microsoft.Xrm.Sdk.OptionSetValue(targetState);
+                _service.Update(update);
+                Console.WriteLine($"  ✅ 已设置 statecode={targetState}（{(inactive ? "停用/隐藏" : "启用")}）: {actualUniqueName} ({entity.Id})");
             }
         }
 

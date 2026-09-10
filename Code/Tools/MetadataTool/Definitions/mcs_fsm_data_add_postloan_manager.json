@@ -1,0 +1,26 @@
+{
+  "entityName": "mcs_fsm_data",
+  "displayName": "融资数据",
+  "displayNameZh": "融资数据",
+  "displayNameEn": "Financing Data",
+  "primaryAttribute": "mcs_fsm_no",
+  "primaryAttributeDisplayName": "融资管理编号",
+  "primaryAttributeDisplayNameZh": "融资管理编号",
+  "primaryAttributeDisplayNameEn": "Financing No",
+  "primaryAttributeLength": 100,
+  "solutionName": "",
+  "autoPublish": false,
+  "fields": [
+    {
+      "schemaName": "mcs_fsm_postloan_manager",
+      "displayName": "贷后管理人",
+      "displayNameZh": "贷后管理人",
+      "displayNameEn": "Post-loan Manager",
+      "description": "贷后管理人，系统用户。融资需求阶段由融资经理填写；融资完成（进入融资落实阶段）时记录共享给该用户并发送消息通知（禅道 #1712）",
+      "type": "lookup",
+      "required": false,
+      "targetEntity": "systemuser",
+      "targetEntityDisplayName": "用户"
+    }
+  ]
+}

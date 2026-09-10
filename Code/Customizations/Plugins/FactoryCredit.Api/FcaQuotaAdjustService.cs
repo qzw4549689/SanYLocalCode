@@ -155,13 +155,19 @@ namespace SanyD365.Plugins.FactoryCredit.Api
                     create["mcs_usedsellerbalance"] = new Money(0m);
                     create["mcs_isactive"] = new OptionSetValue(IS_ACTIVE_YES);
                     create["mcs_validfrom"] = DateTime.UtcNow;
+                    // #1643 新建额度负责人=客户主数据负责人，避免部门级权限用户看不到调用账号名下记录
+                    var customerOwner = GetCustomerOwner(customer);
+                    if (customerOwner != null)
+                    {
+                        create["ownerid"] = customerOwner;
+                    }
                     quotaId = _service.Create(create);
                     quotaCreated = true;
                     _tracer.Trace($"初始化-新建额度记录: {quotaId}, grant={grant}");
                 }
 
-                // 台账：初始化调整金额=0
-                string recordId = CreateLedger(accountRef, custName, contractRef, orderRef, stage, ADJUST_INIT,
+                // 台账：初始化调整金额=0（#1643 负责人=客户主数据负责人）
+                string recordId = CreateLedger(accountRef, custName, GetCustomerOwner(customer), contractRef, orderRef, stage, ADJUST_INIT,
                     grant, oldBalance, 0m, newBalance);
 
                 return Success(0m, newBalance, recordId);
@@ -222,7 +228,7 @@ namespace SanyD365.Plugins.FactoryCredit.Api
                 quotaUpdated = true;
                 _tracer.Trace($"占用-更新额度记录: {quota.Id}, balance {oldBalance} -> {newBalance}, used {oldUsed} -> {oldUsed + amount}");
 
-                string recordId = CreateLedger(accountRef, custName, contractRef, orderRef, stage, ADJUST_OCCUPY,
+                string recordId = CreateLedger(accountRef, custName, GetCustomerOwner(customer), contractRef, orderRef, stage, ADJUST_OCCUPY,
                     grant, oldBalance, amount, newBalance);
 
                 return Success(amount, newBalance, recordId);
@@ -271,7 +277,7 @@ namespace SanyD365.Plugins.FactoryCredit.Api
                 quotaUpdated = true;
                 _tracer.Trace($"释放-更新额度记录: {quota.Id}, balance {oldBalance} -> {newBalance}, used {oldUsed} -> {oldUsed - amount}");
 
-                string recordId = CreateLedger(accountRef, custName, contractRef, orderRef, stage, ADJUST_RELEASE,
+                string recordId = CreateLedger(accountRef, custName, GetCustomerOwner(customer), contractRef, orderRef, stage, ADJUST_RELEASE,
                     grant, oldBalance, amount, newBalance);
 
                 return Success(amount, newBalance, recordId);
@@ -326,14 +332,19 @@ namespace SanyD365.Plugins.FactoryCredit.Api
 
         /// <summary>
         /// 创建台账记录，返回台账编号（mcs_recordid 由系统统一自动编号 Plugin 生成）
+        /// owner：台账负责人（#1643，客户主数据负责人），为 null 时保持平台默认（调用账号）。
         /// </summary>
-        private string CreateLedger(EntityReference accountRef, string custName,
+        private string CreateLedger(EntityReference accountRef, string custName, EntityReference owner,
             EntityReference contractRef, EntityReference orderRef, int stage, int action,
             decimal grant, decimal asisBalance, decimal adjustAmt, decimal tobeBalance)
         {
             var ledger = new Entity("mcs_fca_records");
             ledger["mcs_accountid"] = accountRef;
             ledger["mcs_custname"] = custName;
+            if (owner != null)
+            {
+                ledger["ownerid"] = owner;
+            }
             if (contractRef != null)
             {
                 ledger["mcs_contractid"] = contractRef;
@@ -364,7 +375,7 @@ namespace SanyD365.Plugins.FactoryCredit.Api
         {
             var query = new QueryExpression("mcs_customermasterdata")
             {
-                ColumnSet = new ColumnSet("mcs_name", "mcs_sapnumber"),
+                ColumnSet = new ColumnSet("mcs_name", "mcs_sapnumber", "ownerid"),
                 Criteria = new FilterExpression
                 {
                     Conditions =
@@ -472,6 +483,14 @@ namespace SanyD365.Plugins.FactoryCredit.Api
         private decimal GetMoney(Entity entity, string fieldName)
         {
             return entity.GetAttributeValue<Money>(fieldName)?.Value ?? 0m;
+        }
+
+        /// <summary>
+        /// 读取客户主数据负责人（#1643），未设置时返回 null
+        /// </summary>
+        private EntityReference GetCustomerOwner(Entity customer)
+        {
+            return customer.GetAttributeValue<EntityReference>("ownerid");
         }
 
         private FcaQuotaAdjustResult Fail(string reason)

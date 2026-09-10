@@ -51,9 +51,9 @@
       "displayName": "机构代码",
       "displayNameZh": "机构代码",
       "displayNameEn": "Institution Code",
-      "description": "银行时从mcs_bank.mcs_bankno带出；保险/其他时手工输入",
+      "description": "锁定只读（禅道 #2072）：银行时从mcs_bank.mcs_bankno带出；保险/其他时=融资资源编号mcs_fsm_resource_no（编号保存后才生成，故元数据非必填）",
       "type": "string",
-      "required": true,
+      "required": false,
       "maxLength": 50
     },
     {
@@ -93,11 +93,21 @@
       "displayName": "所在城市",
       "displayNameZh": "所在城市",
       "displayNameEn": "City",
-      "description": "关联城市主数据",
+      "description": "关联城市主数据（禅道 #2138 起停用：城市改手工输入文本字段 mcs_fsm_institution_city_text，本字段改非必填并移出表单，存量数据保留）",
       "type": "lookup",
-      "required": true,
+      "required": false,
       "targetEntity": "mcs_city",
       "targetEntityDisplayName": "城市"
+    },
+    {
+      "schemaName": "mcs_fsm_institution_city_text",
+      "displayName": "所在城市",
+      "displayNameZh": "所在城市",
+      "displayNameEn": "City",
+      "description": "所在城市（手工输入）。禅道 #2138：城市主数据列表不全面，改用文本字段替代原城市 Lookup（mcs_fsm_institution_city，已改非必填并移出表单）",
+      "type": "string",
+      "required": true,
+      "maxLength": 200
     },
     {
       "schemaName": "mcs_fsm_institution_address",

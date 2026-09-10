@@ -24,6 +24,10 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
             ITracingService tracer = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
 
+            // 系统上下文：审批通过后额度表(mcs_fca_quota)/台账(mcs_fca_records)读写走系统(admin)身份（禅道 #1855），
+            // 不依赖回调触发人对基础数据的权限；申请单本身状态回写仍走用户上下文
+            IOrganizationService systemService = factory.CreateOrganizationService(null);
+
             tracer.Trace("=== FcaQuotaAppBppCallbackPlugin 开始执行 ===");
             tracer.Trace($"Message: {context.MessageName}, Stage: {context.Stage}, Depth: {context.Depth}");
 
@@ -90,7 +94,7 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
                         service.Update(updateRecord);
 
                         // 更新额度表并写入台账
-                        ProcessApprovalResult(service, tracer, target.Id);
+                        ProcessApprovalResult(service, systemService, tracer, target.Id);
                         break;
 
                     case "rejected":
@@ -134,11 +138,11 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
         /// <summary>
         /// 审批通过后处理：更新额度表 + 写入台账
         /// </summary>
-        private void ProcessApprovalResult(IOrganizationService service, ITracingService tracer, Guid quotaAppId)
+        private void ProcessApprovalResult(IOrganizationService service, IOrganizationService systemService, ITracingService tracer, Guid quotaAppId)
         {
             Entity quotaApp = service.Retrieve("mcs_fca_quotaapp", quotaAppId,
                 new ColumnSet("mcs_accountid", "mcs_custname", "mcs_sellergrant", "mcs_sellerbalance",
-                              "mcs_tobegrant", "mcs_tobebalance", "mcs_doid"));
+                              "mcs_tobegrant", "mcs_tobebalance", "mcs_doid", "ownerid"));
 
             EntityReference accountRef = quotaApp.GetAttributeValue<EntityReference>("mcs_accountid");
             string custName = quotaApp.GetAttributeValue<string>("mcs_custname");
@@ -146,7 +150,8 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
             Money currentBalance = quotaApp.GetAttributeValue<Money>("mcs_sellerbalance");
             Money tobeGrant = quotaApp.GetAttributeValue<Money>("mcs_tobegrant");
             Money tobeBalance = quotaApp.GetAttributeValue<Money>("mcs_tobebalance");
-            string doid = GetDoidString(service, quotaApp);
+            EntityReference doidRef = quotaApp.GetAttributeValue<EntityReference>("mcs_doid");
+            string doid = GetDoidString(service, doidRef);
 
             if (accountRef == null)
             {
@@ -158,21 +163,47 @@ namespace SanyD365.Plugins.FactoryCredit.Bpp
                 throw new InvalidPluginExecutionException("额度调整申请缺少调整后额度，无法处理审批结果。");
             }
 
-            // 1. 更新额度表
-            QuotaActivationService quotaService = new QuotaActivationService(service, tracer);
-            quotaService.ActivateQuota(accountRef, custName, tobeGrant, tobeBalance, doid);
+            // #1643/#1856 台账/额度记录负责人跟随申请人，避免本人级/部门级权限用户看不到系统身份名下记录
+            // 口径（用户 2026-08-17 明确）：台账 owner=申请人（申请单 owner）；额度 owner=申请人，客户负责人仅作兜底
+            EntityReference appOwner = quotaApp.GetAttributeValue<EntityReference>("ownerid");
+            EntityReference customerOwner = GetCustomerOwner(service, tracer, accountRef);
+            EntityReference quotaOwner = appOwner ?? customerOwner;
+            EntityReference ledgerOwner = appOwner ?? customerOwner;
+            tracer.Trace($"负责人归属: 申请人={(appOwner != null ? appOwner.Id.ToString() : "空")}, 客户负责人={(customerOwner != null ? customerOwner.Id.ToString() : "空")}");
 
-            // 2. 写入台账
-            QuotaRecordService recordService = new QuotaRecordService(service, tracer);
-            recordService.AddQuotaRecord(accountRef, custName, currentGrant, currentBalance, tobeGrant, tobeBalance);
+            // 1. 更新额度表（#1855 系统身份读写 mcs_fca_quota）
+            // #2025 proc 存在（doid 文本非空）时才传 procRef 写 Lookup，避免指向已删除 proc 的失效引用
+            QuotaActivationService quotaService = new QuotaActivationService(systemService, tracer);
+            quotaService.ActivateQuota(accountRef, custName, tobeGrant, tobeBalance, doid, quotaOwner,
+                string.IsNullOrWhiteSpace(doid) ? null : doidRef);
+
+            // 2. 写入台账（#1855 系统身份写 mcs_fca_records）
+            QuotaRecordService recordService = new QuotaRecordService(systemService, tracer);
+            recordService.AddQuotaRecord(accountRef, custName, currentGrant, currentBalance, tobeGrant, tobeBalance, ledgerOwner);
+        }
+
+        /// <summary>
+        /// 读取客户主数据负责人（#1643）；读取失败返回 null，由调用方兜底，不阻断审批回写主流程
+        /// </summary>
+        private EntityReference GetCustomerOwner(IOrganizationService service, ITracingService tracer, EntityReference accountRef)
+        {
+            try
+            {
+                Entity customer = service.Retrieve("mcs_customermasterdata", accountRef.Id, new ColumnSet("ownerid"));
+                return customer.GetAttributeValue<EntityReference>("ownerid");
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace($"读取客户主数据负责人失败（按申请人兜底）: {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>
         /// 从额度调整申请的模型计算序列号 Lookup 中读取字符串序列号
         /// </summary>
-        private string GetDoidString(IOrganizationService service, Entity quotaApp)
+        private string GetDoidString(IOrganizationService service, EntityReference doidRef)
         {
-            var doidRef = quotaApp.GetAttributeValue<EntityReference>("mcs_doid");
             if (doidRef == null)
             {
                 return string.Empty;

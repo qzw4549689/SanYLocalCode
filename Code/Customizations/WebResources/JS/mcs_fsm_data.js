@@ -149,8 +149,48 @@ var FsmDataForm = (function () {
     var SRC = {
         LEAD: "mcs_leadmain_id",      // 线索编号 → mcs_leadmain
         QUOTER: "mcs_quoter_id",      // 报价单编号 → mcs_quoter
-        CONTRACT: "mcs_contract_id"   // 合同编号 → mcs_contract
+        CONTRACT: "mcs_contract_id"   // 合同编号 → mcs_contract（禅道 #2150 起表单隐藏停用，由 CONTRACT_IDS 多选替代）
     };
+
+    // 禅道 #2150：合同编号多选——平台公共 PCF 控件 mcs_common.control.lookup.multiplechoice 绑值，
+    // 存 mcs_contract GUID 逗号分隔（同成交条件基线库 mcs_trade_type / 本表单机构多选 mcs_fsm_resource_ids 模式）
+    var CONTRACT_IDS = "mcs_contract_ids"; // 多选合同 GUID 逗号分隔（Memo，控件绑值）
+    var CONTRACT_NOS = "mcs_contract_nos"; // 合同编号（mcs_contract.mcs_name，LTC-xxx）逗号分隔文本
+
+    /**
+     * 禅道 #2150：解析多选合同 GUID 数组（按用户选择顺序）
+     */
+    function getSelectedContractIds(formContext) {
+        var attr = formContext.getAttribute(CONTRACT_IDS);
+        var raw = attr ? attr.getValue() : null;
+        if (!raw) return [];
+        return String(raw).split(",").map(function (x) { return x.trim().replace(/[{}]/g, ""); }).filter(function (x) { return x.length > 0; });
+    }
+
+    /**
+     * 禅道 #2150：多选合同变更——同步合同编号文本 + 以第一个合同级联带出相关数据
+     */
+    function onContractIdsChanged(formContext) {
+        syncContractNos(formContext);
+        recomputeDerived(formContext);
+    }
+
+    /**
+     * 禅道 #2150：按多选 GUID 顺序批量查合同编号，逗号分隔写入 mcs_contract_nos（展示/接口匹配用）
+     */
+    function syncContractNos(formContext) {
+        var ids = getSelectedContractIds(formContext);
+        if (ids.length === 0) { setValue(formContext, CONTRACT_NOS, null); return; }
+        var filter = ids.map(function (id) { return "mcs_contractid eq " + id; }).join(" or ");
+        Xrm.WebApi.retrieveMultipleRecords("mcs_contract", "?$select=mcs_contractid,mcs_name&$top=" + ids.length + "&$filter=" + filter).then(function (res) {
+            var nameMap = {};
+            res.entities.forEach(function (e) { nameMap[("" + e.mcs_contractid).toLowerCase()] = e.mcs_name || ""; });
+            var nos = ids.map(function (id) { return nameMap[id.toLowerCase()] || ""; }).filter(function (n) { return n.length > 0; });
+            setValue(formContext, CONTRACT_NOS, nos.length > 0 ? nos.join(",") : null);
+        }, function (e) {
+            console.warn("[FSM] 合同编号文本同步失败:", e);
+        });
+    }
 
     // 被级联带出管理的派生字段（清空联动时一并清空）
     var DERIVED_FIELDS = [
@@ -164,8 +204,6 @@ var FsmDataForm = (function () {
 
     // 上次由代入逻辑写入的线索 ID（用于区分代入值与用户手工修改）
     var _lastDerivedLeadId = null;
-    // 重复校验通过后放行一次保存
-    var _saveApproved = false;
     // 已选线索关联的报价主表 ID 缓存（用于报价单弹窗扁平过滤，避免 link-entity 查询生成器错误 0x80041103）
     var _quoteMainIdsForLead = null;
 
@@ -282,6 +320,88 @@ var FsmDataForm = (function () {
                 function (e) { console.warn("[FSM] 汇率读取失败:", e); }
             );
         }
+    }
+
+    // =====================================================================
+    // Bug #1781（2026-08-12）：Money 字段货币符号跟随「融资币种」
+    // 平台机制：Money 控件符号由记录标准币种字段 transactioncurrencyid 驱动（不可绑定自定义 Lookup），
+    // 主表单已隐藏放置标准 Currency 字段作符号载体，此处保持其与 mcs_fsm_currency 一致，
+    // 融资金额/授信金额/贴息/融资费用 4 个 Money 字段符号即随融资币种即时切换。
+    // 实测（DEV1 2026-08-12）：程序化 setValue 不同步刷新符号显示，仅保存/重载后平台才重格式化；
+    // 故附加 DOM 补丁：onChange 同步后立即改写 4 个金额输入框的显示符号，blur/tab 切换后重贴兜底。
+    // =====================================================================
+    var MONEY_FIELDS_FOR_SYMBOL = ["mcs_fsm_amount", "mcs_fsm_credit_amount", "mcs_fsm_interest_discount", "mcs_fsm_fee"];
+    var _currencySymbolCache = {};   // transactioncurrencyid → currencysymbol
+    var _currentSymbol = null;       // 当前融资币种符号（重贴兜底用）
+
+    /**
+     * 同步标准币种字段 transactioncurrencyid = mcs_fsm_currency（值不同才写入，避免表单标脏）
+     * 融资币种为空时不动（新建表单平台默认币种保留，用户选择后立即同步）
+     */
+    function syncTransactionCurrency(formContext) {
+        var txnAttr = formContext.getAttribute("transactioncurrencyid");
+        if (!txnAttr) return; // 标准 Currency 字段未上表单（隐藏单元格缺失）时静默跳过
+        var currencyRef = getLookup(formContext, "mcs_fsm_currency");
+        if (!currencyRef) return;
+        var newId = currencyRef.id.replace(/[{}]/g, "").toLowerCase();
+        var curRef = getLookup(formContext, "transactioncurrencyid");
+        var curId = curRef ? curRef.id.replace(/[{}]/g, "").toLowerCase() : null;
+        if (newId === curId) return; // 已一致不置脏（onLoad 打开存量记录时平台已按保存的币种格式化，无需补丁）
+        txnAttr.setValue([{
+            id: currencyRef.id,
+            name: currencyRef.name,
+            entityType: "transactioncurrency"
+        }]);
+        patchMoneyFieldSymbols(currencyRef.id); // 金额符号显示即时跟随（平台要等保存后才重格式化）
+    }
+
+    /**
+     * 查询币种符号并补丁 4 个 Money 输入框的显示值（带缓存；仅改显示文本，不动属性值，保存不受影响）
+     */
+    function patchMoneyFieldSymbols(currencyId) {
+        var cid = (currencyId || "").replace(/[{}]/g, "").toLowerCase();
+        if (!cid) return;
+        if (_currencySymbolCache[cid] !== undefined) {
+            _applySymbolToMoneyInputs(_currencySymbolCache[cid]);
+            return;
+        }
+        Xrm.WebApi.retrieveRecord("transactioncurrency", cid, "?$select=currencysymbol").then(
+            function (r) {
+                var sym = r["currencysymbol"] || "";
+                _currencySymbolCache[cid] = sym;
+                _applySymbolToMoneyInputs(sym);
+            },
+            function (e) { console.warn("[FSM] 币种符号读取失败:", e); }
+        );
+    }
+
+    /**
+     * 取表单所在 document（UCI 表单脚本在 ClientApiFrame iframe 执行，表单 DOM 在顶层同源 document）
+     */
+    function _getFormDocument() {
+        try {
+            if (document.querySelector('input[data-id^="mcs_fsm_amount"]')) return document;
+            if (window.parent && window.parent.document
+                && window.parent.document.querySelector('input[data-id^="mcs_fsm_amount"]')) return window.parent.document;
+        } catch (e) { /* 跨域等异常静默兜底 */ }
+        return document;
+    }
+
+    /**
+     * 把 4 个 Money 输入框显示值的前导符号替换为指定符号（React 不重渲染该控件则补丁保持，实测 20s+ 稳定）
+     */
+    function _applySymbolToMoneyInputs(symbol) {
+        if (!symbol) return;
+        _currentSymbol = symbol;
+        var doc = _getFormDocument();
+        var nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        MONEY_FIELDS_FOR_SYMBOL.forEach(function (f) {
+            var input = doc.querySelector('input[data-id="' + f + '.fieldControl-currency-text-input"]');
+            if (!input || !input.value) return;
+            var newVal = input.value.replace(/^[^\d\-]+/, symbol);
+            if (newVal === input.value && input.value.indexOf(symbol) !== 0) newVal = symbol + input.value; // 无前导符号兜底
+            if (newVal !== input.value) nativeSetter.call(input, newVal);
+        });
     }
 
     // =====================================================================
@@ -447,13 +567,15 @@ var FsmDataForm = (function () {
         try {
         var leadRef = getLookup(formContext, SRC.LEAD);
         var quoterRef = getLookup(formContext, SRC.QUOTER);
-        var contractRef = getLookup(formContext, SRC.CONTRACT);
+        // 禅道 #2150：合同多选，以第一个合同带出相关数据
+        var contractIds = getSelectedContractIds(formContext);
+        var contractId = contractIds.length > 0 ? contractIds[0] : null;
 
         var pLead = leadRef ? retrieveSafe("mcs_leadmain", leadRef.id,
             "?$select=_mcs_countryid_value,_mcs_buid_value,_mcs_customermasterdataid_value,mcs_accountnumber") : Promise.resolve(null);
         var pQuoter = quoterRef ? retrieveSafe("mcs_quoter", quoterRef.id,
             "?$select=_mcs_countryid_value,_mcs_customermasterdataid_value,mcs_customercode,_mcs_quote_mainid_value") : Promise.resolve(null);
-        var pContract = contractRef ? retrieveSafe("mcs_contract", contractRef.id,
+        var pContract = contractId ? retrieveSafe("mcs_contract", contractId,
             "?$select=_mcs_region_value,_mcs_country_value,_mcs_bu_value,_mcs_customermaster_value,_mcs_leadmain_value") : Promise.resolve(null);
 
         Promise.all([pLead, pQuoter, pContract]).then(function (results) {
@@ -544,6 +666,7 @@ var FsmDataForm = (function () {
                         if (!code && quoter && quoter.mcs_customercode) code = quoter.mcs_customercode;
                         if (!code && effLead && effLead.mcs_accountnumber) code = effLead.mcs_accountnumber;
                         setValue(formContext, "mcs_customer_id", code || null);
+                        applyCustomerCodeReadonly(formContext); // 带出后即锁（有值恒只读口径）
                         // ---- 4. 国区：由国家经映射推导 ----
                         var countryRef = getLookup(formContext, "mcs_country_id");
                         if (countryRef) {
@@ -624,61 +747,113 @@ var FsmDataForm = (function () {
         if (ctrl) ctrl.addCustomFilter(fetchXml, "mcs_quoter");
     }
 
+    // =====================================================================
+    // 禅道 #2176：接口人放大镜按安全角色过滤（addCustomView 自定义视图）
+    // =====================================================================
+
+    // 角色名口径（角色 GUID 各环境不同，FetchXML 按名称联查角色不写死 GUID；⚠️角色改名后过滤会失效为空结果）
+    var MANAGER_ROLE_FILTER = [
+        { field: "mcs_fsm_manager", roleName: "Financing Solutions Manager", viewId: "{2B7E6A10-2176-4A01-9F01-000000000001}" },   // 融资方案接口人（融资需求页签）
+        { field: "mcs_fsm_postloan_manager", roleName: "Post-Financing Manager", viewId: "{2B7E6A10-2176-4A01-9F01-000000000002}" } // 贷后管理人（融资落实页签）
+    ];
+
     /**
-     * 合同弹窗按已选线索过滤（contract.mcs_leadmain）
+     * 禅道 #2176：接口人放大镜设为「按角色过滤」自定义视图（默认视图，初始列表与搜索结果都过滤）。
+     * 成员口径 = 直接分配该角色的用户 + 拥有该角色的团队的成员用户（团队继承），均为启用用户；
+     * 角色不存在/无成员时视图为空（放大镜无结果，绝不放开全量）。
+     * 返工说明：初版 addPreSearch+addCustomFilter 只过滤输入后的搜索；v2 addCustomView 过滤视图结果，
+     * 但点开放大镜的初始列表=平台「最近使用（MRU）」列表，两种 API 都管不到 → v3 补 disableMru 关闭 MRU。
      */
-    function filterContractByLead(formContext) {
-        var leadRef = getLookup(formContext, SRC.LEAD);
-        if (!leadRef) return;
-        var leadId = leadRef.id.replace(/[{}]/g, "");
-        var fetchXml = "<fetch><entity name='mcs_contract'>" +
-            "<filter type='and'><condition attribute='mcs_leadmain' operator='eq' value='" + leadId + "' /></filter>" +
+    function applyManagerRoleView(formContext, fieldName, roleName, viewId) {
+        var fetchXml =
+            "<fetch version='1.0' mapping='logical' distinct='true'>" +
+            "<entity name='systemuser'>" +
+            "<attribute name='fullname' />" +
+            "<attribute name='systemuserid' />" +
+            "<order attribute='fullname' />" +
+            // 直接分配角色（outer join，成员判定在下方 or 过滤）
+            "<link-entity name='systemuserroles' from='systemuserid' to='systemuserid' link-type='outer' alias='sur'>" +
+            "<link-entity name='role' from='roleid' to='roleid' link-type='outer' alias='sr' />" +
+            "</link-entity>" +
+            // 团队继承角色（用户所在团队拥有该角色）
+            "<link-entity name='teammembership' from='systemuserid' to='systemuserid' link-type='outer' alias='tm'>" +
+            "<link-entity name='teamroles' from='teamid' to='teamid' link-type='outer' alias='tr'>" +
+            "<link-entity name='role' from='roleid' to='roleid' link-type='outer' alias='trr' />" +
+            "</link-entity></link-entity>" +
+            "<filter type='and'>" +
+            "<condition attribute='isdisabled' operator='eq' value='0' />" +
+            "<filter type='or'>" +
+            "<condition entityname='sr' attribute='name' operator='eq' value='" + roleName + "' />" +
+            "<condition entityname='trr' attribute='name' operator='eq' value='" + roleName + "' />" +
+            "</filter>" +
+            "</filter>" +
             "</entity></fetch>";
-        var ctrl = formContext.getControl(SRC.CONTRACT);
-        if (ctrl) ctrl.addCustomFilter(fetchXml, "mcs_contract");
+        var layoutXml =
+            "<grid name='resultset' object='8' jump='fullname' select='1' icon='1' preview='1'>" +
+            "<row name='result' id='systemuserid'><cell name='fullname' width='300' /></row></grid>";
+        var ctrl = formContext.getControl(fieldName);
+        if (ctrl) {
+            ctrl.addCustomView(viewId, "systemuser", roleName, fetchXml, layoutXml, true);
+            // 关闭「最近使用」列表（MRU 不受任何过滤 API 控制，不关则点开仍显示未过滤人员）
+            ctrl.disableMru = true;
+        }
     }
 
     /**
      * 重复性校验：线索/报价单/合同三者有一个相同存在即重复
-     * @returns Promise<string|null> 重复记录的融资管理编号；无重复返回 null
+     * Bug #1652（2026-08-07 二次修复）：改为**同步** XMLHttpRequest 查询。
+     * 原异步 preventDefault→查询→重新保存模式会在 BPF 阶段导航保存时中止导航，
+     * 导致回退（融资立项→融资需求）被平台弹回立项阶段（先退回又立刻回去）。
+     * 同步查询无需 preventDefault 等待，导航保存/手动保存均不被误中止。
+     * @returns 同步返回重复记录的融资管理编号；无重复/查询失败返回 null（失败不阻断保存）
      */
-    function checkDuplicateSource(formContext) {
+    function checkDuplicateSourceSync(formContext) {
         var conditions = [];
         var leadRef = getLookup(formContext, SRC.LEAD);
         var quoterRef = getLookup(formContext, SRC.QUOTER);
-        var contractRef = getLookup(formContext, SRC.CONTRACT);
+        var contractIds = getSelectedContractIds(formContext); // 禅道 #2150：多选合同任一相同即重复
         if (leadRef) conditions.push("_mcs_leadmain_id_value eq " + leadRef.id.replace(/[{}]/g, ""));
         if (quoterRef) conditions.push("_mcs_quoter_id_value eq " + quoterRef.id.replace(/[{}]/g, ""));
-        if (contractRef) conditions.push("_mcs_contract_id_value eq " + contractRef.id.replace(/[{}]/g, ""));
-        if (conditions.length === 0) return Promise.resolve(null);
+        contractIds.forEach(function (id) { conditions.push("contains(mcs_contract_ids,'" + id + "')"); });
+        if (conditions.length === 0) return null;
 
         var filter = "(" + conditions.join(" or ") + ")";
         var recordId = formContext.data.entity.getId().replace(/[{}]/g, "");
         if (recordId) filter += " and mcs_fsm_dataid ne " + recordId;
 
-        return Xrm.WebApi.retrieveMultipleRecords("mcs_fsm_data",
-            "?$select=mcs_fsm_no&$top=1&$filter=" + filter).then(
-            function (result) {
-                return (result.entities.length > 0) ? (result.entities[0].mcs_fsm_no || "") : null;
-            },
-            function (e) {
-                console.error("重复性校验查询失败:", e);
-                return null; // 查询失败不阻断保存
-            });
+        try {
+            var url = Xrm.Utility.getGlobalContext().getClientUrl()
+                + "/api/data/v9.2/mcs_fsm_datas?$select=mcs_fsm_no&$top=1&$filter=" + encodeURIComponent(filter);
+            var req = new XMLHttpRequest();
+            req.open("GET", url, false); // 同步
+            req.setRequestHeader("OData-MaxVersion", "4.0");
+            req.setRequestHeader("OData-Version", "4.0");
+            req.setRequestHeader("Accept", "application/json");
+            req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+            req.send();
+            if (req.status === 200) {
+                var result = JSON.parse(req.responseText);
+                return (result.value && result.value.length > 0) ? (result.value[0].mcs_fsm_no || "") : null;
+            }
+            console.warn("[FSM] 重复性校验同步查询返回 " + req.status + "，放行保存");
+            return null; // 查询失败不阻断保存（含实体集名称不符 404 的兜底）
+        } catch (e) {
+            console.error("[FSM] 重复性校验同步查询异常:", e);
+            return null;
+        }
     }
 
     /**
-     * 保存校验：至少一个来源 + 重复性校验
-     * 注意：表单挂有 BPF「融资管理」，BPF 阶段导航会触发平台内部保存，
-     * 若 onSave 无条件 preventDefault 会被平台拦截报错（0x80060802 阻止保存窗体的 Web 资源）。
-     * 因此仅当来源字段发生变更时才 preventDefault 做异步重复校验；其余保存直接放行。
+     * 保存校验：至少一个来源 + 重复性校验（同步，不再 preventDefault 等待）
+     * 注意：表单挂有 BPF「融资管理」，BPF 阶段导航（含回退）会触发平台内部保存，
+     * onSave 里的 preventDefault 会中止阶段导航（平台报错 0x80060802 或静默弹回原阶段），
+     * 因此重复性校验必须同步完成：有重复才 preventDefault，无重复直接放行。
      */
     function onSaveValidate(executionContext) {
-        if (_saveApproved) { _saveApproved = false; return; }
         var formContext = executionContext.getFormContext();
         var eventArgs = executionContext.getEventArgs();
 
-        var hasSource = getLookup(formContext, SRC.LEAD) || getLookup(formContext, SRC.QUOTER) || getLookup(formContext, SRC.CONTRACT);
+        var hasSource = getLookup(formContext, SRC.LEAD) || getLookup(formContext, SRC.QUOTER) || getSelectedContractIds(formContext).length > 0;
         if (!hasSource) {
             eventArgs.preventDefault();
             Xrm.Navigation.openAlertDialog({ text: t("FsmData_RequireOneSource", "线索编号、报价单编号、合同编号至少填写一个。") });
@@ -686,21 +861,17 @@ var FsmDataForm = (function () {
         }
 
         // 来源字段均未变更：跳过重复校验直接放行（避免拦截 BPF 阶段导航等系统保存）
-        var sourceDirty = [SRC.LEAD, SRC.QUOTER, SRC.CONTRACT].some(function (f) {
+        var sourceDirty = [SRC.LEAD, SRC.QUOTER, CONTRACT_IDS].some(function (f) {
             var attr = formContext.getAttribute(f);
             return attr && attr.getIsDirty();
         });
         if (!sourceDirty) return;
 
-        eventArgs.preventDefault();
-        checkDuplicateSource(formContext).then(function (dupNo) {
-            if (dupNo) {
-                Xrm.Navigation.openAlertDialog({ text: t("FsmData_DuplicateSource", "已存在相同线索/报价单/合同编号的融资管理记录：") + dupNo });
-            } else {
-                _saveApproved = true;
-                formContext.data.entity.save();
-            }
-        });
+        var dupNo = checkDuplicateSourceSync(formContext);
+        if (dupNo) {
+            eventArgs.preventDefault();
+            Xrm.Navigation.openAlertDialog({ text: t("FsmData_DuplicateSource", "已存在相同线索/报价单/合同编号的融资管理记录：") + dupNo });
+        }
     }
 
     // 未上表单字段的提示标签回退（无控件可取 label 时避免弹窗显示架构名，2026-08-05 用户反馈）
@@ -757,13 +928,18 @@ var FsmDataForm = (function () {
     //           机构多选必填；4 项改非必填；旧单选机构字段表单隐藏移出清单
     var SOLUTION_TAB = {
         stage: FSM_STATUS.SOLUTION,
-        required: ["mcs_fsm_product", "mcs_fsm_resource_ids", "mcs_fsm_credit_amount", "mcs_fsm_credit_amount_usd",
+        // Bug #1635（2026-08-11 用户指示）：授信金额移出 required 改非必填（元数据本就 Required=None，
+        // 红星与保存拦截仅来自本清单 setRequiredLevel），避免默认值未带出时必填拦截保存/刷新；
+        // 提交融资方案审批时仍校验必填（REQUIRED_SOLUTION_EXTRA 已含 mcs_fsm_credit_amount/usd）
+        required: ["mcs_fsm_product", "mcs_fsm_resource_ids", "mcs_fsm_credit_amount_usd",
                    "mcs_can_project", "mcs_is_valid"],
         // Bug（2026-08-04 新建误放开）：贴息/融资费用/回购条件/其它条件 4 项 #1559 改非必填时漏进本清单，
         // 导致不受阶段控制恒可编辑；移入 optional 恢复「仅状态 3 可写，其余阶段禁用」
         optional: ["mcs_fsm_interest_discount", "mcs_fsm_fee", "mcs_fsm_repurchase_conditions", "mcs_fsm_other_conditions",
                    // Bug #1561：方案提交审批备注（评审意见），仅状态 3 可填，提交融资方案审批时随记录推给 BPP
-                   "mcs_fsm_project_remark"]
+                   "mcs_fsm_project_remark",
+                   // Bug #1635：授信金额非必填，但保持「仅状态 3 可写、其余阶段禁用」阶段控制
+                   "mcs_fsm_credit_amount"]
     };
     // Bug #1559：方案页 6 个机构名称/编码字段由多选组件自动带入，任何阶段始终只读
     var SOLUTION_AUTO_FIELDS = [
@@ -782,8 +958,8 @@ var FsmDataForm = (function () {
     // 注：设备台数/产品名称已由 INITIATION_TAB_METADATA_REQUIRED 控制（同口径），不在此重复；
     //     本组字段均为元数据必填，只做禁用控制，不调 setRequiredLevel。
     var DEMAND_AREA_FIELDS = [
-        // 来源三字段
-        "mcs_leadmain_id", "mcs_quoter_id", "mcs_contract_id",
+        // 来源三字段（禅道 #2150：合同编号改多选 mcs_contract_ids）
+        "mcs_leadmain_id", "mcs_quoter_id", "mcs_contract_ids",
         // 级联带出（融资需求信息）
         "mcs_big_area", "mcs_country_id", "mcs_country_area",
         "mcs_division_id", "mcs_sub_company", "mcs_customer_name", "mcs_customer_id",
@@ -793,12 +969,28 @@ var FsmDataForm = (function () {
         "mcs_fsm_payment_ratio", "mcs_fsm_interest_rate", "mcs_fsm_product"
     ];
 
-    // Bug #1540：进入融资立项（状态=2）后融资需求+六要素全锁，仅报价编码/合同编码仍可写
-    var DEMAND_INITIATION_EDITABLE = ["mcs_quoter_id", "mcs_contract_id"];
+    // Bug #1540：进入融资立项（状态=2）后融资需求区锁定，仅报价编码/合同编码仍可写（#2150 合同改多选）
+    var DEMAND_INITIATION_EDITABLE = ["mcs_quoter_id", "mcs_contract_ids"];
+
+    // 客户编码（mcs_customer_id）：由客户名称级联带出（客户主数据 SAP 编码→报价单/线索编码兜底），
+    // 2026-09-02 用户拍板口径变更（覆盖 PRD「自动带出，可修改」）：有值恒只读；
+    // 兜底：带出失败字段为空时放开可写（元数据必填，防空值锁死无法保存）
+    function applyCustomerCodeReadonly(formContext) {
+        var attr = formContext.getAttribute("mcs_customer_id");
+        var val = attr ? attr.getValue() : null;
+        setFieldDisabled(formContext, "mcs_customer_id", !!(val && ("" + val).trim()));
+    }
+
+    // Bug #1656（取代 #1540 六要素全锁口径）：进入融资立项（状态=2）未提交立项审批前，六要素可编辑；
+    // 提交审批后锁住（审批中随 lockAll），驳回（bppstatus=4）恢复可编辑，通过则锁死（initiationPassed 守卫）
+    var SIX_ELEMENTS_INITIATION_EDITABLE = [
+        "mcs_fsm_amount", "mcs_fsm_currency", "mcs_fsm_period",
+        "mcs_fsm_payment_ratio", "mcs_fsm_interest_rate", "mcs_fsm_product"
+    ];
 
     // Bug #1560：融资解决方案（状态=3）提交融资方案审批时校验合同编号必填，
-    // 故状态 3 放行合同编号可修改（仅合同编号，报价编码仍锁定）
-    var DEMAND_SOLUTION_EDITABLE = ["mcs_contract_id"];
+    // 故状态 3 放行合同编号可修改（仅合同编号，报价编码仍锁定）（#2150 合同改多选）
+    var DEMAND_SOLUTION_EDITABLE = ["mcs_contract_ids"];
 
     /**
      * 设置字段可写状态（遍历该字段所有控件）
@@ -945,10 +1137,11 @@ var FsmDataForm = (function () {
     }
 
     /**
-     * 拦截 BPF 阶段前进：进入下一阶段前必须已通过对应阶段的审批
-     *  - 进入融资解决方案(3)：需立项审批已通过（mcs_approve_type=1 且 mcs_bppstatus=3）
-     *  - 进入融资落实(4)：需融资方案审批已通过（mcs_approve_type=2 且 mcs_bppstatus=3）
-     * 回退不拦截；融资需求 → 融资立项 无前置审批，放行
+     * BPF 阶段变更门禁：
+     *  - 前进（Next）：进入融资解决方案(3) 需立项审批已通过；进入融资落实(4) 需融资方案审批已通过；
+     *    融资需求 → 融资立项 无前置审批，放行
+     *  - 回退（Previous，Bug #1652）：提交立项审批前允许从融资立项回退融资需求；
+     *    审批中（bppstatus=2）或立项已通过（含存在方案审批）后禁止回退，防架空「通过后锁住」（Bug #1656）
      */
     function preventBpfNextWithoutApproval(formContext) {
         var process = formContext.data && formContext.data.process;
@@ -957,7 +1150,8 @@ var FsmDataForm = (function () {
             process.addOnPreStageChange(function (stageChangeContext) {
                 if (_reconcilingFromStatus) return; // 程序化同步（syncBpfFromStatus→moveNext）直接放行
                 var args = stageChangeContext.getEventArgs();
-                if (!args || args.getDirection() !== "Next") return;
+                if (!args) return;
+                var direction = args.getDirection();
                 var targetStage = args.getStage ? args.getStage() : null;
                 var targetNum = targetStage ? getStageNumberByName(targetStage.getName()) : null;
                 if (!targetNum) return;
@@ -969,6 +1163,27 @@ var FsmDataForm = (function () {
                 var initiationPassed = (approveType === APPROVE_TYPE.INITIATION && bppStatus === BPP_STATUS.APPROVED)
                     || (approveType === APPROVE_TYPE.PROJECT);
                 var projectPassed = (approveType === APPROVE_TYPE.PROJECT && bppStatus === BPP_STATUS.APPROVED);
+
+                // Bug #1652：回退方向——审批中/立项已通过后禁止回退；提交立项审批前放行（状态 2 → 1）
+                if (direction === "Previous") {
+                    var bppCodeAttrPrev = formContext.getAttribute("mcs_bppstatuscode");
+                    var inReviewPrev = (bppStatus === BPP_STATUS.IN_REVIEW)
+                        || isBppInProgress(bppCodeAttrPrev ? bppCodeAttrPrev.getValue() : null);
+                    if (inReviewPrev || initiationPassed) {
+                        args.preventDefault();
+                        Xrm.Navigation.openAlertDialog({ text: t("FsmData_NoRollbackAfterSubmit", "已提交立项审批，不允许回退到之前的阶段。") });
+                        return;
+                    }
+                    // Bug #1652 三次修复（2026-08-09）：回退放行时立即把状态字段置为目标阶段值（标脏），
+                    // 让平台自己的导航保存顺带落库；不要在 OnStageChange 里主动 save——
+                    // 那会与平台导航保存并发冲突，导致首次回退被中止弹回（UAT 实测需点两次）
+                    var statusAttrPrev2 = formContext.getAttribute("mcs_fsm_status");
+                    if (statusAttrPrev2 && statusAttrPrev2.getValue() !== targetNum) {
+                        statusAttrPrev2.setValue(targetNum);
+                    }
+                    return;
+                }
+                if (direction !== "Next") return;
 
                 if (targetNum >= FSM_STATUS.SOLUTION && !initiationPassed) {
                     args.preventDefault();
@@ -982,6 +1197,78 @@ var FsmDataForm = (function () {
             });
         } catch (ex) {
             console.error("[FSM] 注册 BPF PreStageChange 拦截失败:", ex);
+        }
+    }
+
+    /**
+     * Bug #1766：BPF 流程是否已点「完成」（状态 finished）
+     */
+    function isBpfFinished(formContext) {
+        try {
+            var proc = formContext.data && formContext.data.process;
+            return !!(proc && proc.getStatus && proc.getStatus() === "finished");
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * Bug #1816/#1817：单据完成后融资落实子网格只读——隐藏「新建融资落实」「添加现有融资落实」按钮。
+     * 说明：UCI 子网格无支持的只读 API，此处为 DOM 级 UI 控制（本脚本在 ClientApiFrame iframe 执行，
+     * 表单 DOM 在顶层同源 document）；服务端 FsmDetailDataCompletedGuardPlugin 兜底拦截，UI 隐藏仅降噪。
+     */
+    function applyImplGridButtonsVisibility(finished) {
+        try {
+            var docs = [document];
+            try {
+                if (window.parent && window.parent.document && window.parent.document !== document) docs.push(window.parent.document);
+            } catch (e) { /* 跨域静默跳过 */ }
+            docs.forEach(function (doc) {
+                // 按 aria-label 匹配（实测：新建按钮 aria=「添加新融资落实…」，添加现有在溢出菜单）
+                // + 按命令 data-id 匹配（Mscrm.SubGrid.mcs_fsm_detail_data.AddNewStandard/AddExisting）双保险
+                var nodes = doc.querySelectorAll('button[aria-label*="融资落实"], [role="menuitem"][aria-label*="融资落实"], button[data-id*="SubGrid.mcs_fsm_detail_data.Add"]');
+                nodes.forEach(function (n) {
+                    var label = n.getAttribute("aria-label") || "";
+                    var dataId = n.getAttribute("data-id") || "";
+                    var isAddBtn = label.indexOf("新建") >= 0 || label.indexOf("添加新") >= 0 || label.indexOf("添加现有") >= 0
+                        || dataId.indexOf("AddNew") >= 0 || dataId.indexOf("AddExisting") >= 0;
+                    if (isAddBtn) n.style.display = finished ? "none" : "";
+                });
+            });
+        } catch (e) { console.warn("[FSM] 落实子网格按钮显隐异常:", e); }
+    }
+
+    /**
+     * Bug #1816/#1817：带重试的子网格按钮显隐调度。
+     * 实锤：tab 切换/子网格加载后命令栏按钮渲染晚于事件回调（tab 点击 4 秒后按钮仍未插入 DOM），
+     * 单次隐藏会落空；完成后 500ms×12 轮询补隐（找到与否都跑，幂等），未完成时立即恢复。
+     */
+    function scheduleImplGridButtons(formContext) {
+        if (!isBpfFinished(formContext)) { applyImplGridButtonsVisibility(false); return; }
+        var attempts = 0;
+        var tick = function () {
+            applyImplGridButtonsVisibility(true);
+            attempts++;
+            if (attempts < 12) setTimeout(tick, 500);
+        };
+        tick();
+    }
+
+    /**
+     * Bug #1766：BPF 点「完成」后重跑锁定（贷后管理人锁死）。
+     * 注意：「完成前必填校验」不在前端做——2026-08-11 DEV1 实锤本环境 OnPreProcessStatusChange
+     * 的 eventArgs 无 preventDefault（UCI 不支持取消流程状态变更），且 pre 事件 getStatus() 返回旧值 active；
+     * 必填阻断由服务端 FsmDataBpfCompleteShareNotifyPlugin PreOperation Step 完成（抛异常回滚）。
+     */
+    function lockAfterBpfComplete(formContext) {
+        try {
+            var proc = formContext.data.process;
+            if (!proc || !proc.addOnProcessStatusChange) return;
+            proc.addOnProcessStatusChange(function () {
+                applyStageControl(formContext);
+            });
+        } catch (ex) {
+            console.error("[FSM] 注册 BPF 状态变更事件失败:", ex);
         }
     }
 
@@ -1010,11 +1297,14 @@ var FsmDataForm = (function () {
      * 规则：
      *  - 状态 1（含新建）：立项/方案两个 tab 均禁用、不必填；融资需求区 + 融资六要素可写
      *  - 状态 2：需求融资管理 tab（立项信息字段）可写 + 必填；方案 tab 禁用；
-     *           融资需求区 + 融资六要素锁定只读，仅报价编码/合同编码除外（Bug #1540，来源用例-545）
+     *           融资需求区锁定只读，报价编码/合同编码除外（Bug #1540，来源用例-545）；
+     *           六要素未提交立项审批前可编辑、审批中锁、驳回解锁、通过锁死（Bug #1656）
      *  - 状态 3：方案 tab 可写 + 必填/选填；需求融资管理 tab 锁定只读；
      *           融资需求区 + 融资六要素锁定只读（Bug #1509，用例 TC-FSM-DATA-013）
      *  - 状态 4 或审批中（mcs_bppstatus=2）：全部锁定只读（用例 TC-FSM-DATA-014）
-     *  - 融资需求区 + 融资六要素：仅状态 1 可写（#1540 后），状态 ≥2 锁定（报价/合同编码状态 2 例外）
+     *  - 融资需求区：仅状态 1 可写，状态 2 仅报价/合同编码可写（#1540）；
+     *    六要素例外（Bug #1656）：状态 1/2 均可写（状态 2 限未提交立项审批前，审批中随 lockAll 锁、
+     *    驳回恢复可编辑、通过锁死），取代 #1540「状态 2 六要素全锁」口径
      *  - 设备台数/产品名称例外（Bug #1578）：状态 1/2/3 均可编辑，提交方案审批后锁死（审批中/状态 4 随 lockAll）
      */
     function applyStageControl(formContext) {
@@ -1023,6 +1313,10 @@ var FsmDataForm = (function () {
         var bppCodeAttr = formContext.getAttribute("mcs_bppstatuscode");
         var bppInReview = (bppStatus === BPP_STATUS.IN_REVIEW) || isBppInProgress(bppCodeAttr ? bppCodeAttr.getValue() : null);
         var lockAll = (status === FSM_STATUS.IMPLEMENTATION) || bppInReview;
+        // Bug #1656：立项已通过（含存在方案审批）时六要素锁死；驳回（bppstatus=4）不命中本条件，恢复可编辑
+        var approveType = getFieldValue(formContext, "mcs_approve_type");
+        var initiationPassed = (approveType === APPROVE_TYPE.INITIATION && bppStatus === BPP_STATUS.APPROVED)
+            || (approveType === APPROVE_TYPE.PROJECT);
 
         [INITIATION_TAB, SOLUTION_TAB].forEach(function (tab) {
             var editable = !lockAll && (status === tab.stage);
@@ -1045,12 +1339,14 @@ var FsmDataForm = (function () {
             setFieldDisabled(formContext, f, !demandMetaEditable);
         });
 
-        // 融资需求区 + 融资六要素：仅融资需求阶段（状态 1）可写；进入融资立项（状态 2）起锁定，
-        // 仅报价编码/合同编码除外（Bug #1540，取代 #1509「状态 1/2 可写」口径）；
+        // 融资需求区 + 融资六要素：融资需求阶段（状态 1）可写；进入融资立项（状态 2）后需求区锁定，
+        // 仅报价编码/合同编码除外（Bug #1540）；六要素在状态 2 未提交立项审批前可编辑、驳回可再改、
+        // 通过锁死（Bug #1656，取代 #1540 六要素全锁口径）；
         // 融资解决方案（状态 3）再放行合同编号（Bug #1560：提交融资方案审批校验合同编号必填，须可修改）
         DEMAND_AREA_FIELDS.forEach(function (f) {
             var editable = !lockAll && (status === FSM_STATUS.DEMAND
-                || (status === FSM_STATUS.INITIATION && DEMAND_INITIATION_EDITABLE.indexOf(f) >= 0)
+                || (status === FSM_STATUS.INITIATION && (DEMAND_INITIATION_EDITABLE.indexOf(f) >= 0
+                    || (!initiationPassed && SIX_ELEMENTS_INITIATION_EDITABLE.indexOf(f) >= 0)))
                 || (status === FSM_STATUS.SOLUTION && DEMAND_SOLUTION_EDITABLE.indexOf(f) >= 0));
             setFieldDisabled(formContext, f, !editable);
         });
@@ -1060,12 +1356,33 @@ var FsmDataForm = (function () {
             setFieldDisabled(formContext, f, true);
         });
 
+        // 客户编码恒只读（2026-09-02 用户拍板，覆盖 DEMAND_AREA_FIELDS 在状态 1 的放行结果）
+        applyCustomerCodeReadonly(formContext);
+
+        // Bug #1727（2026-08-10）：融资方案接口人（mcs_fsm_manager）
+        // 在融资需求阶段（状态 1）由融资经理于「融资需求」Tab 填写，融资立项阶段（状态 2）保持可编辑
+        // （#1538 口径：状态 2 为空带出当前登录人、可手改）；状态 3/4 及审批中（lockAll）锁定。
+        // mcs_fsm_manager 同时在 INITIATION_TAB.required 中（保留其状态 2 必填星标语义），通用规则会在状态 1
+        // 误锁该字段全部控件（含 tab_1 第二实例），此处按阶段口径单独覆盖。
+        // Bug #2071（2026-08-29）：业务要求新增时（状态 1）即必填——必填覆盖与可编辑同口径
+        // （状态 1/2 必填、状态 3/4 及审批中非必填；覆盖 INITIATION_TAB 通用规则在状态 1 置 none 的结果）。
+        var managerEditable = !lockAll && (status === FSM_STATUS.DEMAND || status === FSM_STATUS.INITIATION);
+        setFieldDisabled(formContext, "mcs_fsm_manager", !managerEditable);
+        setFieldRequired(formContext, "mcs_fsm_manager", managerEditable);
+
+        // Bug #1766（2026-08-11）：贷后管理人（mcs_fsm_postloan_manager）移至「融资落实」页签，
+        // 仅融资落实阶段（状态 4）且 BPF 未点「完成」时可编辑（点完成时的必填校验由服务端 Plugin
+        // PreOp 阻断，见 lockAfterBpfComplete 注释）；其余阶段及 BPF 完成后锁死（状态 4 命中 lockAll 全锁，此处单独开口）。
+        var postloanEditable = (status === FSM_STATUS.IMPLEMENTATION) && !isBpfFinished(formContext);
+        setFieldDisabled(formContext, "mcs_fsm_postloan_manager", !postloanEditable);
+
         // Bug（2026-08-04 新建误放开）：金融产品双单元格同属性（六要素 tab_2 + 方案 tab_4），
         // 属性级 setDisabled 两格互相覆盖（SOLUTION_TAB 禁用后被 DEMAND_AREA_FIELDS 六要素规则误放开），
-        // 按控件所在 tab 分别控制：六要素格=仅状态 1 可写；方案格=仅状态 3 可写
+        // 按控件所在 tab 分别控制：六要素格=状态 1 可写、状态 2 未提交立项审批前可写（Bug #1656）；方案格=仅状态 3 可写
         var productStageAttr = formContext.getAttribute("mcs_fsm_product");
         if (productStageAttr) {
-            var productDemandEditable = !lockAll && status === FSM_STATUS.DEMAND;
+            var productDemandEditable = !lockAll && (status === FSM_STATUS.DEMAND
+                || (status === FSM_STATUS.INITIATION && !initiationPassed));
             var productSolutionEditable = !lockAll && status === FSM_STATUS.SOLUTION;
             productStageAttr.controls.forEach(function (ctrl) {
                 try {
@@ -1079,6 +1396,9 @@ var FsmDataForm = (function () {
         // 2026-08-06 用户需求：未到融资落实阶段不允许新增融资落实记录
         var implGrid = formContext.getControl(IMPLEMENTATION_SUBGRID);
         if (implGrid && implGrid.setVisible) implGrid.setVisible(status === FSM_STATUS.IMPLEMENTATION);
+
+        // Bug #1816/#1817：单据完成后落实子网格只读（隐藏新建/添加现有按钮；服务端插件兜底）
+        scheduleImplGridButtons(formContext);
 
         // Bug #1559：阶段控制每次执行后通知 picker 重算可编辑状态（picker 自读表单属性判定，标准自定义事件）
         try { window.dispatchEvent(new CustomEvent("FsmStageChanged")); } catch (e) { console.warn("[FSM] FsmStageChanged 事件分发失败:", e); }
@@ -1110,10 +1430,13 @@ var FsmDataForm = (function () {
     self.onLoad = function (executionContext) {
         var formContext = executionContext.getFormContext();
 
-        [SRC.LEAD, SRC.QUOTER, SRC.CONTRACT].forEach(function (f) {
+        [SRC.LEAD, SRC.QUOTER].forEach(function (f) {
             var attr = formContext.getAttribute(f);
             if (attr) attr.addOnChange(function () { recomputeDerived(formContext); });
         });
+        // 禅道 #2150：多选合同变更 → 同步合同编号文本 + 以第一个合同级联带出
+        var contractIdsAttr = formContext.getAttribute(CONTRACT_IDS);
+        if (contractIdsAttr) contractIdsAttr.addOnChange(function () { onContractIdsChanged(formContext); });
 
         // 线索变化时刷新报价主表缓存（代入也会触发）
         var leadAttrForCache = formContext.getAttribute(SRC.LEAD);
@@ -1122,8 +1445,12 @@ var FsmDataForm = (function () {
 
         var quoterCtrl = formContext.getControl(SRC.QUOTER);
         if (quoterCtrl) quoterCtrl.addPreSearch(function () { filterQuoterByLead(formContext); });
-        var contractCtrl = formContext.getControl(SRC.CONTRACT);
-        if (contractCtrl) contractCtrl.addPreSearch(function () { filterContractByLead(formContext); });
+        // 禅道 #2150：合同改多选 PCF 控件（不支持 addPreSearch 过滤），原按线索过滤合同能力随控件取消
+
+        // 禅道 #2176：接口人放大镜按安全角色过滤（自定义视图：初始列表与搜索均过滤）
+        MANAGER_ROLE_FILTER.forEach(function (cfg) {
+            applyManagerRoleView(formContext, cfg.field, cfg.roleName, cfg.viewId);
+        });
 
         formContext.data.entity.addOnSave(onSaveValidate);
 
@@ -1147,6 +1474,45 @@ var FsmDataForm = (function () {
             var attr = formContext.getAttribute(f);
             if (attr) attr.addOnChange(function () { updateCreditAmountUsd(formContext); });
         });
+
+        // Bug #1781：标准币种字段跟随融资币种（onLoad 兜底纠正存量记录符号 + onChange 即时切换）
+        syncTransactionCurrency(formContext);
+        var currencyAttrForSymbol = formContext.getAttribute("mcs_fsm_currency");
+        if (currencyAttrForSymbol) currencyAttrForSymbol.addOnChange(function () { syncTransactionCurrency(formContext); });
+        // Bug #1781 符号补丁重贴：①金额输入框 blur 后平台用加载时币种重格式化（符号回退），focusout 后重贴；
+        // ②tab 切换控件重建显示旧符号，tabStateChange 后重贴
+        // 注意：本脚本在 ClientApiFrame iframe 执行，focusout 需挂到顶层同源 document（表单 DOM 所在）
+        var _symbolFocusoutHandler = function (ev) {
+            var did = ev && ev.target && ev.target.getAttribute ? (ev.target.getAttribute("data-id") || "") : "";
+            var isMoney = MONEY_FIELDS_FOR_SYMBOL.some(function (f) { return did.indexOf(f + ".fieldControl") === 0; });
+            if (isMoney && _currentSymbol) {
+                setTimeout(function () { _applySymbolToMoneyInputs(_currentSymbol); }, 400);
+            }
+        };
+        document.addEventListener("focusout", _symbolFocusoutHandler, true);
+        try {
+            if (window.parent && window.parent.document && window.parent.document !== document) {
+                window.parent.document.addEventListener("focusout", _symbolFocusoutHandler, true);
+            }
+        } catch (e) { /* 跨域静默跳过 */ }
+        try {
+            formContext.ui.tabs.forEach(function (tab) {
+                tab.addTabStateChange(function () {
+                    setTimeout(function () { if (_currentSymbol) _applySymbolToMoneyInputs(_currentSymbol); }, 300);
+                    // Bug #1816/#1817：tab 切换后子网格 DOM 重建，重跑落实子网格按钮显隐
+                    setTimeout(function () { scheduleImplGridButtons(formContext); }, 400);
+                });
+            });
+        } catch (e) { console.warn("[FSM] tabStateChange 注册失败:", e); }
+        // Bug #1816/#1817：子网格数据加载完成后（行渲染会重建命令栏）重跑按钮显隐
+        try {
+            var implGridForBtns = formContext.getControl(IMPLEMENTATION_SUBGRID);
+            if (implGridForBtns && implGridForBtns.addOnLoad) {
+                implGridForBtns.addOnLoad(function () {
+                    setTimeout(function () { scheduleImplGridButtons(formContext); }, 300);
+                });
+            }
+        } catch (e) { console.warn("[FSM] 子网格 OnLoad 注册失败:", e); }
 
         // Bug #1559：融资资源机构多选 → 校验（启用+产品匹配）并带入机构名称/编码；融资产品变更清空重选
         var resourceIdsAttr = formContext.getAttribute("mcs_fsm_resource_ids");
@@ -1200,12 +1566,30 @@ var FsmDataForm = (function () {
                     lockBpfFields(formContext);
                     defaultManager(formContext); // Bug #1538：BPF 点「下一步」进入融资立项时带出融资经理
                     defaultCreditAmount(formContext); // Bug #1507 兜底：BPF 点「下一步」进入融资解决方案时默认授信金额
+                    // Bug #1652 三次修复：回退时状态字段已在 PreStageChange 置脏，由平台导航保存落库；
+                    // 若平台未触发保存（极端路径），4 秒后仍脏则兜底保存一次，防刷新后被 reconcile 推回。
+                    // 切勿在此立即 data.save()：与平台导航保存并发会导致首次回退被弹回（UAT 实测需点两次）
+                    var bpfNumAfter = getBpfStageNumber(formContext);
+                    var statusAttrAfter = formContext.getAttribute("mcs_fsm_status");
+                    var statusAfter = statusAttrAfter ? statusAttrAfter.getValue() : null;
+                    if (bpfNumAfter && statusAfter && bpfNumAfter < statusAfter) {
+                        setTimeout(function () {
+                            try {
+                                if (statusAttrAfter.getIsDirty()) {
+                                    var p = formContext.data.save();
+                                    if (p && p.then) p.then(null, function (e) { console.warn("[FSM] 阶段回退兜底保存失败:", e); });
+                                }
+                            } catch (e) { console.warn("[FSM] 阶段回退兜底保存异常:", e); }
+                        }, 4000);
+                    }
                 });
             } catch (ex) {
                 console.error("[FSM] 注册 BPF 阶段事件失败:", ex);
             }
             // 进入下一阶段前必须已通过对应阶段审批
             preventBpfNextWithoutApproval(formContext);
+            // Bug #1766：BPF 点「完成」后重跑锁定（贷后管理人锁死）
+            lockAfterBpfComplete(formContext);
             // 打开表单时校正阶段条与状态字段的脱节（含旧数据）
             reconcileStagesOnLoad(formContext);
         }
@@ -1218,6 +1602,12 @@ var FsmDataForm = (function () {
      */
     self.submitInitiationApproval = function (primaryControl) {
         var formContext = primaryControl;
+
+        // Bug #1788（2026-08-12）：仅融资方案接口人（mcs_fsm_manager）可提交（显隐规则的点击兜底）
+        if (!isCurrentUserFsmManager(formContext)) {
+            Xrm.Navigation.openAlertDialog({ text: t("FsmData_OnlyFsmManagerSubmit", "只有融资方案接口人才能提交审批。") });
+            return;
+        }
 
         // 融资经理：取系统登录人（PRD：页面融资经理取系统登陆人）
         var managerAttr = formContext.getAttribute("mcs_fsm_manager");
@@ -1258,13 +1648,19 @@ var FsmDataForm = (function () {
     self.submitProjectApproval = function (primaryControl) {
         var formContext = primaryControl;
 
+        // Bug #1788（2026-08-12）：仅融资方案接口人（mcs_fsm_manager）可提交（显隐规则的点击兜底）
+        if (!isCurrentUserFsmManager(formContext)) {
+            Xrm.Navigation.openAlertDialog({ text: t("FsmData_OnlyFsmManagerSubmit", "只有融资方案接口人才能提交审批。") });
+            return;
+        }
+
         // 先刷新未上表单字段的服务端缓存再校验（2026-08-05 用户反馈「要刷新后才能检测到字段有值」：
         // mcs_fsm_credit_amount_usd 由自动折算异步写库，刚填完授信金额点提交时缓存未更新会误报必填）
         refreshFieldCache(formContext).then(function () {
-        // 融资解决方案提交：所有页面字段除附件外必填 + 合同号必填（PRD）
+        // 融资解决方案提交：所有页面字段除附件外必填 + 合同号必填（PRD）（#2150 合同改多选，校验 mcs_contract_ids）
         // Bug #1578：设备台数/产品名称已移出 REQUIRED_SIX_ELEMENTS，方案审批天然不校验
         var missing = validateRequiredFields(formContext,
-            REQUIRED_SIX_ELEMENTS.concat(REQUIRED_SOLUTION_EXTRA).concat([SRC.CONTRACT]));
+            REQUIRED_SIX_ELEMENTS.concat(REQUIRED_SOLUTION_EXTRA).concat([CONTRACT_IDS]));
         if (missing.length > 0) { alertMissingFields(missing); return; }
 
         var statusAttr = formContext.getAttribute("mcs_fsm_status");
@@ -1290,15 +1686,33 @@ var FsmDataForm = (function () {
     // =====================================================================
     // Ribbon 显隐规则（经典 Ribbon DisplayRule 同步 CustomRule，2026-07-31）
     // 按 PRD：【提交立项审批】仅融资立项(2)可见；【提交融资方案审批】仅融资解决方案(3)可见；新增未保存均隐藏
-    // 角色判断同步规则做不了（需异步查询），维持 JS 提交时的现有拦截
+    // Bug #1788（2026-08-12）：叠加「当前登录人 == 融资方案接口人（mcs_fsm_manager）」判断，
+    // 融资经理等其他人员不可见；接口人为空时所有人隐藏（用户确认口径）。
+    // 字段比对同步可判；安全角色判断需异步查询，同步规则做不了，故按字段控制。
     // =====================================================================
+    // Bug #1788：当前登录人是否为记录的融资方案接口人（mcs_fsm_manager）
+    function isCurrentUserFsmManager(formContext) {
+        try {
+            var attr = formContext.getAttribute("mcs_fsm_manager");
+            var val = attr ? attr.getValue() : null;
+            if (!val || !val.length || !val[0].id) return false; // 接口人为空：所有人不可见/不可提交
+            var currentId = Xrm.Utility.getGlobalContext().userSettings.userId || "";
+            return val[0].id.replace(/[{}]/g, "").toLowerCase()
+                === currentId.replace(/[{}]/g, "").toLowerCase();
+        } catch (e) {
+            console.warn("[FSM] 接口人判断异常:", e);
+            return false;
+        }
+    }
+
     function ribbonShowForStage(primaryControl, stage) {
         try {
             var formContext = primaryControl;
             if (!formContext || !formContext.data || !formContext.data.entity) return false;
             if (!formContext.data.entity.getId()) return false; // 新增未保存
             var attr = formContext.getAttribute("mcs_fsm_status");
-            return attr ? attr.getValue() === stage : false;
+            if (!attr || attr.getValue() !== stage) return false;
+            return isCurrentUserFsmManager(formContext); // Bug #1788：仅接口人可见
         } catch (e) {
             console.warn("[FSM] Ribbon 显隐规则异常:", e);
             return false;
